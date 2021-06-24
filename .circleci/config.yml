@@ -1,0 +1,17 @@
+version: 2.1
+orbs:
+  win: circleci/windows@1.0.0
+jobs:
+  build:
+    executor:
+      name: win/vs2019
+      shell: cmd.exe
+    steps:
+      - checkout
+      - run:
+          name: Build
+          command: |
+            mkdir build
+            cd build
+            cmake ..
+            cmake --build .

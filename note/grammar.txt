@@ -1,0 +1,12 @@
+
+chunk       ::= stmt* EOF
+
+stmt        ::= 'echo' expr ';'
+
+expr        ::= mul_expr ( ( '+' | '-' ) mul_expr )*
+
+mul_expr    ::= unary_expr ( ( '*' | '/' | '%' ) unary_expr )*
+
+unary_expr  ::= ( '+' | '-' ) unary_expr | prima_expr
+
+prim_expr   ::= INT | '(' expr ')'
