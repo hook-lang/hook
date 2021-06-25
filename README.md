@@ -1,5 +1,5 @@
 
-[![fabiosvm](https://circleci.com/gh/fabiosvm/hook-lang.svg?style=shield)](https://app.circleci.com/pipelines/github/fabiosvm)
+[![CI](https://github.com/fabiosvm/hook-lang/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/fabiosvm/hook-lang/actions/workflows/ci.yml)
 
 # Hook 
 
@@ -8,14 +8,27 @@ The Hook Programming Language
 ## Building
 
 ```
-mkdir build
-cd build
-cmake ..
-cmake --build .
+git clone https://github.com/fabiosvm/hook-lang.git
+cd hook-lang
+cmake -B build
+cmake --build build
+```
+
+### Building a release
+
+```
+cmake --build build --config Release
 ```
 
 ## Running an example
 
 ```
-bin/hook < example/arith.hook
+cd bin
+hook < ../examples/sum.hook
+```
+
+### Displaying the bytecode
+
+```
+hook --disasm < ../examples/sum.hook
 ```

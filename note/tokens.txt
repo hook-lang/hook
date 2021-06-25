@@ -1,0 +1,12 @@
+
+TOKEN_EOF       EOF
+TOKEN_SEMICOLON ';'
+TOKEN_LPAREN    '('
+TOKEN_RPAREN    ')'
+TOKEN_PLUS      '+'
+TOKEN_MINUS     '-'
+TOKEN_STAR      '*'
+TOKEN_SLASH     '/'
+TOKEN_PERCENT   '%'
+TOKEN_NUMBER    NUMBER
+TOKEN_ECHO      'echo'

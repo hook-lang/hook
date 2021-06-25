@@ -18,13 +18,6 @@
     scanner_next_token(s); \
   } while(0)
 
-#define EXPECT_SEMICOLON(s) do \
-  { \
-    if (!MATCH(s, TOKEN_SEMICOLON)) \
-      fatal_error_unexpected_token(s); \
-    scanner_next_token(s); \
-  } while(0)
-
 static inline void fatal_error_unexpected_token(scanner_t *scan);
 static inline uint16_t parse_word(char *chars);
 static void compile_statement(chunk_t *chunk, scanner_t *scan);
@@ -70,7 +63,7 @@ static void compile_echo(chunk_t *chunk, scanner_t *scan)
 {
   compile_expression(chunk, scan);
   chunk_emit_opcode(chunk, OP_PRINT);
-  EXPECT_SEMICOLON(scan);
+  EXPECT(scan, TOKEN_SEMICOLON);
 }
 
 static void compile_expression(chunk_t *chunk, scanner_t *scan)

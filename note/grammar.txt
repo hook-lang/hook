@@ -7,6 +7,6 @@ expr        ::= mul_expr ( ( '+' | '-' ) mul_expr )*
 
 mul_expr    ::= unary_expr ( ( '*' | '/' | '%' ) unary_expr )*
 
-unary_expr  ::= ( '+' | '-' ) unary_expr | prima_expr
+unary_expr  ::= ( '+' | '-' ) unary_expr | prim_expr
 
 prim_expr   ::= INT | '(' expr ')'
