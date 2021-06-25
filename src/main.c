@@ -4,25 +4,46 @@
 //
 
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 #include "string.h"
 #include "compiler.h"
 #include "disasm.h"
 #include "vm.h"
 
-int main(void)
+static inline bool has_option(int argc, const char **argv, const char *option);
+
+static inline bool has_option(int argc, const char **argv, const char *option)
+{
+  for (int i = 1; i < argc; ++i)
+    if (!strcmp(argv[i], option))
+      return true;
+  return false;
+}
+
+int main(int argc, const char **argv)
 {
   string_t *str = string_from_stream(stdin);
   scanner_t scan;
   scanner_init(&scan, str->chars);
+
   chunk_t chunk;
   chunk_init(&chunk, 0);
   compile(&chunk, &scan);
   string_free(str);
-  //dump(&chunk);
-  stack_t stk;
-  stack_init(&stk, 0);
-  execute(&stk, &chunk);
+
+  if (has_option(argc, argv, "--disasm"))
+  {
+    dump(&chunk);
+    chunk_free(&chunk);
+    return EXIT_SUCCESS;
+  }
+
+  vm_t vm;
+  vm_init(&vm, 0);
+  vm_execute(&vm, &chunk);
   chunk_free(&chunk);
-  stack_free(&stk);
+  vm_free(&vm);
+
   return EXIT_SUCCESS;
 }
