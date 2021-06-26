@@ -18,6 +18,7 @@ typedef enum
   TOKEN_SLASH,
   TOKEN_PERCENT,
   TOKEN_ECHO,
+  TOKEN_NULL,
   TOKEN_INT
 } token_type_t;
 

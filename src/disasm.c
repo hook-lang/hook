@@ -19,6 +19,9 @@ void dump(chunk_t *chunk)
     ++n;
     switch (op)
     {
+    case OP_NULL:
+      printf("[%05d] Null\n", j);
+      break;
     case OP_INT:
       {
         int num = *((uint16_t*) &bytes[i]);

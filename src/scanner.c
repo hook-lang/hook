@@ -167,6 +167,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_ECHO;
     return;
   }
+  if (match_chars(scan, "null"))
+  {
+    scan->token.type = TOKEN_NULL;
+    return;
+  }
   if (match_int(scan))
     return;
   fatal_error("unable to recognize token at %d:%d", scan->line, scan->col);
