@@ -16,9 +16,8 @@ static inline void resize(chunk_t *chunk, int min_capacity)
   int capacity = chunk->capacity;
   while (capacity < min_capacity)
     capacity <<= 1;
-  uint8_t *bytes = (uint8_t *) reallocate(chunk->bytes, capacity);
   chunk->capacity = capacity;
-  chunk->bytes = bytes;
+  chunk->bytes = (uint8_t *) reallocate(chunk->bytes, capacity);
 }
 
 void chunk_init(chunk_t *chunk, int min_capacity)
@@ -26,10 +25,9 @@ void chunk_init(chunk_t *chunk, int min_capacity)
   int capacity = CHUNK_MIN_CAPACITY;
   while (capacity < min_capacity)
     capacity <<= 1;
-  uint8_t *bytes = (uint8_t *) allocate(capacity);
   chunk->capacity = capacity;
   chunk->length = 0;
-  chunk->bytes = bytes;
+  chunk->bytes = (uint8_t *) allocate(capacity);
 }
 
 void chunk_free(chunk_t *chunk)

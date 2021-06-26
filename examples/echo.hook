@@ -1,3 +1,5 @@
 
 echo null;
+echo false;
+echo true;
 echo 123;

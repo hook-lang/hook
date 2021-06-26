@@ -22,11 +22,17 @@ void dump(chunk_t *chunk)
     case OP_NULL:
       printf("[%05d] Null\n", j);
       break;
+    case OP_FALSE:
+      printf("[%05d] False\n", j);
+      break;
+    case OP_TRUE:
+      printf("[%05d] True\n", j);
+      break;
     case OP_INT:
       {
-        int num = *((uint16_t*) &bytes[i]);
+        int data = *((uint16_t*) &bytes[i]);
         i += 2;
-        printf("[%05d] Int      %d\n", j, num);
+        printf("[%05d] Int      %d\n", j, data);
       }
       break;
     case OP_ADD:

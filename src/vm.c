@@ -97,6 +97,9 @@ static inline void print(vm_t *vm)
   case TYPE_NULL:
     printf("null\n");
     break;
+  case TYPE_BOOLEAN:
+    printf("%s\n", val.as_boolean ? "true" : "false");
+    break;
   case TYPE_NUMBER:
     printf("%g\n", val.as_number);
     break;
@@ -122,10 +125,9 @@ void vm_init(vm_t *vm, int min_capacity)
   int capacity = VM_DEFAULT_NUM_SLOTS;
   while (capacity < min_capacity)
     capacity <<= 1;
-  value_t *slots = (value_t *) allocate(sizeof(*slots) * capacity);
   vm->capacity = capacity;
   vm->end = capacity - 1;
-  vm->slots = slots;
+  vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
   vm->index = -1;
 }
 
@@ -137,6 +139,11 @@ void vm_free(vm_t *vm)
 void vm_push_null(vm_t *vm)
 {
   push(vm, NULL_VALUE);
+}
+
+void vm_push_boolean(vm_t *vm, bool data)
+{
+  push(vm, BOOLEAN_VALUE(data));
 }
 
 void vm_push_number(vm_t *vm, double data)
@@ -162,6 +169,12 @@ void vm_execute(vm_t *vm, chunk_t *chunk)
     {
     case OP_NULL:
       vm_push_null(vm);
+      break;
+    case OP_FALSE:
+      vm_push_boolean(vm, false);
+      break;
+    case OP_TRUE:
+      vm_push_boolean(vm, true);
       break;
     case OP_INT:
       vm_push_number(vm, read_word(&pc));

@@ -18,9 +18,8 @@ static inline string_t *string_allocate(int min_capacity)
   int capacity = STRING_MIN_CAPACITY;
   while (capacity < min_capacity)
     capacity <<= 1;
-  char *chars = (char *) allocate(capacity);
   str->capacity = capacity;
-  str->chars = chars;
+  str->chars = (char *) allocate(capacity);
   return str;
 }
 
@@ -29,9 +28,8 @@ static inline void resize(string_t *str)
   if (str->length < str->capacity)
     return;
   int capacity = str->capacity << 1;
-  char *chars = (char *) reallocate(str->chars, capacity);
   str->capacity = capacity;
-  str->chars = chars;
+  str->chars = (char *) reallocate(str->chars, capacity);
 }
 
 static inline void append_char(string_t *str, char c)
