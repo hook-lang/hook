@@ -139,6 +139,12 @@ static void compile_unary_expression(chunk_t *chunk, scanner_t *scan)
 
 static void compile_prim_expression(chunk_t *chunk, scanner_t *scan)
 {
+  if (MATCH(scan, TOKEN_NULL))
+  {
+    scanner_next_token(scan);
+    chunk_emit_opcode(chunk, OP_NULL);
+    return;
+  }
   if (MATCH(scan, TOKEN_INT))
   {
     uint16_t word = parse_word(scan->token.chars);

@@ -7,9 +7,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "common.h"
 #include "memory.h"
 #include "error.h"
 
+static inline void push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline void add(vm_t *vm);
@@ -20,56 +22,85 @@ static inline void modulo(vm_t *vm);
 static inline void negate(vm_t *vm);
 static inline void print(vm_t *vm);
 
+static inline void push(vm_t *vm, value_t val)
+{
+  if (vm->index == vm->end)
+    fatal_error("stack overflow");
+  ++vm->index;
+  vm->slots[vm->index] = val;
+}
+
 static inline void add(vm_t *vm)
 {
   value_t val2 = vm_pop(vm);
   value_t val1 = VM_GET_TOP(vm);
-  double data = val1 + val2;
-  VM_SET_TOP(vm, data);
+  if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
+    fatal_error("cannot add %s to %s", type_name(val2.type), type_name(val1.type));
+  double data = val1.as_number + val2.as_number;
+  VM_SET_TOP(vm, NUMBER_VALUE(data));
 }
 
 static inline void subtract(vm_t *vm)
 {
   value_t val2 = vm_pop(vm);
   value_t val1 = VM_GET_TOP(vm);
-  double data = val1 - val2;
-  VM_SET_TOP(vm, data);
+  if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
+    fatal_error("cannot subtract %s from %s", type_name(val2.type), type_name(val1.type));
+  double data = val1.as_number - val2.as_number;
+  VM_SET_TOP(vm, NUMBER_VALUE(data));
 }
 
 static inline void multiply(vm_t *vm)
 {
   value_t val2 = vm_pop(vm);
   value_t val1 = VM_GET_TOP(vm);
-  double data = val1 * val2;
-  VM_SET_TOP(vm, data);
+  if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
+    fatal_error("cannot multiply %s to %s", type_name(val2.type), type_name(val1.type));
+  double data = val1.as_number * val2.as_number;
+  VM_SET_TOP(vm, NUMBER_VALUE(data));
 }
 
 static inline void divide(vm_t *vm)
 {
   value_t val2 = vm_pop(vm);
   value_t val1 = VM_GET_TOP(vm);
-  double data = val1 / val2;
-  VM_SET_TOP(vm, data);
+  if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
+    fatal_error("cannot divide %s by %s", type_name(val1.type), type_name(val2.type));
+  double data = val1.as_number / val2.as_number;
+  VM_SET_TOP(vm, NUMBER_VALUE(data));
 }
 
 static inline void modulo(vm_t *vm)
 {
   value_t val2 = vm_pop(vm);
   value_t val1 = VM_GET_TOP(vm);
-  double data = fmod(val1, val2);
-  VM_SET_TOP(vm, data);
+  if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
+    fatal_error("cannot mod %s by %s", type_name(val1.type), type_name(val2.type));
+  double data = fmod(val1.as_number, val2.as_number);
+  VM_SET_TOP(vm, NUMBER_VALUE(data));
 }
 
 static inline void negate(vm_t *vm)
 {
   value_t val = VM_GET_TOP(vm);
-  VM_SET_TOP(vm, -val);
+  if (!IS_NUMBER(val))
+    fatal_error("cannot apply unary minus operator to %s", type_name(val.type));
+  double data = -val.as_number;
+  VM_SET_TOP(vm, NUMBER_VALUE(data));
 }
 
 static inline void print(vm_t *vm)
 {
   value_t val = vm_pop(vm);
-  printf("%g\n", val);
+  switch (val.type)
+  {
+  case TYPE_NULL:
+    printf("null\n");
+    break;
+  case TYPE_NUMBER:
+    printf("%g\n", val.as_number);
+    break;
+  }
 }
 
 static inline int read_byte(uint8_t **pc)
@@ -103,18 +134,19 @@ void vm_free(vm_t *vm)
   free(vm->slots);
 }
 
-void vm_push_double(vm_t *vm, double data)
+void vm_push_null(vm_t *vm)
 {
-  if (vm->index == vm->end)
-    fatal_error("stack overflow");
-  ++vm->index;
-  vm->slots[vm->index] = data;
+  push(vm, NULL_VALUE);
+}
+
+void vm_push_number(vm_t *vm, double data)
+{
+  push(vm, NUMBER_VALUE(data));
 }
 
 value_t vm_pop(vm_t *vm)
 {
-  if (vm->index == -1)
-    fatal_error("stack underflow");
+  ASSERT(vm->index > -1, "stack overflow");
   value_t val = vm->slots[vm->index];
   --vm->index;
   return val;
@@ -128,8 +160,11 @@ void vm_execute(vm_t *vm, chunk_t *chunk)
     opcode_t op = (opcode_t) read_byte(&pc);
     switch (op)
     {
+    case OP_NULL:
+      vm_push_null(vm);
+      break;
     case OP_INT:
-      vm_push_double(vm, read_word(&pc));
+      vm_push_number(vm, read_word(&pc));
       break;
     case OP_ADD:
       add(vm);

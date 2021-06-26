@@ -10,3 +10,4 @@ TOKEN_SLASH     '/'
 TOKEN_PERCENT   '%'
 TOKEN_NUMBER    NUMBER
 TOKEN_ECHO      'echo'
+TOKEN_NULL      'null'

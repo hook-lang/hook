@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME}
   src/memory.c
   src/scanner.c
   src/string.c
+  src/value.c
   src/vm.c)
 
 if(NOT MSVC)
