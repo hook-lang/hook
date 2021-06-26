@@ -1,3 +1,5 @@
 
 echo
+false
 null
+true

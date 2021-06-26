@@ -10,6 +10,9 @@ const char *type_name(type_t type)
   char *name = "null";
   switch (type)
   {
+  case TYPE_BOOLEAN:
+    name = "boolean";
+    break;
   case TYPE_NUMBER:
     name = "number";
     break;

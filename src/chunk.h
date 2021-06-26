@@ -13,6 +13,8 @@
 typedef enum
 {
   OP_NULL,
+  OP_FALSE,
+  OP_TRUE,
   OP_INT,
   OP_ADD,
   OP_SUBTRACT,

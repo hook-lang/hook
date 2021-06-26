@@ -94,8 +94,7 @@ static inline bool match_int(scanner_t *scan)
   int n = 1;
   while (isdigit(CHAR_AT(scan, n)))
     ++n;
-  if (isalnum(CHAR_AT(scan, n))
-   || CHAR_AT(scan, n) == '_')
+  if (isalnum(CHAR_AT(scan, n)) || CHAR_AT(scan, n) == '_')
     return false;
   scan->token.type = TOKEN_INT;
   scan->token.line = scan->line;
@@ -162,6 +161,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_PERCENT;
     return;
   }
+  if (match_chars(scan, "false"))
+  {
+    scan->token.type = TOKEN_FALSE;
+    return;
+  }
   if (match_chars(scan, "echo"))
   {
     scan->token.type = TOKEN_ECHO;
@@ -170,6 +174,11 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "null"))
   {
     scan->token.type = TOKEN_NULL;
+    return;
+  }
+  if (match_chars(scan, "true"))
+  {
+    scan->token.type = TOKEN_TRUE;
     return;
   }
   if (match_int(scan))
