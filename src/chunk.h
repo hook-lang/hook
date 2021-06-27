@@ -18,6 +18,8 @@ typedef enum
   OP_INT,
   OP_CONSTANT,
   OP_ARRAY,
+  OP_LOAD,
+  OP_STORE,
   OP_ADD,
   OP_SUBTRACT,
   OP_MULTIPLY,
