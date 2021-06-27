@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <limits.h>
+#include "string.h"
 #include "error.h"
 
 #define MATCH(s, t) ((s)->token.type == (t))
@@ -189,6 +190,17 @@ static void compile_prim_expression(chunk_t *chunk, array_t *consts, scanner_t *
     scanner_next_token(scan);
     int index = consts->length;
     array_add_element(consts, NUMBER_VALUE(data));
+    chunk_emit_opcode(chunk, OP_CONSTANT);
+    chunk_write_byte(chunk, index);
+    return;
+  }
+  if (MATCH(scan, TOKEN_STRING))
+  {
+    token_t *tk = &scan->token;
+    string_t *str = string_from_chars(tk->length, tk->chars);
+    scanner_next_token(scan);
+    int index = consts->length;
+    array_add_element(consts, STRING_VALUE(str));
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_write_byte(chunk, index);
     return;

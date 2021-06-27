@@ -10,6 +10,7 @@ TOKEN_SLASH     '/'
 TOKEN_PERCENT   '%'
 TOKEN_INT       INT
 TOKEN_FLOAT     FLOAT
+TOKEN_STRING    STRING
 TOKEN_ECHO      'echo'
 TOKEN_FALSE     'false'
 TOKEN_NULL      'null'

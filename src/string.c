@@ -18,6 +18,7 @@ static inline string_t *string_allocate(int min_capacity)
   int capacity = STRING_MIN_CAPACITY;
   while (capacity < min_capacity)
     capacity <<= 1;
+  str->ref_count = 0;
   str->capacity = capacity;
   str->chars = (char *) allocate(capacity);
   return str;
