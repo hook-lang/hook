@@ -30,7 +30,10 @@ int main(int argc, const char **argv)
   chunk_init(&chunk, 0);
   array_t *consts = array_allocate(0);
   consts->length = 0;
-  compile(&chunk, consts, &scan);
+
+  compiler_t comp;
+  compiler_init(&comp, &chunk, consts, &scan);
+  compiler_compile(&comp);
   string_free(str);
 
   if (has_option(argc, argv, "--disasm"))
