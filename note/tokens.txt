@@ -8,7 +8,8 @@ TOKEN_MINUS     '-'
 TOKEN_STAR      '*'
 TOKEN_SLASH     '/'
 TOKEN_PERCENT   '%'
-TOKEN_NUMBER    NUMBER
+TOKEN_INT       INT
+TOKEN_FLOAT     FLOAT
 TOKEN_ECHO      'echo'
 TOKEN_FALSE     'false'
 TOKEN_NULL      'null'

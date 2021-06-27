@@ -17,7 +17,7 @@ static inline void next_char(scanner_t *scan);
 static inline void next_chars(scanner_t *scan, int n);
 static inline bool match_char(scanner_t *scan, const char c);
 static inline bool match_chars(scanner_t *scan, const char *chars);
-static inline bool match_int(scanner_t *scan);
+static inline bool match_number(scanner_t *scan);
 
 static inline void skip(scanner_t *scan)
 {
@@ -87,16 +87,24 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
   return true;
 }
 
-static inline bool match_int(scanner_t *scan)
+static inline bool match_number(scanner_t *scan)
 {
   if (!isdigit(CURRENT_CHAR(scan)))
     return false;
   int n = 1;
   while (isdigit(CHAR_AT(scan, n)))
     ++n;
+  token_type_t type = TOKEN_INT;
+  if (CHAR_AT(scan, n) == '.')
+  {
+    ++n;
+    while (isdigit(CHAR_AT(scan, n)))
+      ++n;
+    type = TOKEN_FLOAT;
+  }
   if (isalnum(CHAR_AT(scan, n)) || CHAR_AT(scan, n) == '_')
     return false;
-  scan->token.type = TOKEN_INT;
+  scan->token.type = type;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
   scan->token.length = n;
@@ -161,14 +169,16 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_PERCENT;
     return;
   }
-  if (match_chars(scan, "false"))
-  {
-    scan->token.type = TOKEN_FALSE;
+  if (match_number(scan))
     return;
-  }
   if (match_chars(scan, "echo"))
   {
     scan->token.type = TOKEN_ECHO;
+    return;
+  }
+  if (match_chars(scan, "false"))
+  {
+    scan->token.type = TOKEN_FALSE;
     return;
   }
   if (match_chars(scan, "null"))
@@ -181,7 +191,5 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_TRUE;
     return;
   }
-  if (match_int(scan))
-    return;
   fatal_error("unable to recognize token at %d:%d", scan->line, scan->col);
 }

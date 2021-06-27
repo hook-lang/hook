@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "common.h"
+#include "chunk.h"
 #include "memory.h"
 #include "error.h"
 
@@ -159,9 +160,9 @@ value_t vm_pop(vm_t *vm)
   return val;
 }
 
-void vm_execute(vm_t *vm, chunk_t *chunk)
+void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
 {
-  uint8_t *pc = chunk->bytes;
+  uint8_t *pc = code;
   for (;;)
   {
     opcode_t op = (opcode_t) read_byte(&pc);
@@ -178,6 +179,9 @@ void vm_execute(vm_t *vm, chunk_t *chunk)
       break;
     case OP_INT:
       vm_push_number(vm, read_word(&pc));
+      break;
+    case OP_CONSTANT:
+      push(vm, consts[read_byte(&pc)]);
       break;
     case OP_ADD:
       add(vm);

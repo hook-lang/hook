@@ -9,4 +9,4 @@ mul_expr    ::= unary_expr ( ( '*' | '/' | '%' ) unary_expr )*
 
 unary_expr  ::= ( '+' | '-' ) unary_expr | prim_expr
 
-prim_expr   ::= 'null' | 'false' | 'true' | INT | '(' expr ')'
+prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | '(' expr ')'

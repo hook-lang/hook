@@ -17,11 +17,12 @@ typedef enum
   TOKEN_STAR,
   TOKEN_SLASH,
   TOKEN_PERCENT,
+  TOKEN_INT,
+  TOKEN_FLOAT,
   TOKEN_ECHO,
   TOKEN_FALSE,
   TOKEN_NULL,
-  TOKEN_TRUE,
-  TOKEN_INT
+  TOKEN_TRUE
 } token_type_t;
 
 typedef struct
