@@ -15,15 +15,18 @@
 #define BOOLEAN_VALUE(b) ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_NONE, .as_boolean = (b)})
 #define NUMBER_VALUE(n)  ((value_t) {.type = TYPE_NUMBER, .flags = FLAG_NONE, .as_number = (n)})
 #define STRING_VALUE(s)  ((value_t) {.type = TYPE_STRING, .flags = FLAG_OBJECT, .as_pointer = (s)})
+#define ARRAY_VALUE(a)   ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as_pointer = (a)})
 
 #define IS_NULL(v)    ((v).type == TYPE_NULL)
 #define IS_BOOLEAN(v) ((v).type == TYPE_BOOLEAN)
 #define IS_NUMBER(v)  ((v).type == TYPE_NUMBER)
 #define IS_OBJECT(v)  ((v).flags & FLAG_OBJECT)
 #define IS_STRING(v)  ((v).type == TYPE_STRING)
+#define IS_ARRAY(v)   ((v).type == TYPE_ARRAY)
 
 #define AS_OBJECT(v) ((object_t *) (v).as_pointer)
 #define AS_STRING(v) ((string_t *) (v).as_pointer)
+#define AS_ARRAY(v)  ((array_t *) (v).as_pointer)
 
 #define OBJECT_HEADER int ref_count;
 
@@ -39,7 +42,8 @@ typedef enum
   TYPE_NULL,
   TYPE_BOOLEAN,
   TYPE_NUMBER,
-  TYPE_STRING
+  TYPE_STRING,
+  TYPE_ARRAY
 } type_t;
 
 typedef struct
@@ -62,5 +66,6 @@ typedef struct
 const char *type_name(type_t type);
 void value_free(value_t val);
 void value_release(value_t val);
+void value_print(value_t val, bool quoted);
 
 #endif

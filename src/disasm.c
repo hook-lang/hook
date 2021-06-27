@@ -38,6 +38,9 @@ void dump(chunk_t *chunk)
     case OP_CONSTANT:
       printf("[%05d] Constant %d\n", j, bytes[i++]);
       break;
+    case OP_ARRAY:
+      printf("[%05d] Array    %d\n", j, bytes[i++]);
+      break;
     case OP_ADD:
       printf("[%05d] Add\n", j);
       break;

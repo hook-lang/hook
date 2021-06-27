@@ -116,12 +116,12 @@ static inline bool match_number(scanner_t *scan)
 
 static inline bool match_string(scanner_t *scan)
 {
-  if (CURRENT_CHAR(scan) != '"')
+  if (CURRENT_CHAR(scan) != '\'')
     return false;
   int n = 1;
   for (;;)
   {
-    if (CHAR_AT(scan, n) == '"')
+    if (CHAR_AT(scan, n) == '\'')
     {
       ++n;
       break;
@@ -155,6 +155,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_EOF;
     return;
   }
+  if (match_char(scan, ','))
+  {
+    scan->token.type = TOKEN_COMMA;
+    return;
+  }
   if (match_char(scan, ';'))
   {
     scan->token.type = TOKEN_SEMICOLON;
@@ -168,6 +173,16 @@ void scanner_next_token(scanner_t *scan)
   if (match_char(scan, ')'))
   {
     scan->token.type = TOKEN_RPAREN;
+    return;
+  }
+  if (match_char(scan, '['))
+  {
+    scan->token.type = TOKEN_LBRACKET;
+    return;
+  }
+  if (match_char(scan, ']'))
+  {
+    scan->token.type = TOKEN_RBRACKET;
     return;
   }
   if (match_char(scan, '+'))

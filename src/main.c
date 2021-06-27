@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "string.h"
 #include "compiler.h"
 #include "disasm.h"
 #include "vm.h"
@@ -29,7 +28,8 @@ int main(int argc, const char **argv)
 
   chunk_t chunk;
   chunk_init(&chunk, 0);
-  array_t *consts = array_new(0);
+  array_t *consts = array_allocate(0);
+  consts->length = 0;
   compile(&chunk, consts, &scan);
   string_free(str);
 

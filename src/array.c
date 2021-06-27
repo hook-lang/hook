@@ -5,6 +5,7 @@
 
 #include "array.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include "memory.h"
 
 static inline void resize(array_t *arr);
@@ -19,14 +20,14 @@ static inline void resize(array_t *arr)
     sizeof(*arr->elements) * capacity);
 }
 
-array_t *array_new(int min_capacity)
+array_t *array_allocate(int min_capacity)
 {
   array_t *arr = (array_t *) allocate(sizeof(*arr));
   int capacity = ARRAY_MIN_CAPACITY;
   while (capacity < min_capacity)
     capacity <<= 1;
+  arr->ref_count = 0;
   arr->capacity = capacity;
-  arr->length = 0;
   arr->elements = (value_t *) allocate(sizeof(arr->elements) * capacity);
   return arr;
 }
@@ -45,4 +46,21 @@ void array_add_element(array_t *arr, value_t val)
   VALUE_INCR_REF(val);
   arr->elements[arr->length] = val;
   ++arr->length;
+}
+
+void array_print(array_t *arr)
+{
+  printf("[");
+  if (!arr->length)
+  {
+    printf("]");
+    return;
+  }
+  value_print(arr->elements[0], true);
+  for (int i = 1; i < arr->length; ++i)
+  {
+    printf(", ");
+    value_print(arr->elements[i], true);
+  }
+  printf("]");
 }
