@@ -28,7 +28,7 @@ array_t *array_allocate(int min_capacity)
     capacity <<= 1;
   arr->ref_count = 0;
   arr->capacity = capacity;
-  arr->elements = (value_t *) allocate(sizeof(arr->elements) * capacity);
+  arr->elements = (value_t *) allocate(sizeof(*arr->elements) * capacity);
   return arr;
 }
 
@@ -63,4 +63,14 @@ void array_print(array_t *arr)
     value_print(arr->elements[i], true);
   }
   printf("]");
+}
+
+bool array_equal(array_t *arr1, array_t *arr2)
+{
+  if (arr1->length != arr2->length)
+    return false;
+  for (int i = 0; i < arr1->length; ++i)
+    if (!value_equal(arr1->elements[i], arr2->elements[i]))
+      return false;  
+  return true;
 }

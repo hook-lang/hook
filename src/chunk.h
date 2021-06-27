@@ -20,12 +20,16 @@ typedef enum
   OP_ARRAY,
   OP_LOAD,
   OP_STORE,
+  OP_EQUAL,
+  OP_GREATER,
+  OP_LESS,
   OP_ADD,
   OP_SUBTRACT,
   OP_MULTIPLY,
   OP_DIVIDE,
   OP_MODULO,
   OP_NEGATE,
+  OP_NOT,
   OP_PRINT,
   OP_RETURN
 } opcode_t;
