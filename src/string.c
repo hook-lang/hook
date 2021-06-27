@@ -70,3 +70,8 @@ void string_free(string_t *str)
   free(str->chars);
   free(str);
 }
+
+int string_compare(string_t *str1, string_t *str2)
+{
+  return strcmp(str1->chars, str2->chars);
+}

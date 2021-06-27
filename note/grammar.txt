@@ -4,7 +4,11 @@ chunk       ::= stmt* EOF
 stmt        ::= VARNAME '=' expr ';'
               | 'echo' expr ';'
 
-expr        ::= mul_expr ( ( '+' | '-' ) mul_expr )*
+expr        ::= comp_expr ( ( '==' | '!=' ) comp_expr )*
+
+comp_expr   ::= add_expr ( ( '>' | '>=' | '<' | '<=' ) add_expr )*
+
+add_expr    ::= mul_expr ( ( '+' | '-' ) mul_expr )*
 
 mul_expr    ::= unary_expr ( ( '*' | '/' | '%' ) unary_expr )*
 
