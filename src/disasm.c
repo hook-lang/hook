@@ -35,6 +35,9 @@ void dump(chunk_t *chunk)
         printf("[%05d] Int      %d\n", j, data);
       }
       break;
+    case OP_CONSTANT:
+      printf("[%05d] Constant %d\n", j, bytes[i++]);
+      break;
     case OP_ADD:
       printf("[%05d] Add\n", j);
       break;

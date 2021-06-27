@@ -16,6 +16,7 @@ typedef enum
   OP_FALSE,
   OP_TRUE,
   OP_INT,
+  OP_CONSTANT,
   OP_ADD,
   OP_SUBTRACT,
   OP_MULTIPLY,

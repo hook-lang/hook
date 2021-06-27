@@ -7,6 +7,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BINARY_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BINARY_DIR}) 
 
 add_executable(${PROJECT_NAME} 
+  src/array.c
   src/chunk.c
   src/compiler.c
   src/disasm.c

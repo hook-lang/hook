@@ -29,20 +29,23 @@ int main(int argc, const char **argv)
 
   chunk_t chunk;
   chunk_init(&chunk, 0);
-  compile(&chunk, &scan);
+  array_t *consts = array_new(0);
+  compile(&chunk, consts, &scan);
   string_free(str);
 
   if (has_option(argc, argv, "--disasm"))
   {
     dump(&chunk);
     chunk_free(&chunk);
+    array_free(consts);
     return EXIT_SUCCESS;
   }
 
   vm_t vm;
   vm_init(&vm, 0);
-  vm_execute(&vm, &chunk);
+  vm_execute(&vm, chunk.bytes, consts->elements);
   chunk_free(&chunk);
+  array_free(consts);
   vm_free(&vm);
 
   return EXIT_SUCCESS;
