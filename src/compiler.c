@@ -205,6 +205,29 @@ static void compile_prim_expression(chunk_t *chunk, array_t *consts, scanner_t *
     chunk_write_byte(chunk, index);
     return;
   }
+  if (MATCH(scan, TOKEN_LBRACKET))
+  {
+    scanner_next_token(scan);
+    if (MATCH(scan, TOKEN_RBRACKET))
+    {
+      scanner_next_token(scan);
+      chunk_emit_opcode(chunk, OP_ARRAY);
+      chunk_write_byte(chunk, 0);
+      return;
+    }
+    compile_expression(chunk, consts, scan);
+    int length = 1;
+    while (MATCH(scan, TOKEN_COMMA))
+    {
+      scanner_next_token(scan);
+      compile_expression(chunk, consts, scan);
+      ++length;
+    }
+    EXPECT(scan, TOKEN_RBRACKET);
+    chunk_emit_opcode(chunk, OP_ARRAY);
+    chunk_write_byte(chunk, length);
+    return;
+  }
   if (MATCH(scan, TOKEN_LPAREN))
   {
     scanner_next_token(scan);

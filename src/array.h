@@ -12,13 +12,15 @@
 
 typedef struct
 {
+  OBJECT_HEADER
   int capacity;
   int length;
   value_t *elements;
 } array_t;
 
-array_t *array_new(int min_capacity);
+array_t *array_allocate(int min_capacity);
 void array_free(array_t *arr);
 void array_add_element(array_t *arr, value_t val);
+void array_print(array_t *arr);
 
 #endif

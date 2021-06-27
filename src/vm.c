@@ -15,6 +15,7 @@
 static inline void push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
+static inline void array(vm_t *vm, int length);
 static inline void add(vm_t *vm);
 static inline void subtract(vm_t *vm);
 static inline void multiply(vm_t *vm);
@@ -31,63 +32,75 @@ static inline void push(vm_t *vm, value_t val)
   vm->slots[vm->index] = val;
 }
 
+static inline void array(vm_t *vm, int length)
+{
+  value_t *slots = &vm->slots[vm->index - length + 1];
+  array_t *arr = array_allocate(length);
+  arr->length = length;
+  for (int i = 0; i < length; i++)
+    arr->elements[i] = slots[i];
+  INCR_REF(arr);
+  slots[0] = ARRAY_VALUE(arr);
+  vm->index -= length - 1;
+}
+
 static inline void add(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index];
-  value_t val2 = slots[-1];
+  value_t *slots = &vm->slots[vm->index - 1];
   value_t val1 = slots[0];
+  value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
     fatal_error("cannot add %s to %s", type_name(val2.type), type_name(val1.type));
   double data = val1.as_number + val2.as_number;
-  slots[-1] = NUMBER_VALUE(data);
+  slots[0] = NUMBER_VALUE(data);
   --vm->index;
 }
 
 static inline void subtract(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index];
-  value_t val2 = slots[-1];
+  value_t *slots = &vm->slots[vm->index - 1];
   value_t val1 = slots[0];
+  value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
     fatal_error("cannot subtract %s from %s", type_name(val2.type), type_name(val1.type));
   double data = val1.as_number - val2.as_number;
-  slots[-1] = NUMBER_VALUE(data);
+  slots[0] = NUMBER_VALUE(data);
   --vm->index;
 }
 
 static inline void multiply(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index];
-  value_t val2 = slots[-1];
+  value_t *slots = &vm->slots[vm->index - 1];
   value_t val1 = slots[0];
+  value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
     fatal_error("cannot multiply %s to %s", type_name(val2.type), type_name(val1.type));
   double data = val1.as_number * val2.as_number;
-  slots[-1] = NUMBER_VALUE(data);
+  slots[0] = NUMBER_VALUE(data);
   --vm->index;
 }
 
 static inline void divide(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index];
-  value_t val2 = slots[-1];
+  value_t *slots = &vm->slots[vm->index - 1];
   value_t val1 = slots[0];
+  value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
     fatal_error("cannot divide %s by %s", type_name(val1.type), type_name(val2.type));
   double data = val1.as_number / val2.as_number;
-  slots[-1] = NUMBER_VALUE(data);
+  slots[0] = NUMBER_VALUE(data);
   --vm->index;
 }
 
 static inline void modulo(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index];
-  value_t val2 = slots[-1];
+  value_t *slots = &vm->slots[vm->index - 1];
   value_t val1 = slots[0];
+  value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
     fatal_error("cannot mod %s by %s", type_name(val1.type), type_name(val2.type));
   double data = fmod(val1.as_number, val2.as_number);
-  slots[-1] = NUMBER_VALUE(data);
+  slots[0] = NUMBER_VALUE(data);
   --vm->index;
 }
 
@@ -104,27 +117,10 @@ static inline void negate(vm_t *vm)
 static inline void print(vm_t *vm)
 {
   value_t val = vm->slots[vm->index];
-  switch (val.type)
-  {
-  case TYPE_NULL:
-    printf("null\n");
-    break;
-  case TYPE_BOOLEAN:
-    printf("%s\n", val.as_boolean ? "true" : "false");
-    break;
-  case TYPE_NUMBER:
-    printf("%g\n", val.as_number);
-    break;
-  case TYPE_STRING:
-    {
-      string_t *str = AS_STRING(val);
-      printf("%s\n", str->chars);
-      DECR_REF(str);
-      if (IS_UNREACHABLE(str))
-        string_free(str);
-    }
-    break;
-  }
+  --vm->index;
+  value_print(val, false);
+  printf("\n");
+  value_release(val);
 }
 
 static inline int read_byte(uint8_t **pc)
@@ -183,6 +179,12 @@ void vm_push_string(vm_t *vm, string_t *str)
   push(vm, STRING_VALUE(str));
 }
 
+void vm_push_array(vm_t *vm, array_t *arr)
+{
+  INCR_REF(arr);
+  push(vm, ARRAY_VALUE(arr));
+}
+
 value_t vm_pop(vm_t *vm)
 {
   ASSERT(vm->index > -1, "stack overflow");
@@ -214,6 +216,9 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
       break;
     case OP_CONSTANT:
       push(vm, consts[read_byte(&pc)]);
+      break;
+    case OP_ARRAY:
+      array(vm, read_byte(&pc));
       break;
     case OP_ADD:
       add(vm);

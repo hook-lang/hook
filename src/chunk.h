@@ -17,6 +17,7 @@ typedef enum
   OP_TRUE,
   OP_INT,
   OP_CONSTANT,
+  OP_ARRAY,
   OP_ADD,
   OP_SUBTRACT,
   OP_MULTIPLY,
