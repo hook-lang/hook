@@ -18,6 +18,7 @@ static inline void next_chars(scanner_t *scan, int n);
 static inline bool match_char(scanner_t *scan, const char c);
 static inline bool match_chars(scanner_t *scan, const char *chars);
 static inline bool match_number(scanner_t *scan);
+static inline bool match_string(scanner_t *scan);
 
 static inline void skip(scanner_t *scan)
 {
@@ -113,6 +114,31 @@ static inline bool match_number(scanner_t *scan)
   return true;
 }
 
+static inline bool match_string(scanner_t *scan)
+{
+  if (CURRENT_CHAR(scan) != '"')
+    return false;
+  int n = 1;
+  for (;;)
+  {
+    if (CHAR_AT(scan, n) == '"')
+    {
+      ++n;
+      break;
+    }
+    if (CHAR_AT(scan, n) == '\0')
+      fatal_error("unclosed string at %d:%d", scan->line, scan->col);
+    ++n;
+  }
+  scan->token.type = TOKEN_STRING;
+  scan->token.line = scan->line;
+  scan->token.col = scan->col;
+  scan->token.length = n  - 2;
+  scan->token.chars = &scan->pos[1];
+  next_chars(scan, n);
+  return true;
+}
+
 void scanner_init(scanner_t *scan, char *chars)
 {
   scan->pos = chars;
@@ -170,6 +196,8 @@ void scanner_next_token(scanner_t *scan)
     return;
   }
   if (match_number(scan))
+    return;
+  if (match_string(scan))
     return;
   if (match_chars(scan, "echo"))
   {

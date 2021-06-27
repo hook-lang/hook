@@ -33,6 +33,8 @@ array_t *array_new(int min_capacity)
 
 void array_free(array_t *arr)
 {
+  for (int i = 0; i < arr->length; ++i)
+    value_release(arr->elements[i]);
   free(arr->elements);
   free(arr);
 }
@@ -40,6 +42,7 @@ void array_free(array_t *arr)
 void array_add_element(array_t *arr, value_t val)
 {
   resize(arr);
+  VALUE_INCR_REF(val);
   arr->elements[arr->length] = val;
   ++arr->length;
 }

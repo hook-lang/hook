@@ -7,11 +7,13 @@
 #define STRING_H
 
 #include <stdio.h>
+#include "value.h"
 
 #define STRING_MIN_CAPACITY 8
 
 typedef struct
 {
+  OBJECT_HEADER
   int capacity;
   int length;
   char *chars;

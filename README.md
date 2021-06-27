@@ -5,6 +5,12 @@
 
 The Hook Programming Language
 
+## Hello, world!
+
+```
+echo "Hello, world!";
+```
+
 ## Building
 
 ```
@@ -24,11 +30,11 @@ cmake --build build --config Release
 
 ```
 cd bin
-hook < ../examples/sum.hook
+hook < ../examples/hello.hook
 ```
 
 ### Displaying the bytecode
 
 ```
-hook --disasm < ../examples/sum.hook
+hook --disasm < ../examples/hello.hook
 ```

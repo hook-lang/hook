@@ -7,12 +7,9 @@
 #define VM_H
 
 #include <stdint.h>
-#include "value.h"
+#include "string.h"
 
 #define VM_DEFAULT_NUM_SLOTS 256
-
-#define VM_GET_TOP(vm)    ((vm)->slots[(vm)->index])
-#define VM_SET_TOP(vm, v) (vm)->slots[(vm)->index] = (v)
 
 typedef struct
 {
@@ -27,6 +24,7 @@ void vm_free(vm_t *vm);
 void vm_push_null(vm_t *vm);
 void vm_push_boolean(vm_t *vm, bool data);
 void vm_push_number(vm_t *vm, double data);
+void vm_push_string(vm_t *vm, string_t *str);
 value_t vm_pop(vm_t *vm);
 void vm_execute(vm_t *vm, uint8_t *code, value_t *consts);
 
