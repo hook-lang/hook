@@ -16,12 +16,16 @@ static inline void push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline void array(vm_t *vm, int length);
+static inline void equal(vm_t *vm);
+static inline void greater(vm_t *vm);
+static inline void less(vm_t *vm);
 static inline void add(vm_t *vm);
 static inline void subtract(vm_t *vm);
 static inline void multiply(vm_t *vm);
 static inline void divide(vm_t *vm);
 static inline void modulo(vm_t *vm);
 static inline void negate(vm_t *vm);
+static inline void not(vm_t *vm);
 static inline void print(vm_t *vm);
 
 static inline void push(vm_t *vm, value_t val)
@@ -42,6 +46,39 @@ static inline void array(vm_t *vm, int length)
   INCR_REF(arr);
   slots[0] = ARRAY_VALUE(arr);
   vm->index -= length - 1;
+}
+
+static inline void equal(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  slots[0] = value_equal(val1, val2) ? TRUE_VALUE : FALSE_VALUE;
+  --vm->index;
+  value_release(val1);
+  value_release(val2);
+}
+
+static inline void greater(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  slots[0] = value_compare(val1, val2) > 0 ? TRUE_VALUE : FALSE_VALUE;
+  --vm->index;
+  value_release(val1);
+  value_release(val2);
+}
+
+static inline void less(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  slots[0] = value_compare(val1, val2) < 0 ? TRUE_VALUE : FALSE_VALUE;
+  --vm->index;
+  value_release(val1);
+  value_release(val2);
 }
 
 static inline void add(vm_t *vm)
@@ -114,6 +151,14 @@ static inline void negate(vm_t *vm)
   slots[0] = NUMBER_VALUE(data);
 }
 
+static inline void not(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index];
+  value_t val = slots[0];
+  slots[0] = IS_FALSY(val) ? TRUE_VALUE : FALSE_VALUE;
+  value_release(val);
+}
+
 static inline void print(vm_t *vm)
 {
   value_t val = vm->slots[vm->index];
@@ -165,7 +210,7 @@ void vm_push_null(vm_t *vm)
 
 void vm_push_boolean(vm_t *vm, bool data)
 {
-  push(vm, BOOLEAN_VALUE(data));
+  push(vm, data ? TRUE_VALUE : FALSE_VALUE);
 }
 
 void vm_push_number(vm_t *vm, double data)
@@ -232,6 +277,14 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
         value_release(frame[index]);
         frame[index] = val;
       }
+    case OP_EQUAL:
+      equal(vm);
+      break;
+    case OP_GREATER:
+      greater(vm);
+      break;
+    case OP_LESS:
+      less(vm);
       break;
     case OP_ADD:
       add(vm);
@@ -250,6 +303,9 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
       break;
     case OP_NEGATE:
       negate(vm);
+      break;
+    case OP_NOT:
+      not(vm);
       break;
     case OP_PRINT:
       print(vm);

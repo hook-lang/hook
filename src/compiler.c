@@ -30,6 +30,8 @@ static void compile_statement(compiler_t *comp);
 static void compile_assignment(compiler_t *comp);
 static void compile_echo(compiler_t *comp);
 static void compile_expression(compiler_t *comp);
+static void compile_comp_expression(compiler_t *comp);
+static void compile_add_expression(compiler_t *comp);
 static void compile_mul_expression(compiler_t *comp);
 static void compile_unary_expression(compiler_t *comp);
 static void compile_prim_expression(compiler_t *comp);
@@ -136,9 +138,76 @@ static void compile_echo(compiler_t *comp)
 
 static void compile_expression(compiler_t *comp)
 {
-  compile_mul_expression(comp);
   scanner_t *scan = comp->scan;
   chunk_t *chunk = comp->chunk;
+  compile_comp_expression(comp);
+  for (;;)
+  {
+    if (MATCH(scan, TOKEN_EQEQ))
+    {
+      scanner_next_token(scan);
+      compile_comp_expression(comp);
+      chunk_emit_opcode(chunk, OP_EQUAL);
+      continue;
+    }
+    if (MATCH(scan, TOKEN_BANGEQ))
+    {
+      scanner_next_token(scan);
+      compile_comp_expression(comp);
+      chunk_emit_opcode(chunk, OP_EQUAL);
+      chunk_emit_opcode(chunk, OP_NOT);
+      continue;
+    }
+    break;
+  }
+}
+
+static void compile_comp_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = comp->chunk;
+  compile_add_expression(comp);
+  for (;;)
+  {
+    if (MATCH(scan, TOKEN_GT))
+    {
+      scanner_next_token(scan);
+      compile_add_expression(comp);
+      chunk_emit_opcode(chunk, OP_GREATER);
+      continue;
+    }
+    if (MATCH(scan, TOKEN_GTEQ))
+    {
+      scanner_next_token(scan);
+      compile_add_expression(comp);
+      chunk_emit_opcode(chunk, OP_LESS);
+      chunk_emit_opcode(chunk, OP_NOT);
+      continue;
+    }
+    if (MATCH(scan, TOKEN_LT))
+    {
+      scanner_next_token(scan);
+      compile_add_expression(comp);
+      chunk_emit_opcode(chunk, OP_LESS);
+      continue;
+    }
+    if (MATCH(scan, TOKEN_LTEQ))
+    {
+      scanner_next_token(scan);
+      compile_add_expression(comp);
+      chunk_emit_opcode(chunk, OP_GREATER);
+      chunk_emit_opcode(chunk, OP_NOT);
+      continue;
+    }
+    break;
+  }
+}
+
+static void compile_add_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = comp->chunk;
+  compile_mul_expression(comp);
   for (;;)
   {
     if (MATCH(scan, TOKEN_PLUS))

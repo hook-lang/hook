@@ -46,6 +46,14 @@ void dump(chunk_t *chunk)
       break;
     case OP_STORE:
       printf("[%05d] Store    %d\n", j, bytes[i++]);
+    case OP_EQUAL:
+      printf("[%05d] Equal\n", j);
+      break;
+    case OP_GREATER:
+      printf("[%05d] Greater\n", j);
+      break;
+    case OP_LESS:
+      printf("[%05d] Less\n", j);
       break;
     case OP_ADD:
       printf("[%05d] Add\n", j);
@@ -64,6 +72,9 @@ void dump(chunk_t *chunk)
       break;
     case OP_NEGATE:
       printf("[%05d] Negate\n", j);
+      break;
+    case OP_NOT:
+      printf("[%05d] Not\n", j);
       break;
     case OP_PRINT:
       printf("[%05d] Print\n", j);

@@ -202,9 +202,39 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_RBRACKET;
     return;
   }
+  if (match_chars(scan, "=="))
+  {
+    scan->token.type = TOKEN_EQEQ;
+    return;
+  }
   if (match_char(scan, '='))
   {
     scan->token.type = TOKEN_EQ;
+    return;
+  }
+  if (match_chars(scan, "!="))
+  {
+    scan->token.type = TOKEN_BANGEQ;
+    return;
+  }
+  if (match_chars(scan, ">="))
+  {
+    scan->token.type = TOKEN_GTEQ;
+    return;
+  }
+  if (match_char(scan, '>'))
+  {
+    scan->token.type = TOKEN_GT;
+    return;
+  }
+  if (match_chars(scan, "<="))
+  {
+    scan->token.type = TOKEN_LTEQ;
+    return;
+  }
+  if (match_char(scan, '<'))
+  {
+    scan->token.type = TOKEN_LT;
     return;
   }
   if (match_char(scan, '+'))
