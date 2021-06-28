@@ -155,7 +155,7 @@ static inline void not(vm_t *vm)
 {
   value_t *slots = &vm->slots[vm->index];
   value_t val = slots[0];
-  slots[0] = IS_FALSY(val) ? TRUE_VALUE : FALSE_VALUE;
+  slots[0] = IS_FALSEY(val) ? TRUE_VALUE : FALSE_VALUE;
   value_release(val);
 }
 
@@ -266,6 +266,9 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
     case OP_ARRAY:
       array(vm, read_byte(&pc));
       break;
+    case OP_POP:
+      value_release(vm->slots[vm->index--]);
+      break;
     case OP_LOAD:
       push(vm, frame[read_byte(&pc)]);
       break;
@@ -277,6 +280,26 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
         value_release(frame[index]);
         frame[index] = val;
       }
+      break;
+    case OP_JUMP:
+      pc = &code[read_word(&pc)];
+      break;
+    case OP_JUMP_IF_FALSE:
+      {
+        int offset = read_word(&pc);
+        value_t val = vm->slots[vm->index];
+        if (IS_FALSEY(val))
+          pc = &code[offset];
+      }
+      break;
+    case OP_JUMP_IF_TRUE:
+      {
+        int offset = read_word(&pc);
+        value_t val = vm->slots[vm->index];
+        if (IS_TRUTHY(val))
+          pc = &code[offset];
+      }
+      break;
     case OP_EQUAL:
       equal(vm);
       break;

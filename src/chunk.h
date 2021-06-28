@@ -18,8 +18,12 @@ typedef enum
   OP_INT,
   OP_CONSTANT,
   OP_ARRAY,
+  OP_POP,
   OP_LOAD,
   OP_STORE,
+  OP_JUMP,
+  OP_JUMP_IF_FALSE,
+  OP_JUMP_IF_TRUE,
   OP_EQUAL,
   OP_GREATER,
   OP_LESS,
@@ -43,8 +47,8 @@ typedef struct
 
 void chunk_init(chunk_t *chunk, int min_capacity);
 void chunk_free(chunk_t *chunk);
-void chunk_write_byte(chunk_t *chunk, uint8_t byte);
-void chunk_write_word(chunk_t *chunk, uint16_t word);
+void chunk_emit_byte(chunk_t *chunk, uint8_t byte);
+void chunk_emit_word(chunk_t *chunk, uint16_t word);
 void chunk_emit_opcode(chunk_t *chunk, opcode_t op);
 
 #endif

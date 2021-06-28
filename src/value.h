@@ -10,14 +10,14 @@
 
 #define FLAG_NONE   0b00
 #define FLAG_OBJECT 0b01
-#define FLAG_FALSY  0b10
+#define FLAG_FALSEY 0b10
 
-#define NULL_VALUE       ((value_t) {.type = TYPE_NULL, .flags = FLAG_FALSY})
-#define FALSE_VALUE      ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_FALSY, .as_boolean = false})
-#define TRUE_VALUE       ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_NONE, .as_boolean = true})
-#define NUMBER_VALUE(n)  ((value_t) {.type = TYPE_NUMBER, .flags = FLAG_NONE, .as_number = (n)})
-#define STRING_VALUE(s)  ((value_t) {.type = TYPE_STRING, .flags = FLAG_OBJECT, .as_pointer = (s)})
-#define ARRAY_VALUE(a)   ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as_pointer = (a)})
+#define NULL_VALUE      ((value_t) {.type = TYPE_NULL, .flags = FLAG_FALSEY})
+#define FALSE_VALUE     ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_FALSEY, .as_boolean = false})
+#define TRUE_VALUE      ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_NONE, .as_boolean = true})
+#define NUMBER_VALUE(n) ((value_t) {.type = TYPE_NUMBER, .flags = FLAG_NONE, .as_number = (n)})
+#define STRING_VALUE(s) ((value_t) {.type = TYPE_STRING, .flags = FLAG_OBJECT, .as_pointer = (s)})
+#define ARRAY_VALUE(a)  ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as_pointer = (a)})
 
 #define IS_NULL(v)    ((v).type == TYPE_NULL)
 #define IS_BOOLEAN(v) ((v).type == TYPE_BOOLEAN)
@@ -25,7 +25,8 @@
 #define IS_STRING(v)  ((v).type == TYPE_STRING)
 #define IS_ARRAY(v)   ((v).type == TYPE_ARRAY)
 #define IS_OBJECT(v)  ((v).flags & FLAG_OBJECT)
-#define IS_FALSY(v)   ((v).flags & FLAG_FALSY)
+#define IS_FALSEY(v)  ((v).flags & FLAG_FALSEY)
+#define IS_TRUTHY(v)  (!IS_FALSEY(v))
 
 #define AS_STRING(v) ((string_t *) (v).as_pointer)
 #define AS_ARRAY(v)  ((array_t *) (v).as_pointer)

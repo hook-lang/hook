@@ -23,6 +23,8 @@
 static inline void fatal_error_unexpected_token(scanner_t *scan);
 static inline long parse_long(char *chars);
 static inline double parse_double(char *chars);
+static inline int emit_jump(chunk_t *chunk, opcode_t op);
+static inline void patch_jump(chunk_t *chunk, int offset);
 static inline bool name_equal(token_t *tk, local_t *local);
 static inline int resolve_local(compiler_t *comp, token_t *tk);
 static inline int add_local(compiler_t *comp, token_t *tk);
@@ -30,6 +32,8 @@ static void compile_statement(compiler_t *comp);
 static void compile_assignment(compiler_t *comp);
 static void compile_echo(compiler_t *comp);
 static void compile_expression(compiler_t *comp);
+static void compile_and_expression(compiler_t *comp);
+static void compile_equal_expression(compiler_t *comp);
 static void compile_comp_expression(compiler_t *comp);
 static void compile_add_expression(compiler_t *comp);
 static void compile_mul_expression(compiler_t *comp);
@@ -64,6 +68,22 @@ static inline double parse_double(char *chars)
   if (errno == ERANGE)
     fatal_error("floating point number too large");
   return result;
+}
+
+static inline int emit_jump(chunk_t *chunk, opcode_t op)
+{
+  chunk_emit_opcode(chunk, op);
+  int offset = chunk->length;
+  chunk_emit_word(chunk, 0);
+  return offset;
+}
+
+static inline void patch_jump(chunk_t *chunk, int offset)
+{
+  int jump = chunk->length;
+  if (jump > UINT16_MAX)
+    fatal_error("code too large");
+  *((uint16_t *) &chunk->bytes[offset]) = jump;
 }
 
 static inline bool name_equal(token_t *tk, local_t *local)
@@ -124,7 +144,7 @@ static void compile_assignment(compiler_t *comp)
     return;
   chunk_t *chunk = comp->chunk;
   chunk_emit_opcode(chunk, OP_STORE);
-  chunk_write_byte(chunk, index);
+  chunk_emit_byte(chunk, index);
 }
 
 static void compile_echo(compiler_t *comp)
@@ -137,6 +157,36 @@ static void compile_echo(compiler_t *comp)
 }
 
 static void compile_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = comp->chunk;
+  compile_and_expression(comp);
+  while (MATCH(scan, TOKEN_PIPEPIPE))
+  {
+    scanner_next_token(scan);
+    int offset = emit_jump(chunk, OP_JUMP_IF_TRUE);
+    chunk_emit_opcode(chunk, OP_POP);
+    compile_and_expression(comp);
+    patch_jump(chunk, offset);
+  }
+}
+
+static void compile_and_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = comp->chunk;
+  compile_equal_expression(comp);
+  while (MATCH(scan, TOKEN_AMPAMP))
+  {
+    scanner_next_token(scan);
+    int offset = emit_jump(chunk, OP_JUMP_IF_FALSE);
+    chunk_emit_opcode(chunk, OP_POP);
+    compile_equal_expression(comp);
+    patch_jump(chunk, offset);
+  }
+}
+
+static void compile_equal_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   chunk_t *chunk = comp->chunk;
@@ -276,6 +326,13 @@ static void compile_unary_expression(compiler_t *comp)
     chunk_emit_opcode(comp->chunk, OP_NEGATE);
     return;
   }
+  if (MATCH(scan, TOKEN_BANG))
+  {
+    scanner_next_token(scan);
+    compile_unary_expression(comp);
+    chunk_emit_opcode(comp->chunk, OP_NOT);
+    return;
+  }
   compile_prim_expression(comp);
 }
 
@@ -309,13 +366,13 @@ static void compile_prim_expression(compiler_t *comp)
     if (data <= UINT16_MAX)
     {
       chunk_emit_opcode(chunk, OP_INT);
-      chunk_write_word(chunk, (uint16_t) data);
+      chunk_emit_word(chunk, (uint16_t) data);
       return;
     }
     int index = consts->length;
     array_add_element(consts, NUMBER_VALUE(data));
     chunk_emit_opcode(chunk, OP_CONSTANT);
-    chunk_write_byte(chunk, index);
+    chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_FLOAT))
@@ -325,7 +382,7 @@ static void compile_prim_expression(compiler_t *comp)
     int index = consts->length;
     array_add_element(consts, NUMBER_VALUE(data));
     chunk_emit_opcode(chunk, OP_CONSTANT);
-    chunk_write_byte(chunk, index);
+    chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_STRING))
@@ -336,7 +393,7 @@ static void compile_prim_expression(compiler_t *comp)
     int index = consts->length;
     array_add_element(consts, STRING_VALUE(str));
     chunk_emit_opcode(chunk, OP_CONSTANT);
-    chunk_write_byte(chunk, index);
+    chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_LBRACKET))
@@ -346,7 +403,7 @@ static void compile_prim_expression(compiler_t *comp)
     {
       scanner_next_token(scan);
       chunk_emit_opcode(chunk, OP_ARRAY);
-      chunk_write_byte(chunk, 0);
+      chunk_emit_byte(chunk, 0);
       return;
     }
     compile_expression(comp);
@@ -359,7 +416,7 @@ static void compile_prim_expression(compiler_t *comp)
     }
     EXPECT(scan, TOKEN_RBRACKET);
     chunk_emit_opcode(chunk, OP_ARRAY);
-    chunk_write_byte(chunk, length);
+    chunk_emit_byte(chunk, length);
     return;
   }
   if (MATCH(scan, TOKEN_VARNAME))
@@ -370,7 +427,7 @@ static void compile_prim_expression(compiler_t *comp)
       fatal_error("undefined local variable %.*s", tk->length, tk->start);
     scanner_next_token(scan);
     chunk_emit_opcode(chunk, OP_LOAD);
-    chunk_write_byte(chunk, index);
+    chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_LPAREN))

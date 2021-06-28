@@ -32,20 +32,44 @@ void dump(chunk_t *chunk)
       {
         int data = *((uint16_t*) &bytes[i]);
         i += 2;
-        printf("[%05d] Int      %d\n", j, data);
+        printf("[%05d] Int         %d\n", j, data);
       }
       break;
     case OP_CONSTANT:
-      printf("[%05d] Constant %d\n", j, bytes[i++]);
+      printf("[%05d] Constant    %d\n", j, bytes[i++]);
       break;
     case OP_ARRAY:
-      printf("[%05d] Array    %d\n", j, bytes[i++]);
+      printf("[%05d] Array       %d\n", j, bytes[i++]);
+      break;
+    case OP_POP:
+      printf("[%05d] Pop\n", j);
       break;
     case OP_LOAD:
-      printf("[%05d] Load     %d\n", j, bytes[i++]);
+      printf("[%05d] Load        %d\n", j, bytes[i++]);
       break;
     case OP_STORE:
-      printf("[%05d] Store    %d\n", j, bytes[i++]);
+      printf("[%05d] Store       %d\n", j, bytes[i++]);
+    case OP_JUMP:
+      {
+        int offset = *((uint16_t*) &bytes[i]);
+        i += 2;
+        printf("[%05d] Jump        %d\n", j, offset);
+      }
+      break;
+    case OP_JUMP_IF_FALSE:
+      {
+        int offset = *((uint16_t*) &bytes[i]);
+        i += 2;
+        printf("[%05d] JumpIfFalse %d\n", j, offset);
+      }
+      break;
+    case OP_JUMP_IF_TRUE:
+      {
+        int offset = *((uint16_t*) &bytes[i]);
+        i += 2;
+        printf("[%05d] JumpIfTrue  %d\n", j, offset);
+      }
+      break;
     case OP_EQUAL:
       printf("[%05d] Equal\n", j);
       break;

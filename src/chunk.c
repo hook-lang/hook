@@ -35,14 +35,14 @@ void chunk_free(chunk_t *chunk)
   free(chunk->bytes);
 }
 
-void chunk_write_byte(chunk_t *chunk, uint8_t byte)
+void chunk_emit_byte(chunk_t *chunk, uint8_t byte)
 {
   resize(chunk, chunk->length + 1);
   chunk->bytes[chunk->length] = byte;
   ++chunk->length;
 }
 
-void chunk_write_word(chunk_t *chunk, uint16_t word)
+void chunk_emit_word(chunk_t *chunk, uint16_t word)
 {
   resize(chunk, chunk->length + 2);
   *((uint16_t *) &chunk->bytes[chunk->length]) = word;
@@ -51,5 +51,5 @@ void chunk_write_word(chunk_t *chunk, uint16_t word)
 
 void chunk_emit_opcode(chunk_t *chunk, opcode_t op)
 {
-  chunk_write_byte(chunk, (uint8_t) op);
+  chunk_emit_byte(chunk, (uint8_t) op);
 }
