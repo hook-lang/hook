@@ -196,6 +196,7 @@ value_t vm_pop(vm_t *vm)
 
 void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
 {
+  value_t *frame = vm->slots;
   uint8_t *pc = code;
   for (;;)
   {
@@ -219,6 +220,18 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
       break;
     case OP_ARRAY:
       array(vm, read_byte(&pc));
+      break;
+    case OP_LOAD:
+      push(vm, frame[read_byte(&pc)]);
+      break;
+    case OP_STORE:
+      {
+        int index = read_byte(&pc);
+        value_t val = vm->slots[vm->index];
+        --vm->index;
+        value_release(frame[index]);
+        frame[index] = val;
+      }
       break;
     case OP_ADD:
       add(vm);

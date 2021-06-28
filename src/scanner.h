@@ -15,6 +15,7 @@ typedef enum
   TOKEN_RPAREN,
   TOKEN_LBRACKET,
   TOKEN_RBRACKET,
+  TOKEN_EQ,
   TOKEN_PLUS,
   TOKEN_MINUS,
   TOKEN_STAR,
@@ -26,7 +27,8 @@ typedef enum
   TOKEN_ECHO,
   TOKEN_FALSE,
   TOKEN_NULL,
-  TOKEN_TRUE
+  TOKEN_TRUE,
+  TOKEN_VARNAME
 } token_type_t;
 
 typedef struct
@@ -35,7 +37,7 @@ typedef struct
   int line;
   int col;
   int length;
-  char *chars;
+  char *start;
 } token_t;
 
 typedef struct
