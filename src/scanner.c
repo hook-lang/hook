@@ -19,6 +19,7 @@ static inline bool match_char(scanner_t *scan, const char c);
 static inline bool match_chars(scanner_t *scan, const char *chars);
 static inline bool match_number(scanner_t *scan);
 static inline bool match_string(scanner_t *scan);
+static inline bool match_varname(scanner_t *scan);
 
 static inline void skip(scanner_t *scan)
 {
@@ -68,7 +69,7 @@ static inline bool match_char(scanner_t *scan, const char c)
   scan->token.line = scan->line;
   scan->token.col = scan->col;
   scan->token.length = 1;
-  scan->token.chars = scan->pos;
+  scan->token.start = scan->pos;
   next_char(scan);
   return true;
 }
@@ -83,7 +84,7 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
   scan->token.line = scan->line;
   scan->token.col = scan->col;
   scan->token.length = n;
-  scan->token.chars = scan->pos;
+  scan->token.start = scan->pos;
   next_chars(scan, n);
   return true;
 }
@@ -109,7 +110,7 @@ static inline bool match_number(scanner_t *scan)
   scan->token.line = scan->line;
   scan->token.col = scan->col;
   scan->token.length = n;
-  scan->token.chars = scan->pos;
+  scan->token.start = scan->pos;
   next_chars(scan, n);
   return true;
 }
@@ -134,7 +135,23 @@ static inline bool match_string(scanner_t *scan)
   scan->token.line = scan->line;
   scan->token.col = scan->col;
   scan->token.length = n  - 2;
-  scan->token.chars = &scan->pos[1];
+  scan->token.start = &scan->pos[1];
+  next_chars(scan, n);
+  return true;
+}
+
+static inline bool match_varname(scanner_t *scan)
+{
+  if (CURRENT_CHAR(scan) != '$')
+    return false;
+  int n = 1;
+  while (isalnum(CHAR_AT(scan, n)) || CHAR_AT(scan, n) == '_')
+    ++n;
+  scan->token.type = TOKEN_VARNAME;
+  scan->token.line = scan->line;
+  scan->token.col = scan->col;
+  scan->token.length = n;
+  scan->token.start = scan->pos;
   next_chars(scan, n);
   return true;
 }
@@ -183,6 +200,11 @@ void scanner_next_token(scanner_t *scan)
   if (match_char(scan, ']'))
   {
     scan->token.type = TOKEN_RBRACKET;
+    return;
+  }
+  if (match_char(scan, '='))
+  {
+    scan->token.type = TOKEN_EQ;
     return;
   }
   if (match_char(scan, '+'))
@@ -234,5 +256,7 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_TRUE;
     return;
   }
+  if (match_varname(scan))
+    return;
   fatal_error("unable to recognize token at %d:%d", scan->line, scan->col);
 }

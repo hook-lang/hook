@@ -1,7 +1,8 @@
 
 chunk       ::= stmt* EOF
 
-stmt        ::= 'echo' expr ';'
+stmt        ::= VARNAME '=' expr ';'
+              | 'echo' expr ';'
 
 expr        ::= mul_expr ( ( '+' | '-' ) mul_expr )*
 
@@ -11,4 +12,5 @@ unary_expr  ::= ( '+' | '-' ) unary_expr | prim_expr
 
 prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )?']'
+              | VARNAME
               | '(' expr ')'

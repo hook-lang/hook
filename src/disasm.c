@@ -41,6 +41,12 @@ void dump(chunk_t *chunk)
     case OP_ARRAY:
       printf("[%05d] Array    %d\n", j, bytes[i++]);
       break;
+    case OP_LOAD:
+      printf("[%05d] Load     %d\n", j, bytes[i++]);
+      break;
+    case OP_STORE:
+      printf("[%05d] Store    %d\n", j, bytes[i++]);
+      break;
     case OP_ADD:
       printf("[%05d] Add\n", j);
       break;
