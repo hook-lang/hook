@@ -1,0 +1,20 @@
+
+if (true) {
+  echo 'truthy';
+}
+
+if (false) {
+  echo 'truthy';
+}
+
+if (true) {
+  echo 'truthy';
+} else {
+  echo 'falsey';
+}
+
+if (false) {
+  echo 'truthy';
+} else {
+  echo 'falsey';
+}

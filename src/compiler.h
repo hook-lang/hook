@@ -11,6 +11,7 @@
 #include "array.h"
 
 #define COMPILER_MAX_LOCALS 256
+#define COMPILER_MAX_BREAKS 256
 
 typedef struct
 {
@@ -18,13 +19,22 @@ typedef struct
   char *start;
 } local_t;
 
+typedef struct loop
+{
+  struct loop *enclosing;
+  int jump;
+  int offset_count;
+  int offsets[COMPILER_MAX_BREAKS];
+} loop_t;
+
 typedef struct
 {
   scanner_t *scan;
   chunk_t *chunk;
   array_t *consts;
-  local_t locals[COMPILER_MAX_LOCALS];
   int local_count;
+  local_t locals[COMPILER_MAX_LOCALS];
+  loop_t *loop;
 } compiler_t;
 
 void compiler_init(compiler_t *comp, chunk_t *chunk, array_t *consts, scanner_t *scan);

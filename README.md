@@ -20,10 +20,18 @@ cmake -B build
 cmake --build build
 ```
 
+### Building for debugging
+
+```
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+```
+
 ### Building a release
 
 ```
-cmake --build build --config Release
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
 ```
 
 ## Running an example

@@ -1,5 +1,11 @@
 
+break
+continue
+do
 echo
+else
 false
+if
 null
 true
+while

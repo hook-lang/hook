@@ -7,10 +7,6 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  # Release, Debug, RelWithDebInfo, etc.
-  BUILD_TYPE: Release
-
 jobs:
   build:
     strategy:
@@ -26,4 +22,4 @@ jobs:
       run: cmake -B ${{github.workspace}}/build
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build

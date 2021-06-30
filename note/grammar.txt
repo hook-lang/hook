@@ -2,7 +2,13 @@
 chunk       ::= stmt* EOF
 
 stmt        ::= VARNAME '=' expr ';'
+              | 'if' '(' expr ')' stmt ( 'else' stmt )?
+              | 'while' '(' expr ')' stmt
+              | 'do' stmt 'while' '(' expr ')' ';'
+              | 'continue' ';'
+              | 'break' ';'
               | 'echo' expr ';'
+              | '{' stmt* '}'
 
 expr        ::= and_expr ( '||' and_expr )*
 

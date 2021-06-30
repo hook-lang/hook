@@ -49,6 +49,7 @@ void dump(chunk_t *chunk)
       break;
     case OP_STORE:
       printf("[%05d] Store       %d\n", j, bytes[i++]);
+      break;
     case OP_JUMP:
       {
         int offset = *((uint16_t*) &bytes[i]);

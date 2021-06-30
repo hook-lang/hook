@@ -249,19 +249,23 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
     switch (op)
     {
     case OP_NULL:
-      vm_push_null(vm);
+      push(vm, NULL_VALUE);
       break;
     case OP_FALSE:
-      vm_push_boolean(vm, false);
+      push(vm, FALSE_VALUE);
       break;
     case OP_TRUE:
-      vm_push_boolean(vm, true);
+      push(vm, TRUE_VALUE);
       break;
     case OP_INT:
-      vm_push_number(vm, read_word(&pc));
+      push(vm, NUMBER_VALUE(read_word(&pc)));
       break;
     case OP_CONSTANT:
-      push(vm, consts[read_byte(&pc)]);
+      {
+        value_t val = consts[read_byte(&pc)];
+        VALUE_INCR_REF(val);
+        push(vm, val);
+      }
       break;
     case OP_ARRAY:
       array(vm, read_byte(&pc));
@@ -270,7 +274,11 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
       value_release(vm->slots[vm->index--]);
       break;
     case OP_LOAD:
-      push(vm, frame[read_byte(&pc)]);
+      {
+        value_t val = frame[read_byte(&pc)];
+        VALUE_INCR_REF(val);
+        push(vm, val);
+      }
       break;
     case OP_STORE:
       {

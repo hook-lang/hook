@@ -202,6 +202,16 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_RBRACKET;
     return;
   }
+  if (match_char(scan, '{'))
+  {
+    scan->token.type = TOKEN_LBRACE;
+    return;
+  }
+  if (match_char(scan, '}'))
+  {
+    scan->token.type = TOKEN_RBRACE;
+    return;
+  }
   if (match_chars(scan, "||"))
   {
     scan->token.type = TOKEN_PIPEPIPE;
@@ -281,14 +291,39 @@ void scanner_next_token(scanner_t *scan)
     return;
   if (match_string(scan))
     return;
+  if (match_chars(scan, "break"))
+  {
+    scan->token.type = TOKEN_BREAK;
+    return;
+  }
+  if (match_chars(scan, "continue"))
+  {
+    scan->token.type = TOKEN_CONTINUE;
+    return;
+  }
+  if (match_chars(scan, "do"))
+  {
+    scan->token.type = TOKEN_DO;
+    return;
+  }
   if (match_chars(scan, "echo"))
   {
     scan->token.type = TOKEN_ECHO;
     return;
   }
+  if (match_chars(scan, "else"))
+  {
+    scan->token.type = TOKEN_ELSE;
+    return;
+  }
   if (match_chars(scan, "false"))
   {
     scan->token.type = TOKEN_FALSE;
+    return;
+  }
+  if (match_chars(scan, "if"))
+  {
+    scan->token.type = TOKEN_IF;
     return;
   }
   if (match_chars(scan, "null"))
@@ -299,6 +334,11 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "true"))
   {
     scan->token.type = TOKEN_TRUE;
+    return;
+  }
+  if (match_chars(scan, "while"))
+  {
+    scan->token.type = TOKEN_WHILE;
     return;
   }
   if (match_varname(scan))

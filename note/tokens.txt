@@ -6,6 +6,8 @@ TOKEN_LPAREN    '('
 TOKEN_RPAREN    ')'
 TOKEN_LBRACKET  '['
 TOKEN_RBRACKET  ']'
+TOKEN_LBRACE    '{'
+TOKEN_RBRACE    '}'
 TOKEN_PIPEPIPE  '||'
 TOKEN_AMPAMP    '&&'
 TOKEN_EQ        '='
@@ -24,8 +26,14 @@ TOKEN_PERCENT   '%'
 TOKEN_INT       INT
 TOKEN_FLOAT     FLOAT
 TOKEN_STRING    STRING
+TOKEN_BREAK     'break'
+TOKEN_CONTINUE  'continue'
+TOKEN_DO        'do'
 TOKEN_ECHO      'echo'
+TOKEN_ELSE      'else'
 TOKEN_FALSE     'false'
+TOKEN_IF        'if'
 TOKEN_NULL      'null'
 TOKEN_TRUE      'true'
+TOKEN_WHILE     'while'
 TOKEN_VARNAME   VARNAME
