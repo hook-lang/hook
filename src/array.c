@@ -40,11 +40,11 @@ void array_free(array_t *arr)
   free(arr);
 }
 
-void array_add_element(array_t *arr, value_t val)
+void array_inplace_add_element(array_t *arr, value_t elem)
 {
   resize(arr);
-  VALUE_INCR_REF(val);
-  arr->elements[arr->length] = val;
+  VALUE_INCR_REF(elem);
+  arr->elements[arr->length] = elem;
   ++arr->length;
 }
 

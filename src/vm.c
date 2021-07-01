@@ -235,7 +235,7 @@ value_t vm_pop(vm_t *vm)
   ASSERT(vm->index > -1, "stack overflow");
   value_t val = vm->slots[vm->index];
   --vm->index;
-  VALUE_DECR_REF(val);
+  value_release(val);
   return val;
 }
 

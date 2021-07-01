@@ -8,9 +8,9 @@
 #include "array.h"
 #include "error.h"
 
-static inline void free_value(value_t val);
+static inline void value_free(value_t val);
 
-static inline void free_value(value_t val)
+static inline void value_free(value_t val)
 {
   switch (val.type)
   {
@@ -50,12 +50,6 @@ const char *type_name(type_t type)
   return name;
 }
 
-void value_free(value_t val)
-{
-  if (IS_OBJECT(val) && IS_UNREACHABLE(AS_OBJECT(val)))
-    free_value(val);
-}
-
 void value_release(value_t val)
 {
   if (!IS_OBJECT(val))
@@ -63,7 +57,7 @@ void value_release(value_t val)
   object_t *obj = AS_OBJECT(val);
   DECR_REF(obj);
   if (IS_UNREACHABLE(obj))
-    free_value(val);
+    value_free(val);
 }
 
 void value_print(value_t val, bool quoted)

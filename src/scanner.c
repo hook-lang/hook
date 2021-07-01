@@ -50,16 +50,17 @@ static inline void next_char(scanner_t *scan)
   {
     ++scan->line;
     scan->col = 1;
+    ++scan->pos;
+    return;
   }
-  else
-    ++scan->col;
+  ++scan->col;
   ++scan->pos;
 }
 
 static inline void next_chars(scanner_t *scan, int n)
 {
   for (int i = 0; i < n; ++i)
-    next_char(scan);  
+    next_char(scan);
 }
 
 static inline bool match_char(scanner_t *scan, const char c)
@@ -134,7 +135,7 @@ static inline bool match_string(scanner_t *scan)
   scan->token.type = TOKEN_STRING;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
-  scan->token.length = n  - 2;
+  scan->token.length = n - 2;
   scan->token.start = &scan->pos[1];
   next_chars(scan, n);
   return true;
@@ -262,9 +263,29 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_LT;
     return;
   }
+  if (match_chars(scan, "++"))
+  {
+    scan->token.type = TOKEN_PLUSPLUS;
+    return;
+  }
+  if (match_chars(scan, "+="))
+  {
+    scan->token.type = TOKEN_PLUSEQ;
+    return;
+  }
   if (match_char(scan, '+'))
   {
     scan->token.type = TOKEN_PLUS;
+    return;
+  }
+  if (match_chars(scan, "--"))
+  {
+    scan->token.type = TOKEN_MINUSMINUS;
+    return;
+  }
+  if (match_chars(scan, "-="))
+  {
+    scan->token.type = TOKEN_MINUSEQ;
     return;
   }
   if (match_char(scan, '-'))
@@ -272,14 +293,29 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_MINUS;
     return;
   }
+  if (match_chars(scan, "*="))
+  {
+    scan->token.type = TOKEN_STAREQ;
+    return;
+  }
   if (match_char(scan, '*'))
   {
     scan->token.type = TOKEN_STAR;
     return;
   }
+  if (match_chars(scan, "/="))
+  {
+    scan->token.type = TOKEN_SLASHEQ;
+    return;
+  }
   if (match_char(scan, '/'))
   {
     scan->token.type = TOKEN_SLASH;
+    return;
+  }
+  if (match_chars(scan, "%="))
+  {
+    scan->token.type = TOKEN_PERCENTEQ;
     return;
   }
   if (match_char(scan, '%'))

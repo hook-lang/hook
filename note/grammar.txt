@@ -1,7 +1,8 @@
 
 chunk       ::= stmt* EOF
 
-stmt        ::= VARNAME '=' expr ';'
+stmt        ::= VARNAME assign_op expr ';'
+              | VARNAME ( '++' | '--' ) ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'while' '(' expr ')' stmt
               | 'do' stmt 'while' '(' expr ')' ';'
@@ -9,6 +10,8 @@ stmt        ::= VARNAME '=' expr ';'
               | 'break' ';'
               | 'echo' expr ';'
               | '{' stmt* '}'
+
+assign_op   ::= '=' | '+=' | '-=' | '*=' | '/=' | '%='
 
 expr        ::= and_expr ( '||' and_expr )*
 

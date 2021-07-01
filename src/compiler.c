@@ -26,6 +26,7 @@ static inline double parse_double(char *chars);
 static inline bool name_equal(token_t *tk, local_t *local);
 static inline int resolve_local(compiler_t *comp, token_t *tk);
 static inline int add_local(compiler_t *comp, token_t *tk);
+static inline void check_local(int index, token_t *tk);
 static inline int emit_jump(chunk_t *chunk, opcode_t op);
 static inline void patch_jump(chunk_t *chunk, int offset);
 static inline void start_loop(compiler_t *comp, loop_t *loop);
@@ -104,6 +105,12 @@ static inline int add_local(compiler_t *comp, token_t *tk)
   local->start = tk->start;
   ++comp->local_count;
   return index;
+}
+
+static inline void check_local(int index, token_t *tk)
+{
+  if (index == -1)
+    fatal_error("undefined local variable %.*s", tk->length, tk->start);
 }
 
 static inline int emit_jump(chunk_t *chunk, opcode_t op)
@@ -197,19 +204,100 @@ static void compile_statement(compiler_t *comp)
 static void compile_assignment(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  token_t *tk = &scan->token;
-  int index = resolve_local(comp, tk);
-  if (index == -1)
-    add_local(comp, tk);
-  scanner_next_token(scan);
-  EXPECT(scan, TOKEN_EQ);
-  compile_expression(comp);
-  EXPECT(scan, TOKEN_SEMICOLON);
-  if (index == -1)
-    return;
   chunk_t *chunk = comp->chunk;
-  chunk_emit_opcode(chunk, OP_STORE);
+  token_t tk = scan->token;
+  scanner_next_token(scan);
+  int index = resolve_local(comp, &tk);
+  if (MATCH(scan, TOKEN_EQ))
+  {
+    scanner_next_token(scan);
+    compile_expression(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    if (index == -1)
+    {
+      add_local(comp, &tk);
+      return;
+    }
+    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_byte(chunk, index);
+    return;
+  }
+  check_local(index, &tk);
+  chunk_emit_opcode(chunk, OP_LOAD);
   chunk_emit_byte(chunk, index);
+  if (MATCH(scan, TOKEN_PLUSEQ))
+  {
+    scanner_next_token(scan);
+    compile_expression(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    chunk_emit_opcode(chunk, OP_ADD);
+    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_byte(chunk, index);
+    return;
+  }
+  if (MATCH(scan, TOKEN_MINUSEQ))
+  {
+    scanner_next_token(scan);
+    compile_expression(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    chunk_emit_opcode(chunk, OP_SUBTRACT);
+    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_byte(chunk, index);
+    return;
+  }
+  if (MATCH(scan, TOKEN_STAREQ))
+  {
+    scanner_next_token(scan);
+    compile_expression(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    chunk_emit_opcode(chunk, OP_MULTIPLY);
+    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_byte(chunk, index);
+    return;
+  }
+  if (MATCH(scan, TOKEN_SLASHEQ))
+  {
+    scanner_next_token(scan);
+    compile_expression(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    chunk_emit_opcode(chunk, OP_DIVIDE);
+    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_byte(chunk, index);
+    return;
+  }
+  if (MATCH(scan, TOKEN_PERCENTEQ))
+  {
+    scanner_next_token(scan);
+    compile_expression(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    chunk_emit_opcode(chunk, OP_MODULO);
+    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_byte(chunk, index);
+    return;
+  }
+  if (MATCH(scan, TOKEN_PLUSPLUS))
+  {
+    scanner_next_token(scan);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    chunk_emit_opcode(chunk, OP_INT);
+    chunk_emit_word(chunk, 1);
+    chunk_emit_opcode(chunk, OP_ADD);
+    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_byte(chunk, index);
+    return;
+  }
+  if (MATCH(scan, TOKEN_MINUSMINUS))
+  {
+    scanner_next_token(scan);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    chunk_emit_opcode(chunk, OP_INT);
+    chunk_emit_word(chunk, 1);
+    chunk_emit_opcode(chunk, OP_SUBTRACT);
+    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_byte(chunk, index);
+    return;
+  }
+  fatal_error_unexpected_token(scan);
 }
 
 static void compile_if_statement(compiler_t *comp)
@@ -526,7 +614,7 @@ static void compile_prim_expression(compiler_t *comp)
       return;
     }
     int index = consts->length;
-    array_add_element(consts, NUMBER_VALUE(data));
+    array_inplace_add_element(consts, NUMBER_VALUE(data));
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
     return;
@@ -536,18 +624,18 @@ static void compile_prim_expression(compiler_t *comp)
     double data = parse_double(scan->token.start);
     scanner_next_token(scan);
     int index = consts->length;
-    array_add_element(consts, NUMBER_VALUE(data));
+    array_inplace_add_element(consts, NUMBER_VALUE(data));
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_STRING))
   {
-    token_t *tk = &scan->token;
-    string_t *str = string_from_chars(tk->length, tk->start);
+    token_t tk = scan->token;
     scanner_next_token(scan);
+    string_t *str = string_from_chars(tk.length, tk.start);
     int index = consts->length;
-    array_add_element(consts, STRING_VALUE(str));
+    array_inplace_add_element(consts, STRING_VALUE(str));
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
     return;
@@ -577,11 +665,10 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_VARNAME))
   {
-    token_t *tk = &scan->token;
-    int index = resolve_local(comp, tk);
-    if (index == -1)
-      fatal_error("undefined local variable %.*s", tk->length, tk->start);
+    token_t tk = scan->token;
     scanner_next_token(scan);
+    int index = resolve_local(comp, &tk);
+    check_local(index, &tk);
     chunk_emit_opcode(chunk, OP_LOAD);
     chunk_emit_byte(chunk, index);
     return;

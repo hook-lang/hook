@@ -20,7 +20,7 @@ typedef struct
 
 array_t *array_allocate(int min_capacity);
 void array_free(array_t *arr);
-void array_add_element(array_t *arr, value_t val);
+void array_inplace_add_element(array_t *arr, value_t elem);
 void array_print(array_t *arr);
 bool array_equal(array_t *arr1, array_t *arr2);
 
