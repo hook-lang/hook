@@ -37,6 +37,7 @@ static void compile_assignment(compiler_t *comp);
 static void compile_if_statement(compiler_t *comp);
 static void compile_while_statement(compiler_t *comp);
 static void compile_do_statement(compiler_t *comp);
+static void compile_for_statement(compiler_t *comp);
 static void compile_continue_statement(compiler_t *comp);
 static void compile_break_statement(compiler_t *comp);
 static void compile_echo(compiler_t *comp);
@@ -110,7 +111,7 @@ static inline int add_local(compiler_t *comp, token_t *tk)
 static inline void check_local(int index, token_t *tk)
 {
   if (index == -1)
-    fatal_error("undefined local variable %.*s", tk->length, tk->start);
+    fatal_error("undefined local variable '%.*s'", tk->length, tk->start);
 }
 
 static inline int emit_jump(chunk_t *chunk, opcode_t op)
@@ -161,6 +162,7 @@ static void compile_statement(compiler_t *comp)
   if (MATCH(scan, TOKEN_VARNAME))
   {
     compile_assignment(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
     return;
   }
   if (MATCH(scan, TOKEN_IF))
@@ -176,6 +178,11 @@ static void compile_statement(compiler_t *comp)
   if (MATCH(scan, TOKEN_DO))
   {
     compile_do_statement(comp);
+    return;
+  }
+  if (MATCH(scan, TOKEN_FOR))
+  {
+    compile_for_statement(comp);
     return;
   }
   if (MATCH(scan, TOKEN_CONTINUE))
@@ -212,7 +219,6 @@ static void compile_assignment(compiler_t *comp)
   {
     scanner_next_token(scan);
     compile_expression(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
     if (index == -1)
     {
       add_local(comp, &tk);
@@ -222,14 +228,13 @@ static void compile_assignment(compiler_t *comp)
     chunk_emit_byte(chunk, index);
     return;
   }
-  check_local(index, &tk);
-  chunk_emit_opcode(chunk, OP_LOAD);
-  chunk_emit_byte(chunk, index);
   if (MATCH(scan, TOKEN_PLUSEQ))
   {
     scanner_next_token(scan);
+    check_local(index, &tk);
+    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_byte(chunk, index);
     compile_expression(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
     chunk_emit_opcode(chunk, OP_ADD);
     chunk_emit_opcode(chunk, OP_STORE);
     chunk_emit_byte(chunk, index);
@@ -238,8 +243,10 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_MINUSEQ))
   {
     scanner_next_token(scan);
+    check_local(index, &tk);
+    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_byte(chunk, index);
     compile_expression(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
     chunk_emit_opcode(chunk, OP_SUBTRACT);
     chunk_emit_opcode(chunk, OP_STORE);
     chunk_emit_byte(chunk, index);
@@ -248,8 +255,10 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_STAREQ))
   {
     scanner_next_token(scan);
+    check_local(index, &tk);
+    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_byte(chunk, index);
     compile_expression(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
     chunk_emit_opcode(chunk, OP_MULTIPLY);
     chunk_emit_opcode(chunk, OP_STORE);
     chunk_emit_byte(chunk, index);
@@ -258,8 +267,10 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_SLASHEQ))
   {
     scanner_next_token(scan);
+    check_local(index, &tk);
+    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_byte(chunk, index);
     compile_expression(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
     chunk_emit_opcode(chunk, OP_DIVIDE);
     chunk_emit_opcode(chunk, OP_STORE);
     chunk_emit_byte(chunk, index);
@@ -268,8 +279,10 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_PERCENTEQ))
   {
     scanner_next_token(scan);
+    check_local(index, &tk);
+    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_byte(chunk, index);
     compile_expression(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
     chunk_emit_opcode(chunk, OP_MODULO);
     chunk_emit_opcode(chunk, OP_STORE);
     chunk_emit_byte(chunk, index);
@@ -278,7 +291,9 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_PLUSPLUS))
   {
     scanner_next_token(scan);
-    EXPECT(scan, TOKEN_SEMICOLON);
+    check_local(index, &tk);
+    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_byte(chunk, index);
     chunk_emit_opcode(chunk, OP_INT);
     chunk_emit_word(chunk, 1);
     chunk_emit_opcode(chunk, OP_ADD);
@@ -289,7 +304,9 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_MINUSMINUS))
   {
     scanner_next_token(scan);
-    EXPECT(scan, TOKEN_SEMICOLON);
+    check_local(index, &tk);
+    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_byte(chunk, index);
     chunk_emit_opcode(chunk, OP_INT);
     chunk_emit_word(chunk, 1);
     chunk_emit_opcode(chunk, OP_SUBTRACT);
@@ -364,11 +381,64 @@ static void compile_do_statement(compiler_t *comp)
   end_loop(comp);
 }
 
+static void compile_for_statement(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = comp->chunk;
+  scanner_next_token(scan);
+  EXPECT(scan, TOKEN_LPAREN);
+  if (MATCH(scan, TOKEN_SEMICOLON))
+    scanner_next_token(scan);
+  else
+  {
+    if (!MATCH(scan, TOKEN_VARNAME))
+      fatal_error_unexpected_token(scan);
+    compile_assignment(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
+  }
+  loop_t loop;
+  start_loop(comp, &loop);
+  if (MATCH(scan, TOKEN_SEMICOLON))
+  {
+    scanner_next_token(scan);
+    chunk_emit_opcode(chunk, OP_TRUE);
+  }
+  else
+  {
+    compile_expression(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
+  }
+  int offset1 = emit_jump(chunk, OP_JUMP_IF_FALSE);
+  chunk_emit_opcode(chunk, OP_POP);
+  int offset2 = emit_jump(chunk, OP_JUMP);
+  int jump = chunk->length;
+  if (MATCH(scan, TOKEN_RPAREN))
+    scanner_next_token(scan);
+  else
+  {
+    if (!MATCH(scan, TOKEN_VARNAME))
+      fatal_error_unexpected_token(scan);
+    compile_assignment(comp);
+    EXPECT(scan, TOKEN_RPAREN);
+  }
+  chunk_emit_opcode(chunk, OP_JUMP);
+  chunk_emit_word(chunk, loop.jump);
+  patch_jump(chunk, offset2);
+  compile_statement(comp);
+  chunk_emit_opcode(chunk, OP_JUMP);
+  chunk_emit_word(chunk, jump);
+  patch_jump(chunk, offset1);
+  chunk_emit_opcode(chunk, OP_POP);
+  end_loop(comp);
+}
+
 static void compile_continue_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   chunk_t *chunk = comp->chunk;
   scanner_next_token(scan);
+  if (!comp->loop)
+    fatal_error("cannot use 'continue' outside of a loop");
   EXPECT(scan, TOKEN_SEMICOLON);
   chunk_emit_opcode(chunk, OP_JUMP);
   chunk_emit_word(chunk, comp->loop->jump);
@@ -378,6 +448,8 @@ static void compile_break_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   scanner_next_token(scan);
+  if (!comp->loop)
+    fatal_error("cannot use 'break' outside of a loop");
   EXPECT(scan, TOKEN_SEMICOLON);
   emit_break(comp);
 }

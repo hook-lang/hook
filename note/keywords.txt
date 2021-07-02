@@ -5,6 +5,7 @@ do
 echo
 else
 false
+for
 if
 null
 true

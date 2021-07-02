@@ -48,6 +48,7 @@ typedef enum
   TOKEN_ECHO,
   TOKEN_ELSE,
   TOKEN_FALSE,
+  TOKEN_FOR,
   TOKEN_IF,
   TOKEN_NULL,
   TOKEN_TRUE,

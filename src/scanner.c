@@ -357,6 +357,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_FALSE;
     return;
   }
+  if (match_chars(scan, "for"))
+  {
+    scan->token.type = TOKEN_FOR;
+    return;
+  }
   if (match_chars(scan, "if"))
   {
     scan->token.type = TOKEN_IF;
