@@ -24,15 +24,16 @@ static inline void fatal_error_unexpected_token(scanner_t *scan);
 static inline long parse_long(char *chars);
 static inline double parse_double(char *chars);
 static inline bool name_equal(token_t *tk, local_t *local);
+static inline int lookup_local(compiler_t *comp, token_t *tk);
+static inline void define_local(compiler_t *comp, token_t *tk);
 static inline int resolve_local(compiler_t *comp, token_t *tk);
-static inline int add_local(compiler_t *comp, token_t *tk);
-static inline void check_local(int index, token_t *tk);
 static inline int emit_jump(chunk_t *chunk, opcode_t op);
 static inline void patch_jump(chunk_t *chunk, int offset);
 static inline void start_loop(compiler_t *comp, loop_t *loop);
 static inline void emit_break(compiler_t *comp);
 static inline void end_loop(compiler_t *comp);
 static void compile_statement(compiler_t *comp);
+static void compile_variable_declaration(compiler_t *comp);
 static void compile_assignment(compiler_t *comp);
 static void compile_if_statement(compiler_t *comp);
 static void compile_while_statement(compiler_t *comp);
@@ -88,30 +89,33 @@ static inline bool name_equal(token_t *tk, local_t *local)
   return !memcmp(tk->start, local->start, tk->length);
 }
 
-static inline int resolve_local(compiler_t *comp, token_t *tk)
+static inline int lookup_local(compiler_t *comp, token_t *tk)
 {
-  for (int i = 0; i < comp->local_count; ++i)
-    if (name_equal(tk, &comp->locals[i]))
-      return i;
-  return -1;
-}
-
-static inline int add_local(compiler_t *comp, token_t *tk)
-{
-  if (comp->local_count == COMPILER_MAX_LOCALS)
-    fatal_error("too many local variables");
-  int index = comp->local_count;
-  local_t *local = &comp->locals[index];
-  local->length = tk->length;
-  local->start = tk->start;
-  ++comp->local_count;
+  int index = comp->local_count - 1;
+  for (; index > -1; --index)
+    if (name_equal(tk, &comp->locals[index]))
+      break;
   return index;
 }
 
-static inline void check_local(int index, token_t *tk)
+static inline void define_local(compiler_t *comp, token_t *tk)
 {
+  if (lookup_local(comp, tk) != -1)
+    fatal_error("local variable '%.*s' is already defined", tk->length, tk->start);
+  if (comp->local_count == COMPILER_MAX_LOCALS)
+    fatal_error("too many local variables");
+  local_t *local = &comp->locals[comp->local_count];
+  local->length = tk->length;
+  local->start = tk->start;
+  ++comp->local_count;
+}
+
+static inline int resolve_local(compiler_t *comp, token_t *tk)
+{
+  int index = lookup_local(comp, tk);
   if (index == -1)
     fatal_error("undefined local variable '%.*s'", tk->length, tk->start);
+  return index;
 }
 
 static inline int emit_jump(chunk_t *chunk, opcode_t op)
@@ -159,7 +163,13 @@ static inline void end_loop(compiler_t *comp)
 static void compile_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  if (MATCH(scan, TOKEN_VARNAME))
+  if (MATCH(scan, TOKEN_LET))
+  {
+    compile_variable_declaration(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    return;
+  }
+  if (MATCH(scan, TOKEN_NAME))
   {
     compile_assignment(comp);
     EXPECT(scan, TOKEN_SEMICOLON);
@@ -208,6 +218,25 @@ static void compile_statement(compiler_t *comp)
   fatal_error_unexpected_token(scan);
 }
 
+static void compile_variable_declaration(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = comp->chunk;
+  scanner_next_token(scan);
+  if (!MATCH(scan, TOKEN_NAME))
+    fatal_error("expected local variable name");
+  token_t tk = scan->token;
+  scanner_next_token(scan);
+  define_local(comp, &tk);
+  if (MATCH(scan, TOKEN_EQ))
+  {
+    scanner_next_token(scan);
+    compile_expression(comp);
+    return;
+  }
+  chunk_emit_opcode(chunk, OP_NULL);
+}
+
 static void compile_assignment(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
@@ -219,11 +248,6 @@ static void compile_assignment(compiler_t *comp)
   {
     scanner_next_token(scan);
     compile_expression(comp);
-    if (index == -1)
-    {
-      add_local(comp, &tk);
-      return;
-    }
     chunk_emit_opcode(chunk, OP_STORE);
     chunk_emit_byte(chunk, index);
     return;
@@ -231,7 +255,6 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_PLUSEQ))
   {
     scanner_next_token(scan);
-    check_local(index, &tk);
     chunk_emit_opcode(chunk, OP_LOAD);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
@@ -243,7 +266,6 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_MINUSEQ))
   {
     scanner_next_token(scan);
-    check_local(index, &tk);
     chunk_emit_opcode(chunk, OP_LOAD);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
@@ -255,7 +277,6 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_STAREQ))
   {
     scanner_next_token(scan);
-    check_local(index, &tk);
     chunk_emit_opcode(chunk, OP_LOAD);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
@@ -267,7 +288,6 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_SLASHEQ))
   {
     scanner_next_token(scan);
-    check_local(index, &tk);
     chunk_emit_opcode(chunk, OP_LOAD);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
@@ -279,7 +299,6 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_PERCENTEQ))
   {
     scanner_next_token(scan);
-    check_local(index, &tk);
     chunk_emit_opcode(chunk, OP_LOAD);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
@@ -291,7 +310,6 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_PLUSPLUS))
   {
     scanner_next_token(scan);
-    check_local(index, &tk);
     chunk_emit_opcode(chunk, OP_LOAD);
     chunk_emit_byte(chunk, index);
     chunk_emit_opcode(chunk, OP_INT);
@@ -304,7 +322,6 @@ static void compile_assignment(compiler_t *comp)
   if (MATCH(scan, TOKEN_MINUSMINUS))
   {
     scanner_next_token(scan);
-    check_local(index, &tk);
     chunk_emit_opcode(chunk, OP_LOAD);
     chunk_emit_byte(chunk, index);
     chunk_emit_opcode(chunk, OP_INT);
@@ -391,10 +408,18 @@ static void compile_for_statement(compiler_t *comp)
     scanner_next_token(scan);
   else
   {
-    if (!MATCH(scan, TOKEN_VARNAME))
+    if (MATCH(scan, TOKEN_LET))
+    {
+      compile_variable_declaration(comp);
+      EXPECT(scan, TOKEN_SEMICOLON);
+    }
+    else if (MATCH(scan, TOKEN_NAME))
+    {
+      compile_assignment(comp);
+      EXPECT(scan, TOKEN_SEMICOLON);
+    }
+    else
       fatal_error_unexpected_token(scan);
-    compile_assignment(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
   }
   loop_t loop;
   start_loop(comp, &loop);
@@ -416,7 +441,7 @@ static void compile_for_statement(compiler_t *comp)
     scanner_next_token(scan);
   else
   {
-    if (!MATCH(scan, TOKEN_VARNAME))
+    if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
     compile_assignment(comp);
     EXPECT(scan, TOKEN_RPAREN);
@@ -735,12 +760,11 @@ static void compile_prim_expression(compiler_t *comp)
     chunk_emit_byte(chunk, length);
     return;
   }
-  if (MATCH(scan, TOKEN_VARNAME))
+  if (MATCH(scan, TOKEN_NAME))
   {
     token_t tk = scan->token;
     scanner_next_token(scan);
     int index = resolve_local(comp, &tk);
-    check_local(index, &tk);
     chunk_emit_opcode(chunk, OP_LOAD);
     chunk_emit_byte(chunk, index);
     return;

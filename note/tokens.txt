@@ -41,7 +41,8 @@ TOKEN_ELSE       'else'
 TOKEN_FALSE      'false'
 TOKEN_FOR        'for'
 TOKEN_IF         'if'
+TOKEN_LET        'let'
 TOKEN_NULL       'null'
 TOKEN_TRUE       'true'
 TOKEN_WHILE      'while'
-TOKEN_VARNAME    VARNAME
+TOKEN_NAME       NAME

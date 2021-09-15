@@ -1,5 +1,5 @@
 
-$pi = 3.14;
-$r = 10;
-$c = 2 * $pi * $r;
-echo $c;
+let PI = 3.14;
+let r = 10;
+let c = 2 * PI * r;
+echo c;
