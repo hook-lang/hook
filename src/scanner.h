@@ -50,10 +50,11 @@ typedef enum
   TOKEN_FALSE,
   TOKEN_FOR,
   TOKEN_IF,
+  TOKEN_LET,
   TOKEN_NULL,
   TOKEN_TRUE,
   TOKEN_WHILE,
-  TOKEN_VARNAME
+  TOKEN_NAME
 } token_type_t;
 
 typedef struct
