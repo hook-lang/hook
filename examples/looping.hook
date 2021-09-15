@@ -1,61 +1,64 @@
 
-$i = 0;
-while ($i < 10) {
-  echo $i;
-  $i++;
+let i = 0;
+while (i < 10) {
+  echo i;
+  i++;
 }
 
-$i = 0;
+i = 0;
 do {
-  echo $i;
-  $i++;
-} while ($i < 10);
+  echo i;
+  i++;
+} while (i < 10);
 
-$i = 0;
+i = 0;
 while (true) {
-  if ($i == 10)
+  if (i == 10)
     break;
-  echo $i;
-  $i++;
+  echo i;
+  i++;
 }
 
-$i = 0;
+i = 0;
 while (true) {
-  echo $i;
-  $i++;
-  if ($i < 10)
+  echo i;
+  i++;
+  if (i < 10)
     continue;
   break;
 }
 
-for ($i = 0; $i < 10; $i++)
-  echo $i;
+for (i = 0; i < 10; i++)
+  echo i;
 
-$i = 0;
-for (; $i < 10; $i++)
-  echo $i;
+i = 0;
+for (; i < 10; i++)
+  echo i;
 
-$i = 0;
-for (; $i < 10; )
+i = 0;
+for (; i < 10; )
 {
-  echo $i;
-  $i++;
+  echo i;
+  i++;
 }
 
-$i = 0;
+i = 0;
 for (;;)
 {
-  if ($i == 10)
+  if (i == 10)
     break;
-  echo $i;
-  $i++;
+  echo i;
+  i++;
 }
 
-$i = 0;
+i = 0;
 for (;;) {
-  echo $i;
-  $i++;
-  if ($i < 10)
+  echo i;
+  i++;
+  if (i < 10)
     continue;
   break;
 }
+
+for (let j = 0; j < 10; j++)
+  echo j;

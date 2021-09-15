@@ -19,7 +19,7 @@ static inline bool match_char(scanner_t *scan, const char c);
 static inline bool match_chars(scanner_t *scan, const char *chars);
 static inline bool match_number(scanner_t *scan);
 static inline bool match_string(scanner_t *scan);
-static inline bool match_varname(scanner_t *scan);
+static inline bool match_name(scanner_t *scan);
 
 static inline void skip(scanner_t *scan)
 {
@@ -141,14 +141,14 @@ static inline bool match_string(scanner_t *scan)
   return true;
 }
 
-static inline bool match_varname(scanner_t *scan)
+static inline bool match_name(scanner_t *scan)
 {
-  if (CURRENT_CHAR(scan) != '$')
+  if (CURRENT_CHAR(scan) != '_' && !isalpha(CURRENT_CHAR(scan)))
     return false;
   int n = 1;
-  while (isalnum(CHAR_AT(scan, n)) || CHAR_AT(scan, n) == '_')
+  while (CHAR_AT(scan, n) == '_' || isalnum(CHAR_AT(scan, n)))
     ++n;
-  scan->token.type = TOKEN_VARNAME;
+  scan->token.type = TOKEN_NAME;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
   scan->token.length = n;
@@ -367,6 +367,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_IF;
     return;
   }
+  if (match_chars(scan, "let"))
+  {
+    scan->token.type = TOKEN_LET;
+    return;
+  }
   if (match_chars(scan, "null"))
   {
     scan->token.type = TOKEN_NULL;
@@ -382,7 +387,7 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_WHILE;
     return;
   }
-  if (match_varname(scan))
+  if (match_name(scan))
     return;
   fatal_error("unable to recognize token at %d:%d", scan->line, scan->col);
 }

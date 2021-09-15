@@ -1,18 +1,21 @@
 
 chunk       ::= stmt* EOF
 
-stmt        ::= assign ';'
+stmt        ::= var_decl ';'
+              | assign ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'while' '(' expr ')' stmt
               | 'do' stmt 'while' '(' expr ')' ';'
-              | 'for' '(' assign? ';' expr? ';' assign? ')' stmt
+              | 'for' '(' var_decl | assign? ';' expr? ';' assign? ')' stmt
               | 'continue' ';'
               | 'break' ';'
               | 'echo' expr ';'
               | '{' stmt* '}'
 
-assign      ::= VARNAME ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
-              | VARNAME ( '++' | '--' )
+var_decl    ::= 'let' NAME ( '=' expr )?
+
+assign      ::= NAME ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
+              | NAME ( '++' | '--' )
 
 expr        ::= and_expr ( '||' and_expr )*
 
@@ -30,5 +33,5 @@ unary_expr  ::= ( '+' | '-' | '!' ) unary_expr | prim_expr
 
 prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'
-              | VARNAME
+              | NAME
               | '(' expr ')'

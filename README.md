@@ -38,11 +38,11 @@ cmake --build build
 
 ```
 cd bin
-hook < ../examples/hello.hook
+./hook < ../examples/hello.hook
 ```
 
 ### Displaying the bytecode
 
 ```
-hook --disasm < ../examples/hello.hook
+./hook --disasm < ../examples/hello.hook
 ```
