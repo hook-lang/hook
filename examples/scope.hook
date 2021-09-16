@@ -1,0 +1,9 @@
+
+let x = 'outer';
+
+{
+  let x = 'inner';
+  echo x;
+}
+
+echo x;

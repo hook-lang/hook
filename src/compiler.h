@@ -15,6 +15,7 @@
 
 typedef struct
 {
+  int depth;
   int length;
   char *start;
 } local_t;
@@ -22,8 +23,9 @@ typedef struct
 typedef struct loop
 {
   struct loop *enclosing;
+  int scope_depth;
   int jump;
-  int offset_count;
+  int num_offsets;
   int offsets[COMPILER_MAX_BREAKS];
 } loop_t;
 
@@ -32,7 +34,8 @@ typedef struct
   scanner_t *scan;
   chunk_t *chunk;
   array_t *consts;
-  int local_count;
+  int scope_depth;
+  int num_locals;
   local_t locals[COMPILER_MAX_LOCALS];
   loop_t *loop;
 } compiler_t;

@@ -23,14 +23,16 @@
 static inline void fatal_error_unexpected_token(scanner_t *scan);
 static inline long parse_long(char *chars);
 static inline double parse_double(char *chars);
+static inline void push_scope(compiler_t *comp);
+static inline void pop_scope(compiler_t *comp);
+static inline int discard_locals(compiler_t *comp, int depth);
 static inline bool name_equal(token_t *tk, local_t *local);
-static inline int lookup_local(compiler_t *comp, token_t *tk);
 static inline void define_local(compiler_t *comp, token_t *tk);
 static inline int resolve_local(compiler_t *comp, token_t *tk);
 static inline int emit_jump(chunk_t *chunk, opcode_t op);
 static inline void patch_jump(chunk_t *chunk, int offset);
 static inline void start_loop(compiler_t *comp, loop_t *loop);
-static inline void emit_break(compiler_t *comp);
+static inline void add_break(compiler_t *comp);
 static inline void end_loop(compiler_t *comp);
 static void compile_statement(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
@@ -82,6 +84,27 @@ static inline double parse_double(char *chars)
   return result;
 }
 
+static inline void push_scope(compiler_t *comp)
+{
+  ++comp->scope_depth;
+}
+
+static inline void pop_scope(compiler_t *comp)
+{
+  comp->num_locals -= discard_locals(comp, comp->scope_depth);
+  --comp->scope_depth;
+}
+
+static inline int discard_locals(compiler_t *comp, int depth)
+{
+  local_t *locals = comp->locals;
+  chunk_t *chunk = comp->chunk;
+  int index = comp->num_locals - 1;
+  for (; index > -1 && locals[index].depth >= depth; --index)
+    chunk_emit_opcode(chunk, OP_POP);
+  return comp->num_locals - index - 1;
+}
+
 static inline bool name_equal(token_t *tk, local_t *local)
 {
   if (tk->length != local->length)
@@ -89,33 +112,33 @@ static inline bool name_equal(token_t *tk, local_t *local)
   return !memcmp(tk->start, local->start, tk->length);
 }
 
-static inline int lookup_local(compiler_t *comp, token_t *tk)
-{
-  int index = comp->local_count - 1;
-  for (; index > -1; --index)
-    if (name_equal(tk, &comp->locals[index]))
-      break;
-  return index;
-}
-
 static inline void define_local(compiler_t *comp, token_t *tk)
 {
-  if (lookup_local(comp, tk) != -1)
-    fatal_error("local variable '%.*s' is already defined", tk->length, tk->start);
-  if (comp->local_count == COMPILER_MAX_LOCALS)
-    fatal_error("too many local variables");
-  local_t *local = &comp->locals[comp->local_count];
+  for (int i = comp->num_locals - 1; i > -1; --i)
+  {
+    local_t *local = &comp->locals[i];
+    if (local->depth < comp->scope_depth)
+      break;
+    if (name_equal(tk, local))
+      fatal_error("variable '%.*s' is already defined in this scope",
+        tk->length, tk->start);
+  }
+  if (comp->num_locals == COMPILER_MAX_LOCALS)
+    fatal_error("cannot declare more than %d variables in one scope",
+      COMPILER_MAX_LOCALS);
+  local_t *local = &comp->locals[comp->num_locals];
+  local->depth = comp->scope_depth;
   local->length = tk->length;
   local->start = tk->start;
-  ++comp->local_count;
+  ++comp->num_locals;
 }
 
 static inline int resolve_local(compiler_t *comp, token_t *tk)
 {
-  int index = lookup_local(comp, tk);
-  if (index == -1)
-    fatal_error("undefined local variable '%.*s'", tk->length, tk->start);
-  return index;
+  for (int i = comp->num_locals - 1; i > -1; --i)
+    if (name_equal(tk, &comp->locals[i]))
+      return i;
+  fatal_error("variable '%.*s' is used but not defined", tk->length, tk->start);
 }
 
 static inline int emit_jump(chunk_t *chunk, opcode_t op)
@@ -137,25 +160,26 @@ static inline void patch_jump(chunk_t *chunk, int offset)
 static inline void start_loop(compiler_t *comp, loop_t *loop)
 {
   loop->enclosing = comp->loop;
+  loop->scope_depth = comp->scope_depth;
   loop->jump = comp->chunk->length;
-  loop->offset_count = 0;
+  loop->num_offsets = 0;
   comp->loop = loop;
 }
 
-static inline void emit_break(compiler_t *comp)
+static inline void add_break(compiler_t *comp)
 {
   loop_t *loop = comp->loop;
-  if (loop->offset_count == COMPILER_MAX_BREAKS)
+  if (loop->num_offsets == COMPILER_MAX_BREAKS)
     fatal_error("too many breaks");
   int offset = emit_jump(comp->chunk, OP_JUMP);
-  loop->offsets[loop->offset_count++] = offset;
+  loop->offsets[loop->num_offsets++] = offset;
 }
 
 static inline void end_loop(compiler_t *comp)
 {
   chunk_t *chunk = comp->chunk;
   loop_t *loop = comp->loop;
-  for (int i = 0; i < loop->offset_count; ++i)
+  for (int i = 0; i < loop->num_offsets; ++i)
     patch_jump(chunk, loop->offsets[i]);
   comp->loop = comp->loop->enclosing;
 }
@@ -224,7 +248,7 @@ static void compile_variable_declaration(compiler_t *comp)
   chunk_t *chunk = comp->chunk;
   scanner_next_token(scan);
   if (!MATCH(scan, TOKEN_NAME))
-    fatal_error("expected local variable name");
+    fatal_error("expected variable name");
   token_t tk = scan->token;
   scanner_next_token(scan);
   define_local(comp, &tk);
@@ -404,6 +428,7 @@ static void compile_for_statement(compiler_t *comp)
   chunk_t *chunk = comp->chunk;
   scanner_next_token(scan);
   EXPECT(scan, TOKEN_LPAREN);
+  push_scope(comp);
   if (MATCH(scan, TOKEN_SEMICOLON))
     scanner_next_token(scan);
   else
@@ -455,6 +480,7 @@ static void compile_for_statement(compiler_t *comp)
   patch_jump(chunk, offset1);
   chunk_emit_opcode(chunk, OP_POP);
   end_loop(comp);
+  pop_scope(comp);
 }
 
 static void compile_continue_statement(compiler_t *comp)
@@ -465,6 +491,7 @@ static void compile_continue_statement(compiler_t *comp)
   if (!comp->loop)
     fatal_error("cannot use 'continue' outside of a loop");
   EXPECT(scan, TOKEN_SEMICOLON);
+  discard_locals(comp, comp->loop->scope_depth + 1);
   chunk_emit_opcode(chunk, OP_JUMP);
   chunk_emit_word(chunk, comp->loop->jump);
 }
@@ -476,7 +503,8 @@ static void compile_break_statement(compiler_t *comp)
   if (!comp->loop)
     fatal_error("cannot use 'break' outside of a loop");
   EXPECT(scan, TOKEN_SEMICOLON);
-  emit_break(comp);
+  discard_locals(comp, comp->loop->scope_depth + 1);
+  add_break(comp);
 }
 
 static void compile_echo(compiler_t *comp)
@@ -492,9 +520,11 @@ static void compile_block(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   scanner_next_token(scan);
+  push_scope(comp);
   while (!MATCH(scan, TOKEN_RBRACE))
     compile_statement(comp);
   scanner_next_token(scan);
+  pop_scope(comp);
 }
 
 static void compile_expression(compiler_t *comp)
@@ -784,7 +814,8 @@ void compiler_init(compiler_t *comp, chunk_t *chunk, array_t *consts, scanner_t 
   comp->scan = scan;
   comp->chunk = chunk;
   comp->consts = consts;
-  comp->local_count = 0;
+  comp->scope_depth = -1;
+  comp->num_locals = 0;
   comp->loop = NULL;
 }
 
