@@ -107,9 +107,8 @@ static inline int discard_locals(compiler_t *comp, int depth)
 
 static inline bool name_equal(token_t *tk, local_t *local)
 {
-  if (tk->length != local->length)
-    return false;
-  return !memcmp(tk->start, local->start, tk->length);
+  return tk->length == local->length
+    && !memcmp(tk->start, local->start, tk->length);
 }
 
 static inline void define_local(compiler_t *comp, token_t *tk)

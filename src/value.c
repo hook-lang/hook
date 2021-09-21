@@ -98,7 +98,7 @@ bool value_equal(value_t val1, value_t val2)
     result = val1.as_number == val2.as_number;
     break;
   case TYPE_STRING:
-    result = !string_compare(AS_STRING(val1), AS_STRING(val2));
+    result = string_equal(AS_STRING(val1), AS_STRING(val2));
     break;
   case TYPE_ARRAY:
     result = array_equal(AS_ARRAY(val1), AS_ARRAY(val2));
