@@ -246,18 +246,47 @@ static void compile_variable_declaration(compiler_t *comp)
   scanner_t *scan = comp->scan;
   chunk_t *chunk = comp->chunk;
   scanner_next_token(scan);
-  if (!MATCH(scan, TOKEN_NAME))
-    fatal_error("expected variable name");
-  token_t tk = scan->token;
-  scanner_next_token(scan);
-  define_local(comp, &tk);
-  if (MATCH(scan, TOKEN_EQ))
+  if (MATCH(scan, TOKEN_NAME))
   {
+    token_t tk = scan->token;
     scanner_next_token(scan);
-    compile_expression(comp);
+    define_local(comp, &tk);
+    if (MATCH(scan, TOKEN_EQ))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      return;
+    }
+    chunk_emit_opcode(chunk, OP_NULL);
     return;
   }
-  chunk_emit_opcode(chunk, OP_NULL);
+  if (MATCH(scan, TOKEN_LBRACKET))
+  {
+    scanner_next_token(scan);
+    if (!MATCH(scan, TOKEN_NAME))
+      fatal_error_unexpected_token(scan);
+    token_t tk = scan->token;
+    scanner_next_token(scan);
+    define_local(comp, &tk);
+    int n = 1;
+    while (MATCH(scan, TOKEN_COMMA))
+    {
+      scanner_next_token(scan);
+      if (!MATCH(scan, TOKEN_NAME))
+        fatal_error_unexpected_token(scan);
+      token_t tk = scan->token;
+      scanner_next_token(scan);
+      define_local(comp, &tk);
+      ++n;
+    }
+    EXPECT(scan, TOKEN_RBRACKET);
+    EXPECT(scan, TOKEN_EQ);
+    compile_expression(comp);
+    chunk_emit_opcode(chunk, OP_UNPACK);
+    chunk_emit_byte(chunk, n);
+    return;
+  }
+  fatal_error_unexpected_token(scan);
 }
 
 static void compile_assignment(compiler_t *comp)

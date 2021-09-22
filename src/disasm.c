@@ -41,6 +41,9 @@ void dump(chunk_t *chunk)
     case OP_ARRAY:
       printf("[%05d] Array       %d\n", j, bytes[i++]);
       break;
+    case OP_UNPACK:
+      printf("[%05d] Unpack      %d\n", j, bytes[i++]);
+      break;
     case OP_POP:
       printf("[%05d] Pop\n", j);
       break;

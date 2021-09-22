@@ -18,6 +18,7 @@ typedef enum
   OP_INT,
   OP_CONSTANT,
   OP_ARRAY,
+  OP_UNPACK,
   OP_POP,
   OP_LOAD,
   OP_STORE,

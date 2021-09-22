@@ -16,6 +16,7 @@ static inline void push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline void array(vm_t *vm, int length);
+static inline void unpack(vm_t *vm, int length);
 static inline void equal(vm_t *vm);
 static inline void greater(vm_t *vm);
 static inline void less(vm_t *vm);
@@ -41,11 +42,32 @@ static inline void array(vm_t *vm, int length)
   value_t *slots = &vm->slots[vm->index - length + 1];
   array_t *arr = array_allocate(length);
   arr->length = length;
-  for (int i = 0; i < length; i++)
+  for (int i = 0; i < length; ++i)
     arr->elements[i] = slots[i];
   INCR_REF(arr);
   slots[0] = ARRAY_VALUE(arr);
   vm->index -= length - 1;
+}
+
+static inline void unpack(vm_t *vm, int length)
+{
+  value_t *slots = &vm->slots[vm->index];
+  value_t val = slots[0];
+  if (!IS_ARRAY(val))
+    fatal_error("cannot unpack %s", type_name(val.type));
+  array_t *arr = AS_ARRAY(val);
+  --vm->index;
+  for (int i = 0; i < length && i < arr->length; ++i)
+  {
+    value_t elem = arr->elements[i];
+    VALUE_INCR_REF(elem);
+    push(vm, elem);
+  }
+  for (int i = arr->length; i < length; ++i)
+    push(vm, NULL_VALUE);
+  DECR_REF(arr);
+  if (IS_UNREACHABLE(arr))
+    array_free(arr);
 }
 
 static inline void equal(vm_t *vm)
@@ -269,6 +291,9 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
       break;
     case OP_ARRAY:
       array(vm, read_byte(&pc));
+      break;
+    case OP_UNPACK:
+      unpack(vm, read_byte(&pc));
       break;
     case OP_POP:
       value_release(vm->slots[vm->index--]);

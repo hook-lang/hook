@@ -2,7 +2,7 @@
 chunk       ::= stmt* EOF
 
 stmt        ::= var_decl ';'
-              | assign ';'
+              | assign ';' 
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'while' '(' expr ')' stmt
               | 'do' stmt 'while' '(' expr ')' ';'
@@ -13,6 +13,7 @@ stmt        ::= var_decl ';'
               | '{' stmt* '}'
 
 var_decl    ::= 'let' NAME ( '=' expr )?
+              | 'let' '[' NAME ( ',' NAME )* ']' '=' expr
 
 assign      ::= NAME ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME ( '++' | '--' )
