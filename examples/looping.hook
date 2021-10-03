@@ -62,3 +62,11 @@ for (;;) {
     continue;
   break;
 }
+
+i = 0;
+loop {
+  if (i == 10)
+    break;
+  echo i;
+  i++;
+}

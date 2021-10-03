@@ -426,7 +426,7 @@ void vm_compile(vm_t *vm)
   INCR_REF(fn);
   slots[0] = FUNCTION_VALUE(fn);
   DECR_REF(str);
-  if (IS_UNREACHABLE(str));
+  if (IS_UNREACHABLE(str))
     string_free(str);
 }
 

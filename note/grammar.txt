@@ -1,16 +1,19 @@
 
 chunk       ::= stmt* EOF
 
-stmt        ::= var_decl ';'
+stmt        ::= block
+              | var_decl ';'
               | assign ';' 
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
+              | 'loop' block
               | 'while' '(' expr ')' stmt
               | 'do' stmt 'while' '(' expr ')' ';'
               | 'for' '(' var_decl | assign? ';' expr? ';' assign? ')' stmt
               | 'continue' ';'
               | 'break' ';'
               | 'echo' expr ';'
-              | '{' stmt* '}'
+
+block       ::= '{' stmt* '}'
 
 var_decl    ::= 'let' NAME ( '=' expr )?
               | 'let' '[' NAME ( ',' NAME )* ']' '=' expr

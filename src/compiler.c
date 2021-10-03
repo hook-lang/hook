@@ -65,16 +65,17 @@ static inline void start_loop(compiler_t *comp, loop_t *loop);
 static inline void add_break(compiler_t *comp);
 static inline void end_loop(compiler_t *comp);
 static void compile_statement(compiler_t *comp);
+static void compile_block(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assignment(compiler_t *comp);
 static void compile_if_statement(compiler_t *comp);
+static void compile_loop_statement(compiler_t *comp);
 static void compile_while_statement(compiler_t *comp);
 static void compile_do_statement(compiler_t *comp);
 static void compile_for_statement(compiler_t *comp);
 static void compile_continue_statement(compiler_t *comp);
 static void compile_break_statement(compiler_t *comp);
 static void compile_echo_statement(compiler_t *comp);
-static void compile_block(compiler_t *comp);
 static void compile_expression(compiler_t *comp);
 static void compile_and_expression(compiler_t *comp);
 static void compile_equal_expression(compiler_t *comp);
@@ -225,6 +226,11 @@ static inline void end_loop(compiler_t *comp)
 static void compile_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
+  if (MATCH(scan, TOKEN_LBRACE))
+  {
+    compile_block(comp);
+    return;
+  }
   if (MATCH(scan, TOKEN_LET))
   {
     compile_variable_declaration(comp);
@@ -240,6 +246,11 @@ static void compile_statement(compiler_t *comp)
   if (MATCH(scan, TOKEN_IF))
   {
     compile_if_statement(comp);
+    return;
+  }
+  if (MATCH(scan, TOKEN_LOOP))
+  {
+    compile_loop_statement(comp);
     return;
   }
   if (MATCH(scan, TOKEN_WHILE))
@@ -272,12 +283,18 @@ static void compile_statement(compiler_t *comp)
     compile_echo_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACE))
-  {
-    compile_block(comp);
-    return;
-  }
   fatal_error_unexpected_token(scan);
+}
+
+static void compile_block(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  scanner_next_token(scan);
+  push_scope(comp);
+  while (!MATCH(scan, TOKEN_RBRACE))
+    compile_statement(comp);
+  scanner_next_token(scan);
+  pop_scope(comp);
 }
 
 static void compile_variable_declaration(compiler_t *comp)
@@ -447,6 +464,21 @@ static void compile_if_statement(compiler_t *comp)
   patch_jump(chunk, offset2);
 }
 
+static void compile_loop_statement(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->fn->chunk;
+  scanner_next_token(scan);
+  if (!MATCH(scan, TOKEN_LBRACE))
+    fatal_error_unexpected_token(scan);
+  loop_t loop;
+  start_loop(comp, &loop);
+  compile_block(comp);
+  chunk_emit_opcode(chunk, OP_JUMP);
+  chunk_emit_word(chunk, loop.jump);
+  end_loop(comp);
+}
+
 static void compile_while_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
@@ -581,17 +613,6 @@ static void compile_echo_statement(compiler_t *comp)
   compile_expression(comp);
   EXPECT(scan, TOKEN_SEMICOLON);
   chunk_emit_opcode(&comp->fn->chunk, OP_PRINT);
-}
-
-static void compile_block(compiler_t *comp)
-{
-  scanner_t *scan = comp->scan;
-  scanner_next_token(scan);
-  push_scope(comp);
-  while (!MATCH(scan, TOKEN_RBRACE))
-    compile_statement(comp);
-  scanner_next_token(scan);
-  pop_scope(comp);
 }
 
 static void compile_expression(compiler_t *comp)

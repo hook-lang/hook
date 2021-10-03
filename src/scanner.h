@@ -51,6 +51,7 @@ typedef enum
   TOKEN_FOR,
   TOKEN_IF,
   TOKEN_LET,
+  TOKEN_LOOP,
   TOKEN_NULL,
   TOKEN_TRUE,
   TOKEN_WHILE,
