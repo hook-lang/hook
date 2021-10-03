@@ -47,11 +47,14 @@ void dump(function_t *fn)
     case OP_POP:
       printf("[%05d] Pop\n", j);
       break;
-    case OP_LOAD:
-      printf("[%05d] Load        %d\n", j, bytes[i++]);
+    case OP_GET_LOCAL:
+      printf("[%05d] GetLocal    %d\n", j, bytes[i++]);
       break;
-    case OP_STORE:
-      printf("[%05d] Store       %d\n", j, bytes[i++]);
+    case OP_SET_LOCAL:
+      printf("[%05d] SetLocal    %d\n", j, bytes[i++]);
+      break;
+    case OP_GET_ELEMENT:
+      printf("[%05d] GetElement\n", j);
       break;
     case OP_JUMP:
       {

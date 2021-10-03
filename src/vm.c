@@ -17,6 +17,7 @@ static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline void array(vm_t *vm, int length);
 static inline void unpack(vm_t *vm, int length);
+static inline void get_element(vm_t *vm);
 static inline void equal(vm_t *vm);
 static inline void greater(vm_t *vm);
 static inline void less(vm_t *vm);
@@ -82,6 +83,29 @@ static inline void unpack(vm_t *vm, int length)
   }
   for (int i = arr->length; i < length; ++i)
     push(vm, NULL_VALUE);
+  DECR_REF(arr);
+  if (IS_UNREACHABLE(arr))
+    array_free(arr);
+}
+
+static inline void get_element(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  if (!IS_ARRAY(val1))
+    fatal_error("cannot use %s as an array", type_name(val1.type));
+  if (!IS_INTEGER(val2))
+    fatal_error("array cannot be indexed by %s", type_name(val2.type));
+  array_t *arr = AS_ARRAY(val1);
+  long index = (long) val2.as_number;
+  if (index < 0 || index >= arr->length)
+    fatal_error("index out of bounds: the length is %d but the index is %d",
+      arr->length, index);
+  value_t elem = arr->elements[index];
+  VALUE_INCR_REF(elem);
+  slots[0] = elem;
+  --vm->index;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
@@ -280,14 +304,14 @@ static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *fr
     case OP_POP:
       value_release(vm->slots[vm->index--]);
       break;
-    case OP_LOAD:
+    case OP_GET_LOCAL:
       {
         value_t val = frame[read_byte(&pc)];
         VALUE_INCR_REF(val);
         push(vm, val);
       }
       break;
-    case OP_STORE:
+    case OP_SET_LOCAL:
       {
         int index = read_byte(&pc);
         value_t val = vm->slots[vm->index];
@@ -295,6 +319,9 @@ static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *fr
         value_release(frame[index]);
         frame[index] = val;
       }
+      break;
+    case OP_GET_ELEMENT:
+      get_element(vm);
       break;
     case OP_JUMP:
       pc = &code[read_word(&pc)];

@@ -23,6 +23,7 @@
 #define IS_NULL(v)     ((v).type == TYPE_NULL)
 #define IS_BOOLEAN(v)  ((v).type == TYPE_BOOLEAN)
 #define IS_NUMBER(v)   ((v).type == TYPE_NUMBER)
+#define IS_INTEGER(v)  (IS_NUMBER(v) && (v).as_number == (long) (v).as_number)
 #define IS_STRING(v)   ((v).type == TYPE_STRING)
 #define IS_ARRAY(v)    ((v).type == TYPE_ARRAY)
 #define IS_CALLABLE(v) ((v).type == TYPE_CALLABLE)

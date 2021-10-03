@@ -356,86 +356,86 @@ static void compile_assignment(compiler_t *comp)
   {
     scanner_next_token(scan);
     compile_expression(comp);
-    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_PLUSEQ))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_opcode(chunk, OP_GET_LOCAL);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_ADD);
-    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_MINUSEQ))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_opcode(chunk, OP_GET_LOCAL);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_SUBTRACT);
-    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_STAREQ))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_opcode(chunk, OP_GET_LOCAL);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_MULTIPLY);
-    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_SLASHEQ))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_opcode(chunk, OP_GET_LOCAL);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_DIVIDE);
-    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_PERCENTEQ))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_opcode(chunk, OP_GET_LOCAL);
     chunk_emit_byte(chunk, index);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_MODULO);
-    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_PLUSPLUS))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_opcode(chunk, OP_GET_LOCAL);
     chunk_emit_byte(chunk, index);
     chunk_emit_opcode(chunk, OP_INT);
     chunk_emit_word(chunk, 1);
     chunk_emit_opcode(chunk, OP_ADD);
-    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, index);
     return;
   }
   if (MATCH(scan, TOKEN_MINUSMINUS))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_opcode(chunk, OP_GET_LOCAL);
     chunk_emit_byte(chunk, index);
     chunk_emit_opcode(chunk, OP_INT);
     chunk_emit_word(chunk, 1);
     chunk_emit_opcode(chunk, OP_SUBTRACT);
-    chunk_emit_opcode(chunk, OP_STORE);
+    chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, index);
     return;
   }
@@ -884,8 +884,15 @@ static void compile_prim_expression(compiler_t *comp)
     token_t tk = scan->token;
     scanner_next_token(scan);
     int index = resolve_local(comp, &tk);
-    chunk_emit_opcode(chunk, OP_LOAD);
+    chunk_emit_opcode(chunk, OP_GET_LOCAL);
     chunk_emit_byte(chunk, index);
+    while (MATCH(scan, TOKEN_LBRACKET))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      EXPECT(scan, TOKEN_RBRACKET);
+      chunk_emit_opcode(chunk, OP_GET_ELEMENT);
+    }
     return;
   }
   if (MATCH(scan, TOKEN_LPAREN))
