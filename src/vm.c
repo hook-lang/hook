@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "common.h"
-#include "chunk.h"
+#include "compiler.h"
 #include "memory.h"
 #include "error.h"
 
@@ -28,6 +28,9 @@ static inline void modulo(vm_t *vm);
 static inline void negate(vm_t *vm);
 static inline void not(vm_t *vm);
 static inline void print(vm_t *vm);
+static inline void call(vm_t *vm, int nargs);
+static inline void adjust_arguments(vm_t *vm, int arity, int nargs);
+static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *frame);
 
 static inline void push(vm_t *vm, value_t val)
 {
@@ -35,6 +38,20 @@ static inline void push(vm_t *vm, value_t val)
     fatal_error("stack overflow");
   ++vm->index;
   vm->slots[vm->index] = val;
+}
+
+static inline int read_byte(uint8_t **pc)
+{
+  int byte = **pc;
+  ++(*pc);
+  return byte;
+}
+
+static inline int read_word(uint8_t **pc)
+{
+  int word = *((uint16_t *) *pc);
+  *pc += 2;
+  return word;
 }
 
 static inline void array(vm_t *vm, int length)
@@ -190,80 +207,45 @@ static inline void print(vm_t *vm)
   value_release(val);
 }
 
-static inline int read_byte(uint8_t **pc)
+static inline void call(vm_t *vm, int nargs)
 {
-  int byte = **pc;
-  ++(*pc);
-  return byte;
-}
-
-static inline int read_word(uint8_t **pc)
-{
-  int word = *((uint16_t *) *pc);
-  *pc += 2;
-  return word;
-}
-
-void vm_init(vm_t *vm, int min_capacity)
-{
-  int capacity = VM_DEFAULT_NUM_SLOTS;
-  while (capacity < min_capacity)
-    capacity <<= 1;
-  vm->capacity = capacity;
-  vm->end = capacity - 1;
-  vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
-  vm->index = -1;
-}
-
-void vm_free(vm_t *vm)
-{
-  while (vm->index > -1)
-  {
-    value_release(vm->slots[vm->index]);
-    --vm->index;
-  }
-  free(vm->slots);
-}
-
-void vm_push_null(vm_t *vm)
-{
-  push(vm, NULL_VALUE);
-}
-
-void vm_push_boolean(vm_t *vm, bool data)
-{
-  push(vm, data ? TRUE_VALUE : FALSE_VALUE);
-}
-
-void vm_push_number(vm_t *vm, double data)
-{
-  push(vm, NUMBER_VALUE(data));
-}
-
-void vm_push_string(vm_t *vm, string_t *str)
-{
-  INCR_REF(str);
-  push(vm, STRING_VALUE(str));
-}
-
-void vm_push_array(vm_t *vm, array_t *arr)
-{
-  INCR_REF(arr);
-  push(vm, ARRAY_VALUE(arr));
-}
-
-value_t vm_pop(vm_t *vm)
-{
-  ASSERT(vm->index > -1, "stack overflow");
-  value_t val = vm->slots[vm->index];
+  value_t *frame = &vm->slots[vm->index - nargs];
+  value_t val = frame[0];
+  if (!IS_CALLABLE(val))
+    fatal_error("value is not callable");
+  function_t *fn = AS_FUNCTION(val);
+  adjust_arguments(vm, fn->arity, nargs);
+  execute(vm, fn->chunk.bytes, fn->consts->elements, frame);
+  DECR_REF(fn);
+  if (IS_UNREACHABLE(fn))
+    function_free(fn);
+  frame[0] = vm->slots[vm->index];
   --vm->index;
-  value_release(val);
-  return val;
+  while (&vm->slots[vm->index] > frame)
+    value_release(vm->slots[vm->index--]);
 }
 
-void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
+static inline void adjust_arguments(vm_t *vm, int arity, int nargs)
 {
-  value_t *frame = vm->slots;
+  if (nargs < arity)
+  {
+    do
+    {
+      push(vm, NULL_VALUE);
+      ++nargs;
+    }
+    while (nargs < arity);
+    return;
+  }
+  while (nargs > arity)
+  {
+    value_release(vm->slots[vm->index--]);
+    --nargs;
+  }  
+}
+
+static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *frame)
+{
   uint8_t *pc = code;
   for (;;)
   {
@@ -370,4 +352,85 @@ void vm_execute(vm_t *vm, uint8_t *code, value_t *consts)
       return;
     }
   }
+}
+
+void vm_init(vm_t *vm, int min_capacity)
+{
+  int capacity = VM_DEFAULT_NUM_SLOTS;
+  while (capacity < min_capacity)
+    capacity <<= 1;
+  vm->capacity = capacity;
+  vm->end = capacity - 1;
+  vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
+  vm->index = -1;
+}
+
+void vm_free(vm_t *vm)
+{
+  while (vm->index > -1)
+    value_release(vm->slots[vm->index--]);
+  free(vm->slots);
+}
+
+void vm_push_null(vm_t *vm)
+{
+  push(vm, NULL_VALUE);
+}
+
+void vm_push_boolean(vm_t *vm, bool data)
+{
+  push(vm, data ? TRUE_VALUE : FALSE_VALUE);
+}
+
+void vm_push_number(vm_t *vm, double data)
+{
+  push(vm, NUMBER_VALUE(data));
+}
+
+void vm_push_string(vm_t *vm, string_t *str)
+{
+  INCR_REF(str);
+  push(vm, STRING_VALUE(str));
+}
+
+void vm_push_array(vm_t *vm, array_t *arr)
+{
+  INCR_REF(arr);
+  push(vm, ARRAY_VALUE(arr));
+}
+
+void vm_push_function(vm_t *vm, function_t *fn)
+{
+  INCR_REF(fn);
+  push(vm, FUNCTION_VALUE(fn));
+}
+
+void vm_pop(vm_t *vm)
+{
+  ASSERT(vm->index > -1, "stack underflow");
+  value_t val = vm->slots[vm->index];
+  --vm->index;
+  value_release(val);
+}
+
+void vm_compile(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index];
+  value_t val = slots[0];
+  if (!IS_STRING(val))
+    fatal_error("value is not string");
+  string_t *str = AS_STRING(val);
+  scanner_t scan;
+  scanner_init(&scan, str->chars);
+  function_t *fn = compile(&scan);
+  INCR_REF(fn);
+  slots[0] = FUNCTION_VALUE(fn);
+  DECR_REF(str);
+  if (IS_UNREACHABLE(str));
+    string_free(str);
+}
+
+void vm_call(vm_t *vm, int nargs)
+{
+  call(vm, nargs);
 }

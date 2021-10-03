@@ -6,13 +6,13 @@
 #include "disasm.h"
 #include <stdio.h>
 
-void dump(chunk_t *chunk)
+void dump(function_t *fn)
 {
-  printf("<chunk at %p>\n", chunk);
-  uint8_t *bytes = chunk->bytes;
+  printf("<function %s at %p>\n", fn->name->chars, fn);
+  uint8_t *bytes = fn->chunk.bytes;
   int i = 0;
   int n = 0;
-  while (i < chunk->length)
+  while (i < fn->chunk.length)
   {
     opcode_t op = (opcode_t) bytes[i];
     int j = i++;

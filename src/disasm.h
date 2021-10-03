@@ -6,8 +6,8 @@
 #ifndef DISASM_H
 #define DISASM_H
 
-#include "chunk.h"
+#include "callable.h"
 
-void dump(chunk_t *chunk);
+void dump(function_t *fn);
 
 #endif

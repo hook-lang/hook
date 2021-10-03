@@ -3,8 +3,12 @@ cmake_minimum_required(VERSION 3.0)
 project(hook VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
-
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address")
+
+if(NOT MSVC)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
+endif(NOT MSVC)
 
 set(BINARY_DIR ${CMAKE_BINARY_DIR}/../bin)
 if(MSVC)
@@ -16,6 +20,7 @@ endif(MSVC)
 
 add_executable(${PROJECT_NAME} 
   src/array.c
+  src/callable.c
   src/chunk.c
   src/compiler.c
   src/disasm.c

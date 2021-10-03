@@ -4,8 +4,7 @@
 //
 
 #include "value.h"
-#include "string.h"
-#include "array.h"
+#include "callable.h"
 #include "error.h"
 
 static inline void value_free(value_t val);
@@ -23,6 +22,9 @@ static inline void value_free(value_t val)
     break;
   case TYPE_ARRAY:
     array_free(AS_ARRAY(val));
+    break;
+  case TYPE_CALLABLE:
+    function_free(AS_FUNCTION(val));
     break;
   }
 }
@@ -45,6 +47,9 @@ const char *type_name(type_t type)
     break;
   case TYPE_ARRAY:
     name = "array";
+    break;
+  case TYPE_CALLABLE:
+    name = "callable";
     break;
   }
   return name;
@@ -79,6 +84,9 @@ void value_print(value_t val, bool quoted)
   case TYPE_ARRAY:
     array_print(AS_ARRAY(val));
     break;
+  case TYPE_CALLABLE:
+    printf("<callable %s at %p>", AS_FUNCTION(val)->name->chars, val.as_pointer);
+    break;
   }
 }
 
@@ -102,6 +110,9 @@ bool value_equal(value_t val1, value_t val2)
     break;
   case TYPE_ARRAY:
     result = array_equal(AS_ARRAY(val1), AS_ARRAY(val2));
+    break;
+  case TYPE_CALLABLE:
+    result = val1.as_pointer == val2.as_pointer;
     break;
   }
   return result;
@@ -136,6 +147,9 @@ int value_compare(value_t val1, value_t val2)
     break;
   case TYPE_ARRAY:
     fatal_error("cannot compare arrays");
+    break;
+  case TYPE_CALLABLE:
+    fatal_error("cannot compare callables");
     break;
   }
   return result;
