@@ -40,6 +40,22 @@ void array_free(array_t *arr)
   free(arr);
 }
 
+array_t *array_add_element(array_t *arr, value_t elem)
+{
+  int length = arr->length;
+  array_t *result = array_allocate(length + 1);
+  result->length = length + 1;
+  for (int i = 0; i < length; i++)
+  {
+    value_t elem = arr->elements[i];
+    VALUE_INCR_REF(elem);
+    result->elements[i] = elem;
+  }
+  VALUE_INCR_REF(elem);
+  result->elements[length] = elem;
+  return result;
+}
+
 array_t *array_set_element(array_t *arr, int index, value_t elem)
 {
   int length = arr->length;

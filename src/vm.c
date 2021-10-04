@@ -18,6 +18,7 @@ static inline int read_word(uint8_t **pc);
 static inline void array(vm_t *vm, int length);
 static inline void unpack(vm_t *vm, int length);
 static inline void get_element(vm_t *vm);
+static inline void inplace_append(vm_t *vm);
 static inline void inplace_put_element(vm_t *vm);
 static inline void equal(vm_t *vm);
 static inline void greater(vm_t *vm);
@@ -110,6 +111,31 @@ static inline void get_element(vm_t *vm)
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
+}
+
+static inline void inplace_append(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  if (!IS_ARRAY(val1))
+    fatal_error("cannot use %s as an array", type_name(val1.type));
+  array_t *arr = AS_ARRAY(val1);
+  if (arr->ref_count == 2)
+  {
+    array_inplace_add_element(arr, val2);
+    --vm->index;
+    VALUE_DECR_REF(val2);
+    return;
+  }
+  array_t *result = array_add_element(arr, val2);
+  INCR_REF(result);
+  slots[0] = ARRAY_VALUE(result);
+  --vm->index;
+  DECR_REF(arr);
+  if (IS_UNREACHABLE(arr))
+    array_free(arr);
+  VALUE_DECR_REF(val2);
 }
 
 static inline void inplace_put_element(vm_t *vm)
@@ -355,6 +381,9 @@ static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *fr
       break;
     case OP_GET_ELEMENT:
       get_element(vm);
+      break;
+    case OP_INPLACE_APPEND:
+      inplace_append(vm);
       break;
     case OP_INPLACE_PUT_ELEMENT:
       inplace_put_element(vm);

@@ -19,3 +19,7 @@ arr = ['foo', 'bar'];
 arr[0] = 'baz';
 arr[1] = 'qux';
 echo arr;
+
+arr = [1, 2];
+arr[] = 3;
+echo arr;

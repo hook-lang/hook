@@ -444,6 +444,16 @@ static void compile_assignment(compiler_t *comp)
     scanner_next_token(scan);
     chunk_emit_opcode(chunk, OP_GET_LOCAL);
     chunk_emit_byte(chunk, index);
+    if (MATCH(scan, TOKEN_RBRACKET))
+    {
+      scanner_next_token(scan);
+      EXPECT(scan, TOKEN_EQ);
+      compile_expression(comp);
+      chunk_emit_opcode(chunk, OP_INPLACE_APPEND);
+      chunk_emit_opcode(chunk, OP_SET_LOCAL);
+      chunk_emit_byte(chunk, index);
+      return;
+    }
     compile_expression(comp);
     EXPECT(scan, TOKEN_RBRACKET);
     EXPECT(scan, TOKEN_EQ);

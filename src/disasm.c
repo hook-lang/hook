@@ -56,6 +56,9 @@ void dump(function_t *fn)
     case OP_GET_ELEMENT:
       printf("[%05d] GetElement\n", j);
       break;
+    case OP_INPLACE_APPEND:
+      printf("[%05d] InplaceAppend\n", j);
+      break;
     case OP_INPLACE_PUT_ELEMENT:
       printf("[%05d] InplacePutElement\n", j);
       break;
