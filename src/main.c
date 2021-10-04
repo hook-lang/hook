@@ -10,7 +10,18 @@
 #include "disasm.h"
 #include "vm.h"
 
+static inline const char *get_argument(int argc, const char **argv, int index);
 static inline bool has_option(int argc, const char **argv, const char *option);
+static inline string_t *load(int argc, const char **argv);
+
+static inline const char *get_argument(int argc, const char **argv, int index)
+{
+  int j = 0;
+  for (int i = 1; i < argc; ++i)
+    if (argv[i][0] != '-' && index == j++)
+      return argv[i];
+  return NULL;
+}
 
 static inline bool has_option(int argc, const char **argv, const char *option)
 {
@@ -20,9 +31,17 @@ static inline bool has_option(int argc, const char **argv, const char *option)
   return false;
 }
 
+static inline string_t *load(int argc, const char **argv)
+{
+  const char *filename = get_argument(argc, argv, 0);
+  if (filename)
+    return string_from_file(filename);
+  return string_from_stream(stdin);
+}
+
 int main(int argc, const char **argv)
 {
-  string_t *str = string_from_stream(stdin);
+  string_t *str = load(argc, argv);
   vm_t vm;
   vm_init(&vm, 0);
   vm_push_string(&vm, str);

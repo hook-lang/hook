@@ -7,10 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "memory.h"
+#include "error.h"
 
 static inline string_t *string_allocate(int min_capacity);
 static inline void resize(string_t *str);
 static inline void append_char(string_t *str, char c);
+static inline FILE *open_file(const char *filename, const char *mode);
 
 static inline string_t *string_allocate(int min_capacity)
 {
@@ -40,6 +42,14 @@ static inline void append_char(string_t *str, char c)
   ++str->length;
 }
 
+static inline FILE *open_file(const char *filename, const char *mode)
+{
+  FILE *fp = fopen(filename, mode);
+  if (!fp)
+    fatal_error("unable to open file '%s'", filename);
+  return fp;
+}
+
 string_t *string_from_chars(int length, const char *chars)
 {
   if (length < 0)
@@ -62,6 +72,20 @@ string_t *string_from_stream(FILE *fp)
     c = fgetc(fp);
   }
   append_char(str, '\0');
+  return str;
+}
+
+string_t *string_from_file(const char *filename)
+{
+  FILE *fp = open_file(filename, "rb");
+  fseek(fp, 0L, SEEK_END);
+  int length = ftell(fp);
+  rewind(fp);
+  string_t *str = string_allocate(length + 1);
+  str->length = length;
+  fread(str->chars, 1, length, fp);
+  str->chars[length] = '\0';
+  fclose(fp);
   return str;
 }
 
