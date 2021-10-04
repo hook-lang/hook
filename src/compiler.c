@@ -439,6 +439,20 @@ static void compile_assignment(compiler_t *comp)
     chunk_emit_byte(chunk, index);
     return;
   }
+  if (MATCH(scan, TOKEN_LBRACKET))
+  {
+    scanner_next_token(scan);
+    chunk_emit_opcode(chunk, OP_GET_LOCAL);
+    chunk_emit_byte(chunk, index);
+    compile_expression(comp);
+    EXPECT(scan, TOKEN_RBRACKET);
+    EXPECT(scan, TOKEN_EQ);
+    compile_expression(comp);
+    chunk_emit_opcode(chunk, OP_INPLACE_PUT_ELEMENT);
+    chunk_emit_opcode(chunk, OP_SET_LOCAL);
+    chunk_emit_byte(chunk, index);
+    return;
+  }
   fatal_error_unexpected_token(scan);
 }
 

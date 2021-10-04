@@ -18,6 +18,7 @@ static inline int read_word(uint8_t **pc);
 static inline void array(vm_t *vm, int length);
 static inline void unpack(vm_t *vm, int length);
 static inline void get_element(vm_t *vm);
+static inline void inplace_put_element(vm_t *vm);
 static inline void equal(vm_t *vm);
 static inline void greater(vm_t *vm);
 static inline void less(vm_t *vm);
@@ -109,6 +110,38 @@ static inline void get_element(vm_t *vm)
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
+}
+
+static inline void inplace_put_element(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index - 2];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  value_t val3 = slots[2];
+  if (!IS_ARRAY(val1))
+    fatal_error("cannot use %s as an array", type_name(val1.type));
+  if (!IS_INTEGER(val2))
+    fatal_error("array cannot be indexed by %s", type_name(val2.type));
+  array_t *arr = AS_ARRAY(val1);
+  long index = (long) val2.as_number;
+  if (index < 0 || index >= arr->length)
+    fatal_error("index out of bounds: the length is %d but the index is %d",
+      arr->length, index);
+  if (arr->ref_count == 2)
+  {
+    array_inplace_set_element(arr, index, val3);
+    vm->index -= 2;
+    VALUE_DECR_REF(val3);
+    return;
+  }
+  array_t *result = array_set_element(arr, index, val3);
+  INCR_REF(result);
+  slots[0] = ARRAY_VALUE(result);
+  vm->index -= 2;
+  DECR_REF(arr);
+  if (IS_UNREACHABLE(arr))
+    array_free(arr);
+  VALUE_DECR_REF(val3);
 }
 
 static inline void equal(vm_t *vm)
@@ -322,6 +355,9 @@ static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *fr
       break;
     case OP_GET_ELEMENT:
       get_element(vm);
+      break;
+    case OP_INPLACE_PUT_ELEMENT:
+      inplace_put_element(vm);
       break;
     case OP_JUMP:
       pc = &code[read_word(&pc)];

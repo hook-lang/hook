@@ -40,12 +40,41 @@ void array_free(array_t *arr)
   free(arr);
 }
 
+array_t *array_set_element(array_t *arr, int index, value_t elem)
+{
+  int length = arr->length;
+  array_t *result = array_allocate(length);
+  result->length = length;
+  for (int i = 0; i < index; ++i)
+  {
+    value_t elem = arr->elements[i];
+    VALUE_INCR_REF(elem);
+    result->elements[i] = elem;
+  }
+  VALUE_INCR_REF(elem);
+  result->elements[index] = elem;
+  for (int i = index + 1; i < length; ++i)
+  {
+    value_t elem = arr->elements[i];
+    VALUE_INCR_REF(elem);
+    result->elements[i] = elem;
+  }
+  return result;
+}
+
 void array_inplace_add_element(array_t *arr, value_t elem)
 {
   resize(arr);
   VALUE_INCR_REF(elem);
   arr->elements[arr->length] = elem;
   ++arr->length;
+}
+
+void array_inplace_set_element(array_t *arr, int index, value_t elem)
+{
+  VALUE_INCR_REF(elem);
+  value_release(arr->elements[index]);
+  arr->elements[index] = elem;
 }
 
 void array_print(array_t *arr)

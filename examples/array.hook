@@ -14,3 +14,8 @@ echo arr[2];
 arr = [1, ['foo', 'bar']];
 echo arr[1];
 echo arr[1][1];
+
+arr = ['foo', 'bar'];
+arr[0] = 'baz';
+arr[1] = 'qux';
+echo arr;

@@ -20,6 +20,7 @@ var_decl    ::= 'let' NAME ( '=' expr )?
 
 assign      ::= NAME ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME ( '++' | '--' )
+              | NAME '[' expr ']' '=' expr ';'
 
 expr        ::= and_expr ( '||' and_expr )*
 
