@@ -23,3 +23,7 @@ echo arr;
 arr = [1, 2];
 arr[] = 3;
 echo arr;
+
+arr = [1, 2, 3];
+delete arr[1];
+echo arr;

@@ -62,6 +62,9 @@ void dump(function_t *fn)
     case OP_INPLACE_PUT_ELEMENT:
       printf("[%05d] InplacePutElement\n", j);
       break;
+    case OP_INPLACE_DELETE:
+      printf("[%05d] InplaceDelete\n", j);
+      break;
     case OP_JUMP:
       {
         int offset = *((uint16_t*) &bytes[i]);

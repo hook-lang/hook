@@ -337,6 +337,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_CONTINUE;
     return;
   }
+  if (match_chars(scan, "delete"))
+  {
+    scan->token.type = TOKEN_DELETE;
+    return;
+  }
   if (match_chars(scan, "do"))
   {
     scan->token.type = TOKEN_DO;

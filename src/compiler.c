@@ -68,6 +68,7 @@ static void compile_statement(compiler_t *comp);
 static void compile_block(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assignment(compiler_t *comp);
+static void compile_delete_statement(compiler_t *comp);
 static void compile_if_statement(compiler_t *comp);
 static void compile_loop_statement(compiler_t *comp);
 static void compile_while_statement(compiler_t *comp);
@@ -242,6 +243,11 @@ static void compile_statement(compiler_t *comp)
     compile_assignment(comp);
     EXPECT(scan, TOKEN_SEMICOLON);
     return;
+  }
+  if (MATCH(scan, TOKEN_DELETE))
+  {
+    compile_delete_statement(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
   }
   if (MATCH(scan, TOKEN_IF))
   {
@@ -464,6 +470,26 @@ static void compile_assignment(compiler_t *comp)
     return;
   }
   fatal_error_unexpected_token(scan);
+}
+
+static void compile_delete_statement(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->fn->chunk;
+  scanner_next_token(scan);
+  if (!MATCH(scan, TOKEN_NAME))
+    fatal_error_unexpected_token(scan);
+  token_t tk = scan->token;
+  scanner_next_token(scan);
+  int index = resolve_local(comp, &tk);
+  chunk_emit_opcode(chunk, OP_GET_LOCAL);
+  chunk_emit_byte(chunk, index);
+  EXPECT(scan, TOKEN_LBRACKET);
+  compile_expression(comp);
+  EXPECT(scan, TOKEN_RBRACKET);
+  chunk_emit_opcode(chunk, OP_INPLACE_DELETE);
+  chunk_emit_opcode(chunk, OP_SET_LOCAL);
+  chunk_emit_byte(chunk, index);
 }
 
 static void compile_if_statement(compiler_t *comp)

@@ -35,6 +35,7 @@ TOKEN_FLOAT      FLOAT
 TOKEN_STRING     STRING
 TOKEN_BREAK      'break'
 TOKEN_CONTINUE   'continue'
+TOKEN_DELETE     'delete'
 TOKEN_DO         'do'
 TOKEN_ECHO       'echo'
 TOKEN_ELSE       'else'

@@ -78,6 +78,26 @@ array_t *array_set_element(array_t *arr, int index, value_t elem)
   return result;
 }
 
+array_t *array_delete_element(array_t *arr, int index)
+{
+  int length = arr->length;
+  array_t *result = array_allocate(length - 1);
+  result->length = length - 1;
+  for (int i = 0; i < index; i++)
+  {
+    value_t elem = arr->elements[i];
+    VALUE_INCR_REF(elem);
+    result->elements[i] = elem;
+  }
+  for (int i = index + 1; i < length; i++)
+  {
+    value_t elem = arr->elements[i];
+    VALUE_INCR_REF(elem);
+    result->elements[i - 1] = elem;
+  }
+  return result;
+}
+
 void array_inplace_add_element(array_t *arr, value_t elem)
 {
   resize(arr);
@@ -91,6 +111,14 @@ void array_inplace_set_element(array_t *arr, int index, value_t elem)
   VALUE_INCR_REF(elem);
   value_release(arr->elements[index]);
   arr->elements[index] = elem;
+}
+
+void array_inplace_delete_element(array_t *arr, int index)
+{
+  value_release(arr->elements[index]);
+  for (int i = index; i < arr->length - 1; ++i)
+    arr->elements[i] = arr->elements[i + 1];
+  --arr->length;
 }
 
 void array_print(array_t *arr)

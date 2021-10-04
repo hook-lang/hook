@@ -1,6 +1,7 @@
 
 break
 continue
+delete
 do
 echo
 else

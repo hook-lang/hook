@@ -22,8 +22,10 @@ array_t *array_allocate(int min_capacity);
 void array_free(array_t *arr);
 array_t *array_add_element(array_t *arr, value_t elem);
 array_t *array_set_element(array_t *arr, int index, value_t elem);
+array_t *array_delete_element(array_t *arr, int index);
 void array_inplace_add_element(array_t *arr, value_t elem);
 void array_inplace_set_element(array_t *arr, int index, value_t elem);
+void array_inplace_delete_element(array_t *arr, int index);
 void array_print(array_t *arr);
 bool array_equal(array_t *arr1, array_t *arr2);
 
