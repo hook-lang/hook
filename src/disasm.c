@@ -47,6 +47,9 @@ void dump(function_t *fn)
     case OP_POP:
       printf("[%05d] Pop\n", j);
       break;
+    case OP_GLOBAL:
+      printf("[%05d] Global            %d\n", j, bytes[i++]);
+      break;
     case OP_GET_LOCAL:
       printf("[%05d] GetLocal          %d\n", j, bytes[i++]);
       break;
@@ -116,8 +119,8 @@ void dump(function_t *fn)
     case OP_NOT:
       printf("[%05d] Not\n", j);
       break;
-    case OP_PRINT:
-      printf("[%05d] Print\n", j);
+    case OP_CALL:
+      printf("[%05d] Call              %d\n", j, bytes[i++]);
       break;
     case OP_RETURN:
       printf("[%05d] Return\n", j);

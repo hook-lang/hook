@@ -24,6 +24,11 @@ static inline void value_free(value_t val)
     array_free(AS_ARRAY(val));
     break;
   case TYPE_CALLABLE:
+    if (IS_NATIVE(val))
+    {
+      native_free(AS_NATIVE(val));
+      break;
+    }
     function_free(AS_FUNCTION(val));
     break;
   }
@@ -85,7 +90,7 @@ void value_print(value_t val, bool quoted)
     array_print(AS_ARRAY(val));
     break;
   case TYPE_CALLABLE:
-    printf("<callable %s at %p>", AS_FUNCTION(val)->name->chars, val.as_pointer);
+    printf("<callable %s at %p>", AS_CALLABLE(val)->name->chars, val.as_pointer);
     break;
   }
 }

@@ -20,6 +20,7 @@ endif(MSVC)
 
 add_executable(${PROJECT_NAME} 
   src/array.c
+  src/builtin.c
   src/callable.c
   src/chunk.c
   src/compiler.c

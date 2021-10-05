@@ -659,10 +659,14 @@ static void compile_break_statement(compiler_t *comp)
 static void compile_echo_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
+  chunk_emit_opcode(chunk, OP_GLOBAL);
+  chunk_emit_byte(chunk, 0);
   compile_expression(comp);
   EXPECT(scan, TOKEN_SEMICOLON);
-  chunk_emit_opcode(&comp->fn->chunk, OP_PRINT);
+  chunk_emit_opcode(chunk, OP_CALL);
+  chunk_emit_byte(chunk, 1);
 }
 
 static void compile_expression(compiler_t *comp)
