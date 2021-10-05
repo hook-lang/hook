@@ -9,6 +9,7 @@
 #include <math.h>
 #include "common.h"
 #include "compiler.h"
+#include "builtin.h"
 #include "memory.h"
 #include "error.h"
 
@@ -31,10 +32,9 @@ static inline void divide(vm_t *vm);
 static inline void modulo(vm_t *vm);
 static inline void negate(vm_t *vm);
 static inline void not(vm_t *vm);
-static inline void print(vm_t *vm);
 static inline void call(vm_t *vm, int nargs);
 static inline void adjust_arguments(vm_t *vm, int arity, int nargs);
-static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *frame);
+static inline void function_call(vm_t *vm, value_t *frame, uint8_t *code, value_t *consts);
 
 static inline void push(vm_t *vm, value_t val)
 {
@@ -311,15 +311,6 @@ static inline void not(vm_t *vm)
   value_release(val);
 }
 
-static inline void print(vm_t *vm)
-{
-  value_t val = vm->slots[vm->index];
-  --vm->index;
-  value_print(val, false);
-  printf("\n");
-  value_release(val);
-}
-
 static inline void call(vm_t *vm, int nargs)
 {
   value_t *frame = &vm->slots[vm->index - nargs];
@@ -328,7 +319,10 @@ static inline void call(vm_t *vm, int nargs)
     fatal_error("value is not callable");
   function_t *fn = AS_FUNCTION(val);
   adjust_arguments(vm, fn->arity, nargs);
-  execute(vm, fn->chunk.bytes, fn->consts->elements, frame);
+  if (IS_NATIVE(val))
+    AS_NATIVE(val)->call(vm, frame);
+  else
+    function_call(vm, frame, fn->chunk.bytes, fn->consts->elements);
   DECR_REF(fn);
   if (IS_UNREACHABLE(fn))
     function_free(fn);
@@ -357,8 +351,9 @@ static inline void adjust_arguments(vm_t *vm, int arity, int nargs)
   }  
 }
 
-static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *frame)
+static inline void function_call(vm_t *vm, value_t *frame, uint8_t *code, value_t *consts)
 {
+  value_t *slots = vm->slots;
   uint8_t *pc = code;
   for (;;)
   {
@@ -391,7 +386,14 @@ static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *fr
       unpack(vm, read_byte(&pc));
       break;
     case OP_POP:
-      value_release(vm->slots[vm->index--]);
+      value_release(slots[vm->index--]);
+      break;
+    case OP_GLOBAL:
+      {
+        value_t val = slots[read_byte(&pc)];
+        VALUE_INCR_REF(val);
+        push(vm, val);
+      }
       break;
     case OP_GET_LOCAL:
       {
@@ -403,7 +405,7 @@ static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *fr
     case OP_SET_LOCAL:
       {
         int index = read_byte(&pc);
-        value_t val = vm->slots[vm->index];
+        value_t val = slots[vm->index];
         --vm->index;
         value_release(frame[index]);
         frame[index] = val;
@@ -427,7 +429,7 @@ static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *fr
     case OP_JUMP_IF_FALSE:
       {
         int offset = read_word(&pc);
-        value_t val = vm->slots[vm->index];
+        value_t val = slots[vm->index];
         if (IS_FALSEY(val))
           pc = &code[offset];
       }
@@ -435,7 +437,7 @@ static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *fr
     case OP_JUMP_IF_TRUE:
       {
         int offset = read_word(&pc);
-        value_t val = vm->slots[vm->index];
+        value_t val = slots[vm->index];
         if (IS_TRUTHY(val))
           pc = &code[offset];
       }
@@ -470,8 +472,8 @@ static inline void execute(vm_t *vm, uint8_t *code, value_t *consts, value_t *fr
     case OP_NOT:
       not(vm);
       break;
-    case OP_PRINT:
-      print(vm);
+    case OP_CALL:
+      call(vm, read_byte(&pc));
       break;
     case OP_RETURN:
       return;
@@ -488,6 +490,7 @@ void vm_init(vm_t *vm, int min_capacity)
   vm->end = capacity - 1;
   vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
   vm->index = -1;
+  globals_init(vm);
 }
 
 void vm_free(vm_t *vm)
@@ -528,6 +531,12 @@ void vm_push_function(vm_t *vm, function_t *fn)
 {
   INCR_REF(fn);
   push(vm, FUNCTION_VALUE(fn));
+}
+
+void vm_push_native(vm_t *vm, native_t *native)
+{
+  INCR_REF(native);
+  push(vm, NATIVE_VALUE(native));
 }
 
 void vm_pop(vm_t *vm)

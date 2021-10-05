@@ -12,7 +12,7 @@
 
 #define VM_DEFAULT_NUM_SLOTS 256
 
-typedef struct
+typedef struct vm
 {
   int capacity;
   int end;
@@ -28,6 +28,7 @@ void vm_push_number(vm_t *vm, double data);
 void vm_push_string(vm_t *vm, string_t *str);
 void vm_push_array(vm_t *vm, array_t *arr);
 void vm_push_function(vm_t *vm, function_t *fn);
+void vm_push_native(vm_t *vm, native_t *native);
 void vm_pop(vm_t *vm);
 void vm_compile(vm_t *vm);
 void vm_call(vm_t *vm, int nargs);

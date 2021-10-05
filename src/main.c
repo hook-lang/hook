@@ -55,7 +55,6 @@ int main(int argc, const char **argv)
   }
   vm_call(&vm, 0);
   vm_pop(&vm);
-  ASSERT(vm.index == -1, "stack must be empty");
   vm_free(&vm);
   return EXIT_SUCCESS;
 }

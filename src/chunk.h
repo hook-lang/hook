@@ -20,6 +20,7 @@ typedef enum
   OP_ARRAY,
   OP_UNPACK,
   OP_POP,
+  OP_GLOBAL,
   OP_GET_LOCAL,
   OP_SET_LOCAL,
   OP_GET_ELEMENT,
@@ -39,7 +40,7 @@ typedef enum
   OP_MODULO,
   OP_NEGATE,
   OP_NOT,
-  OP_PRINT,
+  OP_CALL,
   OP_RETURN
 } opcode_t;
 

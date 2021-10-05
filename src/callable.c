@@ -30,3 +30,23 @@ void function_free(function_t *fn)
   array_free(fn->consts);
   free(fn);
 }
+
+native_t *native_new(string_t *name, int arity, void (*call)(struct vm *, value_t *))
+{
+  native_t *native = (native_t *) allocate(sizeof(*native));
+  native->ref_count = 0;
+  native->arity = arity;
+  INCR_REF(name);
+  native->name = name;
+  native->call = call;
+  return native;
+}
+
+void native_free(native_t *native)
+{
+  string_t *name = native->name;
+  DECR_REF(name);
+  if (IS_UNREACHABLE(name))
+    string_free(name);
+  free(native);
+}
