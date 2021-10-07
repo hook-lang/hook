@@ -4,7 +4,7 @@ project(hook VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address")
+set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -fsanitize=address -fprofile-arcs -ftest-coverage")
 
 if(NOT MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
@@ -17,6 +17,8 @@ if(MSVC)
 else(MSVC)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_DIR})
 endif(MSVC)
+
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 add_executable(${PROJECT_NAME} 
   src/array.c
