@@ -17,7 +17,7 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build
     - name: Running tests
-      run: bin/hook examples/bubble-sort.hook
+      run: ./run-tests
     - name: Code coverage
       run: |
         gcov src/*.c
@@ -44,4 +44,4 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build
     - name: Running tests
-      run: bin/hook examples/bubble-sort.hook
+      run: ./run-tests

@@ -1,0 +1,48 @@
+#!/bin/sh
+
+_title=""
+_script=""
+expect_status=0
+expect_output=""
+
+title()
+{
+  _title=$1
+}
+
+script()
+{
+  _script=$1
+}
+
+expect_success()
+{
+  expect_status=0
+  expect_output=$1
+}
+
+expect_failure()
+{
+  expect_status=1
+  expect_output=$1
+}
+
+run()
+{
+  if [ $expect_status -eq 0 ]; then
+    output=$(echo "$_script" | bin/hook)
+  else
+    output=$(echo "$_script" | bin/hook 2>&1)
+  fi
+  status=$?
+  n=0
+  if [ $status -ne $expect_status ]; then
+    n=$(($n + 1))
+  fi
+  if [ "$output" != "$expect_output" ]; then
+    n=$(($n + 1))
+  fi
+  result=$([ $n -eq 0 ] && echo "Passed" || echo "Failed")
+  echo "[$result] $_title"
+  exit $n
+}
