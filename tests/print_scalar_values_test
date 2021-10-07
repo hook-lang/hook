@@ -1,0 +1,21 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Print scalar values"
+
+script "echo null;
+echo false;
+echo true;
+echo 123;
+echo 4.56;
+echo 'foo';"
+
+expect_success "null
+false
+true
+123
+4.56
+foo"
+
+run
