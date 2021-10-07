@@ -2,7 +2,7 @@
 let arr = [5, 2, 7, 3, 0, 1, 4, 6];
 
 let n = 8;
-let has_changed = false;
+let has_changed;
 do {
   has_changed = false;
   n--;

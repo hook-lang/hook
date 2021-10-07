@@ -24,7 +24,7 @@ jobs:
         pip install --user cpp-coveralls
         coveralls --exclude build --gcov-options '\-lp'
       env:
-        COVERALLS_REPO_TOKEN: emp8JVF6A1owWTtUCJSnNzz5NylPeihGv
+        COVERALLS_REPO_TOKEN: 5tdMY6UwXmx6gIhurNeOe4tnYNaTKpSIr
 
   windows-build:
     runs-on: windows-latest

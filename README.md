@@ -3,7 +3,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f2f1345083c1455683dabcf48b0ea6dd)](https://www.codacy.com/gh/fabiosvm/hook-lang/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=fabiosvm/hook-lang&amp;utm_campaign=Badge_Grade)
 [![Coverage Status](https://coveralls.io/repos/github/fabiosvm/hook-lang/badge.svg?branch=main)](https://coveralls.io/github/fabiosvm/hook-lang?branch=main)
 
-# Hook 
+# Hook
 
 The Hook Programming Language
 

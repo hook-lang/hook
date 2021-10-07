@@ -9,6 +9,8 @@
 #include <string.h>
 #include "error.h"
 
+#define MATCH_MAX_LENGTH 8
+
 #define CHAR_AT(s, i)   ((s)->pos[(i)])
 #define CURRENT_CHAR(s) CHAR_AT(s, 0)
 
@@ -77,7 +79,7 @@ static inline bool match_char(scanner_t *scan, const char c)
 
 static inline bool match_chars(scanner_t *scan, const char *chars)
 {
-  int n = (int) strlen(chars);
+  int n = (int) strnlen(chars, MATCH_MAX_LENGTH);
   if (strncmp(scan->pos, chars, n)
    || (isalnum(CHAR_AT(scan, n)))
    || (CHAR_AT(scan, n) == '_'))
