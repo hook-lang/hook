@@ -17,12 +17,12 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build
     - name: Running tests
-      run: bin/hook examples/bubble-sort.hook
+      run: ./run-tests
     - name: Code coverage
       run: |
         gcov src/*.c
         pip install --user cpp-coveralls
-        coveralls --exclude lib --exclude tests --gcov-options '\-lp'
+        coveralls --exclude build --exclude tests --gcov-options '\-lp'
       env:
         COVERALLS_REPO_TOKEN: emp8JVF6A1owWTtUCJSnNzz5NylPeihGv
 
@@ -44,4 +44,4 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build
     - name: Running tests
-      run: bin/hook examples/bubble-sort.hook
+      run: ./run-tests

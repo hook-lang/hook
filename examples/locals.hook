@@ -1,5 +1,0 @@
-
-let PI = 3.14;
-let r = 10;
-let c = 2 * PI * r;
-echo c;

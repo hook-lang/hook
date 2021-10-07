@@ -1,7 +1,0 @@
-
-echo null;
-echo false;
-echo true;
-echo 123;
-echo 4.56;
-echo 'foo';

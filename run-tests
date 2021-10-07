@@ -1,0 +1,22 @@
+#!/bin/sh
+
+echo "Running tests..."
+
+passed=0
+failed=0
+
+for script in tests/*_test ; do
+  ./$script
+  status=$?
+  if [ $status -eq 0 ]; then
+    passed=$(($passed + 1))
+  else
+    failed=$(($failed + 1))
+  fi
+done
+
+total=$((passed + failed))
+
+echo "Total : $total"
+echo "Passed: $passed"
+echo "Failed: $failed"

@@ -36,6 +36,12 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
+## Testing
+
+```
+./run-tests
+```
+
 ## Running an example
 
 ```
