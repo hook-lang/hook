@@ -668,6 +668,7 @@ static void compile_echo_statement(compiler_t *comp)
   EXPECT(scan, TOKEN_SEMICOLON);
   chunk_emit_opcode(chunk, OP_CALL);
   chunk_emit_byte(chunk, 1);
+  chunk_emit_opcode(chunk, OP_POP);
 }
 
 static void compile_expression(compiler_t *comp)
