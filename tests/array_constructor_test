@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Array constructor"
+
+script "echo [];
+echo [123];
+echo [null, true, 123, 'foo'];"
+
+expect_success "[]
+[123]
+[null, true, 123, 'foo']"
+
+run
