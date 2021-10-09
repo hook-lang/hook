@@ -488,7 +488,21 @@ static void compile_delete_statement(compiler_t *comp)
   EXPECT(scan, TOKEN_LBRACKET);
   compile_expression(comp);
   EXPECT(scan, TOKEN_RBRACKET);
-  chunk_emit_opcode(chunk, OP_INPLACE_DELETE);
+  int n = 0;
+  while (MATCH(scan, TOKEN_LBRACKET))
+  {
+    scanner_next_token(scan);
+    chunk_emit_opcode(chunk, OP_FETCH_ELEMENT);
+    compile_expression(comp);
+    EXPECT(scan, TOKEN_RBRACKET);
+    ++n;
+  }
+  if (n)
+    chunk_emit_opcode(chunk, OP_DELETE);
+  else
+    chunk_emit_opcode(chunk, OP_INPLACE_DELETE);
+  for (int i = 0; i < n; ++i)
+    chunk_emit_opcode(chunk, OP_SET_ELEMENT);
   chunk_emit_opcode(chunk, OP_SET_LOCAL);
   chunk_emit_byte(chunk, index);
 }

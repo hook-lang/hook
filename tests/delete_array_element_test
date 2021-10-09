@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Delete array element"
+
+script "let arr = [1, 2, 3, ['foo', 'bar']];
+delete arr[1];
+echo arr;
+
+delete arr[2][0];
+echo arr;"
+
+expect_success "[1, 3, ['foo', 'bar']]
+[1, 3, ['bar']]"
+
+run

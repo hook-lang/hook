@@ -4,7 +4,7 @@ chunk       ::= stmt* EOF
 stmt        ::= block
               | var_decl ';'
               | assign ';'
-              | 'delete' NAME subscr ';'
+              | 'delete' NAME subscr* subscr ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'loop' block
               | 'while' '(' expr ')' stmt
