@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include "memory.h"
 
+#define CHUNK_MIN_CAPACITY 8
+
 static inline void resize(chunk_t *chunk, int min_capacity);
 
 static inline void resize(chunk_t *chunk, int min_capacity)
@@ -20,14 +22,11 @@ static inline void resize(chunk_t *chunk, int min_capacity)
   chunk->bytes = (uint8_t *) reallocate(chunk->bytes, capacity);
 }
 
-void chunk_init(chunk_t *chunk, int min_capacity)
+void chunk_init(chunk_t *chunk)
 {
-  int capacity = CHUNK_MIN_CAPACITY;
-  while (capacity < min_capacity)
-    capacity <<= 1;
-  chunk->capacity = capacity;
+  chunk->capacity = CHUNK_MIN_CAPACITY;
   chunk->length = 0;
-  chunk->bytes = (uint8_t *) allocate(capacity);
+  chunk->bytes = (uint8_t *) allocate(chunk->capacity);
 }
 
 void chunk_free(chunk_t *chunk)

@@ -8,8 +8,6 @@
 
 #include <stdint.h>
 
-#define CHUNK_MIN_CAPACITY 8
-
 typedef enum
 {
   OP_NULL,
@@ -56,7 +54,7 @@ typedef struct
   uint8_t *bytes;
 } chunk_t;
 
-void chunk_init(chunk_t *chunk, int min_capacity);
+void chunk_init(chunk_t *chunk);
 void chunk_free(chunk_t *chunk);
 void chunk_emit_byte(chunk_t *chunk, uint8_t byte);
 void chunk_emit_word(chunk_t *chunk, uint16_t word);

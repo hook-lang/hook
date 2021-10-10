@@ -14,10 +14,15 @@ echo arr2;
 
 let arr3 = [[[]]];
 arr3[0][0][] = 'foo';
-echo arr3;"
+echo arr3;
+
+let arr4 = [[1, 2, 3]];
+arr4[0][] = 4;
+echo arr4;"
 
 expect_success "['foo']
 [['foo']]
-[[['foo']]]"
+[[['foo']]]
+[[1, 2, 3, 4]]"
 
 run

@@ -14,7 +14,7 @@ function_t *function_new(string_t *name, int arity)
   fn->arity = arity;
   INCR_REF(name);
   fn->name = name;
-  chunk_init(&fn->chunk, 0);
+  chunk_init(&fn->chunk);
   fn->consts = array_allocate(0);
   fn->consts->length = 0;
   return fn;

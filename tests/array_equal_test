@@ -1,0 +1,21 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Array equal"
+
+script "echo [] == [];
+echo [1] == [1];
+echo [1] == [1, 2];
+echo [1, 2] == [1];
+echo [1, 2] == [1, 2];
+echo [1, 2] == [2, 1];"
+
+expect_success "true
+true
+false
+false
+true
+false"
+
+run

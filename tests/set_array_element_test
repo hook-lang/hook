@@ -14,10 +14,16 @@ echo arr2;
 
 let arr3 = [[['foo']]];
 arr3[0][0][0] = 'bar';
-echo arr3;"
+echo arr3;
+
+let arr4 = [['foo', 'bar', 'baz']];
+arr4[0][1] = 'qux';
+echo arr4;
+"
 
 expect_success "['bar']
 [['bar']]
-[[['bar']]]"
+[[['bar']]]
+[['foo', 'qux', 'baz']]"
 
 run

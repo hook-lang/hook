@@ -4,14 +4,14 @@
 
 title "Delete array element"
 
-script "let arr = [1, 2, 3, ['foo', 'bar']];
+script "let arr = [1, 2, 3, ['foo', 'bar', 'baz']];
 delete arr[1];
 echo arr;
 
-delete arr[2][0];
+delete arr[2][1];
 echo arr;"
 
-expect_success "[1, 3, ['foo', 'bar']]
-[1, 3, ['bar']]"
+expect_success "[1, 3, ['foo', 'bar', 'baz']]
+[1, 3, ['foo', 'baz']]"
 
 run
