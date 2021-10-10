@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Error value of type X has no length"
+
+script "echo len(1);"
+
+expect_failure "fatal error: value of type 'number' has no length"
+
+run

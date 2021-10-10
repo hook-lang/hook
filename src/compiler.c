@@ -49,6 +49,11 @@ typedef struct
   function_t *fn;
 } compiler_t;
 
+static const char *globals[] = {
+  "println",
+  "len"
+};
+
 static inline void fatal_error_unexpected_token(scanner_t *scan);
 static inline long parse_long(char *chars);
 static inline double parse_double(char *chars);
@@ -58,7 +63,9 @@ static inline int discard_locals(compiler_t *comp, int depth);
 static inline bool name_equal(token_t *tk, local_t *local);
 static inline void add_local(compiler_t *comp, int length, char *start);
 static inline void define_local(compiler_t *comp, token_t *tk);
+static inline int resolve_variable(compiler_t *comp, token_t *tk, bool *is_local);
 static inline int resolve_local(compiler_t *comp, token_t *tk);
+static inline int resolve_global(token_t *tk);
 static inline int emit_jump(chunk_t *chunk, opcode_t op);
 static inline void patch_jump(chunk_t *chunk, int offset);
 static inline void start_loop(compiler_t *comp, loop_t *loop);
@@ -91,12 +98,9 @@ static inline void fatal_error_unexpected_token(scanner_t *scan)
 {
   token_t *tk = &scan->token;
   if (tk->type == TOKEN_EOF)
-  {
-    const char *fmt = "unexpected end of file at %d:%d";
-    fatal_error(fmt, tk->line, tk->col);
-  }
-  const char *fmt = "unexpected token '%.*s' at %d:%d";
-  fatal_error(fmt, tk->length, tk->start, tk->line, tk->col);
+    fatal_error("unexpected end of file at %d:%d", tk->line, tk->col);
+  fatal_error("unexpected token '%.*s' at %d:%d", tk->length, tk->start,
+    tk->line, tk->col);
 }
 
 static inline long parse_long(char *chars)
@@ -170,14 +174,35 @@ static inline void define_local(compiler_t *comp, token_t *tk)
   add_local(comp, tk->length, tk->start);
 }
 
+static inline int resolve_variable(compiler_t *comp, token_t *tk, bool *is_local)
+{
+  *is_local = true;
+  int index = resolve_local(comp, tk);
+  if (index == -1)
+  {
+    *is_local = false;
+    index = resolve_global(tk);
+  }
+  if (index == -1)
+    fatal_error("variable '%.*s' is used but not defined", tk->length, tk->start);
+  return index;
+}
+
 static inline int resolve_local(compiler_t *comp, token_t *tk)
 {
   int index = comp->num_locals - 1;
   for (; index > -1; --index)
     if (name_equal(tk, &comp->locals[index]))
       break;
-  if (index == -1)
-    fatal_error("variable '%.*s' is used but not defined", tk->length, tk->start);
+  return index;
+}
+
+static inline int resolve_global(token_t *tk)
+{
+  int index = sizeof(globals) / sizeof(*globals) - 1;
+  for (; index > -1; --index)
+    if (!strncmp(globals[index], tk->start, tk->length))
+      break;
   return index;
 }
 
@@ -358,7 +383,11 @@ static void compile_assignment(compiler_t *comp)
   chunk_t *chunk = &comp->fn->chunk;
   token_t tk = scan->token;
   scanner_next_token(scan);
-  int index = resolve_local(comp, &tk);
+  bool is_local;
+  int index = resolve_variable(comp, &tk, &is_local);
+  if (!is_local)
+    fatal_error("cannot assign to immutable variable '%.*s'",
+      tk.length, tk.start);
   if (MATCH(scan, TOKEN_EQ))
   {
     scanner_next_token(scan);
@@ -498,7 +527,11 @@ static void compile_delete_statement(compiler_t *comp)
     fatal_error_unexpected_token(scan);
   token_t tk = scan->token;
   scanner_next_token(scan);
-  int index = resolve_local(comp, &tk);
+  bool is_local;
+  int index = resolve_variable(comp, &tk, &is_local);
+  if (!is_local)
+    fatal_error("cannot delete element from immutable variable '%.*s'",
+      tk.length, tk.start);
   chunk_emit_opcode(chunk, OP_GET_LOCAL);
   chunk_emit_byte(chunk, index);
   EXPECT(scan, TOKEN_LBRACKET);
@@ -969,15 +1002,44 @@ static void compile_prim_expression(compiler_t *comp)
   {
     token_t tk = scan->token;
     scanner_next_token(scan);
-    int index = resolve_local(comp, &tk);
-    chunk_emit_opcode(chunk, OP_GET_LOCAL);
+    bool is_local;
+    int index = resolve_variable(comp, &tk, &is_local);
+    chunk_emit_opcode(chunk, is_local ? OP_GET_LOCAL : OP_GLOBAL);
     chunk_emit_byte(chunk, index);
-    while (MATCH(scan, TOKEN_LBRACKET))
+    for (;;)
     {
-      scanner_next_token(scan);
-      compile_expression(comp);
-      EXPECT(scan, TOKEN_RBRACKET);
-      chunk_emit_opcode(chunk, OP_GET_ELEMENT);
+      if (MATCH(scan, TOKEN_LBRACKET))
+      {
+        scanner_next_token(scan);
+        compile_expression(comp);
+        EXPECT(scan, TOKEN_RBRACKET);
+        chunk_emit_opcode(chunk, OP_GET_ELEMENT);
+        continue;
+      }
+      if (MATCH(scan, TOKEN_LPAREN))
+      {
+        scanner_next_token(scan);
+        if (MATCH(scan, TOKEN_RPAREN))
+        {
+          scanner_next_token(scan);
+          chunk_emit_opcode(chunk, OP_CALL);
+          chunk_emit_byte(chunk, 0);
+          return;
+        }
+        compile_expression(comp);
+        int nargs = 1;
+        while (MATCH(scan, TOKEN_COMMA))
+        {
+          scanner_next_token(scan);
+          compile_expression(comp);
+          ++nargs;
+        }
+        EXPECT(scan, TOKEN_RPAREN);
+        chunk_emit_opcode(chunk, OP_CALL);
+        chunk_emit_byte(chunk, nargs);
+        continue;
+      }
+      break;
     }
     return;
   }

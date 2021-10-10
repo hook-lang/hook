@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Built-in function len()"
+
+script "echo len('foo');
+echo len([1, 2, 3]);"
+
+expect_success "3
+3"
+
+run
