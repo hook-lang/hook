@@ -1,0 +1,23 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Set array element"
+
+script "let arr1 = ['foo'];
+arr1[0] = 'bar';
+echo arr1;
+
+let arr2 = [['foo']];
+arr2[0][0] = 'bar';
+echo arr2;
+
+let arr3 = [[['foo']]];
+arr3[0][0][0] = 'bar';
+echo arr3;"
+
+expect_success "['bar']
+[['bar']]
+[[['bar']]]"
+
+run

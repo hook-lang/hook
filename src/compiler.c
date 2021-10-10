@@ -446,29 +446,45 @@ static void compile_assignment(compiler_t *comp)
     chunk_emit_byte(chunk, index);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACKET))
+  chunk_emit_opcode(chunk, OP_GET_LOCAL);
+  chunk_emit_byte(chunk, index);
+  int n = 0;
+  while (MATCH(scan, TOKEN_LBRACKET))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_GET_LOCAL);
-    chunk_emit_byte(chunk, index);
     if (MATCH(scan, TOKEN_RBRACKET))
     {
       scanner_next_token(scan);
       EXPECT(scan, TOKEN_EQ);
       compile_expression(comp);
-      chunk_emit_opcode(chunk, OP_INPLACE_APPEND);
+      if (n)
+        chunk_emit_opcode(chunk, OP_APPEND);
+      else
+        chunk_emit_opcode(chunk, OP_INPLACE_APPEND);
+      for (int i = 0; i < n; ++i)
+        chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
       chunk_emit_byte(chunk, index);
       return;
     }
     compile_expression(comp);
     EXPECT(scan, TOKEN_RBRACKET);
-    EXPECT(scan, TOKEN_EQ);
-    compile_expression(comp);
-    chunk_emit_opcode(chunk, OP_INPLACE_PUT_ELEMENT);
-    chunk_emit_opcode(chunk, OP_SET_LOCAL);
-    chunk_emit_byte(chunk, index);
-    return;
+    if (MATCH(scan, TOKEN_EQ))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      if (n)
+        chunk_emit_opcode(chunk, OP_PUT_ELEMENT);
+      else
+        chunk_emit_opcode(chunk, OP_INPLACE_PUT_ELEMENT);
+      for (int i = 0; i < n; ++i)
+        chunk_emit_opcode(chunk, OP_SET_ELEMENT);
+      chunk_emit_opcode(chunk, OP_SET_LOCAL);
+      chunk_emit_byte(chunk, index);
+      return;
+    }
+    chunk_emit_opcode(chunk, OP_FETCH_ELEMENT);
+    ++n;
   }
   fatal_error_unexpected_token(scan);
 }

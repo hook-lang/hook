@@ -56,6 +56,9 @@ void dump(function_t *fn)
     case OP_SET_LOCAL:
       printf("[%05d] SetLocal          %d\n", j, bytes[i++]);
       break;
+    case OP_APPEND:
+      printf("[%05d] Append\n", j);
+      break;
     case OP_GET_ELEMENT:
       printf("[%05d] GetElement\n", j);
       break;
@@ -64,6 +67,9 @@ void dump(function_t *fn)
       break;
     case OP_SET_ELEMENT:
       printf("[%05d] SetElement\n", j);
+      break;
+    case OP_PUT_ELEMENT:
+      printf("[%05d] PutElement\n", j);
       break;
     case OP_DELETE:
       printf("[%05d] Delete\n", j);

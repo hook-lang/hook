@@ -21,8 +21,8 @@ var_decl    ::= 'let' NAME ( '=' expr )?
 
 assign      ::= NAME ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME ( '++' | '--' )
-              | NAME '[' ']' '=' expr ';'
-              | NAME subscr '=' expr ';'
+              | NAME subscr* '[' ']' '=' expr ';'
+              | NAME subscr* subscr '=' expr ';'
 
 subscr      ::= '[' expr ']'
 

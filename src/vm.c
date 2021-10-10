@@ -18,9 +18,11 @@ static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline void array(vm_t *vm, int length);
 static inline void unpack(vm_t *vm, int length);
+static inline void append(vm_t *vm);
 static inline void get_element(vm_t *vm);
 static inline void fetch_element(vm_t *vm);
 static inline void set_element(vm_t *vm);
+static inline void put_element(vm_t *vm);
 static inline void delete(vm_t *vm);
 static inline void inplace_append(vm_t *vm);
 static inline void inplace_put_element(vm_t *vm);
@@ -94,6 +96,24 @@ static inline void unpack(vm_t *vm, int length)
     array_free(arr);
 }
 
+static inline void append(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  if (!IS_ARRAY(val1))
+    fatal_error("cannot use %s as an array", type_name(val1.type));
+  array_t *arr = AS_ARRAY(val1);
+  array_t *result = array_add_element(arr, val2);
+  INCR_REF(result);
+  slots[0] = ARRAY_VALUE(result);
+  --vm->index;
+  DECR_REF(arr);
+  if (IS_UNREACHABLE(arr))
+    array_free(arr);
+  VALUE_DECR_REF(val2);
+}
+
 static inline void get_element(vm_t *vm)
 {
   value_t *slots = &vm->slots[vm->index - 1];
@@ -144,6 +164,31 @@ static inline void set_element(vm_t *vm)
   value_t val3 = slots[2];
   array_t *arr = AS_ARRAY(val1);
   long index = (long) val2.as_number;
+  array_t *result = array_set_element(arr, index, val3);
+  INCR_REF(result);
+  slots[0] = ARRAY_VALUE(result);
+  vm->index -= 2;
+  DECR_REF(arr);
+  if (IS_UNREACHABLE(arr))
+    array_free(arr);
+  VALUE_DECR_REF(val3);
+}
+
+static inline void put_element(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index - 2];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  value_t val3 = slots[2];
+  if (!IS_ARRAY(val1))
+    fatal_error("cannot use %s as an array", type_name(val1.type));
+  if (!IS_INTEGER(val2))
+    fatal_error("array cannot be indexed by %s", type_name(val2.type));
+  array_t *arr = AS_ARRAY(val1);
+  long index = (long) val2.as_number;
+  if (index < 0 || index >= arr->length)
+    fatal_error("index out of bounds: the length is %d but the index is %d",
+      arr->length, index);
   array_t *result = array_set_element(arr, index, val3);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
@@ -474,6 +519,9 @@ static inline void function_call(vm_t *vm, value_t *frame, uint8_t *code, value_
         frame[index] = val;
       }
       break;
+    case OP_APPEND:
+      append(vm);
+      break;
     case OP_GET_ELEMENT:
       get_element(vm);
       break;
@@ -482,6 +530,9 @@ static inline void function_call(vm_t *vm, value_t *frame, uint8_t *code, value_
       break;
     case OP_SET_ELEMENT:
       set_element(vm);
+      break;
+    case OP_PUT_ELEMENT:
+      put_element(vm);
       break;
     case OP_DELETE:
       delete(vm);
