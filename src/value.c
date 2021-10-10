@@ -126,7 +126,8 @@ bool value_equal(value_t val1, value_t val2)
 int value_compare(value_t val1, value_t val2)
 {
   if (val1.type != val2.type)
-    fatal_error("cannot compare %s and %s", type_name(val1.type), type_name(val2.type));
+    fatal_error("cannot compare '%s' and '%s'", type_name(val1.type),
+      type_name(val2.type));
   int result = 0;
   switch (val1.type)
   {
@@ -150,11 +151,8 @@ int value_compare(value_t val1, value_t val2)
   case TYPE_STRING:
     result = string_compare(AS_STRING(val1), AS_STRING(val2));
     break;
-  case TYPE_ARRAY:
-    fatal_error("cannot compare arrays");
-    break;
-  case TYPE_CALLABLE:
-    fatal_error("cannot compare callables");
+  default:
+    fatal_error("cannot compare value of type '%s'", type_name(val1.type));
     break;
   }
   return result;
