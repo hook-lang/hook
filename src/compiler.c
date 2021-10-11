@@ -8,7 +8,7 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
-#include "string.h"
+#include "builtin.h"
 #include "error.h"
 
 #define COMPILER_MAX_LOCALS 256
@@ -49,11 +49,6 @@ typedef struct
   function_t *fn;
 } compiler_t;
 
-static const char *globals[] = {
-  "println",
-  "len"
-};
-
 static inline void fatal_error_unexpected_token(scanner_t *scan);
 static inline long parse_long(char *chars);
 static inline double parse_double(char *chars);
@@ -65,7 +60,6 @@ static inline void add_local(compiler_t *comp, int length, char *start);
 static inline void define_local(compiler_t *comp, token_t *tk);
 static inline int resolve_variable(compiler_t *comp, token_t *tk, bool *is_local);
 static inline int resolve_local(compiler_t *comp, token_t *tk);
-static inline int resolve_global(token_t *tk);
 static inline int emit_jump(chunk_t *chunk, opcode_t op);
 static inline void patch_jump(chunk_t *chunk, int offset);
 static inline void start_loop(compiler_t *comp, loop_t *loop);
@@ -181,7 +175,7 @@ static inline int resolve_variable(compiler_t *comp, token_t *tk, bool *is_local
   if (index == -1)
   {
     *is_local = false;
-    index = resolve_global(tk);
+    index = resolve_global(tk->length, tk->start);
   }
   if (index == -1)
     fatal_error("variable '%.*s' is used but not defined", tk->length, tk->start);
@@ -193,15 +187,6 @@ static inline int resolve_local(compiler_t *comp, token_t *tk)
   int index = comp->num_locals - 1;
   for (; index > -1; --index)
     if (name_equal(tk, &comp->locals[index]))
-      break;
-  return index;
-}
-
-static inline int resolve_global(token_t *tk)
-{
-  int index = sizeof(globals) / sizeof(*globals) - 1;
-  for (; index > -1; --index)
-    if (!strncmp(globals[index], tk->start, tk->length))
       break;
   return index;
 }

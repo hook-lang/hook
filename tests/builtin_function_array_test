@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Built-in function array()"
+
+script "let arr = array(100);
+echo arr;"
+
+expect_success "[]"
+
+run

@@ -9,5 +9,6 @@
 #include "vm.h"
 
 void globals_init(vm_t *vm);
+int resolve_global(int length, char *chars);
 
 #endif

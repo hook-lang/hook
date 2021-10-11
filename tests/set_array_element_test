@@ -18,8 +18,7 @@ echo arr3;
 
 let arr4 = [['foo', 'bar', 'baz']];
 arr4[0][1] = 'qux';
-echo arr4;
-"
+echo arr4;"
 
 expect_success "['bar']
 [['bar']]
