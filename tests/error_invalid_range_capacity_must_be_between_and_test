@@ -4,7 +4,7 @@
 
 title "Error invalid range: capacity must be between X and Y"
 
-script "let arr = array(-1);"
+script "var arr = array(-1);"
 
 expect_failure "fatal error: invalid range: capacity must be between 0 and 2147483647"
 

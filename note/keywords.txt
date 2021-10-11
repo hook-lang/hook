@@ -8,8 +8,8 @@ else
 false
 for
 if
-let
 loop
 null
 true
+var
 while

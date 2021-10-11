@@ -4,8 +4,8 @@
 
 title "Array resize"
 
-script "let arr = [];
-for (let i = 1; i <= 100; i++) {
+script "var arr = [];
+for (var i = 1; i <= 100; i++) {
   arr[] = i;
 }
 echo arr[99];"

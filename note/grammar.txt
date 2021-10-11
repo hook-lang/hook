@@ -16,8 +16,8 @@ stmt        ::= block
 
 block       ::= '{' stmt* '}'
 
-var_decl    ::= 'let' NAME ( '=' expr )?
-              | 'let' '[' NAME ( ',' NAME )* ']' '=' expr
+var_decl    ::= 'var' NAME ( '=' expr )?
+              | 'var' '[' NAME ( ',' NAME )* ']' '=' expr
 
 assign      ::= NAME ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME ( '++' | '--' )

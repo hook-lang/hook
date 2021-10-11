@@ -4,7 +4,7 @@
 
 title "Error function F expects X argument but got Y"
 
-script "let n = len();"
+script "var n = len();"
 
 expect_failure "fatal error: function 'len' expects 1 argument but got 0"
 
