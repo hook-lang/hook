@@ -38,7 +38,7 @@ static inline void modulo(vm_t *vm);
 static inline void negate(vm_t *vm);
 static inline void not(vm_t *vm);
 static inline void call(vm_t *vm, int nargs);
-static inline void adjust_arguments(vm_t *vm, int arity, int nargs);
+static inline void check_arity(function_t *fn, int nargs);
 static inline void function_call(vm_t *vm, value_t *frame, uint8_t *code, value_t *consts);
 
 static inline void push(vm_t *vm, value_t val)
@@ -426,7 +426,7 @@ static inline void call(vm_t *vm, int nargs)
   if (!IS_CALLABLE(val))
     fatal_error("cannot call value of type '%s'", type_name(val.type));
   function_t *fn = AS_FUNCTION(val);
-  adjust_arguments(vm, fn->arity, nargs);
+  check_arity(fn, nargs);
   if (IS_NATIVE(val))
     AS_NATIVE(val)->call(vm, frame);
   else
@@ -440,23 +440,15 @@ static inline void call(vm_t *vm, int nargs)
     value_release(vm->slots[vm->index--]);
 }
 
-static inline void adjust_arguments(vm_t *vm, int arity, int nargs)
+static inline void check_arity(function_t *fn, int nargs)
 {
-  if (nargs < arity)
-  {
-    do
-    {
-      push(vm, NULL_VALUE);
-      ++nargs;
-    }
-    while (nargs < arity);
+  int arity = fn->arity;
+  if (nargs >= arity)
     return;
-  }
-  while (nargs > arity)
-  {
-    value_release(vm->slots[vm->index--]);
-    --nargs;
-  }  
+  string_t *name = fn->name;
+  const char *fmt = arity > 1 ? "function '%.*s' expects %d arguments but got %d" :
+    "function '%.*s' expects %d argument but got %d";
+  fatal_error(fmt, name->length, name->chars, arity, nargs);
 }
 
 static inline void function_call(vm_t *vm, value_t *frame, uint8_t *code, value_t *consts)

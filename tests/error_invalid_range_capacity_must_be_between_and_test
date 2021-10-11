@@ -2,7 +2,7 @@
 
 . tests/tests
 
-title "Error invalid range: capacity must be between 0 and 2147483647"
+title "Error invalid range: capacity must be between X and Y"
 
 script "let arr = array(-1);"
 
