@@ -479,6 +479,85 @@ static void compile_assignment(compiler_t *comp)
     }
     chunk_emit_opcode(chunk, OP_FETCH_ELEMENT);
     ++n;
+    if (MATCH(scan, TOKEN_PLUSEQ))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      chunk_emit_opcode(chunk, OP_ADD);
+      for (int i = 0; i < n; ++i)
+        chunk_emit_opcode(chunk, OP_SET_ELEMENT);
+      chunk_emit_opcode(chunk, OP_SET_LOCAL);
+      chunk_emit_byte(chunk, index);
+      return;
+    }
+    if (MATCH(scan, TOKEN_MINUSEQ))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      chunk_emit_opcode(chunk, OP_SUBTRACT);
+      for (int i = 0; i < n; ++i)
+        chunk_emit_opcode(chunk, OP_SET_ELEMENT);
+      chunk_emit_opcode(chunk, OP_SET_LOCAL);
+      chunk_emit_byte(chunk, index);
+      return;
+    }
+    if (MATCH(scan, TOKEN_STAREQ))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      chunk_emit_opcode(chunk, OP_MULTIPLY);
+      for (int i = 0; i < n; ++i)
+        chunk_emit_opcode(chunk, OP_SET_ELEMENT);
+      chunk_emit_opcode(chunk, OP_SET_LOCAL);
+      chunk_emit_byte(chunk, index);
+      return;
+    }
+    if (MATCH(scan, TOKEN_SLASHEQ))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      chunk_emit_opcode(chunk, OP_DIVIDE);
+      for (int i = 0; i < n; ++i)
+        chunk_emit_opcode(chunk, OP_SET_ELEMENT);
+      chunk_emit_opcode(chunk, OP_SET_LOCAL);
+      chunk_emit_byte(chunk, index);
+      return;
+    }
+    if (MATCH(scan, TOKEN_PERCENTEQ))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      chunk_emit_opcode(chunk, OP_MODULO);
+      for (int i = 0; i < n; ++i)
+        chunk_emit_opcode(chunk, OP_SET_ELEMENT);
+      chunk_emit_opcode(chunk, OP_SET_LOCAL);
+      chunk_emit_byte(chunk, index);
+      return;
+    }
+    if (MATCH(scan, TOKEN_PLUSPLUS))
+    {
+      scanner_next_token(scan);
+      chunk_emit_opcode(chunk, OP_INT);
+      chunk_emit_word(chunk, 1);
+      chunk_emit_opcode(chunk, OP_ADD);
+      for (int i = 0; i < n; ++i)
+        chunk_emit_opcode(chunk, OP_SET_ELEMENT);
+      chunk_emit_opcode(chunk, OP_SET_LOCAL);
+      chunk_emit_byte(chunk, index);
+      return;
+    }
+    if (MATCH(scan, TOKEN_MINUSMINUS))
+    {
+      scanner_next_token(scan);
+      chunk_emit_opcode(chunk, OP_INT);
+      chunk_emit_word(chunk, 1);
+      chunk_emit_opcode(chunk, OP_SUBTRACT);
+      for (int i = 0; i < n; ++i)
+        chunk_emit_opcode(chunk, OP_SET_ELEMENT);
+      chunk_emit_opcode(chunk, OP_SET_LOCAL);
+      chunk_emit_byte(chunk, index);
+      return;
+    }
   }
   fatal_error_unexpected_token(scan);
 }

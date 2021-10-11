@@ -19,8 +19,8 @@ block       ::= '{' stmt* '}'
 var_decl    ::= 'var' NAME ( '=' expr )?
               | 'var' '[' NAME ( ',' NAME )* ']' '=' expr
 
-assign      ::= NAME ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
-              | NAME ( '++' | '--' )
+assign      ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
+              | NAME subscr* ( '++' | '--' )
               | NAME subscr* '[' ']' '=' expr ';'
               | NAME subscr* subscr '=' expr ';'
 
