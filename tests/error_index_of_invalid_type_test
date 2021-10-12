@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Error from index_of(): invalid type"
+
+script "var i = index_of('foo', 0);"
+
+expect_failure "fatal error: invalid type: expected array but got 'string'"
+
+run

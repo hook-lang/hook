@@ -40,6 +40,14 @@ void array_free(array_t *arr)
   free(arr);
 }
 
+int array_index_of(array_t *arr, value_t elem)
+{
+  for (int i = 0; i < arr->length; ++i)
+    if (value_equal(arr->elements[i], elem))
+      return i;
+  return -1;
+}
+
 array_t *array_add_element(array_t *arr, value_t elem)
 {
   int length = arr->length;

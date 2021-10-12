@@ -12,13 +12,15 @@ static const char *globals[] = {
   "println",
   "cap",
   "len",
-  "array"
+  "array",
+  "index_of"
 };
 
 static void println_call(vm_t *vm, value_t *frame);
 static void cap_call(vm_t *vm, value_t *frame);
 static void len_call(vm_t *vm, value_t *frame);
 static void array_call(vm_t *vm, value_t *frame);
+static void index_of_call(vm_t *vm, value_t *frame);
 
 static void println_call(vm_t *vm, value_t *frame)
 {
@@ -74,12 +76,22 @@ static void array_call(vm_t *vm, value_t *frame)
   vm_push_array(vm, arr);
 }
 
+static void index_of_call(vm_t *vm, value_t *frame)
+{
+  value_t val1 = frame[1];
+  value_t val2 = frame[2];
+  if (!IS_ARRAY(val1))
+    fatal_error("invalid type: expected array but got '%s'", type_name(val1.type));
+  vm_push_number(vm, array_index_of(AS_ARRAY(val1), val2));
+}
+
 void globals_init(vm_t *vm)
 {
-  vm_push_native(vm, native_new(string_from_chars(-1, "println"), 1, &println_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, "cap"), 1, &cap_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, "len"), 1, &len_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, "array"), 1, &array_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[0]), 1, &println_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[1]), 1, &cap_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[2]), 1, &len_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[3]), 1, &array_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[4]), 2, &index_of_call));
 }
 
 int resolve_global(int length, char *chars)

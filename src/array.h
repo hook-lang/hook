@@ -20,6 +20,7 @@ typedef struct
 
 array_t *array_allocate(int min_capacity);
 void array_free(array_t *arr);
+int array_index_of(array_t *arr, value_t elem);
 array_t *array_add_element(array_t *arr, value_t elem);
 array_t *array_set_element(array_t *arr, int index, value_t elem);
 array_t *array_delete_element(array_t *arr, int index);

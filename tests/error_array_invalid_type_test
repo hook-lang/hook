@@ -2,9 +2,9 @@
 
 . tests/tests
 
-title "Error invalid type: expected integer but got X"
+title "Error from array(): invalid type"
 
-script "var arr = array('1');"
+script "var arr = array('foo');"
 
 expect_failure "fatal error: invalid type: expected integer but got 'string'"
 
