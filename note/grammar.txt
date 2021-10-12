@@ -4,6 +4,7 @@ chunk       ::= stmt* EOF
 stmt        ::= block
               | var_decl ';'
               | assign ';'
+              | NAME call ';'
               | 'delete' NAME subscr* subscr ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'loop' block
@@ -12,7 +13,6 @@ stmt        ::= block
               | 'for' '(' var_decl | assign? ';' expr? ';' assign? ')' stmt
               | 'continue' ';'
               | 'break' ';'
-              | 'echo' expr ';'
 
 block       ::= '{' stmt* '}'
 
@@ -25,6 +25,8 @@ assign      ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME subscr* subscr '=' expr ';'
 
 subscr      ::= '[' expr ']'
+
+call        ::= '(' ( expr ( ',' expr )* )? ')'
 
 expr        ::= and_expr ( '||' and_expr )*
 
@@ -44,5 +46,3 @@ prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'
               | NAME ( subscr | call )*
               | '(' expr ')'
-
-call        ::= '(' ( expr ( ',' expr )* )? ')'

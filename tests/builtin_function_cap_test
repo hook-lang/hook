@@ -4,8 +4,8 @@
 
 title "Built-in function cap()"
 
-script "echo cap('foo');
-echo cap([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);"
+script "println(cap('foo'));
+println(cap([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]));"
 
 expect_success "8
 16"

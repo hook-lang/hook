@@ -16,4 +16,4 @@ do {
   }
 } while (has_changed);
 
-echo arr;
+println(arr);

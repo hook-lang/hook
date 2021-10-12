@@ -10,7 +10,7 @@ The Hook Programming Language
 ## Hello, world!
 
 ```
-echo 'Hello, world!';
+println('Hello, world!');
 ```
 
 ## Building

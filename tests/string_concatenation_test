@@ -4,7 +4,7 @@
 
 title "String concatenation"
 
-script "echo '' + 'foo' + '' + 'bar' + 'baz';"
+script "println('' + 'foo' + '' + 'bar' + 'baz');"
 
 expect_success "foobarbaz"
 

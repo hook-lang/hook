@@ -5,7 +5,7 @@
 title "Built-in function array()"
 
 script "var arr = array(100);
-echo arr;"
+println(arr);"
 
 expect_success "[]"
 

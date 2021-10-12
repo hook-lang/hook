@@ -6,19 +6,19 @@ title "Append array element"
 
 script "var arr1 = [];
 arr1[] = 'foo';
-echo arr1;
+println(arr1);
 
 var arr2 = [[]];
 arr2[0][] = 'foo';
-echo arr2;
+println(arr2);
 
 var arr3 = [[[]]];
 arr3[0][0][] = 'foo';
-echo arr3;
+println(arr3);
 
 var arr4 = [[1, 2, 3]];
 arr4[0][] = 4;
-echo arr4;"
+println(arr4);"
 
 expect_success "['foo']
 [['foo']]

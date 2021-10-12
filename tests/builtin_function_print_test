@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Built-in function print()"
+
+script "print('Hello, ');
+println('world!');"
+
+expect_success "Hello, world!"
+
+run

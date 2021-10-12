@@ -6,19 +6,19 @@ title "Set array element"
 
 script "var arr1 = ['foo'];
 arr1[0] = 'bar';
-echo arr1;
+println(arr1);
 
 var arr2 = [['foo']];
 arr2[0][0] = 'bar';
-echo arr2;
+println(arr2);
 
 var arr3 = [[['foo']]];
 arr3[0][0][0] = 'bar';
-echo arr3;
+println(arr3);
 
 var arr4 = [['foo', 'bar', 'baz']];
 arr4[0][1] = 'qux';
-echo arr4;"
+println(arr4);"
 
 expect_success "['bar']
 [['bar']]

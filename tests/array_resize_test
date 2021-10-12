@@ -8,7 +8,7 @@ script "var arr = [];
 for (var i = 1; i <= 100; i++) {
   arr[] = i;
 }
-echo arr[99];"
+println(arr[99]);"
 
 expect_success "100"
 

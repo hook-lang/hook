@@ -4,11 +4,11 @@
 
 title "Array concatenation"
 
-script "echo [] + ['foo'];
-echo ['foo'] + [];
-echo ['foo', 'bar'] + ['baz'];
+script "println([] + ['foo']);
+println(['foo'] + []);
+println(['foo', 'bar'] + ['baz']);
 var arr = ['foo', 'bar'];
-echo arr + ['baz', 'qux'];"
+println(arr + ['baz', 'qux']);"
 
 expect_success "['foo']
 ['foo']

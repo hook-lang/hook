@@ -5,8 +5,8 @@
 title "Built-in function index_of()"
 
 script "var arr = ['foo', 'bar', 'baz']; 
-echo index_of(arr, 'baz');
-echo index_of(arr, 'qux');"
+println(index_of(arr, 'baz'));
+println(index_of(arr, 'qux'));"
 
 expect_success "2
 -1"

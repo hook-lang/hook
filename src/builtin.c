@@ -9,6 +9,7 @@
 #include "error.h"
 
 static const char *globals[] = {
+  "print",
   "println",
   "cap",
   "len",
@@ -16,11 +17,18 @@ static const char *globals[] = {
   "index_of"
 };
 
+static void print_call(vm_t *vm, value_t *frame);
 static void println_call(vm_t *vm, value_t *frame);
 static void cap_call(vm_t *vm, value_t *frame);
 static void len_call(vm_t *vm, value_t *frame);
 static void array_call(vm_t *vm, value_t *frame);
 static void index_of_call(vm_t *vm, value_t *frame);
+
+static void print_call(vm_t *vm, value_t *frame)
+{
+  value_print(frame[1], false);
+  vm_push_null(vm);
+}
 
 static void println_call(vm_t *vm, value_t *frame)
 {
@@ -87,18 +95,22 @@ static void index_of_call(vm_t *vm, value_t *frame)
 
 void globals_init(vm_t *vm)
 {
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[0]), 1, &println_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[1]), 1, &cap_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[2]), 1, &len_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[3]), 1, &array_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[4]), 2, &index_of_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[0]), 1, &print_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[1]), 1, &println_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[2]), 1, &cap_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[3]), 1, &len_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[4]), 1, &array_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[5]), 2, &index_of_call));
 }
 
 int resolve_global(int length, char *chars)
 {
   int index = sizeof(globals) / sizeof(*globals) - 1;
   for (; index > -1; --index)
-    if (!strncmp(globals[index], chars, length))
+  {
+    const char *global = globals[index];
+    if (!strncmp(global, chars, length) && !global[length])
       break;
+  }
   return index;
 }

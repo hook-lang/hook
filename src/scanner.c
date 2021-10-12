@@ -349,11 +349,6 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_DO;
     return;
   }
-  if (match_chars(scan, "echo"))
-  {
-    scan->token.type = TOKEN_ECHO;
-    return;
-  }
   if (match_chars(scan, "else"))
   {
     scan->token.type = TOKEN_ELSE;
