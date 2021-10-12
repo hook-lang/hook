@@ -401,6 +401,50 @@ static inline void add(vm_t *vm)
         string_free(str2);
     }
     return;
+  case TYPE_ARRAY:
+    {
+      if (!IS_ARRAY(val2))
+        fatal_error("cannot concatenate 'array' and '%s'", type_name(val2.type));
+      array_t *arr1 = AS_ARRAY(val1);
+      if (!arr1->length)
+      {
+        slots[0] = val2;
+        --vm->index;
+        DECR_REF(arr1);
+        if (IS_UNREACHABLE(arr1))
+          array_free(arr1);
+        return;
+      }
+      array_t *arr2 = AS_ARRAY(val2);
+      if (!arr2->length)
+      {
+        --vm->index;
+        DECR_REF(arr2);
+        if (IS_UNREACHABLE(arr2))
+          array_free(arr2);
+        return;
+      }
+      if (arr1->ref_count == 1)
+      {
+        array_inplace_concat(arr1, arr2);
+        --vm->index;
+        DECR_REF(arr2);
+        if (IS_UNREACHABLE(arr2))
+          array_free(arr2);
+        return;
+      }
+      array_t *result = array_concat(arr1, arr2);
+      INCR_REF(result);
+      slots[0] = ARRAY_VALUE(result);
+      --vm->index;
+      DECR_REF(arr1);
+      if (IS_UNREACHABLE(arr1))
+        array_free(arr1);
+      DECR_REF(arr2);
+      if (IS_UNREACHABLE(arr2))
+        array_free(arr2);
+    }
+    return;
   default:
     break;
   }
@@ -412,11 +456,56 @@ static inline void subtract(vm_t *vm)
   value_t *slots = &vm->slots[vm->index - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
-  if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
-    fatal_error("cannot subtract '%s' from '%s'", type_name(val2.type), type_name(val1.type));
-  double data = val1.as_number - val2.as_number;
-  slots[0] = NUMBER_VALUE(data);
-  --vm->index;
+  switch (val1.type)
+  {
+  case TYPE_NUMBER:
+    {
+      if (!IS_NUMBER(val2))
+        fatal_error("cannot subtract '%s' from 'number'", type_name(val2.type));
+      double data = val1.as_number - val2.as_number;
+      slots[0] = NUMBER_VALUE(data);
+      --vm->index;
+    }
+    return;
+  case TYPE_ARRAY:
+    {
+      if (!IS_ARRAY(val2))
+        fatal_error("cannot diff between 'array' and '%s'", type_name(val2.type));
+      array_t *arr1 = AS_ARRAY(val1);
+      array_t *arr2 = AS_ARRAY(val2);
+      if (!arr1->length || !arr2->length)
+      {
+        --vm->index;
+        DECR_REF(arr2);
+        if (IS_UNREACHABLE(arr2))
+          array_free(arr2);
+        return;
+      }
+      if (arr1->ref_count == 1)
+      {
+        array_inplace_diff(arr1, arr2);
+        --vm->index;
+        DECR_REF(arr2);
+        if (IS_UNREACHABLE(arr2))
+          array_free(arr2);
+        return;
+      }
+      array_t *result = array_diff(arr1, arr2);
+      INCR_REF(result);
+      slots[0] = ARRAY_VALUE(result);
+      --vm->index;
+      DECR_REF(arr1);
+      if (IS_UNREACHABLE(arr1))
+        array_free(arr1);
+      DECR_REF(arr2);
+      if (IS_UNREACHABLE(arr2))
+        array_free(arr2);
+    }
+    return;
+  default:
+    break;
+  }
+  fatal_error("cannot subtract '%s' from '%s'", type_name(val2.type), type_name(val1.type));
 }
 
 static inline void multiply(vm_t *vm)

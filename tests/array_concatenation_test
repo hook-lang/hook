@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Array concatenation"
+
+script "echo [] + ['foo'];
+echo ['foo'] + [];
+echo ['foo', 'bar'] + ['baz'];
+var arr = ['foo', 'bar'];
+echo arr + ['baz', 'qux'];"
+
+expect_success "['foo']
+['foo']
+['foo', 'bar', 'baz']
+['foo', 'bar', 'baz', 'qux']"
+
+run

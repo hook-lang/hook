@@ -2,7 +2,7 @@
 
 . tests/tests
 
-title "Concatenate strings"
+title "String concatenation"
 
 script "echo '' + 'foo' + '' + 'bar' + 'baz';"
 

@@ -8,13 +8,15 @@
 #include <stdio.h>
 #include "memory.h"
 
-static inline void resize(array_t *arr);
+static inline void resize(array_t *arr, int min_capacity);
 
-static inline void resize(array_t *arr)
+static inline void resize(array_t *arr, int min_capacity)
 {
-  if (arr->length < arr->capacity)
+  if (min_capacity <= arr->capacity)
     return;
-  int capacity = arr->capacity << 1;
+  int capacity = arr->capacity;
+  while (capacity < min_capacity)
+    capacity <<= 1;
   arr->capacity = capacity;
   arr->elements = (value_t *) reallocate(arr->elements,
     sizeof(*arr->elements) * capacity);
@@ -106,9 +108,43 @@ array_t *array_delete_element(array_t *arr, int index)
   return result;
 }
 
+array_t *array_concat(array_t *arr1, array_t *arr2)
+{
+  int length = arr1->length + arr2->length;
+  array_t *result = array_allocate(length);
+  result->length = length;
+  int j = 0;
+  for (int i = 0; i < arr1->length; ++i, ++j)
+  {
+    value_t elem = arr1->elements[i];
+    VALUE_INCR_REF(elem);
+    result->elements[j] = elem;
+  }
+  for (int i = 0; i < arr2->length; ++i, ++j)
+  {
+    value_t elem = arr2->elements[i];
+    VALUE_INCR_REF(elem);
+    result->elements[j] = elem;
+  }
+  return result;
+}
+
+array_t *array_diff(array_t *arr1, array_t *arr2)
+{
+  array_t *result = array_allocate(0);
+  result->length = 0;
+  for (int i = 0; i < arr1->length; ++i)
+  {
+    value_t elem = arr1->elements[i];
+    if (array_index_of(arr2, elem) == -1)
+      array_inplace_add_element(result, elem);
+  }
+  return result;
+}
+
 void array_inplace_add_element(array_t *arr, value_t elem)
 {
-  resize(arr);
+  resize(arr, arr->length + 1);
   VALUE_INCR_REF(elem);
   arr->elements[arr->length] = elem;
   ++arr->length;
@@ -127,6 +163,35 @@ void array_inplace_delete_element(array_t *arr, int index)
   for (int i = index; i < arr->length - 1; ++i)
     arr->elements[i] = arr->elements[i + 1];
   --arr->length;
+}
+
+void array_inplace_concat(array_t *dest, array_t *src)
+{
+  int length = dest->length + src->length;
+  resize(dest, length);
+  for (int i = 0; i < src->length; ++i)
+  {
+    value_t elem = src->elements[i];
+    VALUE_INCR_REF(elem);
+    dest->elements[dest->length] = elem;
+    ++dest->length;
+  }
+}
+
+void array_inplace_diff(array_t *dest, array_t *src)
+{
+  for (int i = 0; i < src->length; ++i)
+  {
+    value_t elem = src->elements[i];
+    int n = dest->length;
+    for (int j = 0; j < n; ++j)
+    {
+      if (!value_equal(elem, dest->elements[j]))
+        continue;
+      array_inplace_delete_element(dest, j);
+      --n;
+    }
+  }
 }
 
 void array_print(array_t *arr)
