@@ -10,7 +10,7 @@
 #include "error.h"
 
 static inline string_t *string_allocate(int min_capacity);
-static inline void resize(string_t *str);
+static inline void resize(string_t *str, int min_capacity);
 static inline void append_char(string_t *str, char c);
 static inline FILE *open_file(const char *filename, const char *mode);
 
@@ -26,18 +26,20 @@ static inline string_t *string_allocate(int min_capacity)
   return str;
 }
 
-static inline void resize(string_t *str)
+static inline void resize(string_t *str, int min_capacity)
 {
-  if (str->length < str->capacity)
+  if (min_capacity <= str->capacity)
     return;
-  int capacity = str->capacity << 1;
+  int capacity = str->capacity;
+  while (capacity < min_capacity)
+    capacity <<= 1;
   str->capacity = capacity;
   str->chars = (char *) reallocate(str->chars, capacity);
 }
 
 static inline void append_char(string_t *str, char c)
 {
-  resize(str);
+  resize(str, str->length + 1);
   str->chars[str->length] = c;
   ++str->length;
 }
@@ -93,6 +95,26 @@ void string_free(string_t *str)
 {
   free(str->chars);
   free(str);
+}
+
+string_t *string_concat(string_t *str1, string_t *str2)
+{
+  int length = str1->length + str2->length;
+  string_t *result = string_allocate(length + 1);
+  memcpy(result->chars, str1->chars, str1->length);
+  memcpy(&result->chars[str1->length], str2->chars, str2->length);
+  result->length = length;
+  result->chars[length] = '\0';
+  return result;
+}
+
+void string_inplace_concat(string_t *dest, string_t *src)
+{
+  int length = dest->length + src->length;
+  resize(dest, length + 1);
+  memcpy(&dest->chars[dest->length], src->chars, src->length);
+  dest->length = length;
+  dest->chars[length] = '\0';
 }
 
 bool string_equal(string_t *str1, string_t *str2)

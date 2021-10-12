@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. tests/tests
+
+title "Concatenate strings"
+
+script "echo '' + 'foo' + '' + 'bar' + 'baz';"
+
+expect_success "foobarbaz"
+
+run

@@ -346,11 +346,65 @@ static inline void add(vm_t *vm)
   value_t *slots = &vm->slots[vm->index - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
-  if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
-    fatal_error("cannot add '%s' to '%s'", type_name(val2.type), type_name(val1.type));
-  double data = val1.as_number + val2.as_number;
-  slots[0] = NUMBER_VALUE(data);
-  --vm->index;
+  switch (val1.type)
+  {
+  case TYPE_NUMBER:
+    {
+      if (!IS_NUMBER(val2))
+        fatal_error("cannot add '%s' to 'number'", type_name(val2.type));
+      double data = val1.as_number + val2.as_number;
+      slots[0] = NUMBER_VALUE(data);
+      --vm->index;
+    }
+    return;
+  case TYPE_STRING:
+    {
+      if (!IS_STRING(val2))
+        fatal_error("cannot concatenate 'string' and '%s'", type_name(val2.type));
+      string_t *str1 = AS_STRING(val1);
+      if (!str1->length)
+      {
+        slots[0] = val2;
+        --vm->index;
+        DECR_REF(str1);
+        if (IS_UNREACHABLE(str1))
+          string_free(str1);
+        return;
+      }
+      string_t *str2 = AS_STRING(val2);
+      if (!str2->length)
+      {
+        --vm->index;
+        DECR_REF(str2);
+        if (IS_UNREACHABLE(str2))
+          string_free(str2);
+        return;
+      }
+      if (str1->ref_count == 1)
+      {
+        string_inplace_concat(str1, str2);
+        --vm->index;
+        DECR_REF(str2);
+        if (IS_UNREACHABLE(str2))
+          string_free(str2);
+        return;
+      }
+      string_t *result = string_concat(str1, str2);
+      INCR_REF(result);
+      slots[0] = STRING_VALUE(result);
+      --vm->index;
+      DECR_REF(str1);
+      if (IS_UNREACHABLE(str1))
+        string_free(str1);
+      DECR_REF(str2);
+      if (IS_UNREACHABLE(str2))
+        string_free(str2);
+    }
+    return;
+  default:
+    break;
+  }
+  fatal_error("cannot add '%s' to '%s'", type_name(val2.type), type_name(val1.type));
 }
 
 static inline void subtract(vm_t *vm)
