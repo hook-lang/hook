@@ -2,11 +2,11 @@
 
 . test/test
 
-title "Function declaration and call"
+title "Anonymous function"
 
-script "fn sum(a, b) {
+script "var sum = fn (a, b) {
   return a + b;
-}
+};
 
 println(sum(1, 2));"
 

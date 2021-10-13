@@ -88,6 +88,9 @@ static void compile_add_expression(compiler_t *comp);
 static void compile_mul_expression(compiler_t *comp);
 static void compile_unary_expression(compiler_t *comp);
 static void compile_prim_expression(compiler_t *comp);
+static void compile_array_constructor(compiler_t *comp);
+static void compile_anonymous_function(compiler_t *comp);
+static void compile_subscript_or_call(compiler_t *comp);
 static void compiler_init(compiler_t *comp, scanner_t *scan, string_t *name);
 
 static inline void fatal_error_unexpected_token(scanner_t *scan)
@@ -1126,70 +1129,17 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_LBRACKET))
   {
-    scanner_next_token(scan);
-    if (MATCH(scan, TOKEN_RBRACKET))
-    {
-      scanner_next_token(scan);
-      chunk_emit_opcode(chunk, OP_ARRAY);
-      chunk_emit_byte(chunk, 0);
-      return;
-    }
-    compile_expression(comp);
-    int length = 1;
-    while (MATCH(scan, TOKEN_COMMA))
-    {
-      scanner_next_token(scan);
-      compile_expression(comp);
-      ++length;
-    }
-    EXPECT(scan, TOKEN_RBRACKET);
-    chunk_emit_opcode(chunk, OP_ARRAY);
-    chunk_emit_byte(chunk, length);
+    compile_array_constructor(comp);
+    return;
+  }
+  if (MATCH(scan, TOKEN_FN))
+  {
+    compile_anonymous_function(comp);
     return;
   }
   if (MATCH(scan, TOKEN_NAME))
   {
-    token_t tk = scan->token;
-    scanner_next_token(scan);
-    bool is_local;
-    int index = resolve_variable(comp, &tk, &is_local);
-    chunk_emit_opcode(chunk, is_local ? OP_GET_LOCAL : OP_GLOBAL);
-    chunk_emit_byte(chunk, index);
-    for (;;)
-    {
-      if (MATCH(scan, TOKEN_LBRACKET))
-      {
-        scanner_next_token(scan);
-        compile_expression(comp);
-        EXPECT(scan, TOKEN_RBRACKET);
-        chunk_emit_opcode(chunk, OP_GET_ELEMENT);
-        continue;
-      }
-      if (MATCH(scan, TOKEN_LPAREN))
-      {
-        scanner_next_token(scan);
-        if (MATCH(scan, TOKEN_RPAREN))
-        {
-          scanner_next_token(scan);
-          chunk_emit_opcode(chunk, OP_CALL);
-          chunk_emit_byte(chunk, 0);
-          return;
-        }
-        compile_expression(comp);
-        int nargs = 1;
-        while (MATCH(scan, TOKEN_COMMA))
-        {
-          scanner_next_token(scan);
-          compile_expression(comp);
-          ++nargs;
-        }
-        EXPECT(scan, TOKEN_RPAREN);
-        chunk_emit_opcode(chunk, OP_CALL);
-        chunk_emit_byte(chunk, nargs);
-        continue;
-      }
-      break;
-    }
+    compile_subscript_or_call(comp);
     return;
   }
   if (MATCH(scan, TOKEN_LPAREN))
@@ -1200,6 +1150,130 @@ static void compile_prim_expression(compiler_t *comp)
     return;
   }
   fatal_error_unexpected_token(scan);
+}
+
+static void compile_array_constructor(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->fn->chunk;
+  scanner_next_token(scan);
+  if (MATCH(scan, TOKEN_RBRACKET))
+  {
+    scanner_next_token(scan);
+    chunk_emit_opcode(chunk, OP_ARRAY);
+    chunk_emit_byte(chunk, 0);
+    return;
+  }
+  compile_expression(comp);
+  int length = 1;
+  while (MATCH(scan, TOKEN_COMMA))
+  {
+    scanner_next_token(scan);
+    compile_expression(comp);
+    ++length;
+  }
+  EXPECT(scan, TOKEN_RBRACKET);
+  chunk_emit_opcode(chunk, OP_ARRAY);
+  chunk_emit_byte(chunk, length);
+  return;
+}
+
+static void compile_anonymous_function(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->fn->chunk;
+  scanner_next_token(scan);
+  compiler_t fn_comp;
+  compiler_init(&fn_comp, scan, string_from_chars(-1, "anonymous"));
+  array_t *consts = comp->fn->consts;
+  int index = consts->length;
+  array_inplace_add_element(consts, FUNCTION_VALUE(fn_comp.fn));
+  chunk_emit_opcode(chunk, OP_CONSTANT);
+  chunk_emit_byte(chunk, index);
+  EXPECT(scan, TOKEN_LPAREN);
+  if (MATCH(scan, TOKEN_RPAREN))
+  {
+    scanner_next_token(scan);
+    if (!MATCH(scan, TOKEN_LBRACE))
+      fatal_error_unexpected_token(scan);
+    compile_block(&fn_comp);
+    chunk_t *fn_chunk = &fn_comp.fn->chunk;
+    chunk_emit_opcode(fn_chunk, OP_NULL);
+    chunk_emit_opcode(fn_chunk, OP_RETURN);
+    return;
+  }
+  token_t tk;
+  if (!MATCH(scan, TOKEN_NAME))
+    fatal_error_unexpected_token(scan);
+  tk = scan->token;
+  scanner_next_token(scan);
+  define_local(&fn_comp, &tk);
+  int arity = 1;
+  while (MATCH(scan, TOKEN_COMMA))
+  {
+    scanner_next_token(scan);
+    if (!MATCH(scan, TOKEN_NAME))
+      fatal_error_unexpected_token(scan);
+    tk = scan->token;
+    scanner_next_token(scan);
+    define_local(&fn_comp, &tk);
+    ++arity;
+  }
+  fn_comp.fn->arity = arity;
+  EXPECT(scan, TOKEN_RPAREN);
+  if (!MATCH(scan, TOKEN_LBRACE))
+    fatal_error_unexpected_token(scan);
+  compile_block(&fn_comp);
+  chunk_t *fn_chunk = &fn_comp.fn->chunk;
+  chunk_emit_opcode(fn_chunk, OP_NULL);
+  chunk_emit_opcode(fn_chunk, OP_RETURN);
+}
+
+static void compile_subscript_or_call(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->fn->chunk;
+  token_t tk = scan->token;
+  scanner_next_token(scan);
+  bool is_local;
+  int index = resolve_variable(comp, &tk, &is_local);
+  chunk_emit_opcode(chunk, is_local ? OP_GET_LOCAL : OP_GLOBAL);
+  chunk_emit_byte(chunk, index);
+  for (;;)
+  {
+    if (MATCH(scan, TOKEN_LBRACKET))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      EXPECT(scan, TOKEN_RBRACKET);
+      chunk_emit_opcode(chunk, OP_GET_ELEMENT);
+      continue;
+    }
+    if (MATCH(scan, TOKEN_LPAREN))
+    {
+      scanner_next_token(scan);
+      if (MATCH(scan, TOKEN_RPAREN))
+      {
+        scanner_next_token(scan);
+        chunk_emit_opcode(chunk, OP_CALL);
+        chunk_emit_byte(chunk, 0);
+        return;
+      }
+      compile_expression(comp);
+      int nargs = 1;
+      while (MATCH(scan, TOKEN_COMMA))
+      {
+        scanner_next_token(scan);
+        compile_expression(comp);
+        ++nargs;
+      }
+      EXPECT(scan, TOKEN_RPAREN);
+      chunk_emit_opcode(chunk, OP_CALL);
+      chunk_emit_byte(chunk, nargs);
+      continue;
+    }
+    break;
+  }
 }
 
 static void compiler_init(compiler_t *comp, scanner_t *scan, string_t *name)

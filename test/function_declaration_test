@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. test/test
+
+title "Function declaration"
+
+script "fn sum(a, b) {
+  return a + b;
+}
+
+println(sum(1, 2));"
+
+expect_success "3"
+
+run
