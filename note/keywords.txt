@@ -5,10 +5,12 @@ delete
 do
 else
 false
+fn
 for
 if
 loop
 null
+return
 true
 var
 while

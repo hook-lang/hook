@@ -1,0 +1,20 @@
+
+fn sort(a) {
+  var n = len(a);
+  var has_changed;
+  do {
+    has_changed = false;
+    n--;
+    for (var i = 0; i < n; i++) {
+      if (a[i] > a[i + 1]) {
+        var t = a[i];
+        a[i] = a[i + 1];
+        a[i + 1] = t;
+        has_changed = true;
+      }
+    }
+  } while (has_changed);
+  return a;
+}
+
+println(sort([5, 2, 7, 3, 0, 1, 4, 6]));

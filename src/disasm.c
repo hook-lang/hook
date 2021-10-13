@@ -8,7 +8,7 @@
 
 void dump(function_t *fn)
 {
-  printf("<function %s at %p>\n", fn->name->chars, fn);
+  printf("<callable %s at %p>\n", fn->name->chars, fn);
   uint8_t *bytes = fn->chunk.bytes;
   int i = 0;
   int n = 0;

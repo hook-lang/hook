@@ -5,6 +5,7 @@ stmt        ::= block
               | var_decl ';'
               | assign ';'
               | NAME call ';'
+              | 'fn' NAME '(' ( NAME ( ',' NAME )* )? ')' block
               | 'delete' NAME subscr* subscr ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'loop' block
@@ -13,6 +14,7 @@ stmt        ::= block
               | 'for' '(' var_decl | assign? ';' expr? ';' assign? ')' stmt
               | 'continue' ';'
               | 'break' ';'
+              | 'return' expr? ';'
 
 block       ::= '{' stmt* '}'
 

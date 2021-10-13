@@ -1,0 +1,21 @@
+
+fn sort(a) {
+  var n = len(a);
+  if (n <= 1)
+    return a;
+  var pivot = a[0];
+  var left = []; 
+  var right = [];
+  for (var i = 1; i < n; i++) {
+    if (a[i] < pivot)
+      left[] = a[i];
+    else
+      right[] = a[i];
+  }
+  a = sort(left);
+  a[] = pivot;
+  a += sort(right);
+  return a;
+}
+
+println(sort([5, 2, 7, 3, 0, 1, 4, 6]));
