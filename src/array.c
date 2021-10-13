@@ -57,9 +57,9 @@ array_t *array_add_element(array_t *arr, value_t elem)
   result->length = length + 1;
   for (int i = 0; i < length; i++)
   {
-    value_t elem = arr->elements[i];
-    VALUE_INCR_REF(elem);
-    result->elements[i] = elem;
+    value_t val = arr->elements[i];
+    VALUE_INCR_REF(val);
+    result->elements[i] = val;
   }
   VALUE_INCR_REF(elem);
   result->elements[length] = elem;
@@ -73,17 +73,17 @@ array_t *array_set_element(array_t *arr, int index, value_t elem)
   result->length = length;
   for (int i = 0; i < index; ++i)
   {
-    value_t elem = arr->elements[i];
-    VALUE_INCR_REF(elem);
-    result->elements[i] = elem;
+    value_t val = arr->elements[i];
+    VALUE_INCR_REF(val);
+    result->elements[i] = val;
   }
   VALUE_INCR_REF(elem);
   result->elements[index] = elem;
   for (int i = index + 1; i < length; ++i)
   {
-    value_t elem = arr->elements[i];
-    VALUE_INCR_REF(elem);
-    result->elements[i] = elem;
+    value_t val = arr->elements[i];
+    VALUE_INCR_REF(val);
+    result->elements[i] = val;
   }
   return result;
 }

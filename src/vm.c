@@ -124,7 +124,7 @@ static inline void get_element(vm_t *vm)
   if (!IS_INTEGER(val2))
     fatal_error("array cannot be indexed by '%s'", type_name(val2.type));
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as_number;
+  long index = (long) val2.as.number;
   if (index < 0 || index >= arr->length)
     fatal_error("index out of bounds: the length is %d but the index is %d",
       arr->length, index);
@@ -147,7 +147,7 @@ static inline void fetch_element(vm_t *vm)
   if (!IS_INTEGER(val2))
     fatal_error("array cannot be indexed by '%s'", type_name(val2.type));
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as_number;
+  long index = (long) val2.as.number;
   if (index < 0 || index >= arr->length)
     fatal_error("index out of bounds: the length is %d but the index is %d",
       arr->length, index);
@@ -163,7 +163,7 @@ static inline void set_element(vm_t *vm)
   value_t val2 = slots[1];
   value_t val3 = slots[2];
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as_number;
+  long index = (long) val2.as.number;
   array_t *result = array_set_element(arr, index, val3);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
@@ -185,7 +185,7 @@ static inline void put_element(vm_t *vm)
   if (!IS_INTEGER(val2))
     fatal_error("array cannot be indexed by '%s'", type_name(val2.type));
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as_number;
+  long index = (long) val2.as.number;
   if (index < 0 || index >= arr->length)
     fatal_error("index out of bounds: the length is %d but the index is %d",
       arr->length, index);
@@ -209,7 +209,7 @@ static inline void delete(vm_t *vm)
   if (!IS_INTEGER(val2))
     fatal_error("array cannot be indexed by '%s'", type_name(val2.type));
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as_number;
+  long index = (long) val2.as.number;
   if (index < 0 || index >= arr->length)
     fatal_error("index out of bounds: the length is %d but the index is %d",
       arr->length, index);
@@ -258,7 +258,7 @@ static inline void inplace_put_element(vm_t *vm)
   if (!IS_INTEGER(val2))
     fatal_error("array cannot be indexed by '%s'", type_name(val2.type));
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as_number;
+  long index = (long) val2.as.number;
   if (index < 0 || index >= arr->length)
     fatal_error("index out of bounds: the length is %d but the index is %d",
       arr->length, index);
@@ -289,7 +289,7 @@ static inline void inplace_delete(vm_t *vm)
   if (!IS_INTEGER(val2))
     fatal_error("array cannot be indexed by '%s'", type_name(val2.type));
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as_number;
+  long index = (long) val2.as.number;
   if (index < 0 || index >= arr->length)
     fatal_error("index out of bounds: the length is %d but the index is %d",
       arr->length, index);
@@ -352,7 +352,7 @@ static inline void add(vm_t *vm)
     {
       if (!IS_NUMBER(val2))
         fatal_error("cannot add '%s' to 'number'", type_name(val2.type));
-      double data = val1.as_number + val2.as_number;
+      double data = val1.as.number + val2.as.number;
       slots[0] = NUMBER_VALUE(data);
       --vm->index;
     }
@@ -445,7 +445,9 @@ static inline void add(vm_t *vm)
         array_free(arr2);
     }
     return;
-  default:
+  case TYPE_NULL:
+  case TYPE_BOOLEAN:
+  case TYPE_CALLABLE:
     break;
   }
   fatal_error("cannot add '%s' to '%s'", type_name(val2.type), type_name(val1.type));
@@ -462,7 +464,7 @@ static inline void subtract(vm_t *vm)
     {
       if (!IS_NUMBER(val2))
         fatal_error("cannot subtract '%s' from 'number'", type_name(val2.type));
-      double data = val1.as_number - val2.as_number;
+      double data = val1.as.number - val2.as.number;
       slots[0] = NUMBER_VALUE(data);
       --vm->index;
     }
@@ -502,7 +504,10 @@ static inline void subtract(vm_t *vm)
         array_free(arr2);
     }
     return;
-  default:
+  case TYPE_NULL:
+  case TYPE_BOOLEAN:
+  case TYPE_STRING:
+  case TYPE_CALLABLE:
     break;
   }
   fatal_error("cannot subtract '%s' from '%s'", type_name(val2.type), type_name(val1.type));
@@ -515,7 +520,7 @@ static inline void multiply(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
     fatal_error("cannot multiply '%s' to '%s'", type_name(val2.type), type_name(val1.type));
-  double data = val1.as_number * val2.as_number;
+  double data = val1.as.number * val2.as.number;
   slots[0] = NUMBER_VALUE(data);
   --vm->index;
 }
@@ -527,7 +532,7 @@ static inline void divide(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
     fatal_error("cannot divide '%s' by '%s'", type_name(val1.type), type_name(val2.type));
-  double data = val1.as_number / val2.as_number;
+  double data = val1.as.number / val2.as.number;
   slots[0] = NUMBER_VALUE(data);
   --vm->index;
 }
@@ -539,7 +544,7 @@ static inline void modulo(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
     fatal_error("cannot mod '%s' by '%s'", type_name(val1.type), type_name(val2.type));
-  double data = fmod(val1.as_number, val2.as_number);
+  double data = fmod(val1.as.number, val2.as.number);
   slots[0] = NUMBER_VALUE(data);
   --vm->index;
 }
@@ -550,7 +555,7 @@ static inline void negate(vm_t *vm)
   value_t val = slots[0];
   if (!IS_NUMBER(val))
     fatal_error("cannot apply unary minus operator to '%s'", type_name(val.type));
-  double data = -val.as_number;
+  double data = -val.as.number;
   slots[0] = NUMBER_VALUE(data);
 }
 

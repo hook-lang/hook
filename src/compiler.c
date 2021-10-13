@@ -34,7 +34,7 @@ typedef struct loop
 {
   struct loop *enclosing;
   int scope_depth;
-  int jump;
+  uint16_t jump;
   int num_offsets;
   int offsets[COMPILER_MAX_BREAKS];
 } loop_t;
@@ -58,7 +58,7 @@ static inline int discard_locals(compiler_t *comp, int depth);
 static inline bool name_equal(token_t *tk, local_t *local);
 static inline void add_local(compiler_t *comp, int length, char *start);
 static inline void define_local(compiler_t *comp, token_t *tk);
-static inline int resolve_variable(compiler_t *comp, token_t *tk, bool *is_local);
+static inline uint8_t resolve_variable(compiler_t *comp, token_t *tk, bool *is_local);
 static inline int resolve_local(compiler_t *comp, token_t *tk);
 static inline int emit_jump(chunk_t *chunk, opcode_t op);
 static inline void patch_jump(chunk_t *chunk, int offset);
@@ -173,7 +173,7 @@ static inline void define_local(compiler_t *comp, token_t *tk)
   add_local(comp, tk->length, tk->start);
 }
 
-static inline int resolve_variable(compiler_t *comp, token_t *tk, bool *is_local)
+static inline uint8_t resolve_variable(compiler_t *comp, token_t *tk, bool *is_local)
 {
   *is_local = true;
   int index = resolve_local(comp, tk);
@@ -184,7 +184,7 @@ static inline int resolve_variable(compiler_t *comp, token_t *tk, bool *is_local
   }
   if (index == -1)
     fatal_error("variable '%.*s' is used but not defined", tk->length, tk->start);
-  return index;
+  return (uint8_t) index;
 }
 
 static inline int resolve_local(compiler_t *comp, token_t *tk)
@@ -209,7 +209,7 @@ static inline void patch_jump(chunk_t *chunk, int offset)
   int jump = chunk->length;
   if (jump > UINT16_MAX)
     fatal_error("code too large");
-  *((uint16_t *) &chunk->bytes[offset]) = jump;
+  *((uint16_t *) &chunk->bytes[offset]) = (uint16_t) jump;
 }
 
 static inline void start_loop(compiler_t *comp, loop_t *loop)
@@ -337,9 +337,8 @@ static void compile_variable_declaration(compiler_t *comp)
   scanner_next_token(scan);
   if (MATCH(scan, TOKEN_NAME))
   {
-    token_t tk = scan->token;
+    define_local(comp, &scan->token);
     scanner_next_token(scan);
-    define_local(comp, &tk);
     if (MATCH(scan, TOKEN_EQ))
     {
       scanner_next_token(scan);
@@ -354,18 +353,16 @@ static void compile_variable_declaration(compiler_t *comp)
     scanner_next_token(scan);
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
-    token_t tk = scan->token;
+    define_local(comp, &scan->token);
     scanner_next_token(scan);
-    define_local(comp, &tk);
-    int n = 1;
+    uint8_t n = 1;
     while (MATCH(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
       if (!MATCH(scan, TOKEN_NAME))
         fatal_error_unexpected_token(scan);
-      token_t tk = scan->token;
+      define_local(comp, &scan->token);
       scanner_next_token(scan);
-      define_local(comp, &tk);
       ++n;
     }
     EXPECT(scan, TOKEN_RBRACKET);
@@ -383,7 +380,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
   scanner_t *scan = comp->scan;
   chunk_t *chunk = &comp->fn->chunk;
   bool is_local;
-  int index = resolve_variable(comp, &tk, &is_local);
+  uint8_t index = resolve_variable(comp, &tk, &is_local);
   if (!is_local)
     fatal_error("cannot assign to immutable variable '%.*s'",
       tk.length, tk.start);
@@ -582,7 +579,7 @@ static void compile_call_statement(compiler_t *comp, token_t tk)
   chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   bool is_local;
-  int index = resolve_variable(comp, &tk, &is_local);
+  uint8_t index = resolve_variable(comp, &tk, &is_local);
   chunk_emit_opcode(chunk, is_local ? OP_GET_LOCAL : OP_GLOBAL);
   chunk_emit_byte(chunk, index);
   if (MATCH(scan, TOKEN_RPAREN))
@@ -595,7 +592,7 @@ static void compile_call_statement(compiler_t *comp, token_t tk)
     return;
   }
   compile_expression(comp);
-  int nargs = 1;
+  uint8_t nargs = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
@@ -623,7 +620,7 @@ static void compile_function_declaration(compiler_t *comp)
   compiler_t fn_comp;
   compiler_init(&fn_comp, scan, string_from_chars(tk.length, tk.start));
   array_t *consts = comp->fn->consts;
-  int index = consts->length;
+  uint8_t index = (uint8_t) consts->length;
   array_inplace_add_element(consts, FUNCTION_VALUE(fn_comp.fn));
   chunk_emit_opcode(chunk, OP_CONSTANT);
   chunk_emit_byte(chunk, index);
@@ -675,7 +672,7 @@ static void compile_delete_statement(compiler_t *comp)
   token_t tk = scan->token;
   scanner_next_token(scan);
   bool is_local;
-  int index = resolve_variable(comp, &tk, &is_local);
+  uint8_t index = resolve_variable(comp, &tk, &is_local);
   if (!is_local)
     fatal_error("cannot delete element from immutable variable '%.*s'",
       tk.length, tk.start);
@@ -821,7 +818,7 @@ static void compile_for_statement(compiler_t *comp)
   int offset1 = emit_jump(chunk, OP_JUMP_IF_FALSE);
   chunk_emit_opcode(chunk, OP_POP);
   int offset2 = emit_jump(chunk, OP_JUMP);
-  int jump = chunk->length;
+  uint16_t jump = chunk->length;
   if (MATCH(scan, TOKEN_RPAREN))
     scanner_next_token(scan);
   else
@@ -1100,7 +1097,7 @@ static void compile_prim_expression(compiler_t *comp)
       chunk_emit_word(chunk, (uint16_t) data);
       return;
     }
-    int index = consts->length;
+    uint8_t index = (uint8_t) consts->length;
     array_inplace_add_element(consts, NUMBER_VALUE(data));
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
@@ -1110,7 +1107,7 @@ static void compile_prim_expression(compiler_t *comp)
   {
     double data = parse_double(scan->token.start);
     scanner_next_token(scan);
-    int index = consts->length;
+    uint8_t index = (uint8_t) consts->length;
     array_inplace_add_element(consts, NUMBER_VALUE(data));
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
@@ -1118,10 +1115,10 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_STRING))
   {
-    token_t tk = scan->token;
+    token_t *tk = &scan->token;
+    string_t *str = string_from_chars(tk->length, tk->start);
     scanner_next_token(scan);
-    string_t *str = string_from_chars(tk.length, tk.start);
-    int index = consts->length;
+    uint8_t index = (uint8_t) consts->length;
     array_inplace_add_element(consts, STRING_VALUE(str));
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
@@ -1165,7 +1162,7 @@ static void compile_array_constructor(compiler_t *comp)
     return;
   }
   compile_expression(comp);
-  int length = 1;
+  uint8_t length = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
@@ -1186,7 +1183,7 @@ static void compile_anonymous_function(compiler_t *comp)
   compiler_t fn_comp;
   compiler_init(&fn_comp, scan, string_from_chars(-1, "anonymous"));
   array_t *consts = comp->fn->consts;
-  int index = consts->length;
+  uint8_t index = (uint8_t) consts->length;
   array_inplace_add_element(consts, FUNCTION_VALUE(fn_comp.fn));
   chunk_emit_opcode(chunk, OP_CONSTANT);
   chunk_emit_byte(chunk, index);
@@ -1233,10 +1230,9 @@ static void compile_subscript_or_call(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   chunk_t *chunk = &comp->fn->chunk;
-  token_t tk = scan->token;
-  scanner_next_token(scan);
   bool is_local;
-  int index = resolve_variable(comp, &tk, &is_local);
+  uint8_t index = resolve_variable(comp, &scan->token, &is_local);
+  scanner_next_token(scan);
   chunk_emit_opcode(chunk, is_local ? OP_GET_LOCAL : OP_GLOBAL);
   chunk_emit_byte(chunk, index);
   for (;;)
@@ -1260,7 +1256,7 @@ static void compile_subscript_or_call(compiler_t *comp)
         return;
       }
       compile_expression(comp);
-      int nargs = 1;
+      uint8_t nargs = 1;
       while (MATCH(scan, TOKEN_COMMA))
       {
         scanner_next_token(scan);

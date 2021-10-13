@@ -78,19 +78,26 @@ void value_print(value_t val, bool quoted)
     printf("null");
     break;
   case TYPE_BOOLEAN:
-    printf("%s", val.as_boolean ? "true" : "false");
+    printf("%s", val.as.boolean ? "true" : "false");
     break;
   case TYPE_NUMBER:
-    printf("%g", val.as_number);
+    printf("%g", val.as.number);
     break;
   case TYPE_STRING:
-    printf(quoted ? "'%s'" : "%s", AS_STRING(val)->chars);
+    {
+      const char *fmt = quoted ? "'%.*s'" : "%.*s";
+      string_t *str = AS_STRING(val);
+      printf(fmt, str->length, str->chars);
+    }
     break;
   case TYPE_ARRAY:
     array_print(AS_ARRAY(val));
     break;
   case TYPE_CALLABLE:
-    printf("<callable %s at %p>", AS_CALLABLE(val)->name->chars, val.as_pointer);
+    {
+      string_t *name = AS_CALLABLE(val)->name;
+      printf("<callable %.*s at %p>", name->length, name->chars, val.as.pointer);
+    }
     break;
   }
 }
@@ -105,10 +112,10 @@ bool value_equal(value_t val1, value_t val2)
   case TYPE_NULL:
     break;
   case TYPE_BOOLEAN:
-    result = val1.as_boolean == val2.as_boolean;
+    result = val1.as.boolean == val2.as.boolean;
     break;
   case TYPE_NUMBER:
-    result = val1.as_number == val2.as_number;
+    result = val1.as.number == val2.as.number;
     break;
   case TYPE_STRING:
     result = string_equal(AS_STRING(val1), AS_STRING(val2));
@@ -117,7 +124,7 @@ bool value_equal(value_t val1, value_t val2)
     result = array_equal(AS_ARRAY(val1), AS_ARRAY(val2));
     break;
   case TYPE_CALLABLE:
-    result = val1.as_pointer == val2.as_pointer;
+    result = val1.as.pointer == val2.as.pointer;
     break;
   }
   return result;
@@ -134,15 +141,15 @@ int value_compare(value_t val1, value_t val2)
   case TYPE_NULL:
     break;
   case TYPE_BOOLEAN:
-    result = val1.as_boolean - val2.as_boolean;
+    result = val1.as.boolean - val2.as.boolean;
     break;
   case TYPE_NUMBER:
-    if (val1.as_number > val2.as_number)
+    if (val1.as.number > val2.as.number)
     {
       result = 1;
       break;
     }
-    if (val1.as_number < val2.as_number)
+    if (val1.as.number < val2.as.number)
     {
       result = -1;
       break;
@@ -151,7 +158,8 @@ int value_compare(value_t val1, value_t val2)
   case TYPE_STRING:
     result = string_compare(AS_STRING(val1), AS_STRING(val2));
     break;
-  default:
+  case TYPE_ARRAY:
+  case TYPE_CALLABLE:
     fatal_error("cannot compare value of type '%s'", type_name(val1.type));
     break;
   }

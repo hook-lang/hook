@@ -14,18 +14,18 @@
 #define FLAG_NATIVE 0b0100
 
 #define NULL_VALUE        ((value_t) {.type = TYPE_NULL, .flags = FLAG_FALSEY})
-#define FALSE_VALUE       ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_FALSEY, .as_boolean = false})
-#define TRUE_VALUE        ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_NONE, .as_boolean = true})
-#define NUMBER_VALUE(n)   ((value_t) {.type = TYPE_NUMBER, .flags = FLAG_NONE, .as_number = (n)})
-#define STRING_VALUE(s)   ((value_t) {.type = TYPE_STRING, .flags = FLAG_OBJECT, .as_pointer = (s)})
-#define ARRAY_VALUE(a)    ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as_pointer = (a)})
-#define FUNCTION_VALUE(f) ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT, .as_pointer = (f)})
-#define NATIVE_VALUE(n)   ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT | FLAG_NATIVE, .as_pointer = (n)})
+#define FALSE_VALUE       ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_FALSEY, .as.boolean = false})
+#define TRUE_VALUE        ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_NONE, .as.boolean = true})
+#define NUMBER_VALUE(n)   ((value_t) {.type = TYPE_NUMBER, .flags = FLAG_NONE, .as.number = (n)})
+#define STRING_VALUE(s)   ((value_t) {.type = TYPE_STRING, .flags = FLAG_OBJECT, .as.pointer = (s)})
+#define ARRAY_VALUE(a)    ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as.pointer = (a)})
+#define FUNCTION_VALUE(f) ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT, .as.pointer = (f)})
+#define NATIVE_VALUE(n)   ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT | FLAG_NATIVE, .as.pointer = (n)})
 
 #define IS_NULL(v)     ((v).type == TYPE_NULL)
 #define IS_BOOLEAN(v)  ((v).type == TYPE_BOOLEAN)
 #define IS_NUMBER(v)   ((v).type == TYPE_NUMBER)
-#define IS_INTEGER(v)  (IS_NUMBER(v) && (v).as_number == (long) (v).as_number)
+#define IS_INTEGER(v)  (IS_NUMBER(v) && (v).as.number == (long) (v).as.number)
 #define IS_STRING(v)   ((v).type == TYPE_STRING)
 #define IS_ARRAY(v)    ((v).type == TYPE_ARRAY)
 #define IS_CALLABLE(v) ((v).type == TYPE_CALLABLE)
@@ -34,12 +34,12 @@
 #define IS_TRUTHY(v)  (!IS_FALSEY(v))
 #define IS_NATIVE(v)  ((v).flags & FLAG_NATIVE)
 
-#define AS_STRING(v)   ((string_t *) (v).as_pointer)
-#define AS_ARRAY(v)    ((array_t *) (v).as_pointer)
-#define AS_CALLABLE(v) ((callable_t *) (v).as_pointer)
-#define AS_FUNCTION(v) ((function_t *) (v).as_pointer)
-#define AS_NATIVE(v)   ((native_t *) (v).as_pointer)
-#define AS_OBJECT(v)   ((object_t *) (v).as_pointer)
+#define AS_STRING(v)   ((string_t *) (v).as.pointer)
+#define AS_ARRAY(v)    ((array_t *) (v).as.pointer)
+#define AS_CALLABLE(v) ((callable_t *) (v).as.pointer)
+#define AS_FUNCTION(v) ((function_t *) (v).as.pointer)
+#define AS_NATIVE(v)   ((native_t *) (v).as.pointer)
+#define AS_OBJECT(v)   ((object_t *) (v).as.pointer)
 
 #define OBJECT_HEADER int ref_count;
 
@@ -66,10 +66,10 @@ typedef struct
   int flags;
   union
   {
-    bool as_boolean;
-    double as_number;
-    void *as_pointer;
-  };
+    bool boolean;
+    double number;
+    void *pointer;
+  } as;
 } value_t;
 
 typedef struct

@@ -59,7 +59,10 @@ static void cap_call(vm_t *vm, value_t *frame)
   case TYPE_ARRAY:
     vm_push_number(vm, AS_ARRAY(val)->capacity);
     return;
-  default:
+  case TYPE_NULL:
+  case TYPE_BOOLEAN:
+  case TYPE_NUMBER:
+  case TYPE_CALLABLE:
     break;
   }
   fatal_error("invalid type: '%s' has no capacity", type_name(val.type));
@@ -76,7 +79,10 @@ static void len_call(vm_t *vm, value_t *frame)
   case TYPE_ARRAY:
     vm_push_number(vm, AS_ARRAY(val)->length);
     return;
-  default:
+  case TYPE_NULL:
+  case TYPE_BOOLEAN:
+  case TYPE_NUMBER:
+  case TYPE_CALLABLE:
     break;
   }
   fatal_error("invalid type: '%s' has no length", type_name(val.type));
@@ -87,7 +93,7 @@ static void array_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_INTEGER(val))
     fatal_error("invalid type: expected integer but got '%s'", type_name(val.type));
-  long capacity = (long) val.as_number;
+  long capacity = (long) val.as.number;
   if (capacity < 0 || capacity > INT_MAX)
     fatal_error("invalid range: capacity must be between 0 and %d", INT_MAX);
   array_t *arr = array_allocate((int) capacity);
@@ -109,7 +115,7 @@ static void abs_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_NUMBER(val))
     fatal_error("invalid type: expected number but got '%s'", type_name(val.type));
-  vm_push_number(vm, fabs(val.as_number));
+  vm_push_number(vm, fabs(val.as.number));
 }
 
 static void floor_call(vm_t *vm, value_t *frame)
@@ -117,7 +123,7 @@ static void floor_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_NUMBER(val))
     fatal_error("invalid type: expected number but got '%s'", type_name(val.type));
-  vm_push_number(vm, floor(val.as_number));
+  vm_push_number(vm, floor(val.as.number));
 }
 
 static void ceil_call(vm_t *vm, value_t *frame)
@@ -125,7 +131,7 @@ static void ceil_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_NUMBER(val))
     fatal_error("invalid type: expected number but got '%s'", type_name(val.type));
-  vm_push_number(vm, ceil(val.as_number));
+  vm_push_number(vm, ceil(val.as.number));
 }
 
 static void pow_call(vm_t *vm, value_t *frame)
@@ -136,7 +142,7 @@ static void pow_call(vm_t *vm, value_t *frame)
     fatal_error("invalid type: expected number but got '%s'", type_name(val1.type));
   if (!IS_NUMBER(val2))
     fatal_error("invalid type: expected number but got '%s'", type_name(val2.type));
-  vm_push_number(vm, pow(val1.as_number, val2.as_number));
+  vm_push_number(vm, pow(val1.as.number, val2.as.number));
 }
 
 static void sqrt_call(vm_t *vm, value_t *frame)
@@ -144,7 +150,7 @@ static void sqrt_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_NUMBER(val))
     fatal_error("invalid type: expected number but got '%s'", type_name(val.type));
-  vm_push_number(vm, sqrt(val.as_number));
+  vm_push_number(vm, sqrt(val.as.number));
 }
 
 void globals_init(vm_t *vm)
