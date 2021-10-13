@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. test/test
+
+title "Built-in function ceil()"
+
+script "println(ceil(1.23));"
+
+expect_success "2"
+
+run

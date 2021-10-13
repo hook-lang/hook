@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. tests/tests
+. test/test
 
 title "Built-in function array()"
 

@@ -9,7 +9,7 @@ The Hook Programming Language
 
 ## Hello, world!
 
-```
+```js
 println('Hello, world!');
 ```
 

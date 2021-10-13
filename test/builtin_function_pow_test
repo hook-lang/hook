@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. test/test
+
+title "Built-in function pow()"
+
+script "println(pow(2, 3));"
+
+expect_success "8"
+
+run

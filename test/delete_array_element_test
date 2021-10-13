@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. tests/tests
+. test/test
 
 title "Delete array element"
 

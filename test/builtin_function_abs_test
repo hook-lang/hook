@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. test/test
+
+title "Built-in function abs()"
+
+script "println(abs(1.23));
+println(abs(-1.23));"
+
+expect_success "1.23
+1.23"
+
+run

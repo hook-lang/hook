@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. test/test
+
+title "Built-in function sqrt()"
+
+script "println(sqrt(9));"
+
+expect_success "3"
+
+run

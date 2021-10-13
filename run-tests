@@ -5,7 +5,7 @@ echo "Running tests..."
 passed=0
 failed=0
 
-for script in tests/*_test ; do
+for script in test/*_test ; do
   ./$script
   status=$?
   if [ $status -eq 0 ]; then
