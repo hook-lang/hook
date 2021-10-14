@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. test/test
+
+title "Built-in function str()"
+
+script "println([str(null), str(false), str(true), str(1.23), str('foo')]);"
+
+expect_success "['null', 'false', 'true', '1.23', 'foo']"
+
+run

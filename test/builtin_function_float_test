@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. test/test
+
+title "Built-in function float()"
+
+script "println(float(123));
+println(float(1.23));
+println(float('123'));
+println(float('1.23'));"
+
+expect_success "123
+1.23
+123
+1.23"
+
+run

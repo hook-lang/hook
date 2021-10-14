@@ -1,0 +1,21 @@
+#!/bin/sh
+
+. test/test
+
+title "Built-in function bool()"
+
+script "println(bool(null));
+println(bool(false));
+println(bool(true));
+println(bool(0));
+println(bool(''));
+println(bool([]));"
+
+expect_success "false
+false
+true
+true
+true
+true"
+
+run
