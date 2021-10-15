@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. test/test
+
+title "Error X expects Y argument but got Z"
+
+script "var n = len();"
+
+expect_failure "fatal error: len() expects 1 argument but got 0"
+
+run

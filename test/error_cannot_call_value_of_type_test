@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. test/test
+
+title "Error cannot call value of type X"
+
+script "var a = 1;
+a();"
+
+expect_failure "fatal error: cannot call value of type 'number'"
+
+run

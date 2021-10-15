@@ -38,8 +38,9 @@ static inline void modulo(vm_t *vm);
 static inline void negate(vm_t *vm);
 static inline void not(vm_t *vm);
 static inline void call(vm_t *vm, int nargs);
-static inline void check_arity(function_t *fn, int nargs);
+static inline void check_arity(callable_t *callable, int nargs);
 static inline void function_call(vm_t *vm, value_t *frame, uint8_t *code, value_t *consts);
+static inline void pop_frame(vm_t *vm, value_t *frame);
 
 static inline void push(vm_t *vm, value_t val)
 {
@@ -571,31 +572,38 @@ static inline void call(vm_t *vm, int nargs)
 {
   value_t *frame = &vm->slots[vm->index - nargs];
   value_t val = frame[0];
+  if (IS_NATIVE(val))
+  {
+    callable_t *callable = AS_CALLABLE(val);
+    check_arity(callable, nargs);
+    native_t *native = (native_t *) callable;
+    native->call(vm, frame);
+    DECR_REF(native);
+    if (IS_UNREACHABLE(native))
+      native_free(native);
+    pop_frame(vm, frame);
+    return;
+  }
   if (!IS_CALLABLE(val))
     fatal_error("cannot call value of type '%s'", type_name(val.type));
-  function_t *fn = AS_FUNCTION(val);
-  check_arity(fn, nargs);
-  if (IS_NATIVE(val))
-    AS_NATIVE(val)->call(vm, frame);
-  else
-    function_call(vm, frame, fn->chunk.bytes, fn->consts->elements);
+  callable_t *callable = AS_CALLABLE(val);
+  check_arity(callable, nargs);
+  function_t *fn = (function_t *) callable;
+  function_call(vm, frame, fn->chunk.bytes, fn->consts->elements);
   DECR_REF(fn);
   if (IS_UNREACHABLE(fn))
     function_free(fn);
-  frame[0] = vm->slots[vm->index];
-  --vm->index;
-  while (&vm->slots[vm->index] > frame)
-    value_release(vm->slots[vm->index--]);
+  pop_frame(vm, frame);
 }
 
-static inline void check_arity(function_t *fn, int nargs)
+static inline void check_arity(callable_t *callable, int nargs)
 {
-  int arity = fn->arity;
+  int arity = callable->arity;
   if (nargs >= arity)
     return;
-  string_t *name = fn->name;
-  const char *fmt = arity > 1 ? "function '%.*s' expects %d arguments but got %d" :
-    "function '%.*s' expects %d argument but got %d";
+  string_t *name = callable->name;
+  const char *fmt = arity > 1 ? "%.*s() expects %d arguments but got %d" :
+    "%.*s() expects %d argument but got %d";
   fatal_error(fmt, name->length, name->chars, arity, nargs);
 }
 
@@ -742,6 +750,14 @@ static inline void function_call(vm_t *vm, value_t *frame, uint8_t *code, value_
       return;
     }
   }
+}
+
+static inline void pop_frame(vm_t *vm, value_t *frame)
+{
+  frame[0] = vm->slots[vm->index];
+  --vm->index;
+  while (&vm->slots[vm->index] > frame)
+    value_release(vm->slots[vm->index--]);
 }
 
 void vm_init(vm_t *vm, int min_capacity)
