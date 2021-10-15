@@ -5,6 +5,7 @@
 
 #include "value.h"
 #include "callable.h"
+#include "common.h"
 #include "error.h"
 
 static inline void value_free(value_t val);
@@ -130,38 +131,42 @@ bool value_equal(value_t val1, value_t val2)
   return result;
 }
 
-int value_compare(value_t val1, value_t val2)
+int value_compare(value_t val1, value_t val2, int *result)
 {
   if (val1.type != val2.type)
-    fatal_error("cannot compare '%s' and '%s'", type_name(val1.type),
+  {
+    runtime_error("cannot compare '%s' and '%s'", type_name(val1.type),
       type_name(val2.type));
-  int result = 0;
+    return STATUS_ERROR;
+  }
   switch (val1.type)
   {
   case TYPE_NULL:
-    break;
+    *result = 0;
+    return STATUS_OK;
   case TYPE_BOOLEAN:
-    result = val1.as.boolean - val2.as.boolean;
-    break;
+    *result = val1.as.boolean - val2.as.boolean;
+    return STATUS_OK;
   case TYPE_NUMBER:
     if (val1.as.number > val2.as.number)
     {
-      result = 1;
-      break;
+      *result = 1;
+      return STATUS_OK;
     }
     if (val1.as.number < val2.as.number)
     {
-      result = -1;
-      break;
+      *result = -1;
+      return STATUS_OK;
     }
-    break;
+    *result = 0;
+    return STATUS_OK;
   case TYPE_STRING:
-    result = string_compare(AS_STRING(val1), AS_STRING(val2));
-    break;
+    *result = string_compare(AS_STRING(val1), AS_STRING(val2));
+    return STATUS_OK;
   case TYPE_ARRAY:
   case TYPE_CALLABLE:
-    fatal_error("cannot compare value of type '%s'", type_name(val1.type));
     break;
   }
-  return result;
+  runtime_error("cannot compare value of type '%s'", type_name(val1.type));
+  return STATUS_ERROR;
 }

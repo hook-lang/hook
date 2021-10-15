@@ -7,6 +7,7 @@ title "Error cannot call value of type X"
 script "let a = 1;
 a();"
 
-expect_failure "fatal error: cannot call value of type 'number'"
+expect_failure "runtime error: cannot call value of type 'number'
+  at <main>() in <stdin>:2"
 
 run

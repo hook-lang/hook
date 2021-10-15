@@ -6,6 +6,7 @@ title "Error X expects Y argument but got Z"
 
 script "let n = len();"
 
-expect_failure "fatal error: len() expects 1 argument but got 0"
+expect_failure "runtime error: len() expects 1 argument but got 0
+  at <main>() in <stdin>:1"
 
 run

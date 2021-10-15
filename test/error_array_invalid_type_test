@@ -6,6 +6,8 @@ title "Error from array(): invalid type"
 
 script "let arr = array('foo');"
 
-expect_failure "fatal error: invalid type: expected integer but got 'string'"
+expect_failure "runtime error: invalid type: expected integer but got 'string'
+  at array() in <native>
+  at <main>() in <stdin>:1"
 
 run
