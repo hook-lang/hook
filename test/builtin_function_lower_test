@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. test/test
+
+title "Built-in function lower()"
+
+script "println(lower(''));
+println(lower('foo'));
+println(lower('Bar'));
+println(lower('BAZ'));"
+
+expect_success "
+foo
+bar
+baz"
+
+run

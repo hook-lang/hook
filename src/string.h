@@ -27,5 +27,7 @@ string_t *string_concat(string_t *str1, string_t *str2);
 void string_inplace_concat(string_t *dest, string_t *src);
 bool string_equal(string_t *str1, string_t *str2);
 int string_compare(string_t *str1, string_t *str2);
+string_t *string_lower(string_t *str);
+string_t *string_upper(string_t *str);
 
 #endif

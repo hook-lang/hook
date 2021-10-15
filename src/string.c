@@ -6,6 +6,7 @@
 #include "string.h"
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "memory.h"
 #include "error.h"
 
@@ -126,4 +127,26 @@ bool string_equal(string_t *str1, string_t *str2)
 int string_compare(string_t *str1, string_t *str2)
 {
   return strcmp(str1->chars, str2->chars);
+}
+
+string_t *string_lower(string_t *str)
+{
+  int length = str->length;
+  string_t *result = string_allocate(length + 1);
+  result->length = length;
+  for (int i = 0; i < length; i++)
+    result->chars[i] = tolower(str->chars[i]);
+  result->chars[length] = '\0';
+  return result;
+}
+
+string_t *string_upper(string_t *str)
+{
+  int length = str->length;
+  string_t *result = string_allocate(length + 1);
+  result->length = length;
+  for (int i = 0; i < length; i++)
+    result->chars[i] = toupper(str->chars[i]);
+  result->chars[length] = '\0';
+  return result;
 }

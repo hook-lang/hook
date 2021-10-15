@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. test/test
+
+title "Built-in function upper()"
+
+script "println(upper(''));
+println(upper('foo'));
+println(upper('Bar'));
+println(upper('BAZ'));"
+
+expect_success "
+FOO
+BAR
+BAZ"
+
+run

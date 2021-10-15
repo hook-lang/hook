@@ -23,6 +23,8 @@ static const char *globals[] = {
   "cap",
   "len",
   "is_empty",
+  "lower",
+  "upper",
   "array",
   "index_of",
   "abs",
@@ -42,6 +44,8 @@ static void str_call(vm_t *vm, value_t *frame);
 static void cap_call(vm_t *vm, value_t *frame);
 static void len_call(vm_t *vm, value_t *frame);
 static void is_empty_call(vm_t *vm, value_t *frame);
+static void lower_call(vm_t *vm, value_t *frame);
+static void upper_call(vm_t *vm, value_t *frame);
 static void array_call(vm_t *vm, value_t *frame);
 static void index_of_call(vm_t *vm, value_t *frame);
 static void abs_call(vm_t *vm, value_t *frame);
@@ -210,6 +214,22 @@ static void is_empty_call(vm_t *vm, value_t *frame)
   fatal_error("invalid type: '%s' has no length", type_name(val.type));
 }
 
+static void lower_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_STRING(val))
+    fatal_error("invalid type: expected string but got '%s'", type_name(val.type));
+  vm_push_string(vm, string_lower(AS_STRING(val)));
+}
+
+static void upper_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_STRING(val))
+    fatal_error("invalid type: expected string but got '%s'", type_name(val.type));
+  vm_push_string(vm, string_upper(AS_STRING(val)));
+}
+
 static void array_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[1];
@@ -286,13 +306,15 @@ void globals_init(vm_t *vm)
   vm_push_native(vm, native_new(string_from_chars(-1, globals[6]), 1, &cap_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[7]), 1, &len_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[8]), 1, &is_empty_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[9]), 1, &array_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 2, &index_of_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 1, &abs_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 1, &floor_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 1, &ceil_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 2, &pow_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &sqrt_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[9]), 1, &lower_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &upper_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 1, &array_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 2, &index_of_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 1, &abs_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &floor_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &ceil_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 2, &pow_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &sqrt_call));
 }
 
 int resolve_global(int length, char *chars)
