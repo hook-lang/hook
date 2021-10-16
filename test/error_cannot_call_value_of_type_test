@@ -4,7 +4,7 @@
 
 title "Error cannot call value of type X"
 
-script "var a = 1;
+script "let a = 1;
 a();"
 
 expect_failure "fatal error: cannot call value of type 'number'"

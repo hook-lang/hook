@@ -8,6 +8,7 @@ false
 fn
 for
 if
+let
 loop
 null
 return

@@ -29,6 +29,7 @@ typedef struct
   int length;
   char *start;
   int index;
+  bool is_mutable;
 } local_t;
 
 typedef struct loop
@@ -51,6 +52,13 @@ typedef struct
   function_t *fn;
 } compiler_t;
 
+typedef struct
+{
+  uint8_t index;
+  bool is_local;
+  bool is_mutable;
+} variable_t;
+
 static inline void fatal_error_unexpected_token(scanner_t *scan);
 static inline long parse_long(char *chars);
 static inline double parse_double(char *chars);
@@ -58,10 +66,10 @@ static inline void push_scope(compiler_t *comp);
 static inline void pop_scope(compiler_t *comp);
 static inline int discard_locals(compiler_t *comp, int depth);
 static inline bool name_equal(token_t *tk, local_t *local);
-static inline void add_local(compiler_t *comp, token_t *tk, int index);
-static inline void define_local(compiler_t *comp, token_t *tk);
-static inline uint8_t resolve_variable(compiler_t *comp, token_t *tk, bool *is_local);
-static inline int resolve_local(compiler_t *comp, token_t *tk);
+static inline void add_local(compiler_t *comp, token_t *tk, int index, bool is_mutable);
+static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable);
+static inline void resolve_variable(compiler_t *comp, token_t *tk, variable_t *var);
+static inline local_t *resolve_local(compiler_t *comp, token_t *tk);
 static inline int emit_jump(chunk_t *chunk, opcode_t op);
 static inline void patch_jump(chunk_t *chunk, int offset);
 static inline void start_loop(compiler_t *comp, loop_t *loop);
@@ -69,7 +77,7 @@ static inline void add_break(compiler_t *comp);
 static inline void end_loop(compiler_t *comp);
 static void compile_statement(compiler_t *comp);
 static void compile_block(compiler_t *comp);
-static void compile_variable_declaration(compiler_t *comp);
+static void compile_variable_declaration(compiler_t *comp, bool is_mutable);
 static void compile_assignment(compiler_t *comp, token_t tk);
 static void compile_call_statement(compiler_t *comp, token_t tk);
 static void compile_function_declaration(compiler_t *comp);
@@ -149,17 +157,18 @@ static inline bool name_equal(token_t *tk, local_t *local)
     && !memcmp(tk->start, local->start, tk->length);
 }
 
-static inline void add_local(compiler_t *comp, token_t *tk, int index)
+static inline void add_local(compiler_t *comp, token_t *tk, int index, bool is_mutable)
 {
   local_t *local = &comp->locals[comp->num_locals];
   local->depth = comp->scope_depth;
   local->length = tk->length;
   local->start = tk->start;
   local->index = index;
+  local->is_mutable = is_mutable;
   ++comp->num_locals;
 }
 
-static inline void define_local(compiler_t *comp, token_t *tk)
+static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable)
 {
   for (int i = comp->num_locals - 1; i > -1; --i)
   {
@@ -173,32 +182,36 @@ static inline void define_local(compiler_t *comp, token_t *tk)
   if (comp->num_locals == COMPILER_MAX_LOCALS)
     fatal_error("cannot declare more than %d variables in one scope",
       COMPILER_MAX_LOCALS);
-  add_local(comp, tk, comp->next_index++);
+  add_local(comp, tk, comp->next_index++, is_mutable);
 }
 
-static inline uint8_t resolve_variable(compiler_t *comp, token_t *tk, bool *is_local)
+static inline void resolve_variable(compiler_t *comp, token_t *tk, variable_t *var)
 {
-  *is_local = true;
-  int index = resolve_local(comp, tk);
-  if (index == -1)
+  local_t *local = resolve_local(comp, tk);
+  if (local)
   {
-    *is_local = false;
-    index = resolve_global(tk->length, tk->start);
+    var->index = (uint8_t) local->index;
+    var->is_local = true;
+    var->is_mutable = local->is_mutable;
+    return;
   }
+  int index = resolve_global(tk->length, tk->start);
   if (index == -1)
     fatal_error("variable '%.*s' is used but not defined", tk->length, tk->start);
-  return (uint8_t) index;
+  var->index = index;
+  var->is_local = false;
+  var->is_mutable = false;
 }
 
-static inline int resolve_local(compiler_t *comp, token_t *tk)
+static inline local_t *resolve_local(compiler_t *comp, token_t *tk)
 {
   for (int i = comp->num_locals - 1; i > -1; --i)
   {
     local_t *local = &comp->locals[i];
     if (name_equal(tk, local))
-      return local->index;
+      return local;
   }
-  return -1;
+  return NULL;
 }
 
 static inline int emit_jump(chunk_t *chunk, opcode_t op)
@@ -252,9 +265,15 @@ static void compile_statement(compiler_t *comp)
     compile_block(comp);
     return;
   }
+  if (MATCH(scan, TOKEN_LET))
+  {
+    compile_variable_declaration(comp, false);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    return;
+  }
   if (MATCH(scan, TOKEN_VAR))
   {
-    compile_variable_declaration(comp);
+    compile_variable_declaration(comp, true);
     EXPECT(scan, TOKEN_SEMICOLON);
     return;
   }
@@ -335,14 +354,14 @@ static void compile_block(compiler_t *comp)
   pop_scope(comp);
 }
 
-static void compile_variable_declaration(compiler_t *comp)
+static void compile_variable_declaration(compiler_t *comp, bool is_mutable)
 {
   scanner_t *scan = comp->scan;
   chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   if (MATCH(scan, TOKEN_NAME))
   {
-    define_local(comp, &scan->token);
+    define_local(comp, &scan->token, is_mutable);
     scanner_next_token(scan);
     if (MATCH(scan, TOKEN_EQ))
     {
@@ -358,7 +377,7 @@ static void compile_variable_declaration(compiler_t *comp)
     scanner_next_token(scan);
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
-    define_local(comp, &scan->token);
+    define_local(comp, &scan->token, is_mutable);
     scanner_next_token(scan);
     uint8_t n = 1;
     while (MATCH(scan, TOKEN_COMMA))
@@ -366,7 +385,7 @@ static void compile_variable_declaration(compiler_t *comp)
       scanner_next_token(scan);
       if (!MATCH(scan, TOKEN_NAME))
         fatal_error_unexpected_token(scan);
-      define_local(comp, &scan->token);
+      define_local(comp, &scan->token, is_mutable);
       scanner_next_token(scan);
       ++n;
     }
@@ -384,9 +403,9 @@ static void compile_assignment(compiler_t *comp, token_t tk)
 {
   scanner_t *scan = comp->scan;
   chunk_t *chunk = &comp->fn->chunk;
-  bool is_local;
-  uint8_t index = resolve_variable(comp, &tk, &is_local);
-  if (!is_local)
+  variable_t var;
+  resolve_variable(comp, &tk, &var);
+  if (!var.is_mutable)
     fatal_error("cannot assign to immutable variable '%.*s'",
       tk.length, tk.start);
   if (MATCH(scan, TOKEN_EQ))
@@ -394,18 +413,18 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     scanner_next_token(scan);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
-    chunk_emit_byte(chunk, index);
+    chunk_emit_byte(chunk, var.index);
     return;
   }
   chunk_emit_opcode(chunk, OP_GET_LOCAL);
-  chunk_emit_byte(chunk, index);
+  chunk_emit_byte(chunk, var.index);
   if (MATCH(scan, TOKEN_PLUSEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_ADD);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
-    chunk_emit_byte(chunk, index);
+    chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_MINUSEQ))
@@ -414,7 +433,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_SUBTRACT);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
-    chunk_emit_byte(chunk, index);
+    chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_STAREQ))
@@ -423,7 +442,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_MULTIPLY);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
-    chunk_emit_byte(chunk, index);
+    chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_SLASHEQ))
@@ -432,7 +451,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_DIVIDE);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
-    chunk_emit_byte(chunk, index);
+    chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_PERCENTEQ))
@@ -441,7 +460,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_MODULO);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
-    chunk_emit_byte(chunk, index);
+    chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_PLUSPLUS))
@@ -451,7 +470,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     chunk_emit_word(chunk, 1);
     chunk_emit_opcode(chunk, OP_ADD);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
-    chunk_emit_byte(chunk, index);
+    chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_MINUSMINUS))
@@ -461,7 +480,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     chunk_emit_word(chunk, 1);
     chunk_emit_opcode(chunk, OP_SUBTRACT);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
-    chunk_emit_byte(chunk, index);
+    chunk_emit_byte(chunk, var.index);
     return;
   }
   int n = 0;
@@ -477,7 +496,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
-      chunk_emit_byte(chunk, index);
+      chunk_emit_byte(chunk, var.index);
       return;
     }
     compile_expression(comp);
@@ -490,7 +509,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
-      chunk_emit_byte(chunk, index);
+      chunk_emit_byte(chunk, var.index);
       return;
     }
     chunk_emit_opcode(chunk, OP_FETCH_ELEMENT);
@@ -503,7 +522,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
-      chunk_emit_byte(chunk, index);
+      chunk_emit_byte(chunk, var.index);
       return;
     }
     if (MATCH(scan, TOKEN_MINUSEQ))
@@ -514,7 +533,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
-      chunk_emit_byte(chunk, index);
+      chunk_emit_byte(chunk, var.index);
       return;
     }
     if (MATCH(scan, TOKEN_STAREQ))
@@ -525,7 +544,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
-      chunk_emit_byte(chunk, index);
+      chunk_emit_byte(chunk, var.index);
       return;
     }
     if (MATCH(scan, TOKEN_SLASHEQ))
@@ -536,7 +555,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
-      chunk_emit_byte(chunk, index);
+      chunk_emit_byte(chunk, var.index);
       return;
     }
     if (MATCH(scan, TOKEN_PERCENTEQ))
@@ -547,7 +566,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
-      chunk_emit_byte(chunk, index);
+      chunk_emit_byte(chunk, var.index);
       return;
     }
     if (MATCH(scan, TOKEN_PLUSPLUS))
@@ -559,7 +578,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
-      chunk_emit_byte(chunk, index);
+      chunk_emit_byte(chunk, var.index);
       return;
     }
     if (MATCH(scan, TOKEN_MINUSMINUS))
@@ -571,7 +590,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
-      chunk_emit_byte(chunk, index);
+      chunk_emit_byte(chunk, var.index);
       return;
     }
   }
@@ -583,10 +602,10 @@ static void compile_call_statement(compiler_t *comp, token_t tk)
   scanner_t *scan = comp->scan;
   chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
-  bool is_local;
-  uint8_t index = resolve_variable(comp, &tk, &is_local);
-  chunk_emit_opcode(chunk, is_local ? OP_GET_LOCAL : OP_GLOBAL);
-  chunk_emit_byte(chunk, index);
+  variable_t var;
+  resolve_variable(comp, &tk, &var);
+  chunk_emit_opcode(chunk, var.is_local ? OP_GET_LOCAL : OP_GLOBAL);
+  chunk_emit_byte(chunk, var.index);
   if (MATCH(scan, TOKEN_RPAREN))
   {
     scanner_next_token(scan);
@@ -621,10 +640,10 @@ static void compile_function_declaration(compiler_t *comp)
     fatal_error_unexpected_token(scan);
   tk = scan->token;
   scanner_next_token(scan);
-  define_local(comp, &tk);
+  define_local(comp, &tk, false);
   compiler_t fn_comp;
   compiler_init(&fn_comp, scan, string_from_chars(tk.length, tk.start));
-  add_local(&fn_comp, &tk, 0);
+  add_local(&fn_comp, &tk, 0, false);
   array_t *consts = comp->fn->consts;
   uint8_t index = (uint8_t) consts->length;
   array_inplace_add_element(consts, FUNCTION_VALUE(fn_comp.fn));
@@ -646,7 +665,7 @@ static void compile_function_declaration(compiler_t *comp)
     fatal_error_unexpected_token(scan);
   tk = scan->token;
   scanner_next_token(scan);
-  define_local(&fn_comp, &tk);
+  define_local(&fn_comp, &tk, true);
   int arity = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
@@ -655,7 +674,7 @@ static void compile_function_declaration(compiler_t *comp)
       fatal_error_unexpected_token(scan);
     tk = scan->token;
     scanner_next_token(scan);
-    define_local(&fn_comp, &tk);
+    define_local(&fn_comp, &tk, true);
     ++arity;
   }
   fn_comp.fn->arity = arity;
@@ -677,13 +696,13 @@ static void compile_delete_statement(compiler_t *comp)
     fatal_error_unexpected_token(scan);
   token_t tk = scan->token;
   scanner_next_token(scan);
-  bool is_local;
-  uint8_t index = resolve_variable(comp, &tk, &is_local);
-  if (!is_local)
+  variable_t var;
+  resolve_variable(comp, &tk, &var);
+  if (!var.is_mutable)
     fatal_error("cannot delete element from immutable variable '%.*s'",
       tk.length, tk.start);
   chunk_emit_opcode(chunk, OP_GET_LOCAL);
-  chunk_emit_byte(chunk, index);
+  chunk_emit_byte(chunk, var.index);
   EXPECT(scan, TOKEN_LBRACKET);
   compile_expression(comp);
   EXPECT(scan, TOKEN_RBRACKET);
@@ -701,7 +720,7 @@ static void compile_delete_statement(compiler_t *comp)
   for (int i = 0; i < n; ++i)
     chunk_emit_opcode(chunk, OP_SET_ELEMENT);
   chunk_emit_opcode(chunk, OP_SET_LOCAL);
-  chunk_emit_byte(chunk, index);
+  chunk_emit_byte(chunk, var.index);
 }
 
 static void compile_if_statement(compiler_t *comp)
@@ -794,9 +813,14 @@ static void compile_for_statement(compiler_t *comp)
     scanner_next_token(scan);
   else
   {
-    if (MATCH(scan, TOKEN_VAR))
+    if (MATCH(scan, TOKEN_LET))
     {
-      compile_variable_declaration(comp);
+      compile_variable_declaration(comp, false);
+      EXPECT(scan, TOKEN_SEMICOLON);
+    }
+    else if (MATCH(scan, TOKEN_VAR))
+    {
+      compile_variable_declaration(comp, true);
       EXPECT(scan, TOKEN_SEMICOLON);
     }
     else if (MATCH(scan, TOKEN_NAME))
@@ -1211,7 +1235,7 @@ static void compile_anonymous_function(compiler_t *comp)
     fatal_error_unexpected_token(scan);
   tk = scan->token;
   scanner_next_token(scan);
-  define_local(&fn_comp, &tk);
+  define_local(&fn_comp, &tk, true);
   int arity = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
@@ -1220,7 +1244,7 @@ static void compile_anonymous_function(compiler_t *comp)
       fatal_error_unexpected_token(scan);
     tk = scan->token;
     scanner_next_token(scan);
-    define_local(&fn_comp, &tk);
+    define_local(&fn_comp, &tk, true);
     ++arity;
   }
   fn_comp.fn->arity = arity;
@@ -1237,11 +1261,11 @@ static void compile_subscript_or_call(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   chunk_t *chunk = &comp->fn->chunk;
-  bool is_local;
-  uint8_t index = resolve_variable(comp, &scan->token, &is_local);
+  variable_t var;
+  resolve_variable(comp, &scan->token, &var);
   scanner_next_token(scan);
-  chunk_emit_opcode(chunk, is_local ? OP_GET_LOCAL : OP_GLOBAL);
-  chunk_emit_byte(chunk, index);
+  chunk_emit_opcode(chunk, var.is_local ? OP_GET_LOCAL : OP_GLOBAL);
+  chunk_emit_byte(chunk, var.index);
   for (;;)
   {
     if (MATCH(scan, TOKEN_LBRACKET))
