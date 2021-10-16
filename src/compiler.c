@@ -28,6 +28,7 @@ typedef struct
   int depth;
   int length;
   char *start;
+  int index;
 } local_t;
 
 typedef struct loop
@@ -44,6 +45,7 @@ typedef struct
   scanner_t *scan;
   int scope_depth;
   int num_locals;
+  int next_index;
   local_t locals[COMPILER_MAX_LOCALS];
   loop_t *loop;
   function_t *fn;
@@ -56,7 +58,7 @@ static inline void push_scope(compiler_t *comp);
 static inline void pop_scope(compiler_t *comp);
 static inline int discard_locals(compiler_t *comp, int depth);
 static inline bool name_equal(token_t *tk, local_t *local);
-static inline void add_local(compiler_t *comp, int length, char *start);
+static inline void add_local(compiler_t *comp, token_t *tk, int index);
 static inline void define_local(compiler_t *comp, token_t *tk);
 static inline uint8_t resolve_variable(compiler_t *comp, token_t *tk, bool *is_local);
 static inline int resolve_local(compiler_t *comp, token_t *tk);
@@ -147,12 +149,13 @@ static inline bool name_equal(token_t *tk, local_t *local)
     && !memcmp(tk->start, local->start, tk->length);
 }
 
-static inline void add_local(compiler_t *comp, int length, char *start)
+static inline void add_local(compiler_t *comp, token_t *tk, int index)
 {
   local_t *local = &comp->locals[comp->num_locals];
   local->depth = comp->scope_depth;
-  local->length = length;
-  local->start = start;
+  local->length = tk->length;
+  local->start = tk->start;
+  local->index = index;
   ++comp->num_locals;
 }
 
@@ -170,7 +173,7 @@ static inline void define_local(compiler_t *comp, token_t *tk)
   if (comp->num_locals == COMPILER_MAX_LOCALS)
     fatal_error("cannot declare more than %d variables in one scope",
       COMPILER_MAX_LOCALS);
-  add_local(comp, tk->length, tk->start);
+  add_local(comp, tk, comp->next_index++);
 }
 
 static inline uint8_t resolve_variable(compiler_t *comp, token_t *tk, bool *is_local)
@@ -189,11 +192,13 @@ static inline uint8_t resolve_variable(compiler_t *comp, token_t *tk, bool *is_l
 
 static inline int resolve_local(compiler_t *comp, token_t *tk)
 {
-  int index = comp->num_locals - 1;
-  for (; index > -1; --index)
-    if (name_equal(tk, &comp->locals[index]))
-      break;
-  return index;
+  for (int i = comp->num_locals - 1; i > -1; --i)
+  {
+    local_t *local = &comp->locals[i];
+    if (name_equal(tk, local))
+      return local->index;
+  }
+  return -1;
 }
 
 static inline int emit_jump(chunk_t *chunk, opcode_t op)
@@ -619,6 +624,7 @@ static void compile_function_declaration(compiler_t *comp)
   define_local(comp, &tk);
   compiler_t fn_comp;
   compiler_init(&fn_comp, scan, string_from_chars(tk.length, tk.start));
+  add_local(&fn_comp, &tk, 0);
   array_t *consts = comp->fn->consts;
   uint8_t index = (uint8_t) consts->length;
   array_inplace_add_element(consts, FUNCTION_VALUE(fn_comp.fn));
@@ -1278,9 +1284,9 @@ static void compiler_init(compiler_t *comp, scanner_t *scan, string_t *name)
   comp->scan = scan;
   comp->scope_depth = -1;
   comp->num_locals = 0;
+  comp->next_index = 1;
   comp->loop = NULL;
   comp->fn = function_new(name, 0);
-  add_local(comp, name->length, name->chars);
 }
 
 function_t *compile(scanner_t *scan)
