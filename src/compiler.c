@@ -803,8 +803,7 @@ static void compile_for_statement(compiler_t *comp)
     else
       fatal_error_unexpected_token(scan);
   }
-  loop_t loop;
-  start_loop(comp, &loop);
+  uint16_t jump1 = chunk->length;
   if (MATCH(scan, TOKEN_SEMICOLON))
   {
     scanner_next_token(scan);
@@ -818,7 +817,9 @@ static void compile_for_statement(compiler_t *comp)
   int offset1 = emit_jump(chunk, OP_JUMP_IF_FALSE);
   chunk_emit_opcode(chunk, OP_POP);
   int offset2 = emit_jump(chunk, OP_JUMP);
-  uint16_t jump = chunk->length;
+  uint16_t jump2 = chunk->length;
+  loop_t loop;
+  start_loop(comp, &loop);
   if (MATCH(scan, TOKEN_RPAREN))
     scanner_next_token(scan);
   else
@@ -831,11 +832,11 @@ static void compile_for_statement(compiler_t *comp)
     EXPECT(scan, TOKEN_RPAREN);
   }
   chunk_emit_opcode(chunk, OP_JUMP);
-  chunk_emit_word(chunk, loop.jump);
+  chunk_emit_word(chunk, jump1);  
   patch_jump(chunk, offset2);
   compile_statement(comp);
   chunk_emit_opcode(chunk, OP_JUMP);
-  chunk_emit_word(chunk, jump);
+  chunk_emit_word(chunk, jump2);
   patch_jump(chunk, offset1);
   chunk_emit_opcode(chunk, OP_POP);
   end_loop(comp);
