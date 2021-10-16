@@ -1,5 +1,5 @@
 
-var pixels = [' ', '.', ':', ';', '+', '=', 'x', 'X', '$', '&'];
+var pixels = [" ", ".", ":", ";", "+", "=", "x", "X", "$", "&"];
 
 var y_min = -0.2;
 var y_max = 0.1;
@@ -10,7 +10,7 @@ for (var y_pixel = 0; y_pixel < 24; y_pixel++) {
   var y = (y_pixel / 24) * (y_max - y_min) + y_min;
   for (var x_pixel = 0; x_pixel < 80; x_pixel++) {
     var x = (x_pixel / 79) * (x_max - x_min) + x_min;
-    var pixel = ' ';
+    var pixel = " ";
     var x0 = x;
     var y0 = y;
     for (var iter = 0; iter < 80; iter++) {
@@ -28,5 +28,5 @@ for (var y_pixel = 0; y_pixel < 24; y_pixel++) {
     }
     print(pixel);
   }
-  println('');
+  println("");
 }

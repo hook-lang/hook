@@ -120,12 +120,34 @@ static inline bool match_number(scanner_t *scan)
 
 static inline bool match_string(scanner_t *scan)
 {
-  if (CURRENT_CHAR(scan) != '\'')
+  if (CURRENT_CHAR(scan) == '\'')
+  {
+    int n = 1;
+    for (;;)
+    {
+      if (CHAR_AT(scan, n) == '\'')
+      {
+        ++n;
+        break;
+      }
+      if (CHAR_AT(scan, n) == '\0')
+        fatal_error("unclosed string at %d:%d", scan->line, scan->col);
+      ++n;
+    }
+    scan->token.type = TOKEN_STRING;
+    scan->token.line = scan->line;
+    scan->token.col = scan->col;
+    scan->token.length = n - 2;
+    scan->token.start = &scan->pos[1];
+    next_chars(scan, n);
+    return true;
+  }
+  if (CURRENT_CHAR(scan) != '"')
     return false;
   int n = 1;
   for (;;)
   {
-    if (CHAR_AT(scan, n) == '\'')
+    if (CHAR_AT(scan, n) == '"')
     {
       ++n;
       break;
