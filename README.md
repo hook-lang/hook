@@ -7,7 +7,7 @@
 
 Hook is a simple, small, dynamic-typed, imperative, C-style scripting language with an easy-to-understand implementation. It has been written entirely by hand in C99 using simple techniques like recursive descending parsing, syntax-oriented translation, and stack-based machine.
 
-The feature that makes Hook's interpreter different from the rest is the efficient memory management (no memory leakage) through automatic reference counting only, without any other garbage collection mechanism. This is possible because the language has restrictions that prevent the appearance of cyclic references.
+The feature that differentiates Hook's interpreter from others is its efficient memory management (frees all memory as soon as possible) through automatic reference counting only, without any other garbage collection mechanism and no memory leak. This is possible because the language has restrictions that prevent the appearance of cyclic references.
 
 Warning: Hook is still in its early stages of development and is obviously not production ready. 
 
