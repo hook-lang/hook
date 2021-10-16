@@ -7,7 +7,7 @@ fn sort(a) {
     n--;
     for (var i = 0; i < n; i++) {
       if (a[i] > a[i + 1]) {
-        var t = a[i];
+        let t = a[i];
         a[i] = a[i + 1];
         a[i + 1] = t;
         has_changed = true;

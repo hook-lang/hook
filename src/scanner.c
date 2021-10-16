@@ -396,6 +396,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_IF;
     return;
   }
+  if (match_chars(scan, "let"))
+  {
+    scan->token.type = TOKEN_LET;
+    return;
+  }
   if (match_chars(scan, "loop"))
   {
     scan->token.type = TOKEN_LOOP;

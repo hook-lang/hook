@@ -1,9 +1,9 @@
 
 fn sort(a) {
-  var n = len(a);
+  let n = len(a);
   if (n <= 1)
     return a;
-  var pivot = a[0];
+  let pivot = a[0];
   var left = []; 
   var right = [];
   for (var i = 1; i < n; i++) {

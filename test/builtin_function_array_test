@@ -4,7 +4,7 @@
 
 title "Built-in function array()"
 
-script "var arr = array(100);
+script "let arr = array(100);
 println(arr);"
 
 expect_success "[]"

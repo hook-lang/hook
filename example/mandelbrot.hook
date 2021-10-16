@@ -1,15 +1,15 @@
 
-var pixels = [" ", ".", ":", ";", "+", "=", "x", "X", "$", "&"];
+let pixels = [" ", ".", ":", ";", "+", "=", "x", "X", "$", "&"];
 
-var y_min = -0.2;
-var y_max = 0.1;
-var x_min = -1.5;
-var x_max = -1.1;
+let y_min = -0.2;
+let y_max = 0.1;
+let x_min = -1.5;
+let x_max = -1.1;
 
 for (var y_pixel = 0; y_pixel < 24; y_pixel++) {
-  var y = (y_pixel / 24) * (y_max - y_min) + y_min;
+  let y = (y_pixel / 24) * (y_max - y_min) + y_min;
   for (var x_pixel = 0; x_pixel < 80; x_pixel++) {
-    var x = (x_pixel / 79) * (x_max - x_min) + x_min;
+    let x = (x_pixel / 79) * (x_max - x_min) + x_min;
     var pixel = " ";
     var x0 = x;
     var y0 = y;
@@ -20,7 +20,7 @@ for (var y_pixel = 0; y_pixel < 24; y_pixel++) {
       y1 = y1 + y;
       x0 = x1;
       y0 = y1;
-      var d = (x0 * x0) + (y0 * y0);
+      let d = (x0 * x0) + (y0 * y0);
       if (d > 4) {
         pixel = pixels[floor(iter / 8)];
         break;

@@ -7,7 +7,7 @@ title "Array concatenation"
 script "println([] + ['foo']);
 println(['foo'] + []);
 println(['foo', 'bar'] + ['baz']);
-var arr = ['foo', 'bar'];
+let arr = ['foo', 'bar'];
 println(arr + ['baz', 'qux']);"
 
 expect_success "['foo']
