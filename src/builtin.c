@@ -17,6 +17,7 @@
 static const char *globals[] = {
   "print",
   "println",
+  "type",
   "bool",
   "int",
   "float",
@@ -32,12 +33,14 @@ static const char *globals[] = {
   "floor",
   "ceil",
   "pow",
-  "sqrt"
+  "sqrt",
+  "panic"
 };
 
 static inline int string_to_double(string_t *str, double *result);
 static int print_call(vm_t *vm, value_t *frame);
 static int println_call(vm_t *vm, value_t *frame);
+static int type_call(vm_t *vm, value_t *frame);
 static int bool_call(vm_t *vm, value_t *frame);
 static int int_call(vm_t *vm, value_t *frame);
 static int float_call(vm_t *vm, value_t *frame);
@@ -54,6 +57,7 @@ static int floor_call(vm_t *vm, value_t *frame);
 static int ceil_call(vm_t *vm, value_t *frame);
 static int pow_call(vm_t *vm, value_t *frame);
 static int sqrt_call(vm_t *vm, value_t *frame);
+static int panic_call(vm_t *vm, value_t *frame);
 
 static inline int string_to_double(string_t *str, double *result)
 {
@@ -92,6 +96,12 @@ static int println_call(vm_t *vm, value_t *frame)
   value_print(frame[1], false);
   printf("\n");
   vm_push_null(vm);
+  return STATUS_OK;
+}
+
+static int type_call(vm_t *vm, value_t *frame)
+{
+  vm_push_string(vm, string_from_chars(-1, type_name(frame[1].type)));
   return STATUS_OK;
 }
 
@@ -366,26 +376,42 @@ static int sqrt_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
+static int panic_call(vm_t *vm, value_t *frame)
+{
+  (void) vm;
+  value_t val = frame[1];
+  if (!IS_STRING(val))
+  {
+    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  string_t *str = AS_STRING(val);
+  fprintf(stderr, "panic: %.*s\n", str->length, str->chars);
+  return STATUS_PANIC;
+}
+
 void globals_init(vm_t *vm)
 {
   vm_push_native(vm, native_new(string_from_chars(-1, globals[0]), 1, &print_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[1]), 1, &println_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[2]), 1, &bool_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[3]), 1, &int_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[4]), 1, &float_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[5]), 1, &str_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[6]), 1, &cap_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[7]), 1, &len_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[8]), 1, &is_empty_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[9]), 1, &lower_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &upper_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 1, &array_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 2, &index_of_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 1, &abs_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &floor_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &ceil_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 2, &pow_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &sqrt_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[2]), 1, &type_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[3]), 1, &bool_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[4]), 1, &int_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[5]), 1, &float_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[6]), 1, &str_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[7]), 1, &cap_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[8]), 1, &len_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[9]), 1, &is_empty_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &lower_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 1, &upper_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 1, &array_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 2, &index_of_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &abs_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &floor_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &ceil_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 2, &pow_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &sqrt_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &panic_call));
 }
 
 int resolve_global(int length, char *chars)

@@ -703,9 +703,11 @@ static inline int call(vm_t *vm, int nargs)
   if (IS_NATIVE(val))
   {
     native_t *native = (native_t *) callable;
-    if (native->call(vm, frame) == STATUS_ERROR)
+    int status;
+    if ((status = native->call(vm, frame)) != STATUS_OK)
     {
-      print_trace(callable, line);
+      if (status == STATUS_ERROR)
+        print_trace(callable, line);
       pop_frame(vm, frame);
       return STATUS_ERROR;
     }
