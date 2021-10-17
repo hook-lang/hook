@@ -181,12 +181,28 @@ static inline bool match_name(scanner_t *scan)
   return true;
 }
 
-void scanner_init(scanner_t *scan, char *chars)
+void scanner_init(scanner_t *scan, string_t *file, string_t *source)
 {
-  scan->pos = chars;
+  INCR_REF(file);
+  scan->file = file;
+  INCR_REF(source);
+  scan->source = source;
+  scan->pos = source->chars;
   scan->line = 1;
   scan->col = 1;
   scanner_next_token(scan);
+}
+
+void scanner_free(scanner_t *scan)
+{
+  string_t *file = scan->file;
+  DECR_REF(file);
+  if (IS_UNREACHABLE(file))
+    string_free(file);
+  string_t *source = scan->source;
+  DECR_REF(source);
+  if (IS_UNREACHABLE(source))
+    string_free(source);
 }
 
 void scanner_next_token(scanner_t *scan)

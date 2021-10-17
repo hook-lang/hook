@@ -81,6 +81,6 @@ const char *type_name(type_t type);
 void value_release(value_t val);
 void value_print(value_t val, bool quoted);
 bool value_equal(value_t val1, value_t val2);
-int value_compare(value_t val1, value_t val2);
+int value_compare(value_t val1, value_t val2, int *result);
 
 #endif

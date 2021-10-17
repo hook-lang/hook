@@ -357,7 +357,8 @@ static void compile_block(compiler_t *comp)
 static void compile_variable_declaration(compiler_t *comp, bool is_mutable)
 {
   scanner_t *scan = comp->scan;
-  chunk_t *chunk = &comp->fn->chunk;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
   scanner_next_token(scan);
   if (MATCH(scan, TOKEN_NAME))
   {
@@ -391,9 +392,11 @@ static void compile_variable_declaration(compiler_t *comp, bool is_mutable)
     }
     EXPECT(scan, TOKEN_RBRACKET);
     EXPECT(scan, TOKEN_EQ);
+    int line = scan->line;
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_UNPACK);
     chunk_emit_byte(chunk, n);
+    function_add_line(fn, line);
     return;
   }
   fatal_error_unexpected_token(scan);
@@ -402,7 +405,8 @@ static void compile_variable_declaration(compiler_t *comp, bool is_mutable)
 static void compile_assignment(compiler_t *comp, token_t tk)
 {
   scanner_t *scan = comp->scan;
-  chunk_t *chunk = &comp->fn->chunk;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
   variable_t var;
   resolve_variable(comp, &tk, &var);
   if (!var.is_mutable)
@@ -420,65 +424,79 @@ static void compile_assignment(compiler_t *comp, token_t tk)
   chunk_emit_byte(chunk, var.index);
   if (MATCH(scan, TOKEN_PLUSEQ))
   {
+    int line = scan->line;
     scanner_next_token(scan);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_ADD);
+    function_add_line(fn, line);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_MINUSEQ))
   {
+    int line = scan->line;
     scanner_next_token(scan);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_SUBTRACT);
+    function_add_line(fn, line);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_STAREQ))
   {
+    int line = scan->line;
     scanner_next_token(scan);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_MULTIPLY);
+    function_add_line(fn, line);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_SLASHEQ))
   {
+    int line = scan->line;
     scanner_next_token(scan);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_DIVIDE);
+    function_add_line(fn, line);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_PERCENTEQ))
   {
+    int line = scan->line;
     scanner_next_token(scan);
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_MODULO);
+    function_add_line(fn, line);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_PLUSPLUS))
   {
+    int line = scan->line;
     scanner_next_token(scan);
     chunk_emit_opcode(chunk, OP_INT);
     chunk_emit_word(chunk, 1);
     chunk_emit_opcode(chunk, OP_ADD);
+    function_add_line(fn, line);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, var.index);
     return;
   }
   if (MATCH(scan, TOKEN_MINUSMINUS))
   {
+    int line = scan->line;
     scanner_next_token(scan);
     chunk_emit_opcode(chunk, OP_INT);
     chunk_emit_word(chunk, 1);
     chunk_emit_opcode(chunk, OP_SUBTRACT);
+    function_add_line(fn, line);
     chunk_emit_opcode(chunk, OP_SET_LOCAL);
     chunk_emit_byte(chunk, var.index);
     return;
@@ -486,6 +504,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
   int n = 0;
   while (MATCH(scan, TOKEN_LBRACKET))
   {
+    int line = scan->line;
     scanner_next_token(scan);
     if (MATCH(scan, TOKEN_RBRACKET))
     {
@@ -493,6 +512,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       EXPECT(scan, TOKEN_EQ);
       compile_expression(comp);
       chunk_emit_opcode(chunk, n ? OP_APPEND : OP_INPLACE_APPEND);
+      function_add_line(fn, line);
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -506,6 +526,7 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       scanner_next_token(scan);
       compile_expression(comp);
       chunk_emit_opcode(chunk, n ? OP_PUT_ELEMENT : OP_INPLACE_PUT_ELEMENT);
+      function_add_line(fn, line);
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -513,12 +534,15 @@ static void compile_assignment(compiler_t *comp, token_t tk)
       return;
     }
     chunk_emit_opcode(chunk, OP_FETCH_ELEMENT);
+    function_add_line(fn, line);
     ++n;
     if (MATCH(scan, TOKEN_PLUSEQ))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_expression(comp);
       chunk_emit_opcode(chunk, OP_ADD);
+      function_add_line(fn, line);
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -527,9 +551,11 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     }
     if (MATCH(scan, TOKEN_MINUSEQ))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_expression(comp);
       chunk_emit_opcode(chunk, OP_SUBTRACT);
+      function_add_line(fn, line);
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -538,9 +564,11 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     }
     if (MATCH(scan, TOKEN_STAREQ))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_expression(comp);
       chunk_emit_opcode(chunk, OP_MULTIPLY);
+      function_add_line(fn, line);
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -549,9 +577,11 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     }
     if (MATCH(scan, TOKEN_SLASHEQ))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_expression(comp);
       chunk_emit_opcode(chunk, OP_DIVIDE);
+      function_add_line(fn, line);
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -560,9 +590,11 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     }
     if (MATCH(scan, TOKEN_PERCENTEQ))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_expression(comp);
       chunk_emit_opcode(chunk, OP_MODULO);
+      function_add_line(fn, line);
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -571,10 +603,12 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     }
     if (MATCH(scan, TOKEN_PLUSPLUS))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       chunk_emit_opcode(chunk, OP_INT);
       chunk_emit_word(chunk, 1);
       chunk_emit_opcode(chunk, OP_ADD);
+      function_add_line(fn, line);
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -583,10 +617,12 @@ static void compile_assignment(compiler_t *comp, token_t tk)
     }
     if (MATCH(scan, TOKEN_MINUSMINUS))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       chunk_emit_opcode(chunk, OP_INT);
       chunk_emit_word(chunk, 1);
       chunk_emit_opcode(chunk, OP_SUBTRACT);
+      function_add_line(fn, line);
       for (int i = 0; i < n; ++i)
         chunk_emit_opcode(chunk, OP_SET_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -600,7 +636,9 @@ static void compile_assignment(compiler_t *comp, token_t tk)
 static void compile_call_statement(compiler_t *comp, token_t tk)
 {
   scanner_t *scan = comp->scan;
-  chunk_t *chunk = &comp->fn->chunk;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
+  int line = scan->line;
   scanner_next_token(scan);
   variable_t var;
   resolve_variable(comp, &tk, &var);
@@ -612,6 +650,7 @@ static void compile_call_statement(compiler_t *comp, token_t tk)
     EXPECT(scan, TOKEN_SEMICOLON);
     chunk_emit_opcode(chunk, OP_CALL);
     chunk_emit_byte(chunk, 0);
+    function_add_line(fn, line);
     chunk_emit_opcode(chunk, OP_POP);
     return;
   }
@@ -627,6 +666,7 @@ static void compile_call_statement(compiler_t *comp, token_t tk)
   EXPECT(scan, TOKEN_SEMICOLON);
   chunk_emit_opcode(chunk, OP_CALL);
   chunk_emit_byte(chunk, nargs);
+  function_add_line(fn, line);
   chunk_emit_opcode(chunk, OP_POP);
 }
 
@@ -690,7 +730,8 @@ static void compile_function_declaration(compiler_t *comp)
 static void compile_delete_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  chunk_t *chunk = &comp->fn->chunk;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
   scanner_next_token(scan);
   if (!MATCH(scan, TOKEN_NAME))
     fatal_error_unexpected_token(scan);
@@ -703,20 +744,26 @@ static void compile_delete_statement(compiler_t *comp)
       tk.length, tk.start);
   chunk_emit_opcode(chunk, OP_GET_LOCAL);
   chunk_emit_byte(chunk, var.index);
+  int line = scan->line;
   EXPECT(scan, TOKEN_LBRACKET);
   compile_expression(comp);
   EXPECT(scan, TOKEN_RBRACKET);
+  int next = scan->line;
   int n = 0;
   while (MATCH(scan, TOKEN_LBRACKET))
   {
     scanner_next_token(scan);
     chunk_emit_opcode(chunk, OP_FETCH_ELEMENT);
+    function_add_line(fn, line);
     compile_expression(comp);
     EXPECT(scan, TOKEN_RBRACKET);
+    line = next;
+    next = scan->line;
     ++n;
   }
   EXPECT(scan, TOKEN_SEMICOLON);
   chunk_emit_opcode(chunk, n ? OP_DELETE : OP_INPLACE_DELETE);
+  function_add_line(fn, line);
   for (int i = 0; i < n; ++i)
     chunk_emit_opcode(chunk, OP_SET_ELEMENT);
   chunk_emit_opcode(chunk, OP_SET_LOCAL);
@@ -973,37 +1020,46 @@ static void compile_equal_expression(compiler_t *comp)
 static void compile_comp_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  chunk_t *chunk = &comp->fn->chunk;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
   compile_add_expression(comp);
   for (;;)
   {
     if (MATCH(scan, TOKEN_GT))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_add_expression(comp);
       chunk_emit_opcode(chunk, OP_GREATER);
+      function_add_line(fn, line);
       continue;
     }
     if (MATCH(scan, TOKEN_GTEQ))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_add_expression(comp);
       chunk_emit_opcode(chunk, OP_LESS);
+      function_add_line(fn, line);
       chunk_emit_opcode(chunk, OP_NOT);
       continue;
     }
     if (MATCH(scan, TOKEN_LT))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_add_expression(comp);
       chunk_emit_opcode(chunk, OP_LESS);
+      function_add_line(fn, line);
       continue;
     }
     if (MATCH(scan, TOKEN_LTEQ))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_add_expression(comp);
       chunk_emit_opcode(chunk, OP_GREATER);
+      function_add_line(fn, line);
       chunk_emit_opcode(chunk, OP_NOT);
       continue;
     }
@@ -1014,22 +1070,27 @@ static void compile_comp_expression(compiler_t *comp)
 static void compile_add_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  chunk_t *chunk = &comp->fn->chunk;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
   compile_mul_expression(comp);
   for (;;)
   {
     if (MATCH(scan, TOKEN_PLUS))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_mul_expression(comp);
       chunk_emit_opcode(chunk, OP_ADD);
+      function_add_line(fn, line);
       continue;
     }
     if (MATCH(scan, TOKEN_MINUS))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_mul_expression(comp);
       chunk_emit_opcode(chunk, OP_SUBTRACT);
+      function_add_line(fn, line);
       continue;
     }
     break;
@@ -1040,28 +1101,35 @@ static void compile_mul_expression(compiler_t *comp)
 {
   compile_unary_expression(comp);
   scanner_t *scan = comp->scan;
-  chunk_t *chunk = &comp->fn->chunk;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
   for (;;)
   {
     if (MATCH(scan, TOKEN_STAR))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_unary_expression(comp);
       chunk_emit_opcode(chunk, OP_MULTIPLY);
+      function_add_line(fn, line);
       continue;
     }
     if (MATCH(scan, TOKEN_SLASH))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_unary_expression(comp);
       chunk_emit_opcode(chunk, OP_DIVIDE);
+      function_add_line(fn, line);
       continue;
     }
     if (MATCH(scan, TOKEN_PERCENT))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_unary_expression(comp);
       chunk_emit_opcode(chunk, OP_MODULO);
+      function_add_line(fn, line);
       continue;
     }
     break;
@@ -1071,7 +1139,8 @@ static void compile_mul_expression(compiler_t *comp)
 static void compile_unary_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  chunk_t *chunk = &comp->fn->chunk;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
   if (MATCH(scan, TOKEN_PLUS))
   {
     scanner_next_token(scan);
@@ -1080,9 +1149,11 @@ static void compile_unary_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_MINUS))
   {
+    int line = scan->line;
     scanner_next_token(scan);
     compile_unary_expression(comp);
     chunk_emit_opcode(chunk, OP_NEGATE);
+    function_add_line(fn, line);
     return;
   }
   if (MATCH(scan, TOKEN_BANG))
@@ -1212,7 +1283,7 @@ static void compile_anonymous_function(compiler_t *comp)
   chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   compiler_t fn_comp;
-  compiler_init(&fn_comp, scan, string_from_chars(-1, "anonymous"));
+  compiler_init(&fn_comp, scan, string_from_chars(-1, "<anonymous>"));
   array_t *consts = comp->fn->consts;
   uint8_t index = (uint8_t) consts->length;
   array_inplace_add_element(consts, FUNCTION_VALUE(fn_comp.fn));
@@ -1260,7 +1331,8 @@ static void compile_anonymous_function(compiler_t *comp)
 static void compile_subscript_or_call(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  chunk_t *chunk = &comp->fn->chunk;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
   variable_t var;
   resolve_variable(comp, &scan->token, &var);
   scanner_next_token(scan);
@@ -1270,20 +1342,24 @@ static void compile_subscript_or_call(compiler_t *comp)
   {
     if (MATCH(scan, TOKEN_LBRACKET))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       compile_expression(comp);
       EXPECT(scan, TOKEN_RBRACKET);
       chunk_emit_opcode(chunk, OP_GET_ELEMENT);
+      function_add_line(fn, line);
       continue;
     }
     if (MATCH(scan, TOKEN_LPAREN))
     {
+      int line = scan->line;
       scanner_next_token(scan);
       if (MATCH(scan, TOKEN_RPAREN))
       {
         scanner_next_token(scan);
         chunk_emit_opcode(chunk, OP_CALL);
         chunk_emit_byte(chunk, 0);
+        function_add_line(fn, line);
         return;
       }
       compile_expression(comp);
@@ -1297,6 +1373,7 @@ static void compile_subscript_or_call(compiler_t *comp)
       EXPECT(scan, TOKEN_RPAREN);
       chunk_emit_opcode(chunk, OP_CALL);
       chunk_emit_byte(chunk, nargs);
+      function_add_line(fn, line);
       continue;
     }
     break;
@@ -1310,13 +1387,13 @@ static void compiler_init(compiler_t *comp, scanner_t *scan, string_t *name)
   comp->num_locals = 0;
   comp->next_index = 1;
   comp->loop = NULL;
-  comp->fn = function_new(name, 0);
+  comp->fn = function_new(0, name, scan->file);
 }
 
 function_t *compile(scanner_t *scan)
 {
   compiler_t comp;
-  compiler_init(&comp, scan, string_from_chars(-1, "main"));
+  compiler_init(&comp, scan, string_from_chars(-1, "<main>"));
   while (!MATCH(comp.scan, TOKEN_EOF))
     compile_statement(&comp);
   chunk_t *chunk = &comp.fn->chunk;

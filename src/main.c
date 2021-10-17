@@ -12,7 +12,6 @@
 
 static inline const char *get_argument(int argc, const char **argv, int index);
 static inline bool has_option(int argc, const char **argv, const char *option);
-static inline string_t *load(int argc, const char **argv);
 
 static inline const char *get_argument(int argc, const char **argv, int index)
 {
@@ -31,20 +30,15 @@ static inline bool has_option(int argc, const char **argv, const char *option)
   return false;
 }
 
-static inline string_t *load(int argc, const char **argv)
-{
-  const char *filename = get_argument(argc, argv, 0);
-  if (filename)
-    return string_from_file(filename);
-  return string_from_stream(stdin);
-}
-
 int main(int argc, const char **argv)
 {
-  string_t *str = load(argc, argv);
+  const char *filename = get_argument(argc, argv, 0);
+  string_t *file = string_from_chars(-1, filename ? filename : "<stdin>");
+  string_t *source = filename ? string_from_file(filename) : string_from_stream(stdin);
   vm_t vm;
   vm_init(&vm, 0);
-  vm_push_string(&vm, str);
+  vm_push_string(&vm, file);
+  vm_push_string(&vm, source);
   vm_compile(&vm);
   if (has_option(argc, argv, "--disasm"))
   {
@@ -53,7 +47,11 @@ int main(int argc, const char **argv)
     vm_free(&vm);
     return EXIT_SUCCESS;
   }
-  vm_call(&vm, 0);
+  if (vm_call(&vm, 0) == STATUS_ERROR)
+  {
+    vm_free(&vm);
+    return EXIT_FAILURE;
+  }
   vm_pop(&vm);
   vm_free(&vm);
   return EXIT_SUCCESS;

@@ -6,6 +6,8 @@ title "Error invalid range: capacity must be between X and Y"
 
 script "let arr = array(-1);"
 
-expect_failure "fatal error: invalid range: capacity must be between 0 and 2147483647"
+expect_failure "runtime error: invalid range: capacity must be between 0 and 2147483647
+  at array() in <native>
+  at <main>() in <stdin>:1"
 
 run

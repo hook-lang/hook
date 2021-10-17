@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. test/test
+
+title "Error from int(): cannot convert string to number"
+
+script "let a = int('123 x');"
+
+expect_failure "runtime error: invalid type: cannot convert 'string' to 'number'
+  at int() in <native>
+  at <main>() in <stdin>:1"
+
+run

@@ -6,6 +6,8 @@ title "Error from index_of(): invalid type"
 
 script "let i = index_of('foo', 0);"
 
-expect_failure "fatal error: invalid type: expected array but got 'string'"
+expect_failure "runtime error: invalid type: expected array but got 'string'
+  at index_of() in <native>
+  at <main>() in <stdin>:1"
 
 run

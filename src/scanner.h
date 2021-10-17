@@ -6,6 +6,8 @@
 #ifndef SCANNER_H
 #define SCANNER_H
 
+#include "string.h"
+
 typedef enum
 {
   TOKEN_EOF,
@@ -72,13 +74,16 @@ typedef struct
 
 typedef struct
 {
+  string_t *file;
+  string_t *source;
   char *pos;
   int line;
   int col;
   token_t token;
 } scanner_t;
 
-void scanner_init(scanner_t *scan, char *chars);
+void scanner_init(scanner_t *scan, string_t *file, string_t *source);
+void scanner_free(scanner_t *scan);
 void scanner_next_token(scanner_t *scan);
 
 #endif

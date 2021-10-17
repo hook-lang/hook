@@ -1,0 +1,21 @@
+#!/bin/sh
+
+. test/test
+
+title "Variable declaration"
+
+script "var a;
+var b = 1;
+var [c, d] = ['foo', 'bar'];
+
+println(a);
+println(b);
+println(c);
+println(d);"
+
+expect_success "null
+1
+foo
+bar"
+
+run
