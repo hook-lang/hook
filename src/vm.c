@@ -919,7 +919,7 @@ static inline int function_call(vm_t *vm, value_t *frame, function_t *fn, int *l
     }
   }
 error:
-  *line = function_get_line(fn, pc - fn->chunk.bytes);
+  *line = function_get_line(fn, (int) (pc - fn->chunk.bytes));
   return STATUS_ERROR;
 }
 

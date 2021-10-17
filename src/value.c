@@ -86,9 +86,8 @@ void value_print(value_t val, bool quoted)
     break;
   case TYPE_STRING:
     {
-      const char *fmt = quoted ? "'%.*s'" : "%.*s";
       string_t *str = AS_STRING(val);
-      printf(fmt, str->length, str->chars);
+      printf(quoted ? "'%.*s'" : "%.*s", str->length, str->chars);
     }
     break;
   case TYPE_ARRAY:

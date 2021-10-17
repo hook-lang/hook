@@ -60,8 +60,8 @@ typedef struct
 } variable_t;
 
 static inline void fatal_error_unexpected_token(scanner_t *scan);
-static inline long parse_long(char *chars);
-static inline double parse_double(char *chars);
+static inline long parse_long(token_t *tk);
+static inline double parse_double(token_t *tk);
 static inline void push_scope(compiler_t *comp);
 static inline void pop_scope(compiler_t *comp);
 static inline int discard_locals(compiler_t *comp, int depth);
@@ -73,7 +73,6 @@ static inline local_t *resolve_local(compiler_t *comp, token_t *tk);
 static inline int emit_jump(chunk_t *chunk, opcode_t op);
 static inline void patch_jump(chunk_t *chunk, int offset);
 static inline void start_loop(compiler_t *comp, loop_t *loop);
-static inline void add_break(compiler_t *comp);
 static inline void end_loop(compiler_t *comp);
 static void compile_statement(compiler_t *comp);
 static void compile_block(compiler_t *comp);
@@ -112,21 +111,21 @@ static inline void fatal_error_unexpected_token(scanner_t *scan)
     tk->line, tk->col);
 }
 
-static inline long parse_long(char *chars)
+static inline long parse_long(token_t *tk)
 {
   errno = 0;
-  long result = strtol(chars, NULL, 10);
+  long result = strtol(tk->start, NULL, 10);
   if (errno == ERANGE)
-    fatal_error("integer number too large");
+    fatal_error("integer number too large at %d:%d", tk->line, tk->col);
   return result;
 }
 
-static inline double parse_double(char *chars)
+static inline double parse_double(token_t *tk)
 {
   errno = 0;
-  double result = strtod(chars, NULL);
+  double result = strtod(tk->start, NULL);
   if (errno == ERANGE)
-    fatal_error("floating point number too large");
+    fatal_error("floating point number too large at %d:%d", tk->line, tk->col);
   return result;
 }
 
@@ -176,12 +175,12 @@ static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable)
     if (local->depth < comp->scope_depth)
       break;
     if (name_equal(tk, local))
-      fatal_error("variable '%.*s' is already defined in this scope",
-        tk->length, tk->start);
+      fatal_error("variable '%.*s' is already defined in this scope at %d:%d",
+        tk->length, tk->start, tk->line, tk->col);
   }
   if (comp->num_locals == COMPILER_MAX_LOCALS)
-    fatal_error("cannot declare more than %d variables in one scope",
-      COMPILER_MAX_LOCALS);
+    fatal_error("cannot declare more than %d variables in one scope at %d:%d",
+      COMPILER_MAX_LOCALS, tk->line, tk->col);
   add_local(comp, tk, comp->next_index++, is_mutable);
 }
 
@@ -197,8 +196,9 @@ static inline void resolve_variable(compiler_t *comp, token_t *tk, variable_t *v
   }
   int index = resolve_global(tk->length, tk->start);
   if (index == -1)
-    fatal_error("variable '%.*s' is used but not defined", tk->length, tk->start);
-  var->index = index;
+    fatal_error("variable '%.*s' is used but not defined at %d:%d", tk->length,
+      tk->start, tk->line, tk->col);
+  var->index = (uint8_t) index;
   var->is_local = false;
   var->is_mutable = false;
 }
@@ -234,18 +234,9 @@ static inline void start_loop(compiler_t *comp, loop_t *loop)
 {
   loop->enclosing = comp->loop;
   loop->scope_depth = comp->scope_depth;
-  loop->jump = comp->fn->chunk.length;
+  loop->jump = (uint16_t) comp->fn->chunk.length;
   loop->num_offsets = 0;
   comp->loop = loop;
-}
-
-static inline void add_break(compiler_t *comp)
-{
-  loop_t *loop = comp->loop;
-  if (loop->num_offsets == COMPILER_MAX_BREAKS)
-    fatal_error("too many breaks");
-  int offset = emit_jump(&comp->fn->chunk, OP_JUMP);
-  loop->offsets[loop->num_offsets++] = offset;
 }
 
 static inline void end_loop(compiler_t *comp)
@@ -410,8 +401,8 @@ static void compile_assignment(compiler_t *comp, token_t tk)
   variable_t var;
   resolve_variable(comp, &tk, &var);
   if (!var.is_mutable)
-    fatal_error("cannot assign to immutable variable '%.*s'",
-      tk.length, tk.start);
+    fatal_error("cannot assign to immutable variable '%.*s' at %d:%d",
+      tk.length, tk.start, tk.line, tk.col);
   if (MATCH(scan, TOKEN_EQ))
   {
     scanner_next_token(scan);
@@ -740,8 +731,8 @@ static void compile_delete_statement(compiler_t *comp)
   variable_t var;
   resolve_variable(comp, &tk, &var);
   if (!var.is_mutable)
-    fatal_error("cannot delete element from immutable variable '%.*s'",
-      tk.length, tk.start);
+    fatal_error("cannot delete element from immutable variable '%.*s' at %d:%d",
+      tk.length, tk.start, tk.line, tk.col);
   chunk_emit_opcode(chunk, OP_GET_LOCAL);
   chunk_emit_byte(chunk, var.index);
   int line = scan->line;
@@ -880,7 +871,7 @@ static void compile_for_statement(compiler_t *comp)
     else
       fatal_error_unexpected_token(scan);
   }
-  uint16_t jump1 = chunk->length;
+  uint16_t jump1 = (uint16_t) chunk->length;
   if (MATCH(scan, TOKEN_SEMICOLON))
   {
     scanner_next_token(scan);
@@ -894,7 +885,7 @@ static void compile_for_statement(compiler_t *comp)
   int offset1 = emit_jump(chunk, OP_JUMP_IF_FALSE);
   chunk_emit_opcode(chunk, OP_POP);
   int offset2 = emit_jump(chunk, OP_JUMP);
-  uint16_t jump2 = chunk->length;
+  uint16_t jump2 = (uint16_t) chunk->length;
   loop_t loop;
   start_loop(comp, &loop);
   if (MATCH(scan, TOKEN_RPAREN))
@@ -924,9 +915,10 @@ static void compile_continue_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   chunk_t *chunk = &comp->fn->chunk;
+  token_t tk = scan->token;
   scanner_next_token(scan);
   if (!comp->loop)
-    fatal_error("cannot use 'continue' outside of a loop");
+    fatal_error("cannot use 'continue' outside of a loop at %d:%d", tk.line, tk.col);
   EXPECT(scan, TOKEN_SEMICOLON);
   discard_locals(comp, comp->loop->scope_depth + 1);
   chunk_emit_opcode(chunk, OP_JUMP);
@@ -936,12 +928,17 @@ static void compile_continue_statement(compiler_t *comp)
 static void compile_break_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
+  token_t tk = scan->token;
   scanner_next_token(scan);
   if (!comp->loop)
-    fatal_error("cannot use 'break' outside of a loop");
+    fatal_error("cannot use 'break' outside of a loop at %d:%d", tk.line, tk.col);
   EXPECT(scan, TOKEN_SEMICOLON);
   discard_locals(comp, comp->loop->scope_depth + 1);
-  add_break(comp);
+  loop_t *loop = comp->loop;
+  if (loop->num_offsets == COMPILER_MAX_BREAKS)
+    fatal_error("too many breaks at %d:%d", tk.line, tk.col);
+  int offset = emit_jump(&comp->fn->chunk, OP_JUMP);
+  loop->offsets[loop->num_offsets++] = offset;
 }
 
 static void compile_return_statement(compiler_t *comp)
@@ -1191,7 +1188,7 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_INT))
   {
-    long data = parse_long(scan->token.start);
+    long data = parse_long(&scan->token);
     scanner_next_token(scan);
     if (data <= UINT16_MAX)
     {
@@ -1207,7 +1204,7 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_FLOAT))
   {
-    double data = parse_double(scan->token.start);
+    double data = parse_double(&scan->token);
     scanner_next_token(scan);
     uint8_t index = (uint8_t) consts->length;
     array_inplace_add_element(consts, NUMBER_VALUE(data));

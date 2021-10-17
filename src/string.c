@@ -135,7 +135,7 @@ string_t *string_lower(string_t *str)
   string_t *result = string_allocate(length + 1);
   result->length = length;
   for (int i = 0; i < length; i++)
-    result->chars[i] = tolower(str->chars[i]);
+    result->chars[i] = (char) tolower(str->chars[i]);
   result->chars[length] = '\0';
   return result;
 }
@@ -146,7 +146,7 @@ string_t *string_upper(string_t *str)
   string_t *result = string_allocate(length + 1);
   result->length = length;
   for (int i = 0; i < length; i++)
-    result->chars[i] = toupper(str->chars[i]);
+    result->chars[i] = (char) toupper(str->chars[i]);
   result->chars[length] = '\0';
   return result;
 }
