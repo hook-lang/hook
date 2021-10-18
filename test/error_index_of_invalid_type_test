@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. test/test
+. test/_test
 
 title "Error from index_of(): invalid type"
 

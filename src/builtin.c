@@ -34,6 +34,7 @@ static const char *globals[] = {
   "ceil",
   "pow",
   "sqrt",
+  "system",
   "panic"
 };
 
@@ -57,6 +58,7 @@ static int floor_call(vm_t *vm, value_t *frame);
 static int ceil_call(vm_t *vm, value_t *frame);
 static int pow_call(vm_t *vm, value_t *frame);
 static int sqrt_call(vm_t *vm, value_t *frame);
+static int system_call(vm_t *vm, value_t *frame);
 static int panic_call(vm_t *vm, value_t *frame);
 
 static inline int string_to_double(string_t *str, double *result)
@@ -376,6 +378,18 @@ static int sqrt_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
+static int system_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_STRING(val))
+  {
+    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  vm_push_number(vm, system(AS_STRING(val)->chars));
+  return STATUS_OK;
+}
+
 static int panic_call(vm_t *vm, value_t *frame)
 {
   (void) vm;
@@ -411,7 +425,8 @@ void globals_init(vm_t *vm)
   vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &ceil_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 2, &pow_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &sqrt_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &panic_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &system_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &panic_call));
 }
 
 int resolve_global(int length, char *chars)

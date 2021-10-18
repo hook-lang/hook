@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. test/test
+. test/_test
 
 title "Error X expects Y argument but got Z"
 

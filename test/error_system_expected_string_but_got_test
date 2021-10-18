@@ -2,12 +2,12 @@
 
 . test/_test
 
-title "Error from upper(): expected string but got X"
+title "Error from system(): expected string but got X"
 
-script "let a = upper(1);"
+script "system(1);"
 
 expect_failure "runtime error: invalid type: expected string but got 'number'
-  at upper() in <native>
+  at system() in <native>
   at <main>() in <stdin>:1"
 
 run
