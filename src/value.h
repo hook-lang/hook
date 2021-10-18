@@ -36,7 +36,6 @@
 
 #define AS_STRING(v)   ((string_t *) (v).as.pointer)
 #define AS_ARRAY(v)    ((array_t *) (v).as.pointer)
-#define AS_CALLABLE(v) ((callable_t *) (v).as.pointer)
 #define AS_FUNCTION(v) ((function_t *) (v).as.pointer)
 #define AS_NATIVE(v)   ((native_t *) (v).as.pointer)
 #define AS_OBJECT(v)   ((object_t *) (v).as.pointer)

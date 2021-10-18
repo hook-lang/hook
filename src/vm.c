@@ -17,6 +17,7 @@ static inline void push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline void array(vm_t *vm, int length);
+static inline void function(vm_t *vm, prototype_t *proto);
 static inline int unpack(vm_t *vm, int length);
 static inline int append(vm_t *vm);
 static inline int get_element(vm_t *vm);
@@ -37,10 +38,10 @@ static inline int divide(vm_t *vm);
 static inline int modulo(vm_t *vm);
 static inline int negate(vm_t *vm);
 static inline void not(vm_t *vm);
-static inline int call(vm_t *vm, int nargs);
-static inline int check_arity(callable_t *callable, int nargs);
-static inline void print_trace(callable_t *callable, int line);
-static inline int function_call(vm_t *vm, value_t *frame, function_t *fn, int *line);
+static inline int call(vm_t *vm, int num_args);
+static inline int check_arity(int arity, string_t *name, int num_args);
+static inline void print_trace(string_t *name, string_t *file, int line);
+static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *line);
 static inline void pop_frame(vm_t *vm, value_t *frame);
 static inline void move_result_and_pop_frame(vm_t *vm, value_t *frame);
 
@@ -73,9 +74,21 @@ static inline void array(vm_t *vm, int length)
   arr->length = length;
   for (int i = 0; i < length; ++i)
     arr->elements[i] = slots[i];
+  vm->index -= length;
   INCR_REF(arr);
-  slots[0] = ARRAY_VALUE(arr);
-  vm->index -= length - 1;
+  push(vm, ARRAY_VALUE(arr));
+}
+
+static inline void function(vm_t *vm, prototype_t *proto)
+{
+  int num_nonlocals = proto->num_nonlocals;
+  value_t *slots = &vm->slots[vm->index - num_nonlocals + 1];
+  function_t *fn = function_new(proto);
+  for (int i = 0; i < num_nonlocals; ++i)
+    fn->nonlocals[i] = slots[i];
+  vm->index -= num_nonlocals;
+  INCR_REF(fn);
+  push(vm, FUNCTION_VALUE(fn));
 }
 
 static inline int unpack(vm_t *vm, int length)
@@ -683,9 +696,9 @@ static inline void not(vm_t *vm)
   value_release(val);
 }
 
-static inline int call(vm_t *vm, int nargs)
+static inline int call(vm_t *vm, int num_args)
 {
-  value_t *frame = &vm->slots[vm->index - nargs];
+  value_t *frame = &vm->slots[vm->index - num_args];
   value_t val = frame[0];
   if (!IS_CALLABLE(val))
   {
@@ -693,21 +706,19 @@ static inline int call(vm_t *vm, int nargs)
     pop_frame(vm, frame);
     return STATUS_ERROR;
   }
-  callable_t *callable = AS_CALLABLE(val);
-  if (check_arity(callable, nargs) == STATUS_ERROR)
-  {
-    pop_frame(vm, frame);
-    return STATUS_ERROR;
-  }
-  int line = -1;
   if (IS_NATIVE(val))
   {
-    native_t *native = (native_t *) callable;
+    native_t *native = AS_NATIVE(val);
+    if (check_arity(native->arity, native->name, num_args) == STATUS_ERROR)
+    {
+      pop_frame(vm, frame);
+      return STATUS_ERROR;
+    }
     int status;
     if ((status = native->call(vm, frame)) != STATUS_OK)
     {
       if (status == STATUS_ERROR)
-        print_trace(callable, line);
+        print_trace(native->name, NULL, 0);
       pop_frame(vm, frame);
       return STATUS_ERROR;
     }
@@ -717,10 +728,17 @@ static inline int call(vm_t *vm, int nargs)
     move_result_and_pop_frame(vm, frame);
     return STATUS_OK;
   }
-  function_t *fn = (function_t *) callable;
-  if (function_call(vm, frame, fn, &line) == STATUS_ERROR)
+  function_t *fn = AS_FUNCTION(val);
+  prototype_t *proto = fn->proto;
+  if (check_arity(proto->arity, proto->name, num_args) == STATUS_ERROR)
   {
-    print_trace(callable, line);
+    pop_frame(vm, frame);
+    return STATUS_ERROR;
+  }
+  int line;
+  if (call_function(vm, frame, fn, &line) == STATUS_ERROR)
+  {
+    print_trace(proto->name, proto->file, line);
     pop_frame(vm, frame);
     return STATUS_ERROR;
   }
@@ -731,35 +749,35 @@ static inline int call(vm_t *vm, int nargs)
   return STATUS_OK;
 }
 
-static inline int check_arity(callable_t *callable, int nargs)
+static inline int check_arity(int arity, string_t *name, int num_args)
 {
-  int arity = callable->arity;
-  if (nargs >= arity)
+  if (num_args >= arity)
     return STATUS_OK;
-  string_t *name = callable->name;
   const char *fmt = arity > 1 ? "%.*s() expects %d arguments but got %d" :
     "%.*s() expects %d argument but got %d";
-  runtime_error(fmt, name->length, name->chars, arity, nargs);
+  runtime_error(fmt, name->length, name->chars, arity, num_args);
   return STATUS_ERROR;
 }
 
-static inline void print_trace(callable_t *callable, int line)
+static inline void print_trace(string_t *name, string_t *file, int line)
 {
-  char *name = callable->name ? callable->name->chars : "<anonymous>";
-  if (line == -1)
+  char *chars = name ? name->chars : "<anonymous>";
+  if (file)
   {
-    fprintf(stderr, "  at %s() in <native>\n", name);
+    fprintf(stderr, "  at %s() in %.*s:%d\n", chars, file->length, file->chars, line);
     return;
   }
-  string_t *file = ((function_t *) callable)->file;
-  fprintf(stderr, "  at %s() in %.*s:%d\n", name, file->length, file->chars, line);
+  fprintf(stderr, "  at %s() in <native>\n", chars);
 }
 
-static inline int function_call(vm_t *vm, value_t *frame, function_t *fn, int *line)
+static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *line)
 {
-  uint8_t *code = fn->chunk.bytes;
-  value_t *consts = fn->consts->elements;
   value_t *slots = vm->slots;
+  prototype_t *proto = fn->proto;
+  value_t *nonlocals = fn->nonlocals;
+  uint8_t *code = proto->chunk.bytes;
+  value_t *consts = proto->consts->elements;
+  prototype_t **protos = proto->protos;
   uint8_t *pc = code;
   for (;;)
   {
@@ -788,6 +806,9 @@ static inline int function_call(vm_t *vm, value_t *frame, function_t *fn, int *l
     case OP_ARRAY:
       array(vm, read_byte(&pc));
       break;
+    case OP_FUNCTION:
+      function(vm, protos[read_byte(&pc)]);
+      break;
     case OP_UNPACK:
       if (unpack(vm, read_byte(&pc)) == STATUS_ERROR)
         goto error;
@@ -798,6 +819,13 @@ static inline int function_call(vm_t *vm, value_t *frame, function_t *fn, int *l
     case OP_GLOBAL:
       {
         value_t val = slots[read_byte(&pc)];
+        VALUE_INCR_REF(val);
+        push(vm, val);
+      }
+      break;
+    case OP_NONLOCAL:
+      {
+        value_t val = nonlocals[read_byte(&pc)];
         VALUE_INCR_REF(val);
         push(vm, val);
       }
@@ -919,7 +947,7 @@ static inline int function_call(vm_t *vm, value_t *frame, function_t *fn, int *l
     }
   }
 error:
-  *line = function_get_line(fn, (int) (pc - fn->chunk.bytes));
+  *line = prototype_get_line(proto, (int) (pc - proto->chunk.bytes));
   return STATUS_ERROR;
 }
 
@@ -1016,7 +1044,8 @@ void vm_compile(vm_t *vm)
   string_t *source = AS_STRING(val2);
   scanner_t scan;
   scanner_init(&scan, file, source);
-  function_t *fn = compile(&scan);
+  prototype_t *proto = compile(&scan);
+  function_t *fn = function_new(proto);
   INCR_REF(fn);
   slots[0] = FUNCTION_VALUE(fn);
   --vm->index;
@@ -1025,7 +1054,7 @@ void vm_compile(vm_t *vm)
   scanner_free(&scan);
 }
 
-int vm_call(vm_t *vm, int nargs)
+int vm_call(vm_t *vm, int num_args)
 {
-  return call(vm, nargs);
+  return call(vm, num_args);
 }

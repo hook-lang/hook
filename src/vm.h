@@ -31,6 +31,6 @@ void vm_push_function(vm_t *vm, function_t *fn);
 void vm_push_native(vm_t *vm, native_t *native);
 void vm_pop(vm_t *vm);
 void vm_compile(vm_t *vm);
-int vm_call(vm_t *vm, int nargs);
+int vm_call(vm_t *vm, int num_args);
 
 #endif

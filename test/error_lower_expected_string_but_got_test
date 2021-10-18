@@ -8,6 +8,6 @@ script "let a = lower(1);"
 
 expect_failure "runtime error: invalid type: expected string but got 'number'
   at lower() in <native>
-  at <main>() in <stdin>:1"
+  at main() in <stdin>:1"
 
 run

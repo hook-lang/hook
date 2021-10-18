@@ -429,7 +429,7 @@ void globals_init(vm_t *vm)
   vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &panic_call));
 }
 
-int resolve_global(int length, char *chars)
+int lookup_global(int length, char *chars)
 {
   int index = sizeof(globals) / sizeof(*globals) - 1;
   for (; index > -1; --index)

@@ -8,6 +8,6 @@ script "let a = sqrt('foo');"
 
 expect_failure "runtime error: invalid type: expected number but got 'string'
   at sqrt() in <native>
-  at <main>() in <stdin>:1"
+  at main() in <stdin>:1"
 
 run

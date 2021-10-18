@@ -7,6 +7,6 @@ title "Built-in function panic()"
 script "panic('oops!');"
 
 expect_failure "panic: oops!
-  at <main>() in <stdin>:1"
+  at main() in <stdin>:1"
 
 run

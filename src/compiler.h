@@ -9,6 +9,6 @@
 #include "callable.h"
 #include "scanner.h"
 
-function_t *compile(scanner_t *scan);
+prototype_t *compile(scanner_t *scan);
 
 #endif

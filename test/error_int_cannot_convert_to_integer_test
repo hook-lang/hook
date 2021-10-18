@@ -8,6 +8,6 @@ script "let a = int(null);"
 
 expect_failure "runtime error: invalid type: cannot convert 'null' to 'integer'
   at int() in <native>
-  at <main>() in <stdin>:1"
+  at main() in <stdin>:1"
 
 run

@@ -6,14 +6,16 @@
 #include "disasm.h"
 #include <stdio.h>
 
-void dump(function_t *fn)
+static inline void dump_prototype(prototype_t *proto);
+
+static inline void dump_prototype(prototype_t *proto)
 {
-  string_t *name = fn->name;
-  printf("<callable %.*s at %p>\n", name->length, name->chars, fn);
-  uint8_t *bytes = fn->chunk.bytes;
+  string_t *name = proto->name;
+  printf("<function %.*s at %p>\n", name->length, name->chars, proto);
+  uint8_t *bytes = proto->chunk.bytes;
   int i = 0;
   int n = 0;
-  while (i < fn->chunk.length)
+  while (i < proto->chunk.length)
   {
     opcode_t op = (opcode_t) bytes[i];
     int j = i++;
@@ -42,6 +44,9 @@ void dump(function_t *fn)
     case OP_ARRAY:
       printf("[%05d] Array             %d\n", j, bytes[i++]);
       break;
+    case OP_FUNCTION:
+      printf("[%05d] Function          %d\n", j, bytes[i++]);
+      break;
     case OP_UNPACK:
       printf("[%05d] Unpack            %d\n", j, bytes[i++]);
       break;
@@ -50,6 +55,9 @@ void dump(function_t *fn)
       break;
     case OP_GLOBAL:
       printf("[%05d] Global            %d\n", j, bytes[i++]);
+      break;
+    case OP_NONLOCAL:
+      printf("[%05d] NonLocal          %d\n", j, bytes[i++]);
       break;
     case OP_GET_LOCAL:
       printf("[%05d] GetLocal          %d\n", j, bytes[i++]);
@@ -144,4 +152,12 @@ void dump(function_t *fn)
     }
   }
   printf("%d instruction(s)\n\n", n);
+  for (int i = 0; i < proto->num_protos; ++i)
+    dump_prototype(proto->protos[i]);  
+}
+
+void dump(function_t *fn)
+{
+  prototype_t *proto = fn->proto;
+  dump_prototype(proto);
 }
