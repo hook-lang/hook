@@ -1209,12 +1209,6 @@ static void compile_unary_expression(compiler_t *comp)
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
-  if (MATCH(scan, TOKEN_PLUS))
-  {
-    scanner_next_token(scan);
-    compile_unary_expression(comp);
-    return;
-  }
   if (MATCH(scan, TOKEN_MINUS))
   {
     int line = scan->line;
