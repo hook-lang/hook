@@ -1,0 +1,17 @@
+    
+var n = 99;
+
+while (n > 1) {
+  println(str(n) + " bottles of beer on the wall,");
+  println(str(n) + " bottles of beer!");
+  println("You take one down, pass it around,");
+  n--;
+  println(str(n) + " bottles of beer on the wall!");
+  println("");
+}
+
+println(str(n) + " bottle of beer on the wall,");
+println(str(n) + " bottle of beer!");
+println("You take it down, pass it around,");
+println("No more bottles of beer!");
+println("");

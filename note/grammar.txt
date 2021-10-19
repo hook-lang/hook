@@ -18,7 +18,8 @@ stmt        ::= block
 
 block       ::= '{' stmt* '}'
 
-var_decl    ::= ( 'let' | 'var' ) NAME ( '=' expr )?
+var_decl    ::= 'let' NAME '=' expr
+              | 'var' NAME ( '=' expr )?
               | ( 'let' | 'var' ) '[' NAME ( ',' NAME )* ']' '=' expr
 
 assign      ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
