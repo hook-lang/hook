@@ -1,0 +1,26 @@
+#!/bin/sh
+
+. test/_test
+
+title "Non-locals test"
+
+script "let a = 1;
+fn f (x) {
+  let b = 2;
+  fn g (y) {
+    let c = 3;
+    let h = fn (z) {
+      return z + c + y + b * x * x;
+    };
+    return h;
+  }
+  let h = g(a);
+  return h;
+}
+let h = f(4);
+let r = h(5);
+println(r);"
+
+expect_success "41"
+
+run

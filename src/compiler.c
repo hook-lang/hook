@@ -765,7 +765,7 @@ static void compile_function_declaration(compiler_t *comp)
     fatal_error_unexpected_token(scan);
   tk = scan->token;
   scanner_next_token(scan);
-  define_local(&child_comp, &tk, true);
+  define_local(&child_comp, &tk, false);
   int arity = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
@@ -774,7 +774,7 @@ static void compile_function_declaration(compiler_t *comp)
       fatal_error_unexpected_token(scan);
     tk = scan->token;
     scanner_next_token(scan);
-    define_local(&child_comp, &tk, true);
+    define_local(&child_comp, &tk, false);
     ++arity;
   }
   child_comp.proto->arity = arity;
@@ -1368,7 +1368,7 @@ static void compile_anonymous_function(compiler_t *comp)
     fatal_error_unexpected_token(scan);
   tk = scan->token;
   scanner_next_token(scan);
-  define_local(&child_comp, &tk, true);
+  define_local(&child_comp, &tk, false);
   int arity = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
@@ -1377,7 +1377,7 @@ static void compile_anonymous_function(compiler_t *comp)
       fatal_error_unexpected_token(scan);
     tk = scan->token;
     scanner_next_token(scan);
-    define_local(&child_comp, &tk, true);
+    define_local(&child_comp, &tk, false);
     ++arity;
   }
   child_comp.proto->arity = arity;
