@@ -81,7 +81,7 @@ static void compile_let_statement(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assignment(compiler_t *comp, token_t tk);
 static void compile_call_statement(compiler_t *comp, token_t tk);
-static void compile_function_declaration(compiler_t *comp);
+static void compile_function_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_delete_statement(compiler_t *comp);
 static void compile_if_statement(compiler_t *comp);
 static void compile_loop_statement(compiler_t *comp);
@@ -100,7 +100,6 @@ static void compile_mul_expression(compiler_t *comp);
 static void compile_unary_expression(compiler_t *comp);
 static void compile_prim_expression(compiler_t *comp);
 static void compile_array_constructor(compiler_t *comp);
-static void compile_anonymous_function(compiler_t *comp);
 static void compile_subscript_or_call(compiler_t *comp);
 static void compile_variable(compiler_t *comp, token_t *tk);
 static bool compile_nonlocal(compiler_t *comp, token_t *tk);
@@ -313,7 +312,7 @@ static void compile_statement(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_FN))
   {
-    compile_function_declaration(comp);
+    compile_function_declaration(comp, false);
     return;
   }
   if (MATCH(scan, TOKEN_DELETE))
@@ -730,20 +729,27 @@ static void compile_call_statement(compiler_t *comp, token_t tk)
   chunk_emit_opcode(chunk, OP_POP);
 }
 
-static void compile_function_declaration(compiler_t *comp)
+static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
 {
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
   scanner_next_token(scan);
   token_t tk;
-  if (!MATCH(scan, TOKEN_NAME))
-    fatal_error_unexpected_token(scan);
-  tk = scan->token;
-  scanner_next_token(scan);
-  define_local(comp, &tk, false);
+  string_t *name;
+  if (is_anonymous)
+    name = string_from_chars(-1, "anonymous");
+  else
+  {
+    if (!MATCH(scan, TOKEN_NAME))
+      fatal_error_unexpected_token(scan);
+    tk = scan->token;
+    scanner_next_token(scan);
+    define_local(comp, &tk, false);
+    name = string_from_chars(tk.length, tk.start);
+  }
   compiler_t child_comp;
-  compiler_init(&child_comp, comp, scan, string_from_chars(tk.length, tk.start));
+  compiler_init(&child_comp, comp, scan, name);
   add_local(&child_comp, 0, &tk, false);
   chunk_t *child_chunk = &child_comp.proto->chunk;
   EXPECT(scan, TOKEN_LPAREN);
@@ -1295,7 +1301,7 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_FN))
   {
-    compile_anonymous_function(comp);
+    compile_function_declaration(comp, true);
     return;
   }
   if (MATCH(scan, TOKEN_NAME))
@@ -1337,60 +1343,6 @@ static void compile_array_constructor(compiler_t *comp)
   chunk_emit_opcode(chunk, OP_ARRAY);
   chunk_emit_byte(chunk, length);
   return;
-}
-
-static void compile_anonymous_function(compiler_t *comp)
-{
-  scanner_t *scan = comp->scan;
-  prototype_t *proto = comp->proto;
-  chunk_t *chunk = &proto->chunk;
-  scanner_next_token(scan);
-  compiler_t child_comp;
-  compiler_init(&child_comp, comp, scan, string_from_chars(-1, "anonymous"));
-  chunk_t *child_chunk = &child_comp.proto->chunk;
-  EXPECT(scan, TOKEN_LPAREN);
-  if (MATCH(scan, TOKEN_RPAREN))
-  {
-    scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_LBRACE))
-      fatal_error_unexpected_token(scan);
-    compile_block(&child_comp);
-    chunk_emit_opcode(child_chunk, OP_NULL);
-    chunk_emit_opcode(child_chunk, OP_RETURN);
-    int index = proto->num_protos;
-    prototype_add_child(proto, child_comp.proto);
-    chunk_emit_opcode(chunk, OP_FUNCTION);
-    chunk_emit_byte(chunk, index);
-    return;
-  }
-  token_t tk;
-  if (!MATCH(scan, TOKEN_NAME))
-    fatal_error_unexpected_token(scan);
-  tk = scan->token;
-  scanner_next_token(scan);
-  define_local(&child_comp, &tk, false);
-  int arity = 1;
-  while (MATCH(scan, TOKEN_COMMA))
-  {
-    scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
-      fatal_error_unexpected_token(scan);
-    tk = scan->token;
-    scanner_next_token(scan);
-    define_local(&child_comp, &tk, false);
-    ++arity;
-  }
-  child_comp.proto->arity = arity;
-  EXPECT(scan, TOKEN_RPAREN);
-  if (!MATCH(scan, TOKEN_LBRACE))
-    fatal_error_unexpected_token(scan);
-  compile_block(&child_comp);
-  chunk_emit_opcode(child_chunk, OP_NULL);
-  chunk_emit_opcode(child_chunk, OP_RETURN);
-  int index = proto->num_protos;
-  prototype_add_child(proto, child_comp.proto);
-  chunk_emit_opcode(chunk, OP_FUNCTION);
-  chunk_emit_byte(chunk, index);
 }
 
 static void compile_subscript_or_call(compiler_t *comp)
