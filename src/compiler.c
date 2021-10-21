@@ -11,8 +11,9 @@
 #include "builtin.h"
 #include "error.h"
 
-#define COMPILER_MAX_VARIABLES (UINT8_MAX + 1)
-#define COMPILER_MAX_BREAKS    (UINT8_MAX + 1)
+#define MAX_CONSTANTS (UINT8_MAX + 1)
+#define MAX_VARIABLES (UINT8_MAX + 1)
+#define MAX_BREAKS    (UINT8_MAX + 1)
 
 #define MATCH(s, t) ((s)->token.type == (t))
 
@@ -39,7 +40,7 @@ typedef struct loop
   int scope_depth;
   uint16_t jump;
   int num_offsets;
-  int offsets[COMPILER_MAX_BREAKS];
+  int offsets[MAX_BREAKS];
 } loop_t;
 
 typedef struct compiler
@@ -49,18 +50,21 @@ typedef struct compiler
   int scope_depth;
   int num_variables;
   int local_index;
-  variable_t variables[COMPILER_MAX_VARIABLES];
+  variable_t variables[MAX_VARIABLES];
   loop_t *loop;
   prototype_t *proto;
 } compiler_t;
 
 static inline void fatal_error_unexpected_token(scanner_t *scan);
-static inline long parse_long(token_t *tk);
 static inline double parse_double(token_t *tk);
+static inline bool string_match(token_t *tk, string_t *str);
+static inline uint8_t add_number_constant(prototype_t *proto, double data);
+static inline uint8_t add_string_constant(prototype_t *proto, token_t *tk);
+static inline uint8_t add_constant(prototype_t *proto, value_t val);
 static inline void push_scope(compiler_t *comp);
 static inline void pop_scope(compiler_t *comp);
 static inline int discard_variables(compiler_t *comp, int depth);
-static inline bool name_equal(token_t *tk, variable_t *var);
+static inline bool variable_match(token_t *tk, variable_t *var);
 static inline void add_local(compiler_t *comp, int index, token_t *tk, bool is_mutable);
 static inline uint8_t add_nonlocal(compiler_t *comp, token_t *tk);
 static inline void add_variable(compiler_t *comp, bool is_local, uint8_t index, token_t *tk,
@@ -80,7 +84,7 @@ static void compile_block(compiler_t *comp);
 static void compile_let_statement(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assignment(compiler_t *comp, token_t *tk);
-static void compile_call_statement(compiler_t *comp, token_t tk);
+static void compile_call_statement(compiler_t *comp, token_t *tk);
 static void compile_function_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_delete_statement(compiler_t *comp);
 static void compile_if_statement(compiler_t *comp);
@@ -113,15 +117,6 @@ static inline void fatal_error_unexpected_token(scanner_t *scan)
     tk->line, tk->col);
 }
 
-static inline long parse_long(token_t *tk)
-{
-  errno = 0;
-  long result = strtol(tk->start, NULL, 10);
-  if (errno == ERANGE)
-    fatal_error("integer number too large at %d:%d", tk->line, tk->col);
-  return result;
-}
-
 static inline double parse_double(token_t *tk)
 {
   errno = 0;
@@ -129,6 +124,53 @@ static inline double parse_double(token_t *tk)
   if (errno == ERANGE)
     fatal_error("floating point number too large at %d:%d", tk->line, tk->col);
   return result;
+}
+
+static inline bool string_match(token_t *tk, string_t *str)
+{
+  return tk->length == str->length
+    && !memcmp(tk->start, str->chars, tk->length);
+}
+
+static inline uint8_t add_number_constant(prototype_t *proto, double data)
+{
+  array_t *consts = proto->consts;
+  value_t *elements = consts->elements;
+  for (int i = 0; i < consts->length; ++i)
+  {
+    value_t elem = elements[i];
+    if (elem.type != TYPE_NUMBER)
+      continue;
+    if (data == elem.as.number)
+      return (uint8_t) i;
+  }
+  return add_constant(proto, NUMBER_VALUE(data));
+}
+
+static inline uint8_t add_string_constant(prototype_t *proto, token_t *tk)
+{
+  array_t *consts = proto->consts;
+  value_t *elements = consts->elements;
+  for (int i = 0; i < consts->length; ++i)
+  {
+    value_t elem = elements[i];
+    if (elem.type != TYPE_STRING)
+      continue;
+    if (string_match(tk, AS_STRING(elem)))
+      return (uint8_t) i;
+  }
+  string_t *str = string_from_chars(tk->length, tk->start);
+  return add_constant(proto, STRING_VALUE(str));
+}
+
+static inline uint8_t add_constant(prototype_t *proto, value_t val)
+{
+  array_t *consts = proto->consts;
+  if (consts->length == MAX_CONSTANTS)
+    fatal_error("a function may only contain %d unique constants", MAX_CONSTANTS);
+  uint8_t index = (uint8_t) consts->length;
+  array_inplace_add_element(consts, val);
+  return index;
 }
 
 static inline void push_scope(compiler_t *comp)
@@ -153,7 +195,7 @@ static inline int discard_variables(compiler_t *comp, int depth)
   return comp->num_variables - index - 1;
 }
 
-static inline bool name_equal(token_t *tk, variable_t *var)
+static inline bool variable_match(token_t *tk, variable_t *var)
 {
   return tk->length == var->length
     && !memcmp(tk->start, var->start, tk->length);
@@ -174,9 +216,9 @@ static inline uint8_t add_nonlocal(compiler_t *comp, token_t *tk)
 static inline void add_variable(compiler_t *comp, bool is_local, uint8_t index, token_t *tk,
   bool is_mutable)
 {
-  if (comp->num_variables == COMPILER_MAX_VARIABLES)
+  if (comp->num_variables == MAX_VARIABLES)
     fatal_error("cannot declare more than %d variables in one scope at %d:%d",
-      COMPILER_MAX_VARIABLES, tk->line, tk->col);
+      MAX_VARIABLES, tk->line, tk->col);
   variable_t *var = &comp->variables[comp->num_variables];
   var->is_local = is_local;
   var->depth = comp->scope_depth;
@@ -194,7 +236,7 @@ static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable)
     variable_t *var = &comp->variables[i];
     if (var->depth < comp->scope_depth)
       break;
-    if (name_equal(tk, var))
+    if (variable_match(tk, var))
       fatal_error("variable '%.*s' is already defined in this scope at %d:%d",
         tk->length, tk->start, tk->line, tk->col);
   }
@@ -218,7 +260,7 @@ static inline variable_t *lookup_variable(compiler_t *comp, token_t *tk)
   for (int i = comp->num_variables - 1; i > -1; --i)
   {
     variable_t *var = &comp->variables[i];
-    if (name_equal(tk, var))
+    if (variable_match(tk, var))
       return var;
   }
   return NULL;
@@ -303,7 +345,7 @@ static void compile_statement(compiler_t *comp)
     scanner_next_token(scan);
     if (MATCH(scan, TOKEN_LPAREN))
     {
-      compile_call_statement(comp, tk);
+      compile_call_statement(comp, &tk);
       return;
     }
     compile_assignment(comp, &tk);
@@ -701,14 +743,14 @@ static void compile_assignment(compiler_t *comp, token_t *tk)
   fatal_error_unexpected_token(scan);
 }
 
-static void compile_call_statement(compiler_t *comp, token_t tk)
+static void compile_call_statement(compiler_t *comp, token_t *tk)
 {
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
   int line = scan->line;
   scanner_next_token(scan);
-  compile_variable(comp, &tk);
+  compile_variable(comp, tk);
   if (MATCH(scan, TOKEN_RPAREN))
   {
     scanner_next_token(scan);
@@ -1027,7 +1069,7 @@ static void compile_break_statement(compiler_t *comp)
   EXPECT(scan, TOKEN_SEMICOLON);
   discard_variables(comp, comp->loop->scope_depth + 1);
   loop_t *loop = comp->loop;
-  if (loop->num_offsets == COMPILER_MAX_BREAKS)
+  if (loop->num_offsets == MAX_BREAKS)
     fatal_error("too many breaks at %d:%d", tk.line, tk.col);
   int offset = emit_jump(&comp->proto->chunk, OP_JUMP);
   loop->offsets[loop->num_offsets++] = offset;
@@ -1257,7 +1299,6 @@ static void compile_prim_expression(compiler_t *comp)
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
-  array_t *consts = proto->consts;
   int line = scan->line;
   if (MATCH(scan, TOKEN_NULL))
   {
@@ -1282,7 +1323,7 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_INT))
   {
-    long data = parse_long(&scan->token);
+    double data = parse_double(&scan->token);
     scanner_next_token(scan);
     if (data <= UINT16_MAX)
     {
@@ -1291,8 +1332,7 @@ static void compile_prim_expression(compiler_t *comp)
       prototype_add_line(proto, line);
       return;
     }
-    uint8_t index = (uint8_t) consts->length;
-    array_inplace_add_element(consts, NUMBER_VALUE(data));
+    uint8_t index = add_number_constant(proto, data);
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
     prototype_add_line(proto, line);
@@ -1302,8 +1342,7 @@ static void compile_prim_expression(compiler_t *comp)
   {
     double data = parse_double(&scan->token);
     scanner_next_token(scan);
-    uint8_t index = (uint8_t) consts->length;
-    array_inplace_add_element(consts, NUMBER_VALUE(data));
+    uint8_t index = add_number_constant(proto, data);
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
     prototype_add_line(proto, line);
@@ -1311,11 +1350,9 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_STRING))
   {
-    token_t *tk = &scan->token;
-    string_t *str = string_from_chars(tk->length, tk->start);
+    token_t tk = scan->token;
     scanner_next_token(scan);
-    uint8_t index = (uint8_t) consts->length;
-    array_inplace_add_element(consts, STRING_VALUE(str));
+    uint8_t index = add_string_constant(proto, &tk);
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
     prototype_add_line(proto, line);
