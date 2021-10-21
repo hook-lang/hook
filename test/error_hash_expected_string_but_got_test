@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. test/_test
+. test/__test
 
 title "Error from hash(): expected string but got X"
 

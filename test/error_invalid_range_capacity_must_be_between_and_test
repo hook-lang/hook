@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. test/_test
+. test/__test
 
 title "Error invalid range: capacity must be between X and Y"
 

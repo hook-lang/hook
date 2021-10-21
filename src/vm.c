@@ -42,8 +42,8 @@ static inline int call(vm_t *vm, int num_args);
 static inline int check_arity(int arity, string_t *name, int num_args);
 static inline void print_trace(string_t *name, string_t *file, int line);
 static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *line);
-static inline void pop_frame(vm_t *vm, value_t *frame);
-static inline void move_result_and_pop_frame(vm_t *vm, value_t *frame);
+static inline void discard_frame(vm_t *vm, value_t *frame);
+static inline void move_result(vm_t *vm, value_t *frame);
 
 static inline void push(vm_t *vm, value_t val)
 {
@@ -703,7 +703,7 @@ static inline int call(vm_t *vm, int num_args)
   if (!IS_CALLABLE(val))
   {
     runtime_error("cannot call value of type '%s'", type_name(val.type));
-    pop_frame(vm, frame);
+    discard_frame(vm, frame);
     return STATUS_ERROR;
   }
   if (IS_NATIVE(val))
@@ -711,41 +711,41 @@ static inline int call(vm_t *vm, int num_args)
     native_t *native = AS_NATIVE(val);
     if (check_arity(native->arity, native->name, num_args) == STATUS_ERROR)
     {
-      pop_frame(vm, frame);
+      discard_frame(vm, frame);
       return STATUS_ERROR;
     }
     int status;
     if ((status = native->call(vm, frame)) != STATUS_OK)
     {
-      if (status == STATUS_ERROR)
+      if (status != STATUS_NO_TRACE)
         print_trace(native->name, NULL, 0);
-      pop_frame(vm, frame);
+      discard_frame(vm, frame);
       return STATUS_ERROR;
     }
     DECR_REF(native);
     if (IS_UNREACHABLE(native))
       native_free(native);
-    move_result_and_pop_frame(vm, frame);
+    move_result(vm, frame);
     return STATUS_OK;
   }
   function_t *fn = AS_FUNCTION(val);
   prototype_t *proto = fn->proto;
   if (check_arity(proto->arity, proto->name, num_args) == STATUS_ERROR)
   {
-    pop_frame(vm, frame);
+    discard_frame(vm, frame);
     return STATUS_ERROR;
   }
   int line;
   if (call_function(vm, frame, fn, &line) == STATUS_ERROR)
   {
     print_trace(proto->name, proto->file, line);
-    pop_frame(vm, frame);
+    discard_frame(vm, frame);
     return STATUS_ERROR;
   }
   DECR_REF(fn);
   if (IS_UNREACHABLE(fn))
     function_free(fn);
-  move_result_and_pop_frame(vm, frame);
+  move_result(vm, frame);
   return STATUS_OK;
 }
 
@@ -951,13 +951,13 @@ error:
   return STATUS_ERROR;
 }
 
-static inline void pop_frame(vm_t *vm, value_t *frame)
+static inline void discard_frame(vm_t *vm, value_t *frame)
 {
   while (&vm->slots[vm->index] >= frame)
     value_release(vm->slots[vm->index--]);
 }
 
-static inline void move_result_and_pop_frame(vm_t *vm, value_t *frame)
+static inline void move_result(vm_t *vm, value_t *frame)
 {
   frame[0] = vm->slots[vm->index];
   --vm->index;

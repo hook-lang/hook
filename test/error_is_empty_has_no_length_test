@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. test/_test
+. test/__test
 
 title "Error from is_empty(): X has no length"
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. test/_test
+. test/__test
 
 title "Error from system(): expected string but got X"
 

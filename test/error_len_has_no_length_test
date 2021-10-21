@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. test/_test
+. test/__test
 
 title "Error from len(): X has no length"
 

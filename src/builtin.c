@@ -37,6 +37,7 @@ static const char *globals[] = {
   "pow",
   "sqrt",
   "system",
+  "assert",
   "panic"
 };
 
@@ -63,6 +64,7 @@ static int ceil_call(vm_t *vm, value_t *frame);
 static int pow_call(vm_t *vm, value_t *frame);
 static int sqrt_call(vm_t *vm, value_t *frame);
 static int system_call(vm_t *vm, value_t *frame);
+static int assert_call(vm_t *vm, value_t *frame);
 static int panic_call(vm_t *vm, value_t *frame);
 
 static inline int string_to_double(string_t *str, double *result)
@@ -417,6 +419,25 @@ static int system_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
+static int assert_call(vm_t *vm, value_t *frame)
+{
+  (void) vm;
+  value_t val = frame[2];
+  if (!IS_STRING(val))
+  {
+    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  if (IS_FALSEY(frame[1]))
+  {
+    string_t *str = AS_STRING(val);
+    fprintf(stderr, "assertion failed: %.*s\n", str->length, str->chars);
+    return STATUS_NO_TRACE;
+  }
+  vm_push_null(vm);
+  return STATUS_OK;
+}
+
 static int panic_call(vm_t *vm, value_t *frame)
 {
   (void) vm;
@@ -428,7 +449,7 @@ static int panic_call(vm_t *vm, value_t *frame)
   }
   string_t *str = AS_STRING(val);
   fprintf(stderr, "panic: %.*s\n", str->length, str->chars);
-  return STATUS_PANIC;
+  return STATUS_NO_TRACE;
 }
 
 void globals_init(vm_t *vm)
@@ -455,7 +476,8 @@ void globals_init(vm_t *vm)
   vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 2, &pow_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &sqrt_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &system_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 1, &panic_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 2, &assert_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &panic_call));
 }
 
 int lookup_global(int length, char *chars)

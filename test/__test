@@ -2,6 +2,7 @@
 
 _title=""
 _script=""
+_arguments=""
 expect_status=0
 expect_output=""
 
@@ -13,6 +14,17 @@ title()
 script()
 {
   _script=$1
+}
+
+arguments()
+{
+  _arguments=$1
+}
+
+expect()
+{
+  expect_status=$1
+  expect_output=$2
 }
 
 expect_success()
@@ -30,9 +42,9 @@ expect_failure()
 run()
 {
   if [ $expect_status -eq 0 ]; then
-    output=$(echo "$_script" | bin/hook)
+    output=$(echo "$_script" | bin/hook $_arguments)
   else
-    output=$(echo "$_script" | bin/hook 2>&1)
+    output=$(echo "$_script" | bin/hook $_arguments 2>&1)
   fi
   status=$?
   n=0

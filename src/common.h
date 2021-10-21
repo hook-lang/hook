@@ -6,9 +6,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define STATUS_OK    0
-#define STATUS_ERROR 1
-#define STATUS_PANIC 2
+#define STATUS_OK       0
+#define STATUS_ERROR    1
+#define STATUS_NO_TRACE 2
 
 #define ASSERT(b, m) do \
   { \

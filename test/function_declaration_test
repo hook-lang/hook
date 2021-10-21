@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. test/_test
+. test/__test
 
 title "Function declaration"
 
@@ -11,6 +11,18 @@ script "fn f(a, b) {
 let g = fn (a, b) {
   return a - b;
 };
+
+fn h() {
+  fn f() {}
+  fn g() {}
+  fn h() {}
+  fn i() {}
+  fn j() {}
+  fn k() {}
+  fn l() {}
+  fn m() {}
+  fn n() {}
+}
 
 println(f(1, 2));
 println(g(3, 2));"
