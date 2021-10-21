@@ -85,10 +85,7 @@ void value_print(value_t val, bool quoted)
     printf("%g", val.as.number);
     break;
   case TYPE_STRING:
-    {
-      string_t *str = AS_STRING(val);
-      printf(quoted ? "'%.*s'" : "%.*s", str->length, str->chars);
-    }
+    string_print(AS_STRING(val), quoted);
     break;
   case TYPE_ARRAY:
     array_print(AS_ARRAY(val));

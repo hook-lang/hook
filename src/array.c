@@ -213,6 +213,8 @@ void array_print(array_t *arr)
 
 bool array_equal(array_t *arr1, array_t *arr2)
 {
+  if (arr1 == arr2)
+    return true;
   if (arr1->length != arr2->length)
     return false;
   for (int i = 0; i < arr1->length; ++i)

@@ -25,6 +25,8 @@ static const char *globals[] = {
   "cap",
   "len",
   "is_empty",
+  "hash",
+  "compare",
   "lower",
   "upper",
   "array",
@@ -49,6 +51,8 @@ static int str_call(vm_t *vm, value_t *frame);
 static int cap_call(vm_t *vm, value_t *frame);
 static int len_call(vm_t *vm, value_t *frame);
 static int is_empty_call(vm_t *vm, value_t *frame);
+static int hash_call(vm_t *vm, value_t *frame);
+static int compare_call(vm_t *vm, value_t *frame);
 static int lower_call(vm_t *vm, value_t *frame);
 static int upper_call(vm_t *vm, value_t *frame);
 static int array_call(vm_t *vm, value_t *frame);
@@ -209,7 +213,7 @@ static int cap_call(vm_t *vm, value_t *frame)
   case TYPE_CALLABLE:
     break;
   }
-  runtime_error("invalid type: '%s' has no capacity", type_name(val.type));
+  runtime_error("invalid type: '%s' has no capacity property", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -230,7 +234,7 @@ static int len_call(vm_t *vm, value_t *frame)
   case TYPE_CALLABLE:
     break;
   }
-  runtime_error("invalid type: '%s' has no length", type_name(val.type));
+  runtime_error("invalid type: '%s' has no length property", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -251,8 +255,31 @@ static int is_empty_call(vm_t *vm, value_t *frame)
   case TYPE_CALLABLE:
     break;
   }
-  runtime_error("invalid type: '%s' has no length", type_name(val.type));
+  runtime_error("invalid type: '%s' has no length property", type_name(val.type));
   return STATUS_ERROR;
+}
+
+static int hash_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_STRING(val))
+  {
+    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  vm_push_number(vm, string_hash(AS_STRING(val)));
+  return STATUS_OK;
+}
+
+static int compare_call(vm_t *vm, value_t *frame)
+{
+  value_t val1 = frame[1];
+  value_t val2 = frame[2];
+  int result;
+  if (value_compare(val1, val2, &result) == STATUS_ERROR)
+    return STATUS_ERROR;
+  vm_push_number(vm, result);
+  return STATUS_OK;
 }
 
 static int lower_call(vm_t *vm, value_t *frame)
@@ -416,17 +443,19 @@ void globals_init(vm_t *vm)
   vm_push_native(vm, native_new(string_from_chars(-1, globals[7]), 1, &cap_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[8]), 1, &len_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[9]), 1, &is_empty_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &lower_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 1, &upper_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 1, &array_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 2, &index_of_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &abs_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &floor_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &ceil_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 2, &pow_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &sqrt_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &system_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &panic_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &hash_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 2, &compare_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 1, &lower_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 1, &upper_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &array_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 2, &index_of_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &abs_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &floor_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &ceil_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 2, &pow_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &sqrt_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &system_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 1, &panic_call));
 }
 
 int lookup_global(int length, char *chars)

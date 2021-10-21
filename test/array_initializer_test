@@ -2,7 +2,7 @@
 
 . test/_test
 
-title "Array constructor"
+title "Array initializer"
 
 script "println([]);
 println([123]);

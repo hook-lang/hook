@@ -99,7 +99,7 @@ static void compile_add_expression(compiler_t *comp);
 static void compile_mul_expression(compiler_t *comp);
 static void compile_unary_expression(compiler_t *comp);
 static void compile_prim_expression(compiler_t *comp);
-static void compile_array_constructor(compiler_t *comp);
+static void compile_array_initializer(compiler_t *comp);
 static void compile_subscript_or_call(compiler_t *comp);
 static void compile_variable(compiler_t *comp, token_t *tk);
 static bool compile_nonlocal(compiler_t *comp, token_t *tk);
@@ -1296,7 +1296,7 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_LBRACKET))
   {
-    compile_array_constructor(comp);
+    compile_array_initializer(comp);
     return;
   }
   if (MATCH(scan, TOKEN_FN))
@@ -1319,7 +1319,7 @@ static void compile_prim_expression(compiler_t *comp)
   fatal_error_unexpected_token(scan);
 }
 
-static void compile_array_constructor(compiler_t *comp)
+static void compile_array_initializer(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   chunk_t *chunk = &comp->proto->chunk;

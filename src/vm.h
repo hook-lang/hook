@@ -6,7 +6,6 @@
 #ifndef VM_H
 #define VM_H
 
-#include <stdint.h>
 #include "string.h"
 #include "callable.h"
 

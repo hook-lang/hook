@@ -14,6 +14,7 @@ static inline string_t *string_allocate(int min_capacity);
 static inline void resize(string_t *str, int min_capacity);
 static inline void append_char(string_t *str, char c);
 static inline FILE *open_file(const char *filename, const char *mode);
+static inline uint32_t hash(int length, char *chars);
 
 static inline string_t *string_allocate(int min_capacity)
 {
@@ -24,6 +25,7 @@ static inline string_t *string_allocate(int min_capacity)
   str->ref_count = 0;
   str->capacity = capacity;
   str->chars = (char *) allocate(capacity);
+  str->hash = -1;
   return str;
 }
 
@@ -51,6 +53,17 @@ static inline FILE *open_file(const char *filename, const char *mode)
   if (!fp)
     fatal_error("unable to open file '%s'", filename);
   return fp;
+}
+
+static inline uint32_t hash(int length, char *chars)
+{
+  uint32_t hash = 2166136261u;
+  for (int i = 0; i < length; i++)
+  {
+    hash ^= chars[i];
+    hash *= 16777619;
+  }
+  return hash;
 }
 
 string_t *string_from_chars(int length, const char *chars)
@@ -116,12 +129,25 @@ void string_inplace_concat(string_t *dest, string_t *src)
   memcpy(&dest->chars[dest->length], src->chars, src->length);
   dest->length = length;
   dest->chars[length] = '\0';
+  dest->hash = -1;
+}
+
+void string_print(string_t *str, bool quoted)
+{
+  printf(quoted ? "'%.*s'" : "%.*s", str->length, str->chars);
+}
+
+uint32_t string_hash(string_t *str)
+{
+  if (str->hash == -1)
+    str->hash = hash(str->length, str->chars);
+  return (uint32_t) str->hash;
 }
 
 bool string_equal(string_t *str1, string_t *str2)
 {
-  return str1->length == str2->length
-    && !memcmp(str1->chars, str2->chars, str1->length);
+  return str1 == str2 || (str1->length == str2->length
+    && !memcmp(str1->chars, str2->chars, str1->length));
 }
 
 int string_compare(string_t *str1, string_t *str2)

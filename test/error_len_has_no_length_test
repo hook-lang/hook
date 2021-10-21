@@ -6,7 +6,7 @@ title "Error from len(): X has no length"
 
 script "println(len(1));"
 
-expect_failure "runtime error: invalid type: 'number' has no length
+expect_failure "runtime error: invalid type: 'number' has no length property
   at len() in <native>
   at main() in <stdin>:1"
 
