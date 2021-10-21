@@ -27,7 +27,7 @@ typedef struct
 {
   bool is_local;
   int depth;
-  int index;
+  uint8_t index;
   int length;
   char *start;
   bool is_mutable;
@@ -62,8 +62,8 @@ static inline void pop_scope(compiler_t *comp);
 static inline int discard_variables(compiler_t *comp, int depth);
 static inline bool name_equal(token_t *tk, variable_t *var);
 static inline void add_local(compiler_t *comp, int index, token_t *tk, bool is_mutable);
-static inline int add_nonlocal(compiler_t *comp, token_t *tk);
-static inline void add_variable(compiler_t *comp, bool is_local, int index, token_t *tk,
+static inline uint8_t add_nonlocal(compiler_t *comp, token_t *tk);
+static inline void add_variable(compiler_t *comp, bool is_local, uint8_t index, token_t *tk,
   bool is_mutable);
 static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable);
 static inline variable_t resolve_variable(compiler_t *comp, token_t *tk);
@@ -164,14 +164,14 @@ static inline void add_local(compiler_t *comp, int index, token_t *tk, bool is_m
   add_variable(comp, true, index, tk, is_mutable);
 }
 
-static inline int add_nonlocal(compiler_t *comp, token_t *tk)
+static inline uint8_t add_nonlocal(compiler_t *comp, token_t *tk)
 {
-  int index = comp->proto->num_nonlocals++;
+  uint8_t index = comp->proto->num_nonlocals++;
   add_variable(comp, false, index, tk, false);
   return index;
 }
 
-static inline void add_variable(compiler_t *comp, bool is_local, int index, token_t *tk,
+static inline void add_variable(compiler_t *comp, bool is_local, uint8_t index, token_t *tk,
   bool is_mutable)
 {
   if (comp->num_variables == COMPILER_MAX_VARIABLES)
@@ -761,7 +761,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     compile_block(&child_comp);
     chunk_emit_opcode(child_chunk, OP_NULL);
     chunk_emit_opcode(child_chunk, OP_RETURN);
-    int index = proto->num_protos;
+    uint8_t index = proto->num_protos;
     prototype_add_child(proto, child_comp.proto);
     chunk_emit_opcode(chunk, OP_FUNCTION);
     chunk_emit_byte(chunk, index);
@@ -790,7 +790,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   compile_block(&child_comp);
   chunk_emit_opcode(child_chunk, OP_NULL);
   chunk_emit_opcode(child_chunk, OP_RETURN);
-  int index = proto->num_protos;
+  uint8_t index = proto->num_protos;
   prototype_add_child(proto, child_comp.proto);
   chunk_emit_opcode(chunk, OP_FUNCTION);
   chunk_emit_byte(chunk, index);
@@ -1406,7 +1406,7 @@ static void compile_variable(compiler_t *comp, token_t *tk)
   }
   if (compile_nonlocal(comp->parent, tk))
   {
-    int index = add_nonlocal(comp, tk);
+    uint8_t index = add_nonlocal(comp, tk);
     chunk_emit_opcode(chunk, OP_NONLOCAL);
     chunk_emit_byte(chunk, index);
     return;
@@ -1416,7 +1416,7 @@ static void compile_variable(compiler_t *comp, token_t *tk)
     fatal_error("variable '%.*s' is used but not defined at %d:%d", tk->length,
       tk->start, tk->line, tk->col);
   chunk_emit_opcode(chunk, OP_GLOBAL);
-  chunk_emit_byte(chunk, index);
+  chunk_emit_byte(chunk, (uint8_t) index);
 }
 
 static bool compile_nonlocal(compiler_t *comp, token_t *tk)
@@ -1441,7 +1441,7 @@ static bool compile_nonlocal(compiler_t *comp, token_t *tk)
   }
   if (compile_nonlocal(comp->parent, tk))
   {
-    int index = add_nonlocal(comp, tk);
+    uint8_t index = add_nonlocal(comp, tk);
     chunk_emit_opcode(chunk, OP_NONLOCAL);
     chunk_emit_byte(chunk, index);
     return true;

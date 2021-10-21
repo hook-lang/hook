@@ -27,17 +27,17 @@ typedef struct prototype
   line_t *lines;
   chunk_t chunk;
   array_t *consts;
-  int protos_capacity;
-  int num_protos;
+  uint8_t protos_capacity;
+  uint8_t num_protos;
   struct prototype **protos;
-  int num_nonlocals;
+  uint8_t num_nonlocals;
 } prototype_t;
 
 typedef struct
 {
   OBJECT_HEADER
   prototype_t *proto;
-  value_t nonlocals[];
+  value_t nonlocals[1];
 } function_t;
 
 struct vm;

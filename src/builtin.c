@@ -460,7 +460,7 @@ void globals_init(vm_t *vm)
 
 int lookup_global(int length, char *chars)
 {
-  int index = sizeof(globals) / sizeof(*globals) - 1;
+  int index = (int) (sizeof(globals) / sizeof(*globals) - 1);
   for (; index > -1; --index)
   {
     const char *global = globals[index];
