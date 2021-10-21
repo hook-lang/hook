@@ -12,10 +12,7 @@ fn sort(a) {
     else
       right[] = a[i];
   }
-  a = sort(left);
-  a[] = pivot;
-  a += sort(right);
-  return a;
+  return sort(left) + [pivot] + sort(right);
 }
 
 println(sort([5, 2, 7, 3, 0, 1, 4, 6]));

@@ -56,7 +56,7 @@ static inline void resize_protos(prototype_t *proto)
 {
   if (proto->num_protos < proto->protos_capacity)
     return;
-  int capacity = proto->protos_capacity << 1;
+  uint8_t capacity = proto->protos_capacity << 1;
   proto->protos_capacity = capacity;
   proto->protos = (prototype_t **) reallocate(proto->protos,
     sizeof(*proto->protos) * capacity);

@@ -95,28 +95,30 @@ static inline int string_to_double(string_t *str, double *result)
 static int print_call(vm_t *vm, value_t *frame)
 {
   value_print(frame[1], false);
-  vm_push_null(vm);
-  return STATUS_OK;
+  return vm_push_null(vm);
 }
 
 static int println_call(vm_t *vm, value_t *frame)
 {
   value_print(frame[1], false);
   printf("\n");
-  vm_push_null(vm);
-  return STATUS_OK;
+  return vm_push_null(vm);
 }
 
 static int type_call(vm_t *vm, value_t *frame)
 {
-  vm_push_string(vm, string_from_chars(-1, type_name(frame[1].type)));
+  string_t *str = string_from_chars(-1, type_name(frame[1].type));
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
   return STATUS_OK;
 }
 
 static int bool_call(vm_t *vm, value_t *frame)
 {
-  vm_push_boolean(vm, IS_TRUTHY(frame[1]));
-  return STATUS_OK;
+  return vm_push_boolean(vm, IS_TRUTHY(frame[1]));
 }
 
 static int int_call(vm_t *vm, value_t *frame)
@@ -125,16 +127,14 @@ static int int_call(vm_t *vm, value_t *frame)
   switch (val.type)
   {
   case TYPE_NUMBER:
-    vm_push_number(vm, (long) val.as.number);
-    return STATUS_OK;
+    return vm_push_number(vm, (long) val.as.number);
   case TYPE_STRING:
     {
       double result;
       if (string_to_double(AS_STRING(frame[1]), &result) == STATUS_ERROR)
         return STATUS_ERROR;
-      vm_push_number(vm, (long) result);
+      return vm_push_number(vm, (long) result);
     }
-    return STATUS_OK;
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
@@ -157,9 +157,8 @@ static int float_call(vm_t *vm, value_t *frame)
       double result;
       if (string_to_double(AS_STRING(frame[1]), &result) == STATUS_ERROR)
         return STATUS_ERROR;
-      vm_push_number(vm, result);
+      return vm_push_number(vm, result);
     }
-    return STATUS_OK;
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
@@ -173,29 +172,39 @@ static int float_call(vm_t *vm, value_t *frame)
 static int str_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[1];
+  string_t *str = NULL;
   switch (val.type)
   {
   case TYPE_NULL:
-    vm_push_string(vm, string_from_chars(-1, "null"));
-    return STATUS_OK;
+    str = string_from_chars(-1, "null");
+    break;
   case TYPE_BOOLEAN:
-    vm_push_string(vm, string_from_chars(-1, val.as.boolean ? "true" : "false"));
-    return STATUS_OK;
+    str = string_from_chars(-1, val.as.boolean ? "true" : "false");
+    break;
   case TYPE_NUMBER:
     {
       char chars[32];
       sprintf(chars, "%g", val.as.number);
-      vm_push_string(vm, string_from_chars(-1, chars));
+      str = string_from_chars(-1, chars);
     }
-    return STATUS_OK;
+    break;
   case TYPE_STRING:
     return STATUS_OK;
   case TYPE_ARRAY:
   case TYPE_CALLABLE:
     break;
   }
-  runtime_error("invalid type: cannot convert '%s' to 'string'", type_name(val.type));
-  return STATUS_ERROR;
+  if (!str)
+  {
+    runtime_error("invalid type: cannot convert '%s' to 'string'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
 }
 
 static int cap_call(vm_t *vm, value_t *frame)
@@ -204,11 +213,9 @@ static int cap_call(vm_t *vm, value_t *frame)
   switch (val.type)
   {
   case TYPE_STRING:
-    vm_push_number(vm, AS_STRING(val)->capacity);
-    return STATUS_OK;
+    return vm_push_number(vm, AS_STRING(val)->capacity);
   case TYPE_ARRAY:
-    vm_push_number(vm, AS_ARRAY(val)->capacity);
-    return STATUS_OK;
+    return vm_push_number(vm, AS_ARRAY(val)->capacity);
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
@@ -225,11 +232,9 @@ static int len_call(vm_t *vm, value_t *frame)
   switch (val.type)
   {
   case TYPE_STRING:
-    vm_push_number(vm, AS_STRING(val)->length);
-    return STATUS_OK;
+    return vm_push_number(vm, AS_STRING(val)->length);
   case TYPE_ARRAY:
-    vm_push_number(vm, AS_ARRAY(val)->length);
-    return STATUS_OK;
+    return vm_push_number(vm, AS_ARRAY(val)->length);
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
@@ -246,11 +251,9 @@ static int is_empty_call(vm_t *vm, value_t *frame)
   switch (val.type)
   {
   case TYPE_STRING:
-    vm_push_boolean(vm, !AS_STRING(val)->length);
-    return STATUS_OK;
+    return vm_push_boolean(vm, !AS_STRING(val)->length);
   case TYPE_ARRAY:
-    vm_push_boolean(vm, !AS_ARRAY(val)->length);
-    return STATUS_OK;
+    return vm_push_boolean(vm, !AS_ARRAY(val)->length);
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
@@ -269,8 +272,7 @@ static int hash_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  vm_push_number(vm, string_hash(AS_STRING(val)));
-  return STATUS_OK;
+  return vm_push_number(vm, string_hash(AS_STRING(val)));
 }
 
 static int compare_call(vm_t *vm, value_t *frame)
@@ -280,8 +282,7 @@ static int compare_call(vm_t *vm, value_t *frame)
   int result;
   if (value_compare(val1, val2, &result) == STATUS_ERROR)
     return STATUS_ERROR;
-  vm_push_number(vm, result);
-  return STATUS_OK;
+  return vm_push_number(vm, result);
 }
 
 static int lower_call(vm_t *vm, value_t *frame)
@@ -292,7 +293,12 @@ static int lower_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  vm_push_string(vm, string_lower(AS_STRING(val)));
+  string_t *str = string_lower(AS_STRING(val));
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
   return STATUS_OK;
 }
 
@@ -304,7 +310,12 @@ static int upper_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  vm_push_string(vm, string_upper(AS_STRING(val)));
+  string_t *str = string_upper(AS_STRING(val));
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
   return STATUS_OK;
 }
 
@@ -324,7 +335,11 @@ static int array_call(vm_t *vm, value_t *frame)
   }
   array_t *arr = array_allocate((int) capacity);
   arr->length = 0;
-  vm_push_array(vm, arr);
+  if (vm_push_array(vm, arr) == STATUS_ERROR)
+  {
+    array_free(arr);
+    return STATUS_ERROR;
+  }
   return STATUS_OK;
 }
 
@@ -337,8 +352,7 @@ static int index_of_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected array but got '%s'", type_name(val1.type));
     return STATUS_ERROR;
   }
-  vm_push_number(vm, array_index_of(AS_ARRAY(val1), val2));
-  return STATUS_OK;
+  return vm_push_number(vm, array_index_of(AS_ARRAY(val1), val2));
 }
 
 static int abs_call(vm_t *vm, value_t *frame)
@@ -349,8 +363,7 @@ static int abs_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  vm_push_number(vm, fabs(val.as.number));
-  return STATUS_OK;
+  return vm_push_number(vm, fabs(val.as.number));
 }
 
 static int floor_call(vm_t *vm, value_t *frame)
@@ -361,8 +374,7 @@ static int floor_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  vm_push_number(vm, floor(val.as.number));
-  return STATUS_OK;
+  return vm_push_number(vm, floor(val.as.number));
 }
 
 static int ceil_call(vm_t *vm, value_t *frame)
@@ -373,8 +385,7 @@ static int ceil_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  vm_push_number(vm, ceil(val.as.number));
-  return STATUS_OK;
+  return vm_push_number(vm, ceil(val.as.number));
 }
 
 static int pow_call(vm_t *vm, value_t *frame)
@@ -391,8 +402,7 @@ static int pow_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected number but got '%s'", type_name(val2.type));
     return STATUS_ERROR;
   }
-  vm_push_number(vm, pow(val1.as.number, val2.as.number));
-  return STATUS_OK;
+  return vm_push_number(vm, pow(val1.as.number, val2.as.number));
 }
 
 static int sqrt_call(vm_t *vm, value_t *frame)
@@ -403,8 +413,7 @@ static int sqrt_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  vm_push_number(vm, sqrt(val.as.number));
-  return STATUS_OK;
+  return vm_push_number(vm, sqrt(val.as.number));
 }
 
 static int system_call(vm_t *vm, value_t *frame)
@@ -415,8 +424,7 @@ static int system_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  vm_push_number(vm, system(AS_STRING(val)->chars));
-  return STATUS_OK;
+  return vm_push_number(vm, system(AS_STRING(val)->chars));
 }
 
 static int assert_call(vm_t *vm, value_t *frame)
@@ -434,8 +442,7 @@ static int assert_call(vm_t *vm, value_t *frame)
     fprintf(stderr, "assertion failed: %.*s\n", str->length, str->chars);
     return STATUS_NO_TRACE;
   }
-  vm_push_null(vm);
-  return STATUS_OK;
+  return vm_push_null(vm);
 }
 
 static int panic_call(vm_t *vm, value_t *frame)

@@ -13,11 +13,11 @@
 #include "memory.h"
 #include "error.h"
 
-static inline void push(vm_t *vm, value_t val);
+static inline int push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
-static inline void array(vm_t *vm, int length);
-static inline void function(vm_t *vm, prototype_t *proto);
+static inline int array(vm_t *vm, int length);
+static inline int function(vm_t *vm, prototype_t *proto);
 static inline int unpack(vm_t *vm, int length);
 static inline int append(vm_t *vm);
 static inline int get_element(vm_t *vm);
@@ -45,12 +45,16 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
 static inline void discard_frame(vm_t *vm, value_t *frame);
 static inline void move_result(vm_t *vm, value_t *frame);
 
-static inline void push(vm_t *vm, value_t val)
+static inline int push(vm_t *vm, value_t val)
 {
   if (vm->index == vm->end)
-    fatal_error("stack overflow");
+  {
+    runtime_error("stack overflow");
+    return STATUS_ERROR;
+  }
   ++vm->index;
   vm->slots[vm->index] = val;
+  return STATUS_OK;
 }
 
 static inline int read_byte(uint8_t **pc)
@@ -67,7 +71,7 @@ static inline int read_word(uint8_t **pc)
   return word;
 }
 
-static inline void array(vm_t *vm, int length)
+static inline int array(vm_t *vm, int length)
 {
   value_t *slots = &vm->slots[vm->index - length + 1];
   array_t *arr = array_allocate(length);
@@ -75,11 +79,16 @@ static inline void array(vm_t *vm, int length)
   for (int i = 0; i < length; ++i)
     arr->elements[i] = slots[i];
   vm->index -= length;
+  if (push(vm, ARRAY_VALUE(arr)) == STATUS_ERROR)
+  {
+    array_free(arr);
+    return STATUS_ERROR;
+  }
   INCR_REF(arr);
-  push(vm, ARRAY_VALUE(arr));
+  return STATUS_OK;
 }
 
-static inline void function(vm_t *vm, prototype_t *proto)
+static inline int function(vm_t *vm, prototype_t *proto)
 {
   int num_nonlocals = proto->num_nonlocals;
   value_t *slots = &vm->slots[vm->index - num_nonlocals + 1];
@@ -87,8 +96,13 @@ static inline void function(vm_t *vm, prototype_t *proto)
   for (int i = 0; i < num_nonlocals; ++i)
     fn->nonlocals[i] = slots[i];
   vm->index -= num_nonlocals;
+  if (push(vm, FUNCTION_VALUE(fn)) == STATUS_ERROR)
+  {
+    function_free(fn);
+    return STATUS_ERROR;
+  }
   INCR_REF(fn);
-  push(vm, FUNCTION_VALUE(fn));
+  return STATUS_OK;
 }
 
 static inline int unpack(vm_t *vm, int length)
@@ -102,18 +116,22 @@ static inline int unpack(vm_t *vm, int length)
   }
   array_t *arr = AS_ARRAY(val);
   --vm->index;
+  int status = STATUS_OK;
   for (int i = 0; i < length && i < arr->length; ++i)
   {
     value_t elem = arr->elements[i];
+    if ((status = push(vm, elem)) == STATUS_ERROR)
+      goto end;
     VALUE_INCR_REF(elem);
-    push(vm, elem);
   }
   for (int i = arr->length; i < length; ++i)
-    push(vm, NULL_VALUE);
+    if ((status = push(vm, NULL_VALUE)) == STATUS_ERROR)
+      break;
+end:
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
-  return STATUS_OK;
+  return status;
 }
 
 static inline int append(vm_t *vm)
@@ -195,8 +213,9 @@ static inline int fetch_element(vm_t *vm)
     return STATUS_ERROR;
   }
   value_t elem = arr->elements[index];
+  if (push(vm, elem) == STATUS_ERROR)
+    return STATUS_ERROR;
   VALUE_INCR_REF(elem);
-  push(vm, elem);
   return STATUS_OK;
 }
 
@@ -785,29 +804,36 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
     switch (op)
     {
     case OP_NULL:
-      push(vm, NULL_VALUE);
+      if (push(vm, NULL_VALUE) == STATUS_ERROR)
+        goto error;
       break;
     case OP_FALSE:
-      push(vm, FALSE_VALUE);
+      if (push(vm, FALSE_VALUE) == STATUS_ERROR)
+        goto error;
       break;
     case OP_TRUE:
-      push(vm, TRUE_VALUE);
+      if (push(vm, TRUE_VALUE) == STATUS_ERROR)
+        goto error;
       break;
     case OP_INT:
-      push(vm, NUMBER_VALUE(read_word(&pc)));
+      if (push(vm, NUMBER_VALUE(read_word(&pc))) == STATUS_ERROR)
+        goto error;
       break;
     case OP_CONSTANT:
       {
         value_t val = consts[read_byte(&pc)];
+        if (push(vm, val) == STATUS_ERROR)
+          goto error;
         VALUE_INCR_REF(val);
-        push(vm, val);
       }
       break;
     case OP_ARRAY:
-      array(vm, read_byte(&pc));
+      if (array(vm, read_byte(&pc)) == STATUS_ERROR)
+        goto error;
       break;
     case OP_FUNCTION:
-      function(vm, protos[read_byte(&pc)]);
+      if (function(vm, protos[read_byte(&pc)]) == STATUS_ERROR)
+        goto error;
       break;
     case OP_UNPACK:
       if (unpack(vm, read_byte(&pc)) == STATUS_ERROR)
@@ -819,22 +845,25 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
     case OP_GLOBAL:
       {
         value_t val = slots[read_byte(&pc)];
+        if (push(vm, val) == STATUS_ERROR)
+          goto error;
         VALUE_INCR_REF(val);
-        push(vm, val);
       }
       break;
     case OP_NONLOCAL:
       {
         value_t val = nonlocals[read_byte(&pc)];
+        if (push(vm, val) == STATUS_ERROR)
+          goto error;
         VALUE_INCR_REF(val);
-        push(vm, val);
       }
       break;
     case OP_GET_LOCAL:
       {
         value_t val = frame[read_byte(&pc)];
+        if (push(vm, val) == STATUS_ERROR)
+          goto error;
         VALUE_INCR_REF(val);
-        push(vm, val);
       }
       break;
     case OP_SET_LOCAL:
@@ -967,7 +996,7 @@ static inline void move_result(vm_t *vm, value_t *frame)
 
 void vm_init(vm_t *vm, int min_capacity)
 {
-  int capacity = VM_DEFAULT_NUM_SLOTS;
+  int capacity = VM_MIN_CAPACITY;
   while (capacity < min_capacity)
     capacity <<= 1;
   vm->capacity = capacity;
@@ -984,43 +1013,51 @@ void vm_free(vm_t *vm)
   free(vm->slots);
 }
 
-void vm_push_null(vm_t *vm)
+int vm_push_null(vm_t *vm)
 {
-  push(vm, NULL_VALUE);
+  return push(vm, NULL_VALUE);
 }
 
-void vm_push_boolean(vm_t *vm, bool data)
+int vm_push_boolean(vm_t *vm, bool data)
 {
-  push(vm, data ? TRUE_VALUE : FALSE_VALUE);
+  return push(vm, data ? TRUE_VALUE : FALSE_VALUE);
 }
 
-void vm_push_number(vm_t *vm, double data)
+int vm_push_number(vm_t *vm, double data)
 {
-  push(vm, NUMBER_VALUE(data));
+  return push(vm, NUMBER_VALUE(data));
 }
 
-void vm_push_string(vm_t *vm, string_t *str)
+int vm_push_string(vm_t *vm, string_t *str)
 {
+  if (push(vm, STRING_VALUE(str)) == STATUS_ERROR)
+    return STATUS_ERROR;
   INCR_REF(str);
-  push(vm, STRING_VALUE(str));
+  return STATUS_OK;
 }
 
-void vm_push_array(vm_t *vm, array_t *arr)
+int vm_push_array(vm_t *vm, array_t *arr)
 {
+  if (push(vm, ARRAY_VALUE(arr)) == STATUS_ERROR)
+    return STATUS_ERROR;
   INCR_REF(arr);
-  push(vm, ARRAY_VALUE(arr));
+  return STATUS_OK;
 }
 
-void vm_push_function(vm_t *vm, function_t *fn)
+int vm_push_function(vm_t *vm, function_t *fn)
 {
+  if (push(vm, FUNCTION_VALUE(fn)) == STATUS_ERROR)
+    return STATUS_ERROR;
   INCR_REF(fn);
-  push(vm, FUNCTION_VALUE(fn));
+  return STATUS_OK;
 }
 
-void vm_push_native(vm_t *vm, native_t *native)
+int vm_push_native(vm_t *vm, native_t *native)
 {
+  if (push(vm, NATIVE_VALUE(native)) == STATUS_ERROR)
+    return STATUS_ERROR;
   INCR_REF(native);
-  push(vm, NATIVE_VALUE(native));
+  return STATUS_OK;
 }
 
 void vm_pop(vm_t *vm)
