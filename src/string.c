@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <limits.h>
 #include "memory.h"
 #include "error.h"
 
@@ -69,7 +70,7 @@ static inline uint32_t hash(int length, char *chars)
 string_t *string_from_chars(int length, const char *chars)
 {
   if (length < 0)
-    length = (int) strlen(chars);
+    length = (int) strnlen(chars, INT_MAX);
   string_t *str = string_allocate(length + 1);
   str->length = length;
   memcpy(str->chars, chars, length);

@@ -4,19 +4,19 @@
 
 title "Append array element"
 
-script "var arr1 = [];
+script "let mut arr1 = [];
 arr1[] = 'foo';
 println(arr1);
 
-var arr2 = [[]];
+let mut arr2 = [[]];
 arr2[0][] = 'foo';
 println(arr2);
 
-var arr3 = [[[]]];
+let mut arr3 = [[[]]];
 arr3[0][0][] = 'foo';
 println(arr3);
 
-var arr4 = [[1, 2, 3]];
+let mut arr4 = [[1, 2, 3]];
 arr4[0][] = 4;
 println(arr4);"
 

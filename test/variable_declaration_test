@@ -6,9 +6,11 @@ title "Variable declaration"
 
 script "let a = 1;
 let [b, c] = [2, 3];
-var d;
-var e = 4;
-var [f, g] = ['foo', 'bar'];
+let mut d;
+let mut e = 4;
+let [f, g] = ['foo', 'bar'];
+let [mut h] = ['baz'];
+let [i, mut j] = ['qux', 'quux'];
 
 println(a);
 println(b);
@@ -16,7 +18,10 @@ println(c);
 println(d);
 println(e);
 println(f);
-println(g);"
+println(g);
+println(h);
+println(i);
+println(j);"
 
 expect_success "1
 2
@@ -24,6 +29,9 @@ expect_success "1
 null
 4
 foo
-bar"
+bar
+baz
+qux
+quux"
 
 run

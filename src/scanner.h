@@ -55,10 +55,10 @@ typedef enum
   TOKEN_IF,
   TOKEN_LET,
   TOKEN_LOOP,
+  TOKEN_MUT,
   TOKEN_NULL,
   TOKEN_RETURN,
   TOKEN_TRUE,
-  TOKEN_VAR,
   TOKEN_WHILE,
   TOKEN_NAME
 } token_type_t;

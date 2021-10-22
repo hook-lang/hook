@@ -10,8 +10,8 @@ for
 if
 let
 loop
+mut
 null
 return
 true
-var
 while

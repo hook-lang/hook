@@ -1,12 +1,11 @@
 
-fn sort(a) {
-  var arr = a;
-  var n = len(a);
-  var has_changed;
+fn sort(mut arr) {
+  let mut n = len(arr);
+  let mut has_changed;
   do {
     has_changed = false;
     n--;
-    for (var i = 0; i < n; i++) {
+    for (let mut i = 0; i < n; i++) {
       if (arr[i] > arr[i + 1]) {
         let t = arr[i];
         arr[i] = arr[i + 1];

@@ -422,6 +422,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_LOOP;
     return;
   }
+  if (match_chars(scan, "mut"))
+  {
+    scan->token.type = TOKEN_MUT;
+    return;
+  }
   if (match_chars(scan, "null"))
   {
     scan->token.type = TOKEN_NULL;
@@ -435,11 +440,6 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "true"))
   {
     scan->token.type = TOKEN_TRUE;
-    return;
-  }
-  if (match_chars(scan, "var"))
-  {
-    scan->token.type = TOKEN_VAR;
     return;
   }
   if (match_chars(scan, "while"))

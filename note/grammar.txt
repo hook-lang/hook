@@ -5,7 +5,7 @@ stmt        ::= block
               | var_decl ';'
               | assign ';'
               | NAME call ';'
-              | 'fn' NAME '(' ( NAME ( ',' NAME )* )? ')' block
+              | 'fn' NAME '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')' block
               | 'delete' NAME subscr* subscr ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'loop' block
@@ -19,8 +19,8 @@ stmt        ::= block
 block       ::= '{' stmt* '}'
 
 var_decl    ::= 'let' NAME '=' expr
-              | 'var' NAME ( '=' expr )?
-              | ( 'let' | 'var' ) '[' NAME ( ',' NAME )* ']' '=' expr
+              | 'let' 'mut' NAME ( '=' expr )?
+              | 'let' '[' 'mut'? NAME ( ',' 'mut'? NAME )* ']' '=' expr
 
 assign      ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME subscr* ( '++' | '--' )
@@ -47,7 +47,7 @@ unary_expr  ::= ( '-' | '!' ) unary_expr | prim_expr
 
 prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'
-              | 'fn' '(' ( NAME ( ',' NAME )* )? ')' block
+              | 'fn' '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')' block
               | 'if' '(' expr ')' expr 'else' expr
               | NAME ( subscr | call )*
               | '(' expr ')'

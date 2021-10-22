@@ -4,7 +4,7 @@
 
 title "Delete array element"
 
-script "var arr = [1, 2, 3, ['foo', 'bar', 'baz']];
+script "let mut arr = [1, 2, 3, ['foo', 'bar', 'baz']];
 delete arr[1];
 println(arr);
 

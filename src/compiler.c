@@ -49,7 +49,7 @@ typedef struct compiler
   scanner_t *scan;
   int scope_depth;
   int num_variables;
-  int local_index;
+  uint8_t local_index;
   variable_t variables[MAX_VARIABLES];
   loop_t *loop;
   prototype_t *proto;
@@ -65,7 +65,7 @@ static inline void push_scope(compiler_t *comp);
 static inline void pop_scope(compiler_t *comp);
 static inline int discard_variables(compiler_t *comp, int depth);
 static inline bool variable_match(token_t *tk, variable_t *var);
-static inline void add_local(compiler_t *comp, int index, token_t *tk, bool is_mutable);
+static inline void add_local(compiler_t *comp, token_t *tk, bool is_mutable);
 static inline uint8_t add_nonlocal(compiler_t *comp, token_t *tk);
 static inline void add_variable(compiler_t *comp, bool is_local, uint8_t index, token_t *tk,
   bool is_mutable);
@@ -81,7 +81,6 @@ static inline void compiler_init(compiler_t *comp, compiler_t *parent, scanner_t
   string_t *name);
 static void compile_statement(compiler_t *comp);
 static void compile_block(compiler_t *comp);
-static void compile_let_statement(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assignment(compiler_t *comp, token_t *tk);
 static void compile_call_statement(compiler_t *comp, token_t *tk);
@@ -202,8 +201,9 @@ static inline bool variable_match(token_t *tk, variable_t *var)
     && !memcmp(tk->start, var->start, tk->length);
 }
 
-static inline void add_local(compiler_t *comp, int index, token_t *tk, bool is_mutable)
+static inline void add_local(compiler_t *comp, token_t *tk, bool is_mutable)
 {
+  uint8_t index = comp->local_index++;
   add_variable(comp, true, index, tk, is_mutable);
 }
 
@@ -241,7 +241,7 @@ static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable)
       fatal_error("variable '%.*s' is already defined in this scope at %d:%d",
         tk->length, tk->start, tk->line, tk->col);
   }
-  add_local(comp, comp->local_index++, tk, is_mutable);
+  add_local(comp, tk, is_mutable);
 }
 
 static inline variable_t resolve_variable(compiler_t *comp, token_t *tk)
@@ -330,12 +330,6 @@ static void compile_statement(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_LET))
   {
-    compile_let_statement(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
-    return;
-  }
-  if (MATCH(scan, TOKEN_VAR))
-  {
     compile_variable_declaration(comp);
     EXPECT(scan, TOKEN_SEMICOLON);
     return;
@@ -417,49 +411,6 @@ static void compile_block(compiler_t *comp)
   pop_scope(comp);
 }
 
-static void compile_let_statement(compiler_t *comp)
-{
-  scanner_t *scan = comp->scan;
-  prototype_t *proto = comp->proto;
-  chunk_t *chunk = &proto->chunk;
-  scanner_next_token(scan);
-  if (MATCH(scan, TOKEN_NAME))
-  {
-    define_local(comp, &scan->token, false);
-    scanner_next_token(scan);
-    EXPECT(scan, TOKEN_EQ);
-    compile_expression(comp);
-    return;
-  }
-  if (MATCH(scan, TOKEN_LBRACKET))
-  {
-    scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
-      fatal_error_unexpected_token(scan);
-    define_local(comp, &scan->token, false);
-    scanner_next_token(scan);
-    uint8_t n = 1;
-    while (MATCH(scan, TOKEN_COMMA))
-    {
-      scanner_next_token(scan);
-      if (!MATCH(scan, TOKEN_NAME))
-        fatal_error_unexpected_token(scan);
-      define_local(comp, &scan->token, false);
-      scanner_next_token(scan);
-      ++n;
-    }
-    EXPECT(scan, TOKEN_RBRACKET);
-    EXPECT(scan, TOKEN_EQ);
-    int line = scan->line;
-    compile_expression(comp);
-    chunk_emit_opcode(chunk, OP_UNPACK);
-    chunk_emit_byte(chunk, n);
-    prototype_add_line(proto, line);
-    return;
-  }
-  fatal_error_unexpected_token(scan);
-}
-
 static void compile_variable_declaration(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
@@ -468,13 +419,24 @@ static void compile_variable_declaration(compiler_t *comp)
   scanner_next_token(scan);
   if (MATCH(scan, TOKEN_NAME))
   {
+    define_local(comp, &scan->token, false);
+    scanner_next_token(scan);
+    EXPECT(scan, TOKEN_EQ);
+    compile_expression(comp);
+    return;
+  }
+  if (MATCH(scan, TOKEN_MUT))
+  {
+    scanner_next_token(scan);
+    if (!MATCH(scan, TOKEN_NAME))
+      fatal_error_unexpected_token(scan);
     define_local(comp, &scan->token, true);
     scanner_next_token(scan);
     if (MATCH(scan, TOKEN_EQ))
     {
       scanner_next_token(scan);
       compile_expression(comp);
-      return;
+      return;  
     }
     chunk_emit_opcode(chunk, OP_NULL);
     prototype_add_line(proto, scan->line);
@@ -483,17 +445,29 @@ static void compile_variable_declaration(compiler_t *comp)
   if (MATCH(scan, TOKEN_LBRACKET))
   {
     scanner_next_token(scan);
+    bool is_mutable = false;
+    if (MATCH(scan, TOKEN_MUT))
+    {
+      scanner_next_token(scan);
+      is_mutable = true;
+    }
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
-    define_local(comp, &scan->token, true);
+    define_local(comp, &scan->token, is_mutable);
     scanner_next_token(scan);
     uint8_t n = 1;
     while (MATCH(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
+      bool is_mutable = false;
+      if (MATCH(scan, TOKEN_MUT))
+      {
+        scanner_next_token(scan);
+        is_mutable = true;
+      }
       if (!MATCH(scan, TOKEN_NAME))
         fatal_error_unexpected_token(scan);
-      define_local(comp, &scan->token, true);
+      define_local(comp, &scan->token, is_mutable);
       scanner_next_token(scan);
       ++n;
     }
@@ -800,7 +774,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   }
   compiler_t child_comp;
   compiler_init(&child_comp, comp, scan, name);
-  add_local(&child_comp, 0, &tk, false);
+  add_variable(&child_comp, true, 0, &tk, false);
   chunk_t *child_chunk = &child_comp.proto->chunk;
   EXPECT(scan, TOKEN_LPAREN);
   if (MATCH(scan, TOKEN_RPAREN))
@@ -813,20 +787,32 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     prototype_add_line(proto, scan->line);
     goto end;
   }
+  bool is_mutable = false;
+  if (MATCH(scan, TOKEN_MUT))
+  {
+    scanner_next_token(scan);
+    is_mutable = true;
+  }
   if (!MATCH(scan, TOKEN_NAME))
     fatal_error_unexpected_token(scan);
   tk = scan->token;
   scanner_next_token(scan);
-  define_local(&child_comp, &tk, false);
+  define_local(&child_comp, &tk, is_mutable);
   int arity = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
+    bool is_mutable = false;
+    if (MATCH(scan, TOKEN_MUT))
+    {
+      scanner_next_token(scan);
+      is_mutable = true;
+    }
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
     tk = scan->token;
     scanner_next_token(scan);
-    define_local(&child_comp, &tk, false);
+    define_local(&child_comp, &tk, is_mutable);
     ++arity;
   }
   child_comp.proto->arity = arity;
@@ -980,11 +966,6 @@ static void compile_for_statement(compiler_t *comp)
   else
   {
     if (MATCH(scan, TOKEN_LET))
-    {
-      compile_let_statement(comp);
-      EXPECT(scan, TOKEN_SEMICOLON);
-    }
-    else if (MATCH(scan, TOKEN_VAR))
     {
       compile_variable_declaration(comp);
       EXPECT(scan, TOKEN_SEMICOLON);

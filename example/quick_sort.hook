@@ -1,18 +1,21 @@
 
-fn sort(a) {
-  let n = len(a);
+fn sort(mut arr) {
+  let n = len(arr);
   if (n <= 1)
-    return a;
-  let pivot = a[0];
-  var left = []; 
-  var right = [];
-  for (var i = 1; i < n; i++) {
-    if (a[i] < pivot)
-      left[] = a[i];
+    return arr;
+  let pivot = arr[0];
+  let mut left = []; 
+  let mut right = [];
+  for (let mut i = 1; i < n; i++) {
+    if (arr[i] < pivot)
+      left[] = arr[i];
     else
-      right[] = a[i];
+      right[] = arr[i];
   }
-  return sort(left) + [pivot] + sort(right);
+  arr = sort(left);
+  arr[] = pivot;
+  arr += sort(right);
+  return arr;
 }
 
 println(sort([5, 2, 7, 3, 0, 1, 4, 6]));

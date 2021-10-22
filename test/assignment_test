@@ -4,7 +4,7 @@
 
 title "Assignment"
 
-script "var a;
+script "let mut a;
 a = 1;
 a += 1;
 a -= 1;
@@ -14,7 +14,7 @@ a %= 1;
 a++;
 a--;
 
-var b = [];
+let mut b = [];
 b[] = 1;
 b[0] += 1;
 b[0] -= 1;
@@ -24,7 +24,7 @@ b[0] %= 1;
 b[0]++;
 b[0]--;
 
-var c = [[]];
+let mut c = [[]];
 c[0][] = 1;
 c[0][0] += 1;
 c[0][0] -= 1;
