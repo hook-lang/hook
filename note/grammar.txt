@@ -48,5 +48,6 @@ unary_expr  ::= ( '-' | '!' ) unary_expr | prim_expr
 prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'
               | 'fn' '(' ( NAME ( ',' NAME )* )? ')' block
+              | 'if' '(' expr ')' expr 'else' expr
               | NAME ( subscr | call )*
               | '(' expr ')'

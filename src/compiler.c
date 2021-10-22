@@ -104,6 +104,7 @@ static void compile_mul_expression(compiler_t *comp);
 static void compile_unary_expression(compiler_t *comp);
 static void compile_prim_expression(compiler_t *comp);
 static void compile_array_initializer(compiler_t *comp);
+static void compile_if_expression(compiler_t *comp);
 static void compile_subscript_or_call(compiler_t *comp);
 static void compile_variable(compiler_t *comp, token_t *tk);
 static bool compile_nonlocal(compiler_t *comp, token_t *tk);
@@ -810,13 +811,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     compile_block(&child_comp);
     chunk_emit_opcode(child_chunk, OP_NULL);
     prototype_add_line(proto, scan->line);
-    chunk_emit_opcode(child_chunk, OP_RETURN);
-    uint8_t index = proto->num_protos;
-    prototype_add_child(proto, child_comp.proto);
-    chunk_emit_opcode(chunk, OP_FUNCTION);
-    chunk_emit_byte(chunk, index);
-    prototype_add_line(proto, line);
-    return;
+    goto end;
   }
   if (!MATCH(scan, TOKEN_NAME))
     fatal_error_unexpected_token(scan);
@@ -841,6 +836,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   compile_block(&child_comp);
   chunk_emit_opcode(child_chunk, OP_NULL);
   prototype_add_line(proto, scan->line);
+end:
   chunk_emit_opcode(child_chunk, OP_RETURN);
   uint8_t index = proto->num_protos;
   prototype_add_child(proto, child_comp.proto);
@@ -1368,6 +1364,11 @@ static void compile_prim_expression(compiler_t *comp)
     compile_function_declaration(comp, true);
     return;
   }
+  if (MATCH(scan, TOKEN_IF))
+  {
+    compile_if_expression(comp);
+    return;
+  }
   if (MATCH(scan, TOKEN_NAME))
   {
     compile_subscript_or_call(comp);
@@ -1411,6 +1412,25 @@ static void compile_array_initializer(compiler_t *comp)
   chunk_emit_byte(chunk, length);
   prototype_add_line(proto, line);
   return;
+}
+
+static void compile_if_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->proto->chunk;
+  scanner_next_token(scan);
+  EXPECT(scan, TOKEN_LPAREN);
+  compile_expression(comp);
+  EXPECT(scan, TOKEN_RPAREN);
+  int offset1 = emit_jump(chunk, OP_JUMP_IF_FALSE);
+  chunk_emit_opcode(chunk, OP_POP);
+  compile_expression(comp);
+  int offset2 = emit_jump(chunk, OP_JUMP);
+  patch_jump(chunk, offset1);
+  chunk_emit_opcode(chunk, OP_POP);
+  EXPECT(scan, TOKEN_ELSE);
+  compile_expression(comp);
+  patch_jump(chunk, offset2);
 }
 
 static void compile_subscript_or_call(compiler_t *comp)

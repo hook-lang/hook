@@ -1,0 +1,31 @@
+#!/bin/sh
+
+. test/__test
+
+title "If statement and expression"
+
+script "if (true) {}
+if (false) {}
+if (true) {
+  println('foo');
+}
+if (true) {
+  println('foo');
+} else {
+  println('bar');
+}
+if (false) {
+  println('foo');
+} else {
+  println('bar');
+}
+println(if (true) 'foo' else 'bar');
+println(if (false) 'foo' else 'bar');"
+
+expect_success "foo
+foo
+bar
+foo
+bar"
+
+run
