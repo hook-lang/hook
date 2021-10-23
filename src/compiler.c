@@ -762,20 +762,21 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   chunk_t *chunk = &proto->chunk;
   int line = scan->line;
   scanner_next_token(scan);
-  token_t tk;
-  string_t *name = NULL;
+  compiler_t child_comp;
   if (!is_anonymous)
   {
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
-    tk = scan->token;
+    token_t tk = scan->token;
     scanner_next_token(scan);
     define_local(comp, &tk, false);
-    name = string_from_chars(tk.length, tk.start);
+    string_t *name = string_from_chars(tk.length, tk.start);
+    compiler_init(&child_comp, comp, scan, name);
+    add_variable(&child_comp, true, 0, &tk, false);
   }
-  compiler_t child_comp;
-  compiler_init(&child_comp, comp, scan, name);
-  add_variable(&child_comp, true, 0, &tk, false);
+  else
+    compiler_init(&child_comp, comp, scan, NULL);
+
   chunk_t *child_chunk = &child_comp.proto->chunk;
   EXPECT(scan, TOKEN_LPAREN);
   if (MATCH(scan, TOKEN_RPAREN))
@@ -796,9 +797,8 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   }
   if (!MATCH(scan, TOKEN_NAME))
     fatal_error_unexpected_token(scan);
-  tk = scan->token;
+  define_local(&child_comp, &scan->token, is_mutable);
   scanner_next_token(scan);
-  define_local(&child_comp, &tk, is_mutable);
   int arity = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
@@ -811,9 +811,8 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     }
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
-    tk = scan->token;
+    define_local(&child_comp, &scan->token, is_mutable);
     scanner_next_token(scan);
-    define_local(&child_comp, &tk, is_mutable);
     ++arity;
   }
   child_comp.proto->arity = arity;

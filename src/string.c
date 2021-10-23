@@ -95,7 +95,7 @@ string_t *string_from_file(const char *filename)
   rewind(fp);
   string_t *str = string_allocate(length + 1);
   str->length = length;
-  fread(str->chars, 1, length, fp);
+  ASSERT(fread(str->chars, length, 1, fp) == 1, "unexpected error reading stream");
   str->chars[length] = '\0';
   fclose(fp);
   return str;
@@ -148,7 +148,8 @@ bool string_equal(string_t *str1, string_t *str2)
 
 int string_compare(string_t *str1, string_t *str2)
 {
-  return strcmp(str1->chars, str2->chars);
+  int result = strcmp(str1->chars, str2->chars);
+  return result > 0 ? 1 : (result < 0 ? -1 : 0);
 }
 
 string_t *string_lower(string_t *str)
