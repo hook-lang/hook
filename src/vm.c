@@ -772,21 +772,22 @@ static inline int check_arity(int arity, string_t *name, int num_args)
 {
   if (num_args >= arity)
     return STATUS_OK;
-  const char *fmt = arity > 1 ? "%.*s() expects %d arguments but got %d" :
-    "%.*s() expects %d argument but got %d";
-  runtime_error(fmt, name->length, name->chars, arity, num_args);
+  const char *fmt = arity > 1 ? "%s() expects %d arguments but got %d" :
+    "%s() expects %d argument but got %d";
+  char *name_chars = name ? name->chars : "<anonymous>";
+  runtime_error(fmt, name_chars, arity, num_args);
   return STATUS_ERROR;
 }
 
 static inline void print_trace(string_t *name, string_t *file, int line)
 {
-  char *chars = name ? name->chars : "<anonymous>";
+  char *name_chars = name ? name->chars : "<anonymous>";
   if (file)
   {
-    fprintf(stderr, "  at %s() in %.*s:%d\n", chars, file->length, file->chars, line);
+    fprintf(stderr, "  at %s() in %.*s:%d\n", name_chars, file->length, file->chars, line);
     return;
   }
-  fprintf(stderr, "  at %s() in <native>\n", chars);
+  fprintf(stderr, "  at %s() in <native>\n", name_chars);
 }
 
 static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *line)

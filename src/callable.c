@@ -67,7 +67,8 @@ prototype_t *prototype_new(int arity, string_t *name, string_t *file)
   prototype_t *proto = (prototype_t *) allocate(sizeof(*proto));
   proto->ref_count = 0;
   proto->arity = arity;
-  INCR_REF(name);
+  if (name)
+    INCR_REF(name);
   proto->name = name;
   INCR_REF(file);
   proto->file = file;
@@ -83,9 +84,12 @@ prototype_t *prototype_new(int arity, string_t *name, string_t *file)
 void prototype_free(prototype_t *proto)
 {
   string_t *name = proto->name;
-  DECR_REF(name);
-  if (IS_UNREACHABLE(name))
-    string_free(name);
+  if (name)
+  {
+    DECR_REF(name);
+    if (IS_UNREACHABLE(name))
+      string_free(name);
+  }
   string_t *file = proto->file;
   DECR_REF(file);
   if (IS_UNREACHABLE(file))

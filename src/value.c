@@ -93,7 +93,12 @@ void value_print(value_t val, bool quoted)
   case TYPE_CALLABLE:
     {
       string_t *name = IS_NATIVE(val) ? AS_NATIVE(val)->name : AS_FUNCTION(val)->proto->name;
-      printf("<callable %.*s at %p>", name->length, name->chars, val.as.pointer);
+      if (name)
+      {
+        printf("<callable %.*s at %p>", name->length, name->chars, val.as.pointer);
+        break;
+      }
+      printf("<callable at %p>", val.as.pointer);
     }
     break;
   }

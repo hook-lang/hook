@@ -11,7 +11,10 @@ static inline void dump_prototype(prototype_t *proto);
 static inline void dump_prototype(prototype_t *proto)
 {
   string_t *name = proto->name;
-  printf("<function %.*s>\n", name->length, name->chars);
+  if (name)
+    printf("<function %.*s>\n", name->length, name->chars);
+  else
+    printf("<function>\n");
   uint8_t *bytes = proto->chunk.bytes;
   int i = 0;
   int n = 0;

@@ -761,10 +761,8 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   int line = scan->line;
   scanner_next_token(scan);
   token_t tk;
-  string_t *name;
-  if (is_anonymous)
-    name = string_from_chars(-1, "anonymous");
-  else
+  string_t *name = NULL;
+  if (!is_anonymous)
   {
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
