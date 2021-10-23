@@ -247,13 +247,14 @@ static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable)
 static inline variable_t resolve_variable(compiler_t *comp, token_t *tk)
 {
   variable_t *var = lookup_variable(comp, tk);
-  if (!var)
-    if (nonlocal_exists(comp->parent, tk) || lookup_global(tk->length, tk->start) != -1)
-      var = &((variable_t) {.is_mutable = false});
-  if (!var)
+  if (var)
+    return *var;
+  if (!nonlocal_exists(comp->parent, tk) && lookup_global(tk->length, tk->start) == -1)
+  {
     fatal_error("variable '%.*s' is used but not defined at %d:%d", tk->length,
       tk->start, tk->line, tk->col);
-  return *var;
+  }
+  return (variable_t) {.is_mutable = false};
 }
 
 static inline variable_t *lookup_variable(compiler_t *comp, token_t *tk)

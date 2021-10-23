@@ -8,6 +8,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
+#include "common.h"
 #include "memory.h"
 #include "error.h"
 
@@ -82,11 +83,16 @@ string_t *string_from_stream(FILE *fp)
 {
   string_t *str = string_allocate(0);
   str->length = 0;
-  int c = fgetc(fp);
-  while (c != EOF)
+  for (;;)
   {
+    int c = fgetc(fp);
+    if (c == EOF)
+    {
+      if (feof(fp))
+        break;
+      ASSERT(!ferror(fp), "unexpected error reading stream");
+    }
     append_char(str, (char) c);
-    c = fgetc(fp);
   }
   append_char(str, '\0');
   return str;
