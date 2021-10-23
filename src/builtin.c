@@ -487,9 +487,14 @@ void globals_init(vm_t *vm)
   vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &panic_call));
 }
 
+int num_globals(void)
+{
+  return (int) (sizeof(globals) / sizeof(*globals));
+}
+
 int lookup_global(int length, char *chars)
 {
-  int index = (int) (sizeof(globals) / sizeof(*globals) - 1);
+  int index = num_globals() - 1;
   for (; index > -1; --index)
   {
     const char *global = globals[index];

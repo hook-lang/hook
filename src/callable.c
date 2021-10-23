@@ -119,7 +119,7 @@ int prototype_get_line(prototype_t *proto, int offset)
       break;
     }
   }
-  ASSERT(line_no != -1, "prototype must be contains the line number");
+  ASSERT(line_no != -1, "prototype must contain the line number");
   return line_no;
 }
 
