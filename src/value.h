@@ -19,6 +19,8 @@
 #define NUMBER_VALUE(n)   ((value_t) {.type = TYPE_NUMBER, .flags = FLAG_NONE, .as.number = (n)})
 #define STRING_VALUE(s)   ((value_t) {.type = TYPE_STRING, .flags = FLAG_OBJECT, .as.pointer = (s)})
 #define ARRAY_VALUE(a)    ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as.pointer = (a)})
+#define STRUCT_VALUE(s)   ((value_t) {.type = TYPE_STRUCT, .flags = FLAG_OBJECT, .as.pointer = (s)})
+#define INSTANCE_VALUE(i) ((value_t) {.type = TYPE_INSTANCE, .flags = FLAG_OBJECT, .as.pointer = (i)})
 #define FUNCTION_VALUE(f) ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT, .as.pointer = (f)})
 #define NATIVE_VALUE(n)   ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT | FLAG_NATIVE, .as.pointer = (n)})
 
@@ -28,14 +30,18 @@
 #define IS_INTEGER(v)  (IS_NUMBER(v) && (v).as.number == (long) (v).as.number)
 #define IS_STRING(v)   ((v).type == TYPE_STRING)
 #define IS_ARRAY(v)    ((v).type == TYPE_ARRAY)
+#define IS_STRUCT(v)   ((v).type == TYPE_STRUCT)
+#define IS_INSTANCE(v) ((v).type == TYPE_INSTANCE)
 #define IS_CALLABLE(v) ((v).type == TYPE_CALLABLE)
-#define IS_OBJECT(v)  ((v).flags & FLAG_OBJECT)
-#define IS_FALSEY(v)  ((v).flags & FLAG_FALSEY)
-#define IS_TRUTHY(v)  (!IS_FALSEY(v))
-#define IS_NATIVE(v)  ((v).flags & FLAG_NATIVE)
+#define IS_OBJECT(v)   ((v).flags & FLAG_OBJECT)
+#define IS_FALSEY(v)   ((v).flags & FLAG_FALSEY)
+#define IS_TRUTHY(v)   (!IS_FALSEY(v))
+#define IS_NATIVE(v)   ((v).flags & FLAG_NATIVE)
 
 #define AS_STRING(v)   ((string_t *) (v).as.pointer)
 #define AS_ARRAY(v)    ((array_t *) (v).as.pointer)
+#define AS_STRUCT(v)   ((struct_t *) (v).as.pointer)
+#define AS_INSTANCE(v) ((instance_t *) (v).as.pointer)
 #define AS_FUNCTION(v) ((function_t *) (v).as.pointer)
 #define AS_NATIVE(v)   ((native_t *) (v).as.pointer)
 #define AS_OBJECT(v)   ((object_t *) (v).as.pointer)
@@ -56,6 +62,8 @@ typedef enum
   TYPE_NUMBER,
   TYPE_STRING,
   TYPE_ARRAY,
+  TYPE_STRUCT,
+  TYPE_INSTANCE,
   TYPE_CALLABLE
 } type_t;
 

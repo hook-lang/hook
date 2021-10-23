@@ -218,6 +218,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_COMMA;
     return;
   }
+  if (match_char(scan, ':'))
+  {
+    scan->token.type = TOKEN_COLON;
+    return;
+  }
   if (match_char(scan, ';'))
   {
     scan->token.type = TOKEN_SEMICOLON;

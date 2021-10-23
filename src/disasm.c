@@ -47,6 +47,9 @@ static inline void dump_prototype(prototype_t *proto)
     case OP_ARRAY:
       printf("[%05d] Array             %d\n", j, bytes[i++]);
       break;
+    case OP_INSTANCE:
+      printf("[%05d] Instance\n", j);
+      break;
     case OP_FUNCTION:
       printf("[%05d] Function          %d\n", j, bytes[i++]);
       break;

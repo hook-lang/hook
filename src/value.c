@@ -4,6 +4,7 @@
 //
 
 #include "value.h"
+#include "struct.h"
 #include "callable.h"
 #include "common.h"
 #include "error.h"
@@ -23,6 +24,12 @@ static inline void value_free(value_t val)
     break;
   case TYPE_ARRAY:
     array_free(AS_ARRAY(val));
+    break;
+  case TYPE_STRUCT:
+    struct_free(AS_STRUCT(val));
+    break;
+  case TYPE_INSTANCE:
+    instance_free(AS_INSTANCE(val));
     break;
   case TYPE_CALLABLE:
     if (IS_NATIVE(val))
@@ -53,6 +60,12 @@ const char *type_name(type_t type)
     break;
   case TYPE_ARRAY:
     name = "array";
+    break;
+  case TYPE_STRUCT:
+    name = "struct";
+    break;
+  case TYPE_INSTANCE:
+    name = "instance";
     break;
   case TYPE_CALLABLE:
     name = "callable";
@@ -90,6 +103,12 @@ void value_print(value_t val, bool quoted)
   case TYPE_ARRAY:
     array_print(AS_ARRAY(val));
     break;
+  case TYPE_STRUCT:
+    printf("<struct at %p>", val.as.pointer);
+    break;
+  case TYPE_INSTANCE:
+    instance_print(AS_INSTANCE(val));
+    break;
   case TYPE_CALLABLE:
     {
       string_t *name = IS_NATIVE(val) ? AS_NATIVE(val)->name : AS_FUNCTION(val)->proto->name;
@@ -124,6 +143,12 @@ bool value_equal(value_t val1, value_t val2)
     break;
   case TYPE_ARRAY:
     result = array_equal(AS_ARRAY(val1), AS_ARRAY(val2));
+    break;
+  case TYPE_STRUCT:
+    result = struct_equal(AS_STRUCT(val1), AS_STRUCT(val2));
+    break;
+  case TYPE_INSTANCE:
+    instance_equal(AS_INSTANCE(val1), AS_INSTANCE(val2));
     break;
   case TYPE_CALLABLE:
     result = val1.as.pointer == val2.as.pointer;
@@ -165,6 +190,8 @@ int value_compare(value_t val1, value_t val2, int *result)
     *result = string_compare(AS_STRING(val1), AS_STRING(val2));
     return STATUS_OK;
   case TYPE_ARRAY:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
   case TYPE_CALLABLE:
     break;
   }

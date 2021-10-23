@@ -28,10 +28,12 @@ add_executable(${PROJECT_NAME}
   src/compiler.c
   src/disasm.c
   src/error.c
+  src/hash.c
   src/main.c
   src/memory.c
   src/scanner.c
   src/string.c
+  src/struct.c
   src/value.c
   src/vm.c)
 

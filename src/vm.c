@@ -5,11 +5,11 @@
 
 #include "vm.h"
 #include <stdlib.h>
-#include <stdio.h>
 #include <math.h>
 #include "common.h"
 #include "compiler.h"
 #include "builtin.h"
+#include "struct.h"
 #include "memory.h"
 #include "error.h"
 
@@ -17,6 +17,7 @@ static inline int push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline int array(vm_t *vm, int length);
+static inline int instance(vm_t *vm);
 static inline int function(vm_t *vm, prototype_t *proto);
 static inline int unpack(vm_t *vm, int length);
 static inline int append(vm_t *vm);
@@ -86,6 +87,25 @@ static inline int array(vm_t *vm, int length)
   }
   INCR_REF(arr);
   return STATUS_OK;
+}
+
+static inline int instance(vm_t *vm)
+{
+  struct_t *ztruct = AS_STRUCT(vm->slots[vm->index]);
+  --vm->index;
+  int length = ztruct->length;
+  value_t *slots = &vm->slots[vm->index - length + 1];
+  instance_t *inst = instance_allocate(ztruct);
+  for (int i = 0; i < length; ++i)
+    inst->values[i] = slots[i];
+  vm->index -= length;
+  int status = STATUS_OK;
+  if ((status = push(vm, INSTANCE_VALUE(inst))) == STATUS_ERROR)
+    instance_free(inst);
+  else
+    INCR_REF(inst);
+  DECR_REF(ztruct);
+  return status;
 }
 
 static inline int function(vm_t *vm, prototype_t *proto)
@@ -571,6 +591,8 @@ static inline int add(vm_t *vm)
     return STATUS_OK;
   case TYPE_NULL:
   case TYPE_BOOLEAN:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
   case TYPE_CALLABLE:
     break;
   }
@@ -638,6 +660,8 @@ static inline int subtract(vm_t *vm)
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_STRING:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
   case TYPE_CALLABLE:
     break;
   }
@@ -830,6 +854,10 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       break;
     case OP_ARRAY:
       if (array(vm, read_byte(&pc)) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_INSTANCE:
+      if (instance(vm) == STATUS_ERROR)
         goto error;
       break;
     case OP_FUNCTION:

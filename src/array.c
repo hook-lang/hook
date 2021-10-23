@@ -197,16 +197,18 @@ void array_inplace_diff(array_t *dest, array_t *src)
 void array_print(array_t *arr)
 {
   printf("[");
-  if (!arr->length)
+  int length = arr->length;
+  if (!length)
   {
     printf("]");
     return;
   }
-  value_print(arr->elements[0], true);
-  for (int i = 1; i < arr->length; ++i)
+  value_t *elements = arr->elements;
+  value_print(elements[0], true);
+  for (int i = 1; i < length; ++i)
   {
     printf(", ");
-    value_print(arr->elements[i], true);
+    value_print(elements[i], true);
   }
   printf("]");
 }

@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <errno.h>
+#include "struct.h"
 #include "common.h"
 #include "error.h"
 
@@ -138,6 +139,8 @@ static int int_call(vm_t *vm, value_t *frame)
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
   case TYPE_CALLABLE:
     break;
   }
@@ -162,6 +165,8 @@ static int float_call(vm_t *vm, value_t *frame)
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
   case TYPE_CALLABLE:
     break;
   }
@@ -191,6 +196,8 @@ static int str_call(vm_t *vm, value_t *frame)
   case TYPE_STRING:
     return STATUS_OK;
   case TYPE_ARRAY:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
   case TYPE_CALLABLE:
     break;
   }
@@ -219,6 +226,8 @@ static int cap_call(vm_t *vm, value_t *frame)
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
   case TYPE_CALLABLE:
     break;
   }
@@ -235,6 +244,10 @@ static int len_call(vm_t *vm, value_t *frame)
     return vm_push_number(vm, AS_STRING(val)->length);
   case TYPE_ARRAY:
     return vm_push_number(vm, AS_ARRAY(val)->length);
+  case TYPE_STRUCT:
+    return vm_push_number(vm, AS_STRUCT(val)->length);
+  case TYPE_INSTANCE:
+    return vm_push_number(vm, AS_INSTANCE(val)->ztruct->length);
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
@@ -254,6 +267,10 @@ static int is_empty_call(vm_t *vm, value_t *frame)
     return vm_push_boolean(vm, !AS_STRING(val)->length);
   case TYPE_ARRAY:
     return vm_push_boolean(vm, !AS_ARRAY(val)->length);
+  case TYPE_STRUCT:
+    return vm_push_boolean(vm, !AS_STRUCT(val)->length);
+  case TYPE_INSTANCE:
+    return vm_push_boolean(vm, !AS_INSTANCE(val)->ztruct->length);
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
