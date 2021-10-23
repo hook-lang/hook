@@ -98,6 +98,9 @@ static inline void dump_prototype(prototype_t *proto)
     case OP_INPLACE_DELETE:
       printf("[%05d] InplaceDelete\n", j);
       break;
+    case OP_GET_FIELD:
+      printf("[%05d] GetField\n", j);
+      break;
     case OP_JUMP:
       {
         int offset = *((uint16_t*) &bytes[i]);

@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Option --disasm"
+title "Option: --disasm"
 
 script "fn factorial(n) {
   if (n == 0)

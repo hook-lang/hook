@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. test/__test
+
+title "Array: get element"
+
+script "let arr1 = ['foo', 'bar', 'baz'];
+println(arr1[0]);
+println(arr1[1]);
+println(arr1[2]);
+
+let arr2 = [['foo', 'bar']];
+println(arr2[0][1]);"
+
+expect_success "foo
+bar
+baz
+bar"
+
+run

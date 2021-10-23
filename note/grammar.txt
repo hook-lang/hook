@@ -50,5 +50,5 @@ prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | '{' ( NAME ':' expr ( ',' NAME ':' expr )* )? '}'
               | 'fn' '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')' block
               | 'if' '(' expr ')' expr 'else' expr
-              | NAME ( subscr | call )*
+              | NAME ( '[' expr ']' | '.' NAME | call )*
               | '(' expr ')'

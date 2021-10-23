@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Array initializer"
+title "Array: initializer"
 
 script "println([]);
 println([123]);

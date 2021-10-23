@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Array concatenation"
+title "Array: concatenation"
 
 script "println([] + ['foo']);
 println(['foo'] + []);

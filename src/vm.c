@@ -29,6 +29,7 @@ static inline int delete(vm_t *vm);
 static inline int inplace_append(vm_t *vm);
 static inline int inplace_put_element(vm_t *vm);
 static inline int inplace_delete(vm_t *vm);
+static inline int get_field(vm_t *vm);
 static inline void equal(vm_t *vm);
 static inline int greater(vm_t *vm);
 static inline int less(vm_t *vm);
@@ -432,6 +433,37 @@ static inline int inplace_delete(vm_t *vm)
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
+  return STATUS_OK;
+}
+
+static inline int get_field(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->index - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  if (!IS_INSTANCE(val1))
+  {
+    runtime_error("cannot use '%s' as an struct instance", type_name(val1.type));
+    return STATUS_ERROR;
+  }
+  instance_t *inst = AS_INSTANCE(val1);
+  string_t *name = AS_STRING(val2);
+  int index = struct_index_of(inst->ztruct, name);
+  if (index == -1)
+  {
+    runtime_error("no field `%.*s` on struct", name->length, name->chars);
+    return STATUS_ERROR;
+  }
+  value_t value = inst->values[index];
+  VALUE_INCR_REF(value);
+  slots[0] = value;
+  --vm->index;
+  DECR_REF(inst);
+  if (IS_UNREACHABLE(inst))
+    instance_free(inst);
+  DECR_REF(name);
+  if (IS_UNREACHABLE(name))
+    string_free(name);
   return STATUS_OK;
 }
 
@@ -937,6 +969,10 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       break;
     case OP_INPLACE_DELETE:
       if (inplace_delete(vm) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_GET_FIELD:
+      if (get_field(vm) == STATUS_ERROR)
         goto error;
       break;
     case OP_JUMP:

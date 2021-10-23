@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Append array element"
+title "Array: append element"
 
 script "let mut arr1 = [];
 arr1[] = 'foo';

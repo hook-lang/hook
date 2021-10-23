@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Array difference"
+title "Array: difference"
 
 script "println([] - ['foo']);
 println(['foo'] - []);

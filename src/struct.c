@@ -89,26 +89,43 @@ void struct_free(struct_t *ztruct)
   free(ztruct);
 }
 
+int struct_index_of(struct_t *ztruct, string_t *name)
+{
+  int mask = ztruct->mask;
+  field_t **table = ztruct->table;
+  int i = string_hash(name) & mask;
+  for (;;)
+  {
+    field_t *field = table[i];
+    if (!field)
+      break;
+    if (string_equal(name, field->name))
+      return field->index;
+    i = (i + 1) & mask;
+  }
+  return -1;
+}
+
 bool struct_put_if_absent(struct_t *ztruct, int length, char *chars)
 {
   int mask = ztruct->mask;
   field_t **table = ztruct->table;
   uint32_t h = hash(length, chars);
-  int index = h & mask;
+  int i = h & mask;
   for (;;)
   {
-    field_t *field = table[index];
+    field_t *field = table[i];
     if (!field)
     {
       string_t *name = string_from_chars(length, chars);
       name->hash = h;
-      table[index] = add_field(ztruct, name);
+      table[i] = add_field(ztruct, name);
       resize(ztruct);
       return true;
     }
     if (name_match(length, chars, field->name))
       break;
-    index = (index + 1) & mask;
+    i = (i + 1) & mask;
   }
   return false;
 }

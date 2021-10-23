@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. test/__test
+
+title "Struct instance: get field"
+
+script "let s1 = {foo: 1, bar: 2, baz: 3};
+println(s1.foo);
+println(s1.bar);
+println(s1.baz);
+
+let s2 = {foo: {bar: 1, baz: 2}};
+println(s2.foo.baz);"
+
+expect_success "1
+2
+3
+2"
+
+run

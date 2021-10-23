@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "String concatenation"
+title "String: concatenation"
 
 script "println('' + 'foo' + '' + 'bar' + 'baz');"
 

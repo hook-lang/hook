@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Strcut instantiator"
+title "Strcut: instantiator"
 
 script "println({});
 println({a: 1});

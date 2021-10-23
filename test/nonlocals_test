@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Non-locals test"
+title "Non-locals"
 
 script "let a = 1;
 fn f (x) {

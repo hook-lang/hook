@@ -1480,6 +1480,23 @@ static void compile_subscript_or_call(compiler_t *comp)
       prototype_add_line(proto, line);
       continue;
     }
+    if (MATCH(scan, TOKEN_DOT))
+    {
+      int line1 = scan->line;
+      scanner_next_token(scan);
+      if (!MATCH(scan, TOKEN_NAME))
+        fatal_error_unexpected_token(scan);
+      int line2 = scan->line;
+      token_t tk = scan->token;
+      scanner_next_token(scan);
+      uint8_t index = add_string_constant(proto, &tk);
+      chunk_emit_opcode(chunk, OP_CONSTANT);
+      chunk_emit_byte(chunk, index);
+      prototype_add_line(proto, line2);
+      chunk_emit_opcode(chunk, OP_GET_FIELD);
+      prototype_add_line(proto, line1);
+      continue;
+    }
     if (MATCH(scan, TOKEN_LPAREN))
     {
       int line = scan->line;

@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Set array element"
+title "Array: set element"
 
 script "let mut arr1 = ['foo'];
 arr1[0] = 'bar';

@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Array equal"
+title "Array: equal"
 
 script "println([] == []);
 println([1] == [1]);

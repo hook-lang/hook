@@ -2,7 +2,7 @@
 
 . test/__test
 
-title "Array resize"
+title "Array: resize"
 
 script "let mut arr = [];
 for (let mut i = 1; i <= 100; i++) {
