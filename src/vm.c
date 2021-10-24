@@ -100,13 +100,15 @@ static inline int instance(vm_t *vm)
   for (int i = 0; i < length; ++i)
     inst->values[i] = slots[i];
   vm->index -= length;
-  int status = STATUS_OK;
-  if ((status = push(vm, INSTANCE_VALUE(inst))) == STATUS_ERROR)
+  if (push(vm, INSTANCE_VALUE(inst)) == STATUS_ERROR)
+  {
     instance_free(inst);
-  else
-    INCR_REF(inst);
+    DECR_REF(ztruct);
+    return STATUS_ERROR;
+  }
+  INCR_REF(inst);
   DECR_REF(ztruct);
-  return status;
+  return STATUS_OK;
 }
 
 static inline int function(vm_t *vm, prototype_t *proto)
@@ -828,8 +830,8 @@ static inline int check_arity(int arity, string_t *name, int num_args)
 {
   if (num_args >= arity)
     return STATUS_OK;
-  const char *fmt = arity > 1 ? "%s() expects %d arguments but got %d" :
-    "%s() expects %d argument but got %d";
+  const char *fmt = arity == 1 ? "%s() expects %d argument but got %d" :
+    "%s() expects %d arguments but got %d";
   char *name_chars = name ? name->chars : "<anonymous>";
   runtime_error(fmt, name_chars, arity, num_args);
   return STATUS_ERROR;

@@ -104,7 +104,7 @@ static void compile_mul_expression(compiler_t *comp);
 static void compile_unary_expression(compiler_t *comp);
 static void compile_prim_expression(compiler_t *comp);
 static void compile_array_initializer(compiler_t *comp);
-static void compile_struct_instantiator(compiler_t *comp);
+static void compile_struct_initializer(compiler_t *comp);
 static void compile_if_expression(compiler_t *comp);
 static void compile_subscript_or_call(compiler_t *comp);
 static void compile_variable(compiler_t *comp, token_t *tk);
@@ -1342,7 +1342,7 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_LBRACE))
   {
-    compile_struct_instantiator(comp);
+    compile_struct_initializer(comp);
     return;
   }
   if (MATCH(scan, TOKEN_FN))
@@ -1399,11 +1399,12 @@ end:
   return;
 }
 
-static void compile_struct_instantiator(compiler_t *comp)
+static void compile_struct_initializer(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
+  int line = scan->line;
   scanner_next_token(scan);
   struct_t *ztruct = struct_new();
   if (MATCH(scan, TOKEN_RBRACE))
@@ -1439,7 +1440,9 @@ end:
   index = add_constant(proto, STRUCT_VALUE(ztruct));
   chunk_emit_opcode(chunk, OP_CONSTANT);
   chunk_emit_byte(chunk, index);
+  prototype_add_line(proto, line);
   chunk_emit_opcode(chunk, OP_INSTANCE);
+  prototype_add_line(proto, line);
 }
 
 static void compile_if_expression(compiler_t *comp)
