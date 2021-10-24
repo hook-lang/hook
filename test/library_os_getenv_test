@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. test/__test
+
+title "Library os: getenv()"
+
+script "let os = require('os');
+println(os.getenv('HOOK_HOME'));"
+
+expect_status_success
+
+run

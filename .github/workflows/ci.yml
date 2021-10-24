@@ -18,6 +18,8 @@ jobs:
       run: cmake --build ${{github.workspace}}/build
     - name: Running tests
       run: ./run-tests
+      env:
+        HOOK_HOME: ${{github.workspace}}
     - name: Code coverage
       run: |
         gcov src/*.c
@@ -44,3 +46,5 @@ jobs:
       run: cmake --build ${{github.workspace}}/build
     - name: Running tests
       run: ./run-tests
+      env:
+        HOOK_HOME: ${{github.workspace}}

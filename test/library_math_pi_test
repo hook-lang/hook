@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. test/__test
+
+title "Library math: PI"
+
+script "let math = require('math');
+println(math.PI);"
+
+expect_status_success
+
+run

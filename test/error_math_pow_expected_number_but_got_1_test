@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. test/__test
+
+title "Error from math.pow(): expected number but got X (1)"
+
+script "let math = require('math');
+let a = math.pow('foo', 1);"
+
+expect_failure "runtime error: invalid type: expected number but got 'string'
+  at pow() in <native>
+  at main() in <stdin>:2"
+
+run

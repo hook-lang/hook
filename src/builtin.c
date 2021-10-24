@@ -6,14 +6,27 @@
 #include "builtin.h"
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <float.h>
 #include <ctype.h>
 #include <limits.h>
+#ifdef WIN32
+#include <Windows.h>
+#else
+#include <dlfcn.h>
+#endif
 #include <errno.h>
+#include <assert.h>
 #include "struct.h"
 #include "common.h"
 #include "error.h"
+
+#define HOME "HOOK_HOME"
+
+#ifdef WIN32
+typedef int (__stdcall *load_library_t)(vm_t *);
+#else
+typedef void (*load_library_t)(vm_t *);
+#endif
 
 static const char *globals[] = {
   "print",
@@ -32,17 +45,13 @@ static const char *globals[] = {
   "upper",
   "array",
   "index_of",
-  "abs",
-  "floor",
-  "ceil",
-  "pow",
-  "sqrt",
-  "system",
   "assert",
-  "panic"
+  "panic",
+  "require"
 };
 
 static inline int string_to_double(string_t *str, double *result);
+static inline int load_library(vm_t *vm, string_t *name);
 static int print_call(vm_t *vm, value_t *frame);
 static int println_call(vm_t *vm, value_t *frame);
 static int type_call(vm_t *vm, value_t *frame);
@@ -59,14 +68,9 @@ static int lower_call(vm_t *vm, value_t *frame);
 static int upper_call(vm_t *vm, value_t *frame);
 static int array_call(vm_t *vm, value_t *frame);
 static int index_of_call(vm_t *vm, value_t *frame);
-static int abs_call(vm_t *vm, value_t *frame);
-static int floor_call(vm_t *vm, value_t *frame);
-static int ceil_call(vm_t *vm, value_t *frame);
-static int pow_call(vm_t *vm, value_t *frame);
-static int sqrt_call(vm_t *vm, value_t *frame);
-static int system_call(vm_t *vm, value_t *frame);
 static int assert_call(vm_t *vm, value_t *frame);
 static int panic_call(vm_t *vm, value_t *frame);
+static int require_call(vm_t *vm, value_t *frame);
 
 static inline int string_to_double(string_t *str, double *result)
 {
@@ -90,6 +94,60 @@ static inline int string_to_double(string_t *str, double *result)
     runtime_error("invalid type: cannot convert 'string' to 'number'");
     return STATUS_ERROR;
   }
+  return STATUS_OK;
+}
+
+static inline int load_library(vm_t *vm, string_t *name)
+{
+#ifdef WIN32
+  const char *file_infix = "\\lib\\";
+  const char *file_ext = ".dll";
+#else
+  const char *file_infix = "/lib/lib";
+#ifdef __APPLE__
+  const char *file_ext = ".dylib";
+#else
+  const char *file_ext = ".so";
+#endif
+#endif
+  const char *func_prefix = "load_";
+  char *home = getenv(HOME);
+  if (!home)
+  {
+    runtime_error("environment variable `%s` not defined", HOME);
+    return STATUS_ERROR;
+  }
+  string_t *file = string_from_chars(-1, home);
+  string_inplace_concat_chars(file, -1, file_infix);
+  string_inplace_concat(file, name);
+  string_inplace_concat_chars(file, -1, file_ext);
+#ifdef WIN32
+  HINSTANCE handle = LoadLibrary(file->chars);
+#else
+  void *handle = dlopen(file->chars, RTLD_NOW | RTLD_GLOBAL);
+#endif
+  if (!handle)
+  {
+    runtime_error("cannot load library `%.*s`", name->length, name->chars);
+    string_free(file);
+    return STATUS_ERROR;
+  }
+  string_free(file);
+  string_t *func = string_from_chars(-1, func_prefix);
+  string_inplace_concat(func, name);
+#ifdef WIN32
+  load_library_t load = GetProcAddress(handle, func->chars);
+#else
+  load_library_t load = dlsym(handle, func->chars);
+#endif
+  if (!load)
+  {
+    runtime_error("no such function %.*s()", func->length, func->chars);
+    string_free(func);
+    return STATUS_ERROR;
+  }
+  string_free(func);
+  load(vm);
   return STATUS_OK;
 }
 
@@ -372,78 +430,6 @@ static int index_of_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, array_index_of(AS_ARRAY(val1), val2));
 }
 
-static int abs_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  return vm_push_number(vm, fabs(val.as.number));
-}
-
-static int floor_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  return vm_push_number(vm, floor(val.as.number));
-}
-
-static int ceil_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  return vm_push_number(vm, ceil(val.as.number));
-}
-
-static int pow_call(vm_t *vm, value_t *frame)
-{
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
-  if (!IS_NUMBER(val1))
-  {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val1.type));
-    return STATUS_ERROR;
-  }
-  if (!IS_NUMBER(val2))
-  {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val2.type));
-    return STATUS_ERROR;
-  }
-  return vm_push_number(vm, pow(val1.as.number, val2.as.number));
-}
-
-static int sqrt_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  return vm_push_number(vm, sqrt(val.as.number));
-}
-
-static int system_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  return vm_push_number(vm, system(AS_STRING(val)->chars));
-}
-
 static int assert_call(vm_t *vm, value_t *frame)
 {
   (void) vm;
@@ -476,32 +462,38 @@ static int panic_call(vm_t *vm, value_t *frame)
   return STATUS_NO_TRACE;
 }
 
-void globals_init(vm_t *vm)
+static int require_call(vm_t *vm, value_t *frame)
 {
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[0]), 1, &print_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[1]), 1, &println_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[2]), 1, &type_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[3]), 1, &bool_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[4]), 1, &int_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[5]), 1, &float_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[6]), 1, &str_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[7]), 1, &cap_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[8]), 1, &len_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[9]), 1, &is_empty_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &hash_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 2, &compare_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 1, &lower_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 1, &upper_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &array_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 2, &index_of_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &abs_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &floor_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &ceil_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 2, &pow_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &sqrt_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &system_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 2, &assert_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &panic_call));
+  value_t val = frame[1];
+  if (!IS_STRING(val))
+  {
+    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  return load_library(vm, AS_STRING(val));
+}
+
+void load_globals(vm_t *vm)
+{
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[0]), 1, &print_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[1]), 1, &println_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[2]), 1, &type_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[3]), 1, &bool_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[4]), 1, &int_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[5]), 1, &float_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[6]), 1, &str_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[7]), 1, &cap_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[8]), 1, &len_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[9]), 1, &is_empty_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &hash_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 2, &compare_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 1, &lower_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 1, &upper_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &array_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 2, &index_of_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 2, &assert_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &panic_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &require_call)) == STATUS_OK);
 }
 
 int num_globals(void)

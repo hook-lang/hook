@@ -118,6 +118,18 @@ string_t *string_concat(string_t *str1, string_t *str2)
   return result;
 }
 
+void string_inplace_concat_chars(string_t *dest, int length, const char *chars)
+{
+  if (length < 0)
+    length = (int) strnlen(chars, INT_MAX);
+  int new_length = dest->length + length;
+  resize(dest, new_length + 1);
+  memcpy(&dest->chars[dest->length], chars, length);
+  dest->length = new_length;
+  dest->chars[new_length] = '\0';
+  dest->hash = -1;
+}
+
 void string_inplace_concat(string_t *dest, string_t *src)
 {
   int length = dest->length + src->length;

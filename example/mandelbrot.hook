@@ -1,4 +1,5 @@
 
+let floor = require("math").floor;
 let pixels = [" ", ".", ":", ";", "+", "=", "x", "X", "$", "&"];
 
 let y_min = -0.2;

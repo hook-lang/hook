@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. test/__test
+
+title "Library math: pow()"
+
+script "let math = require('math');
+println(math.pow(2, 3));"
+
+expect_success "8"
+
+run

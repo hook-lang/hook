@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. test/__test
+
+title "Library math: ceil()"
+
+script "let math = require('math');
+println(math.ceil(1.23));"
+
+expect_success "2"
+
+run

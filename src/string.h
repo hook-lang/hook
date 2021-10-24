@@ -26,6 +26,7 @@ string_t *string_from_stream(FILE *fp);
 string_t *string_from_file(const char *filename);
 void string_free(string_t *str);
 string_t *string_concat(string_t *str1, string_t *str2);
+void string_inplace_concat_chars(string_t *dest, int length, const char *chars);
 void string_inplace_concat(string_t *dest, string_t *src);
 void string_print(string_t *str, bool quoted);
 uint32_t string_hash(string_t *str);

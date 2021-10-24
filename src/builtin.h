@@ -8,7 +8,7 @@
 
 #include "vm.h"
 
-void globals_init(vm_t *vm);
+void load_globals(vm_t *vm);
 int num_globals(void);
 int lookup_global(int length, char *chars);
 

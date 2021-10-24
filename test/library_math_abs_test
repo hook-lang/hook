@@ -1,0 +1,14 @@
+#!/bin/sh
+
+. test/__test
+
+title "Library math: abs()"
+
+script "let math = require('math');
+println(math.abs(1.23));
+println(math.abs(-1.23));"
+
+expect_success "1.23
+1.23"
+
+run

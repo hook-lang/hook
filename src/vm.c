@@ -17,7 +17,7 @@ static inline int push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline int array(vm_t *vm, int length);
-static inline int instance(vm_t *vm);
+static inline void instance(vm_t *vm);
 static inline int initialize_struct(vm_t *vm, int num_args);
 static inline int function(vm_t *vm, prototype_t *proto);
 static inline int unpack(vm_t *vm, int length);
@@ -91,25 +91,18 @@ static inline int array(vm_t *vm, int length)
   return STATUS_OK;
 }
 
-static inline int instance(vm_t *vm)
+static inline void instance(vm_t *vm)
 {
   struct_t *ztruct = AS_STRUCT(vm->slots[vm->index]);
-  --vm->index;
   int length = ztruct->length;
-  value_t *slots = &vm->slots[vm->index - length + 1];
+  value_t *slots = &vm->slots[vm->index - length];
   instance_t *inst = instance_allocate(ztruct);
   for (int i = 0; i < length; ++i)
     inst->values[i] = slots[i];
   vm->index -= length;
-  if (push(vm, INSTANCE_VALUE(inst)) == STATUS_ERROR)
-  {
-    instance_free(inst);
-    DECR_REF(ztruct);
-    return STATUS_ERROR;
-  }
   INCR_REF(inst);
+  slots[0] = INSTANCE_VALUE(inst);
   DECR_REF(ztruct);
-  return STATUS_OK;
 }
 
 static inline int initialize_struct(vm_t *vm, int num_args)
@@ -925,8 +918,7 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
         goto error;
       break;
     case OP_INSTANCE:
-      if (instance(vm) == STATUS_ERROR)
-        goto error;
+      instance(vm);
       break;
     case OP_INITILIZE_STRUCT:
       if (initialize_struct(vm, read_byte(&pc)) == STATUS_ERROR)
@@ -1108,7 +1100,7 @@ void vm_init(vm_t *vm, int min_capacity)
   vm->end = capacity - 1;
   vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
   vm->index = -1;
-  globals_init(vm);
+  load_globals(vm);
 }
 
 void vm_free(vm_t *vm)
@@ -1116,6 +1108,14 @@ void vm_free(vm_t *vm)
   while (vm->index > -1)
     value_release(vm->slots[vm->index--]);
   free(vm->slots);
+}
+
+int vm_push_value(vm_t *vm, value_t val)
+{
+  if (push(vm, val) == STATUS_ERROR)
+    return STATUS_ERROR;
+  VALUE_INCR_REF(val);
+  return STATUS_OK;
 }
 
 int vm_push_null(vm_t *vm)
@@ -1135,34 +1135,32 @@ int vm_push_number(vm_t *vm, double data)
 
 int vm_push_string(vm_t *vm, string_t *str)
 {
-  if (push(vm, STRING_VALUE(str)) == STATUS_ERROR)
-    return STATUS_ERROR;
-  INCR_REF(str);
-  return STATUS_OK;
+  return vm_push_value(vm, STRING_VALUE(str));
 }
 
 int vm_push_array(vm_t *vm, array_t *arr)
 {
-  if (push(vm, ARRAY_VALUE(arr)) == STATUS_ERROR)
-    return STATUS_ERROR;
-  INCR_REF(arr);
-  return STATUS_OK;
+  return vm_push_value(vm, ARRAY_VALUE(arr));
+}
+
+int vm_push_struct(vm_t *vm, struct_t *ztruct)
+{
+  return vm_push_value(vm, STRUCT_VALUE(ztruct));
+}
+
+int vm_push_instance(vm_t *vm, instance_t *inst)
+{
+  return vm_push_value(vm, INSTANCE_VALUE(inst));
 }
 
 int vm_push_function(vm_t *vm, function_t *fn)
 {
-  if (push(vm, FUNCTION_VALUE(fn)) == STATUS_ERROR)
-    return STATUS_ERROR;
-  INCR_REF(fn);
-  return STATUS_OK;
+  return vm_push_value(vm, FUNCTION_VALUE(fn));
 }
 
 int vm_push_native(vm_t *vm, native_t *native)
 {
-  if (push(vm, NATIVE_VALUE(native)) == STATUS_ERROR)
-    return STATUS_ERROR;
-  INCR_REF(native);
-  return STATUS_OK;
+  return vm_push_value(vm, NATIVE_VALUE(native));
 }
 
 void vm_pop(vm_t *vm)
@@ -1171,6 +1169,16 @@ void vm_pop(vm_t *vm)
   value_t val = vm->slots[vm->index];
   --vm->index;
   value_release(val);
+}
+
+void vm_instance(vm_t *vm)
+{
+  instance(vm);
+}
+
+int vm_initialize_struct(vm_t *vm, int num_args)
+{
+  return initialize_struct(vm, num_args);
 }
 
 void vm_compile(vm_t *vm)

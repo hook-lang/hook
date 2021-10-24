@@ -4,6 +4,7 @@ _title=""
 _script=""
 _arguments=""
 expect_status=0
+check_output=0
 expect_output=""
 
 title()
@@ -21,21 +22,34 @@ arguments()
   _arguments=$1
 }
 
+expect_status_success()
+{
+  expect_status=0
+}
+
+expect_status_failure()
+{
+  expect_status=1
+}
+
 expect()
 {
   expect_status=$1
+  check_output=1
   expect_output=$2
 }
 
 expect_success()
 {
   expect_status=0
+  check_output=1
   expect_output=$1
 }
 
 expect_failure()
 {
   expect_status=1
+  check_output=1
   expect_output=$1
 }
 
@@ -51,7 +65,7 @@ run()
   if [ $status -ne $expect_status ]; then
     n=$(($n + 1))
   fi
-  if [ "$output" != "$expect_output" ]; then
+  if [ $check_output -eq 1 ] && [ "$output" != "$expect_output" ]; then
     n=$(($n + 1))
   fi
   result=$([ $n -eq 0 ] && echo "Passed" || echo "Failed")
