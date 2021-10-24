@@ -48,6 +48,7 @@ TOKEN_LOOP       'loop'
 TOKEN_MUT        'mut'
 TOKEN_NULL       'null'
 TOKEN_RETURN     'return'
+TOKEN_STRUCT     'struct'
 TOKEN_TRUE       'true'
 TOKEN_WHILE      'while'
 TOKEN_NAME       NAME

@@ -13,5 +13,6 @@ loop
 mut
 null
 return
+struct
 true
 while

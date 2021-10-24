@@ -104,7 +104,15 @@ void value_print(value_t val, bool quoted)
     array_print(AS_ARRAY(val));
     break;
   case TYPE_STRUCT:
-    printf("<struct at %p>", val.as.pointer);
+    {
+      string_t *name = AS_STRUCT(val)->name;
+      if (name)
+      {
+        printf("<struct %.*s at %p>", name->length, name->chars, val.as.pointer);
+        break;
+      }
+      printf("<struct at %p>", val.as.pointer);
+    }
     break;
   case TYPE_INSTANCE:
     instance_print(AS_INSTANCE(val));

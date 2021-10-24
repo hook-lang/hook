@@ -61,7 +61,7 @@ static inline bool name_match(int length, char *chars, string_t *name)
   return length == name->length && !memcmp(chars, name->chars, length);
 }
 
-struct_t *struct_new(void)
+struct_t *struct_new(string_t *name)
 {
   int capacity = STRUCT_MIN_CAPACITY;
   struct_t *ztruct = (struct_t *) allocate(sizeof(*ztruct));
@@ -69,6 +69,9 @@ struct_t *struct_new(void)
   ztruct->capacity = capacity;
   ztruct->mask = capacity - 1;
   ztruct->length = 0;
+  if (name)
+    INCR_REF(name);
+  ztruct->name = name;
   ztruct->fields = (field_t *) allocate(sizeof(*ztruct->fields) * capacity);
   ztruct->table = allocate_table(capacity);
   return ztruct;
@@ -76,6 +79,13 @@ struct_t *struct_new(void)
 
 void struct_free(struct_t *ztruct)
 {
+  string_t *name = ztruct->name;
+  if (name)
+  {
+    DECR_REF(name);
+    if (IS_UNREACHABLE(name))
+      string_free(name);
+  }
   field_t *fields = ztruct->fields;
   for (int i = 0; i < ztruct->length; ++i)
   {

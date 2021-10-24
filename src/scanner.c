@@ -447,6 +447,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_RETURN;
     return;
   }
+  if (match_chars(scan, "struct"))
+  {
+    scan->token.type = TOKEN_STRUCT;
+    return;
+  }
   if (match_chars(scan, "true"))
   {
     scan->token.type = TOKEN_TRUE;

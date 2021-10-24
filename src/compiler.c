@@ -85,6 +85,7 @@ static void compile_block(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assignment(compiler_t *comp, token_t *tk);
 static void compile_call_statement(compiler_t *comp, token_t *tk);
+static void compile_struct_declaration(compiler_t *comp);
 static void compile_function_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_delete_statement(compiler_t *comp);
 static void compile_if_statement(compiler_t *comp);
@@ -348,6 +349,11 @@ static void compile_statement(compiler_t *comp)
     }
     compile_assignment(comp, &tk);
     EXPECT(scan, TOKEN_SEMICOLON);
+    return;
+  }
+  if (MATCH(scan, TOKEN_STRUCT))
+  {
+    compile_struct_declaration(comp);
     return;
   }
   if (MATCH(scan, TOKEN_FN))
@@ -740,19 +746,66 @@ static void compile_call_statement(compiler_t *comp, token_t *tk)
     return;
   }
   compile_expression(comp);
-  uint8_t nargs = 1;
+  uint8_t num_args = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
     compile_expression(comp);
-    ++nargs;
+    ++num_args;
   }
   EXPECT(scan, TOKEN_RPAREN);
   EXPECT(scan, TOKEN_SEMICOLON);
   chunk_emit_opcode(chunk, OP_CALL);
-  chunk_emit_byte(chunk, nargs);
+  chunk_emit_byte(chunk, num_args);
   prototype_add_line(proto, line);
   chunk_emit_opcode(chunk, OP_POP);
+}
+
+static void compile_struct_declaration(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  prototype_t *proto = comp->proto;
+  chunk_t *chunk = &proto->chunk;
+  int line = scan->line;
+  scanner_next_token(scan);
+  if (!MATCH(scan, TOKEN_NAME))
+    fatal_error_unexpected_token(scan);
+  token_t tk = scan->token;
+  scanner_next_token(scan);
+  define_local(comp, &tk, false);
+  string_t *name = string_from_chars(tk.length, tk.start);
+  struct_t *ztruct = struct_new(name);
+  EXPECT(scan, TOKEN_LBRACE);
+  if (MATCH(scan, TOKEN_RBRACE))
+  {
+    scanner_next_token(scan);
+    goto end;
+  }
+  if (!MATCH(scan, TOKEN_NAME))
+    fatal_error_unexpected_token(scan);
+  tk = scan->token;
+  scanner_next_token(scan);
+  if (!struct_put_if_absent(ztruct, tk.length, tk.start))
+    fatal_error("field `%.*s` is already declared at %d:%d", tk.length,
+      tk.start, tk.line, tk.col);
+  while (MATCH(scan, TOKEN_COMMA))
+  {
+    scanner_next_token(scan);
+    if (!MATCH(scan, TOKEN_NAME))
+      fatal_error_unexpected_token(scan);
+    tk = scan->token;
+    scanner_next_token(scan);
+    if (!struct_put_if_absent(ztruct, tk.length, tk.start))
+      fatal_error("field `%.*s` is already declared at %d:%d", tk.length,
+        tk.start, tk.line, tk.col);
+  }
+  EXPECT(scan, TOKEN_RBRACE);
+  uint8_t index;
+end:
+  index = add_constant(proto, STRUCT_VALUE(ztruct));
+  chunk_emit_opcode(chunk, OP_CONSTANT);
+  chunk_emit_byte(chunk, index);
+  prototype_add_line(proto, line);
 }
 
 static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
@@ -776,7 +829,6 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   }
   else
     compiler_init(&child_comp, comp, scan, NULL);
-
   chunk_t *child_chunk = &child_comp.proto->chunk;
   EXPECT(scan, TOKEN_LPAREN);
   if (MATCH(scan, TOKEN_RPAREN))
@@ -1406,7 +1458,7 @@ static void compile_struct_initializer(compiler_t *comp)
   chunk_t *chunk = &proto->chunk;
   int line = scan->line;
   scanner_next_token(scan);
-  struct_t *ztruct = struct_new();
+  struct_t *ztruct = struct_new(NULL);
   if (MATCH(scan, TOKEN_RBRACE))
   {
     scanner_next_token(scan);
@@ -1513,20 +1565,45 @@ static void compile_subscript_or_call(compiler_t *comp)
         return;
       }
       compile_expression(comp);
-      uint8_t nargs = 1;
+      uint8_t num_args = 1;
       while (MATCH(scan, TOKEN_COMMA))
       {
         scanner_next_token(scan);
         compile_expression(comp);
-        ++nargs;
+        ++num_args;
       }
       EXPECT(scan, TOKEN_RPAREN);
       chunk_emit_opcode(chunk, OP_CALL);
-      chunk_emit_byte(chunk, nargs);
+      chunk_emit_byte(chunk, num_args);
       prototype_add_line(proto, line);
       continue;
     }
     break;
+  }
+  if (MATCH(scan, TOKEN_LBRACE))
+  {
+    int line = scan->line;
+    scanner_next_token(scan);
+    if (MATCH(scan, TOKEN_RBRACE))
+    {
+      scanner_next_token(scan);
+      chunk_emit_opcode(chunk, OP_INITILIZE_STRUCT);
+      chunk_emit_byte(chunk, 0);
+      prototype_add_line(proto, line);
+      return;
+    }
+    compile_expression(comp);
+    uint8_t num_args = 1;
+    while (MATCH(scan, TOKEN_COMMA))
+    {
+      scanner_next_token(scan);
+      compile_expression(comp);
+      ++num_args;
+    }
+    EXPECT(scan, TOKEN_RBRACE);
+    chunk_emit_opcode(chunk, OP_INITILIZE_STRUCT);
+    chunk_emit_byte(chunk, num_args);
+    prototype_add_line(proto, line);
   }
 }
 

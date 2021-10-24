@@ -18,6 +18,7 @@ static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline int array(vm_t *vm, int length);
 static inline int instance(vm_t *vm);
+static inline int initialize_struct(vm_t *vm, int num_args);
 static inline int function(vm_t *vm, prototype_t *proto);
 static inline int unpack(vm_t *vm, int length);
 static inline int append(vm_t *vm);
@@ -108,6 +109,39 @@ static inline int instance(vm_t *vm)
   }
   INCR_REF(inst);
   DECR_REF(ztruct);
+  return STATUS_OK;
+}
+
+static inline int initialize_struct(vm_t *vm, int num_args)
+{
+  value_t *slots = &vm->slots[vm->index - num_args];
+  value_t val = slots[0];
+  if (!IS_STRUCT(val))
+  {
+    runtime_error("expected struct, found `%s`", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  struct_t *ztruct = AS_STRUCT(val);
+  int length = ztruct->length;
+  if (length != num_args)
+  {
+    const char *fmt = length == 1 ? 
+      "initializer of %s expects %d argument but got %d" :
+      "initializer of %s expects %d arguments but got %d";
+    string_t *name = ztruct->name;
+    char *name_chars = name ? name->chars : "<anonymous>";
+    runtime_error(fmt, name_chars, length, num_args);
+    return STATUS_ERROR;
+  }
+  instance_t *inst = instance_allocate(ztruct);
+  for (int i = 0; i < length; ++i)
+    inst->values[i] = slots[i + 1];
+  vm->index -= length;
+  INCR_REF(inst);
+  slots[0] = INSTANCE_VALUE(inst);
+  DECR_REF(ztruct);
+  if (IS_UNREACHABLE(ztruct))
+    struct_free(ztruct);
   return STATUS_OK;
 }
 
@@ -892,6 +926,10 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       break;
     case OP_INSTANCE:
       if (instance(vm) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_INITILIZE_STRUCT:
+      if (initialize_struct(vm, read_byte(&pc)) == STATUS_ERROR)
         goto error;
       break;
     case OP_FUNCTION:

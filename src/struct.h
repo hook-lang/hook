@@ -23,6 +23,7 @@ typedef struct
   int capacity;
   int mask;
   int length;
+  string_t *name;
   field_t *fields;
   field_t **table;
 } struct_t;
@@ -34,7 +35,7 @@ typedef struct
   value_t values[1];
 } instance_t;
 
-struct_t *struct_new(void);
+struct_t *struct_new(string_t *name);
 void struct_free(struct_t *ztruct);
 int struct_index_of(struct_t *ztruct, string_t *name);
 bool struct_put_if_absent(struct_t *ztruct, int length, char *chars);
