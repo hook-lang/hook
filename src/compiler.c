@@ -85,7 +85,7 @@ static void compile_block(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assignment(compiler_t *comp, token_t *tk);
 static void compile_call_statement(compiler_t *comp, token_t *tk);
-static void compile_struct_declaration(compiler_t *comp);
+static void compile_struct_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_function_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_delete_statement(compiler_t *comp);
 static void compile_if_statement(compiler_t *comp);
@@ -353,7 +353,7 @@ static void compile_statement(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_STRUCT))
   {
-    compile_struct_declaration(comp);
+    compile_struct_declaration(comp, false);
     return;
   }
   if (MATCH(scan, TOKEN_FN))
@@ -761,19 +761,24 @@ static void compile_call_statement(compiler_t *comp, token_t *tk)
   chunk_emit_opcode(chunk, OP_POP);
 }
 
-static void compile_struct_declaration(compiler_t *comp)
+static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
 {
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
   int line = scan->line;
   scanner_next_token(scan);
-  if (!MATCH(scan, TOKEN_NAME))
-    fatal_error_unexpected_token(scan);
-  token_t tk = scan->token;
-  scanner_next_token(scan);
-  define_local(comp, &tk, false);
-  string_t *name = string_from_chars(tk.length, tk.start);
+  token_t tk;
+  string_t *name = NULL;
+  if (!is_anonymous)
+  {
+    if (!MATCH(scan, TOKEN_NAME))
+      fatal_error_unexpected_token(scan);
+    tk = scan->token;
+    scanner_next_token(scan);
+    define_local(comp, &tk, false);
+    name = string_from_chars(tk.length, tk.start);
+  }
   struct_t *ztruct = struct_new(name);
   EXPECT(scan, TOKEN_LBRACE);
   if (MATCH(scan, TOKEN_RBRACE))
@@ -1397,6 +1402,11 @@ static void compile_prim_expression(compiler_t *comp)
     compile_struct_initializer(comp);
     return;
   }
+  if (MATCH(scan, TOKEN_STRUCT))
+  {
+    compile_struct_declaration(comp, true);
+    return;
+  }
   if (MATCH(scan, TOKEN_FN))
   {
     compile_function_declaration(comp, true);
@@ -1587,7 +1597,7 @@ static void compile_subscript_or_call(compiler_t *comp)
     if (MATCH(scan, TOKEN_RBRACE))
     {
       scanner_next_token(scan);
-      chunk_emit_opcode(chunk, OP_INITILIZE_STRUCT);
+      chunk_emit_opcode(chunk, OP_INITILIZE);
       chunk_emit_byte(chunk, 0);
       prototype_add_line(proto, line);
       return;
@@ -1601,7 +1611,7 @@ static void compile_subscript_or_call(compiler_t *comp)
       ++num_args;
     }
     EXPECT(scan, TOKEN_RBRACE);
-    chunk_emit_opcode(chunk, OP_INITILIZE_STRUCT);
+    chunk_emit_opcode(chunk, OP_INITILIZE);
     chunk_emit_byte(chunk, num_args);
     prototype_add_line(proto, line);
   }

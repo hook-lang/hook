@@ -920,7 +920,7 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
     case OP_INSTANCE:
       instance(vm);
       break;
-    case OP_INITILIZE_STRUCT:
+    case OP_INITILIZE:
       if (initialize_struct(vm, read_byte(&pc)) == STATUS_ERROR)
         goto error;
       break;

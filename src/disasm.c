@@ -50,8 +50,8 @@ static inline void dump_prototype(prototype_t *proto)
     case OP_INSTANCE:
       printf("[%05d] Instance\n", j);
       break;
-    case OP_INITILIZE_STRUCT:
-      printf("[%05d] InitializeStruct  %d\n", j, bytes[i++]);
+    case OP_INITILIZE:
+      printf("[%05d] Initialize        %d\n", j, bytes[i++]);
       break;
     case OP_FUNCTION:
       printf("[%05d] Function          %d\n", j, bytes[i++]);
