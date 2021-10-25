@@ -59,6 +59,9 @@ static inline void dump_prototype(prototype_t *proto)
     case OP_UNPACK:
       printf("[%05d] Unpack            %d\n", j, bytes[i++]);
       break;
+    case OP_DESTRUCT:
+      printf("[%05d] Destruct          %d\n", j, bytes[i++]);
+      break;
     case OP_POP:
       printf("[%05d] Pop\n", j);
       break;

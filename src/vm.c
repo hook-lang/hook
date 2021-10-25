@@ -20,7 +20,8 @@ static inline int array(vm_t *vm, int length);
 static inline void instance(vm_t *vm);
 static inline int initialize_struct(vm_t *vm, int num_args);
 static inline int function(vm_t *vm, prototype_t *proto);
-static inline int unpack(vm_t *vm, int length);
+static inline int unpack(vm_t *vm, int n);
+static inline int destruct(vm_t *vm, int n);
 static inline int append(vm_t *vm);
 static inline int get_element(vm_t *vm);
 static inline int fetch_element(vm_t *vm);
@@ -155,10 +156,9 @@ static inline int function(vm_t *vm, prototype_t *proto)
   return STATUS_OK;
 }
 
-static inline int unpack(vm_t *vm, int length)
+static inline int unpack(vm_t *vm, int n)
 {
-  value_t *slots = &vm->slots[vm->index];
-  value_t val = slots[0];
+  value_t val = vm->slots[vm->index];
   if (!IS_ARRAY(val))
   {
     runtime_error("cannot unpack value of type '%s'", type_name(val.type));
@@ -167,14 +167,14 @@ static inline int unpack(vm_t *vm, int length)
   array_t *arr = AS_ARRAY(val);
   --vm->index;
   int status = STATUS_OK;
-  for (int i = 0; i < length && i < arr->length; ++i)
+  for (int i = 0; i < n && i < arr->length; ++i)
   {
     value_t elem = arr->elements[i];
     if ((status = push(vm, elem)) == STATUS_ERROR)
       goto end;
     VALUE_INCR_REF(elem);
   }
-  for (int i = arr->length; i < length; ++i)
+  for (int i = arr->length; i < n; ++i)
     if ((status = push(vm, NULL_VALUE)) == STATUS_ERROR)
       break;
 end:
@@ -182,6 +182,33 @@ end:
   if (IS_UNREACHABLE(arr))
     array_free(arr);
   return status;
+}
+
+static inline int destruct(vm_t *vm, int n)
+{
+  value_t val = vm->slots[vm->index];
+  if (!IS_INSTANCE(val))
+  {
+    runtime_error("cannot destructure value of type '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  instance_t *inst = AS_INSTANCE(val);
+  struct_t *ztruct = inst->ztruct;
+  value_t *slots = &vm->slots[vm->index - n];
+  for (int i = 0; i < n; ++i)
+  {
+    string_t *name = AS_STRING(slots[i]);
+    int index = struct_index_of(ztruct, name);
+    value_t value = index == -1 ? NULL_VALUE : inst->values[index];
+    VALUE_INCR_REF(value);
+    DECR_REF(name);
+    slots[i] = value;
+  }
+  --vm->index;
+  DECR_REF(inst);
+  if (IS_UNREACHABLE(inst))
+    instance_free(inst);
+  return STATUS_OK;
 }
 
 static inline int append(vm_t *vm)
@@ -930,6 +957,10 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       break;
     case OP_UNPACK:
       if (unpack(vm, read_byte(&pc)) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_DESTRUCT:
+      if (destruct(vm, read_byte(&pc)) == STATUS_ERROR)
         goto error;
       break;
     case OP_POP:

@@ -22,6 +22,7 @@ block       ::= '{' stmt* '}'
 var_decl    ::= 'let' NAME '=' expr
               | 'let' 'mut' NAME ( '=' expr )?
               | 'let' '[' 'mut'? NAME ( ',' 'mut'? NAME )* ']' '=' expr
+              | 'let' '{' 'mut'? NAME ( ',' 'mut'? NAME )* '}' '=' expr
 
 assign      ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME subscr* ( '++' | '--' )
