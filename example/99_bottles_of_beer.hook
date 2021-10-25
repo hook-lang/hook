@@ -1,4 +1,7 @@
-    
+//
+// 99_bottles_of_beer.hook
+//
+
 let mut n = 99;
 
 while (n > 1) {

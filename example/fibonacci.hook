@@ -1,3 +1,6 @@
+//
+// fibonacci.hook
+//
 
 fn fibonacci(n) {
   if (n == 0)

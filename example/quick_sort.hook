@@ -1,3 +1,6 @@
+//
+// quick_sort.hook
+//
 
 fn sort(mut arr) {
   let n = len(arr);

@@ -1,3 +1,6 @@
+//
+// factorial.hook
+//
 
 fn factorial(n) {
   if (n == 0)

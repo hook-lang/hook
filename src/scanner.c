@@ -28,8 +28,8 @@ static inline void skip(scanner_t *scan)
 begin:
   while (isspace(CURRENT_CHAR(scan)))
     next_char(scan);
-  if (CHAR_AT(scan, 0) == '/'
-    && CHAR_AT(scan, 1) == '/')
+  if ((CHAR_AT(scan, 0) == '/' && CHAR_AT(scan, 1) == '/')
+   || (CHAR_AT(scan, 0) == '#' && CHAR_AT(scan, 1) == '!'))
   {
     next_chars(scan, 2);
     for (;;)

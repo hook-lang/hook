@@ -1,5 +1,3 @@
-//
-// hello.hook
-//
+#!/usr/bin/env hook
 
 println("Hello, world!");

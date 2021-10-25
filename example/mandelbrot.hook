@@ -1,3 +1,6 @@
+//
+// mandelbrot.hook
+//
 
 let floor = require("math").floor;
 let pixels = [" ", ".", ":", ";", "+", "=", "x", "X", "$", "&"];
