@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. test/__test
+
+title "Built-in function chr()"
+
+script "println(chr(102));"
+
+expect_success "f"
+
+run

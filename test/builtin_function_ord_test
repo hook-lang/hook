@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. test/__test
+
+title "Built-in function ord()"
+
+script "println(ord('f'));
+println(ord('foo'));"
+
+expect_success "102
+102"
+
+run

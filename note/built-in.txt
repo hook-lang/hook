@@ -6,6 +6,8 @@ bool(val: value) -> boolean
 int(val: number|string) -> integer
 float(val: number|string) -> number
 str(val: null|boolean|number|string) -> string
+ord(val: string) -> integer
+chr(val: integer) -> string
 cap(val: string|array) -> integer
 len(val: string|array) -> integer
 is_empty(val: string|array) -> boolean
