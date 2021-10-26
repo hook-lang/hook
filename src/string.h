@@ -6,7 +6,6 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include <stdint.h>
 #include <stdio.h>
 #include "value.h"
 
@@ -21,6 +20,8 @@ typedef struct
   int64_t hash;
 } string_t;
 
+string_t *string_allocate(int min_capacity);
+string_t *string_new(int min_capacity);
 string_t *string_from_chars(int length, const char *chars);
 string_t *string_from_stream(FILE *fp);
 string_t *string_from_file(const char *filename);

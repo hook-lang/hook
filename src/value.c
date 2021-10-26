@@ -18,6 +18,7 @@ static inline void value_free(value_t val)
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
+  case TYPE_USERDATA:
     break;
   case TYPE_STRING:
     string_free(AS_STRING(val));
@@ -32,12 +33,14 @@ static inline void value_free(value_t val)
     instance_free(AS_INSTANCE(val));
     break;
   case TYPE_CALLABLE:
-    if (IS_NATIVE(val))
     {
-      native_free(AS_NATIVE(val));
-      break;
+      if (IS_NATIVE(val))
+      {
+        native_free(AS_NATIVE(val));
+        break;
+      }
+      function_free(AS_FUNCTION(val));
     }
-    function_free(AS_FUNCTION(val));
     break;
   }
 }
@@ -69,6 +72,9 @@ const char *type_name(type_t type)
     break;
   case TYPE_CALLABLE:
     name = "callable";
+    break;
+  case TYPE_USERDATA:
+    name = "userdata";
     break;
   }
   return name;
@@ -128,6 +134,9 @@ void value_print(value_t val, bool quoted)
       printf("<callable at %p>", val.as.pointer);
     }
     break;
+  case TYPE_USERDATA:
+    printf("<userdata 0x%lx>", val.as.userdata);
+    break;
   }
 }
 
@@ -159,6 +168,7 @@ bool value_equal(value_t val1, value_t val2)
     instance_equal(AS_INSTANCE(val1), AS_INSTANCE(val2));
     break;
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     result = val1.as.pointer == val2.as.pointer;
     break;
   }
@@ -201,6 +211,7 @@ int value_compare(value_t val1, value_t val2, int *result)
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     break;
   }
   runtime_error("cannot compare value of type '%s'", type_name(val1.type));

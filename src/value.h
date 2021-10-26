@@ -7,6 +7,7 @@
 #define VALUE_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define FLAG_NONE   0b0000
 #define FLAG_OBJECT 0b0001
@@ -23,6 +24,7 @@
 #define INSTANCE_VALUE(i) ((value_t) {.type = TYPE_INSTANCE, .flags = FLAG_OBJECT, .as.pointer = (i)})
 #define FUNCTION_VALUE(f) ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT, .as.pointer = (f)})
 #define NATIVE_VALUE(n)   ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT | FLAG_NATIVE, .as.pointer = (n)})
+#define USERDATA_VALUE(u) ((value_t) {.type = TYPE_USERDATA, .flags = FLAG_NONE, .as.userdata = (u)})
 
 #define IS_NULL(v)     ((v).type == TYPE_NULL)
 #define IS_BOOLEAN(v)  ((v).type == TYPE_BOOLEAN)
@@ -33,6 +35,7 @@
 #define IS_STRUCT(v)   ((v).type == TYPE_STRUCT)
 #define IS_INSTANCE(v) ((v).type == TYPE_INSTANCE)
 #define IS_CALLABLE(v) ((v).type == TYPE_CALLABLE)
+#define IS_USERDATA(v) ((v).type == TYPE_USERDATA)
 #define IS_OBJECT(v)   ((v).flags & FLAG_OBJECT)
 #define IS_FALSEY(v)   ((v).flags & FLAG_FALSEY)
 #define IS_TRUTHY(v)   (!IS_FALSEY(v))
@@ -64,7 +67,8 @@ typedef enum
   TYPE_ARRAY,
   TYPE_STRUCT,
   TYPE_INSTANCE,
-  TYPE_CALLABLE
+  TYPE_CALLABLE,
+  TYPE_USERDATA
 } type_t;
 
 typedef struct
@@ -76,6 +80,7 @@ typedef struct
     bool boolean;
     double number;
     void *pointer;
+    uint64_t userdata;
   } as;
 } value_t;
 

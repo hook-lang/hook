@@ -1,3 +1,4 @@
+
 print(val: value)
 println(val: value)
 type(val: value) -> string
@@ -14,11 +15,6 @@ lower(str: string) -> string
 upper(str: string) -> string
 array(min_capacity: integer) -> array
 index_of(arr: array, elem: value) -> integer
-abs(num: number) -> number
-floor(num: number) -> number
-ceil(num: number) -> number
-pow(base: number, power: number) -> number
-sqrt(num: number) -> number
-system(cmd: string)
 assert(assertion: value, msg: string)
 panic(msg: string)
+require(lib: string) -> instance

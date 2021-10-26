@@ -13,23 +13,9 @@
 #include "memory.h"
 #include "error.h"
 
-static inline string_t *string_allocate(int min_capacity);
 static inline void resize(string_t *str, int min_capacity);
 static inline void append_char(string_t *str, char c);
 static inline FILE *open_file(const char *filename, const char *mode);
-
-static inline string_t *string_allocate(int min_capacity)
-{
-  string_t *str = (string_t *) allocate(sizeof(*str));
-  int capacity = STRING_MIN_CAPACITY;
-  while (capacity < min_capacity)
-    capacity <<= 1;
-  str->ref_count = 0;
-  str->capacity = capacity;
-  str->chars = (char *) allocate(capacity);
-  str->hash = -1;
-  return str;
-}
 
 static inline void resize(string_t *str, int min_capacity)
 {
@@ -57,11 +43,33 @@ static inline FILE *open_file(const char *filename, const char *mode)
   return fp;
 }
 
+string_t *string_allocate(int min_capacity)
+{
+  ++min_capacity;
+  string_t *str = (string_t *) allocate(sizeof(*str));
+  int capacity = STRING_MIN_CAPACITY;
+  while (capacity < min_capacity)
+    capacity <<= 1;
+  str->ref_count = 0;
+  str->capacity = capacity;
+  str->chars = (char *) allocate(capacity);
+  str->hash = -1;
+  return str;
+}
+
+string_t *string_new(int min_capacity)
+{
+  string_t *str = string_allocate(min_capacity);
+  str->length = 0;
+  str->chars[0] = '\0';
+  return str;
+}
+
 string_t *string_from_chars(int length, const char *chars)
 {
   if (length < 0)
     length = (int) strnlen(chars, INT_MAX);
-  string_t *str = string_allocate(length + 1);
+  string_t *str = string_allocate(length);
   str->length = length;
   memcpy(str->chars, chars, length);
   str->chars[length] = '\0';
@@ -93,7 +101,7 @@ string_t *string_from_file(const char *filename)
   fseek(fp, 0L, SEEK_END);
   int length = ftell(fp);
   rewind(fp);
-  string_t *str = string_allocate(length + 1);
+  string_t *str = string_allocate(length);
   str->length = length;
   ASSERT(fread(str->chars, length, 1, fp) == 1, "unexpected error reading stream");
   str->chars[length] = '\0';
@@ -110,7 +118,7 @@ void string_free(string_t *str)
 string_t *string_concat(string_t *str1, string_t *str2)
 {
   int length = str1->length + str2->length;
-  string_t *result = string_allocate(length + 1);
+  string_t *result = string_allocate(length);
   memcpy(result->chars, str1->chars, str1->length);
   memcpy(&result->chars[str1->length], str2->chars, str2->length);
   result->length = length;
@@ -167,7 +175,7 @@ int string_compare(string_t *str1, string_t *str2)
 string_t *string_lower(string_t *str)
 {
   int length = str->length;
-  string_t *result = string_allocate(length + 1);
+  string_t *result = string_allocate(length);
   result->length = length;
   for (int i = 0; i < length; i++)
     result->chars[i] = (char) tolower(str->chars[i]);
@@ -178,7 +186,7 @@ string_t *string_lower(string_t *str)
 string_t *string_upper(string_t *str)
 {
   int length = str->length;
-  string_t *result = string_allocate(length + 1);
+  string_t *result = string_allocate(length);
   result->length = length;
   for (int i = 0; i < length; i++)
     result->chars[i] = (char) toupper(str->chars[i]);

@@ -1,0 +1,38 @@
+
+math:
+  
+  PI: number
+
+  abs(num: number) -> number
+  floor(num: number) -> number
+  ceil(num: number) -> number
+  pow(base: number, power: number) -> number
+  sqrt(num: number) -> number
+
+os:
+
+  CLOCKS_PER_SECOND: number
+
+  clock() -> number
+  system(cmd: string) -> number
+  getenv(var: string) -> string
+
+io:
+
+  STD_IN: userdata
+  STD_OUT: userdata
+  STD_ERR: userdata
+  SEEK_SET: number
+  SEEK_CURRENT: number
+  SEEK_END: number
+
+  open(filename: string, mode: string) -> null|userdata
+  close(stream: userdata) -> number
+  popen(command: string, mode: string) -> null|userdata
+  pclose(stream: userdata) -> number
+  eof(stream: userdata) -> boolean
+  flush(stream: userdata) -> number
+  sync(stream: userdata) -> boolean
+  seek(stream: userdata, offset: number, whence: number) -> number
+  read(stream: userdata, size: number) -> null|string
+  write(stream: userdata, str: string) -> null|number

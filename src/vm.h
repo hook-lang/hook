@@ -31,6 +31,7 @@ int vm_push_struct(vm_t *vm, struct_t *ztruct);
 int vm_push_instance(vm_t *vm, instance_t *inst);
 int vm_push_function(vm_t *vm, function_t *fn);
 int vm_push_native(vm_t *vm, native_t *native);
+int vm_push_userdata(vm_t *vm, uint64_t udata);
 void vm_pop(vm_t *vm);
 void vm_instance(vm_t *vm);
 int vm_initialize_struct(vm_t *vm, int num_args);

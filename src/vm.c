@@ -682,6 +682,7 @@ static inline int add(vm_t *vm)
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     break;
   }
   runtime_error("cannot add '%s' to '%s'", type_name(val2.type), type_name(val1.type));
@@ -751,6 +752,7 @@ static inline int subtract(vm_t *vm)
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     break;
   }
   runtime_error("cannot subtract '%s' from '%s'", type_name(val2.type), type_name(val1.type));
@@ -1192,6 +1194,11 @@ int vm_push_function(vm_t *vm, function_t *fn)
 int vm_push_native(vm_t *vm, native_t *native)
 {
   return vm_push_value(vm, NATIVE_VALUE(native));
+}
+
+int vm_push_userdata(vm_t *vm, uint64_t udata)
+{
+  return push(vm, USERDATA_VALUE(udata));
 }
 
 void vm_pop(vm_t *vm)

@@ -82,6 +82,22 @@ add_library(os SHARED
   src/value.c
   src/vm.c)
 
+add_library(io SHARED
+  src/array.c
+  src/builtin.c
+  src/callable.c
+  src/chunk.c
+  src/compiler.c
+  src/error.c
+  src/hash.c
+  src/io.c
+  src/memory.c
+  src/scanner.c
+  src/string.c
+  src/struct.c
+  src/value.c
+  src/vm.c)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

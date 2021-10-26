@@ -200,6 +200,7 @@ static int int_call(vm_t *vm, value_t *frame)
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     break;
   }
   runtime_error("invalid type: cannot convert '%s' to 'integer'", type_name(val.type));
@@ -226,6 +227,7 @@ static int float_call(vm_t *vm, value_t *frame)
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     break;
   }
   runtime_error("invalid type: cannot convert '%s' to 'number'", type_name(val.type));
@@ -257,6 +259,7 @@ static int str_call(vm_t *vm, value_t *frame)
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     break;
   }
   if (!str)
@@ -287,6 +290,7 @@ static int cap_call(vm_t *vm, value_t *frame)
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     break;
   }
   runtime_error("invalid type: '%s' has no capacity property", type_name(val.type));
@@ -310,6 +314,7 @@ static int len_call(vm_t *vm, value_t *frame)
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     break;
   }
   runtime_error("invalid type: '%s' has no length property", type_name(val.type));
@@ -333,6 +338,7 @@ static int is_empty_call(vm_t *vm, value_t *frame)
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
   case TYPE_CALLABLE:
+  case TYPE_USERDATA:
     break;
   }
   runtime_error("invalid type: '%s' has no length property", type_name(val.type));
