@@ -8,7 +8,6 @@
 #include <math.h>
 #include "common.h"
 #include "compiler.h"
-#include "builtin.h"
 #include "struct.h"
 #include "memory.h"
 #include "error.h"
@@ -1133,7 +1132,6 @@ void vm_init(vm_t *vm, int min_capacity)
   vm->end = capacity - 1;
   vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
   vm->index = -1;
-  load_globals(vm);
 }
 
 void vm_free(vm_t *vm)

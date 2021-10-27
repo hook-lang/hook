@@ -6,10 +6,10 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include "common.h"
 #include "dump.h"
-#include "builtin.h"
 #include "vm.h"
+#include "builtin.h"
+#include "common.h"
 
 #define VERSION "0.1.0"
 
@@ -22,6 +22,7 @@ static inline const char *option_value(const char *opt);
 static inline int option_length(const char *opt);
 static inline void print_help(void);
 static inline void print_version(void);
+static inline array_t *args_array(void);
 
 static inline const char *argument(int index)
 {
@@ -81,6 +82,19 @@ static inline void print_version(void)
   printf("hook version %s\n", VERSION);
 }
 
+static inline array_t *args_array(void)
+{
+  array_t *args = array_allocate(_argc);
+  args->length = _argc;
+  for (int i = 0; i < _argc; ++i)
+  {
+    string_t *arg = string_from_chars(-1, _argv[i]);
+    INCR_REF(arg);
+    args->elements[i] = STRING_VALUE(arg);
+  }
+  return args;
+}
+
 int main(int argc, const char **argv)
 {
   _argc = argc;
@@ -102,6 +116,7 @@ int main(int argc, const char **argv)
   string_t *source = filename ? string_from_file(filename) : string_from_stream(stdin);
   vm_t vm;
   vm_init(&vm, stack_size);
+  load_globals(&vm);
   vm_push_string(&vm, file);
   vm_push_string(&vm, source);
   vm_compile(&vm);
@@ -112,13 +127,16 @@ int main(int argc, const char **argv)
     vm_free(&vm);
     return EXIT_SUCCESS;
   }
-  if (vm_call(&vm, 0) == STATUS_ERROR)
+  vm_push_array(&vm, args_array());
+  if (vm_call(&vm, 1) == STATUS_ERROR)
   {
     vm_free(&vm);
     return EXIT_FAILURE;
   }
-  vm_pop(&vm);
+  value_t result = vm.slots[vm.index];
+  int status = IS_INTEGER(result) ? (int) result.as.number : 0;
+  --vm.index;
   ASSERT(vm.index == num_globals() - 1, "must remain exactly the globals");
   vm_free(&vm);
-  return EXIT_SUCCESS;
+  return status;
 }

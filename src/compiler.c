@@ -1733,6 +1733,9 @@ prototype_t *compile(scanner_t *scan)
 {
   compiler_t comp;
   compiler_init(&comp, NULL, scan, string_from_chars(-1, "main"));
+  char args_name[] = "args";
+  token_t tk = {.length = sizeof(args_name) - 1, .start = args_name};
+  add_local(&comp, &tk, false);
   while (!MATCH(comp.scan, TOKEN_EOF))
     compile_statement(&comp);
   prototype_t *proto = comp.proto;
