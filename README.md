@@ -7,19 +7,6 @@
 
 Hook is a simple, small, cross-plataform scripting language with an easy-to-understand implementation. It has been written entirely by hand in C99 using simple techniques like recursive descending parsing, syntax-oriented translation, and stack-based machine.
 
-## Features
-
-The main features are:
-
-* Imperative programming
-* C-style
-* Dynamic-type
-* Immutability by default
-* No accidental side effects
-* Automatic memory management
-
-Warning: Hook is still in its early stages of development and is obviously not production ready. 
-
 ## What does it look like 
 
 ```rust
@@ -29,6 +16,20 @@ fn factorial(n) {
   return n * factorial(n - 1);
 }
 ```
+
+## Features
+
+The main features are:
+
+* Imperative programming
+* C-style
+* Dynamic-type
+* Immutability by default
+* No accidental side effects
+* Single-pass compiler
+* Automatic memory management
+
+Warning: Hook is still in its early stages of development and is obviously not production ready. 
 
 ## Building and installing
 
