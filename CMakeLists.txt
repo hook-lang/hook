@@ -29,7 +29,7 @@ add_executable(${PROJECT_NAME}
   src/callable.c
   src/chunk.c
   src/compiler.c
-  src/disasm.c
+  src/dump.c
   src/error.c
   src/hash.c
   src/main.c

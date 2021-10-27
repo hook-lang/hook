@@ -7,7 +7,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "common.h"
-#include "disasm.h"
+#include "dump.h"
 #include "builtin.h"
 #include "vm.h"
 
@@ -70,7 +70,7 @@ static inline void print_help(void)
     "options:\n"
     "  -h, --help      prints this message\n"
     "  -v, --version   shows version information\n"
-    "  -d, --disasm    shows the bytecode\n"
+    "  -d, --dump      shows the bytecode\n"
     "  -sz=<size>      sets the stack size \n"
     "\n",
   _argv[0]);
@@ -105,10 +105,10 @@ int main(int argc, const char **argv)
   vm_push_string(&vm, file);
   vm_push_string(&vm, source);
   vm_compile(&vm);
-  if (option("-d") || option("--disasm"))
+  if (option("-d") || option("--dump"))
   {
     function_t *fn = AS_FUNCTION(vm.slots[vm.index]);
-    dump(fn);
+    dump(fn->proto);
     vm_free(&vm);
     return EXIT_SUCCESS;
   }
