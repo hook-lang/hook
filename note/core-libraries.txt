@@ -8,6 +8,7 @@ math:
   ceil(num: number) -> number
   pow(base: number, power: number) -> number
   sqrt(num: number) -> number
+  random() -> number
 
 os:
 
@@ -33,6 +34,10 @@ io:
   eof(stream: userdata) -> boolean
   flush(stream: userdata) -> number
   sync(stream: userdata) -> boolean
+  tell(stream: userdata) -> integer
+  rewind(stream: userdata)
   seek(stream: userdata, offset: number, whence: number) -> number
   read(stream: userdata, size: number) -> null|string
   write(stream: userdata, str: string) -> null|number
+  readln(stream: userdata) -> string
+  writeln(stream: userdata, str: string) -> null|number

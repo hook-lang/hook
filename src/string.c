@@ -86,7 +86,7 @@ string_t *string_from_stream(FILE *stream, char terminal)
     {
       if (feof(stream))
         break;
-      ASSERT(!ferror(stream), "unexpected error reading stream");
+      ASSERT(!ferror(stream), "unexpected error on fgetc()");
     }
     append_char(str, (char) c);
     ++str->length;
@@ -105,7 +105,7 @@ string_t *string_from_file(const char *filename)
   rewind(stream);
   string_t *str = string_allocate(length);
   str->length = length;
-  ASSERT(fread(str->chars, length, 1, stream) == 1, "unexpected error reading stream");
+  ASSERT(fread(str->chars, length, 1, stream) == 1, "unexpected error on fread()");
   str->chars[length] = '\0';
   fclose(stream);
   return str;

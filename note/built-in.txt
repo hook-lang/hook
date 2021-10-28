@@ -15,8 +15,10 @@ hash(str: string) -> integer
 compare(val1: value, val2: value) -> integer
 lower(str: string) -> string
 upper(str: string) -> string
+trim(str: string) -> string
 array(min_capacity: integer) -> array
 index_of(arr: array, elem: value) -> integer
+sleep(ms: integer)
 assert(assertion: value, msg: string)
 panic(msg: string)
 require(lib: string) -> instance

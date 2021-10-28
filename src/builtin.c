@@ -13,6 +13,7 @@
 #include <Windows.h>
 #else
 #include <dlfcn.h>
+#include <unistd.h>
 #endif
 #include <errno.h>
 #include <assert.h>
@@ -48,6 +49,7 @@ static const char *globals[] = {
   "trim",
   "array",
   "index_of",
+  "sleep",
   "assert",
   "panic",
   "require"
@@ -74,6 +76,7 @@ static int upper_call(vm_t *vm, value_t *frame);
 static int trim_call(vm_t *vm, value_t *frame);
 static int array_call(vm_t *vm, value_t *frame);
 static int index_of_call(vm_t *vm, value_t *frame);
+static int sleep_call(vm_t *vm, value_t *frame);
 static int assert_call(vm_t *vm, value_t *frame);
 static int panic_call(vm_t *vm, value_t *frame);
 static int require_call(vm_t *vm, value_t *frame);
@@ -499,6 +502,28 @@ static int index_of_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, array_index_of(AS_ARRAY(val1), val2));
 }
 
+static int sleep_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_INTEGER(val))
+  {
+    runtime_error("invalid type: expected integer but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  long ms = (long) val.as.number;
+  if (ms < 0 || ms > INT_MAX)
+  {
+    runtime_error("invalid range: argument must be between 0 and %d", INT_MAX);
+    return STATUS_ERROR;
+  }
+#ifdef WIN32
+  Sleep((int) ms);
+#else
+  ASSERT(!usleep((int) ms * 1000), "unexpected error on usleep()");
+#endif
+  return vm_push_null(vm);
+}
+
 static int assert_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[2];
@@ -562,9 +587,10 @@ void load_globals(vm_t *vm)
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &trim_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &array_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 2, &index_of_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 2, &assert_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &panic_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &require_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &sleep_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 2, &assert_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &panic_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 1, &require_call)) == STATUS_OK);
 }
 
 int num_globals(void)
