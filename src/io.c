@@ -4,6 +4,7 @@
 //
 
 #include "io.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #ifdef WIN32
@@ -21,9 +22,13 @@ static int pclose_call(vm_t *vm, value_t *frame);
 static int eof_call(vm_t *vm, value_t *frame);
 static int flush_call(vm_t *vm, value_t *frame);
 static int sync_call(vm_t *vm, value_t *frame);
+static int tell_call(vm_t *vm, value_t *frame);
+static int rewind_call(vm_t *vm, value_t *frame);
 static int seek_call(vm_t *vm, value_t *frame);
 static int read_call(vm_t *vm, value_t *frame);
 static int write_call(vm_t *vm, value_t *frame);
+static int readln_call(vm_t *vm, value_t *frame);
+static int writeln_call(vm_t *vm, value_t *frame);
 
 static int open_call(vm_t *vm, value_t *frame)
 {
@@ -147,6 +152,31 @@ static int sync_call(vm_t *vm, value_t *frame)
   return vm_push_boolean(vm, result);
 }
 
+static int tell_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_USERDATA(val))
+  {
+    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  FILE *stream = (FILE *) val.as.userdata;
+  return vm_push_number(vm, ftell(stream));
+}
+
+static int rewind_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_USERDATA(val))
+  {
+    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  FILE *stream = (FILE *) val.as.userdata;
+  rewind(stream);
+  return vm_push_null(vm);
+}
+
 static int seek_call(vm_t *vm, value_t *frame)
 {
   value_t val1 = frame[1];
@@ -216,11 +246,45 @@ static int write_call(vm_t *vm, value_t *frame)
   }
   FILE *stream = (FILE *) val1.as.userdata;
   string_t *str = AS_STRING(val2);
-  int size = str->length;
-  int length = (int) fwrite(str->chars, 1, size, stream);
-  if (length < size)
+  size_t size = str->length;
+  if (fwrite(str->chars, 1, size, stream) < size)
     return vm_push_null(vm);
-  return vm_push_number(vm, length);
+  return vm_push_number(vm, size);
+}
+
+static int readln_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_USERDATA(val))
+  {
+    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  FILE *stream = (FILE *) val.as.userdata;
+  string_t *str = string_from_stream(stream, '\n');
+  return vm_push_string(vm, str);
+}
+
+static int writeln_call(vm_t *vm, value_t *frame)
+{
+  value_t val1 = frame[1];
+  value_t val2 = frame[2];
+  if (!IS_USERDATA(val1))
+  {
+    runtime_error("invalid type: expected userdata but got '%s'", type_name(val1.type));
+    return STATUS_ERROR;
+  }
+  if (!IS_STRING(val2))
+  {
+    runtime_error("invalid type: expected string but got '%s'", type_name(val2.type));
+    return STATUS_ERROR;
+  }
+  FILE *stream = (FILE *) val1.as.userdata;
+  string_t *str = AS_STRING(val2);
+  size_t size = str->length;
+  if (fwrite(str->chars, 1, size, stream) < size || fwrite("\n", 1, 1, stream) < 1)
+    return vm_push_null(vm);
+  return vm_push_number(vm, size + 1);
 }
 
 #ifdef WIN32
@@ -242,9 +306,13 @@ void load_io(vm_t *vm)
   char eof[] = "eof";
   char flush[] = "flush";
   char sync[] = "sync";
+  char tell[] = "tell";
+  char rewind[] = "rewind";
   char seek[] = "seek";
   char read[] = "read";
   char write[] = "write";
+  char readln[] = "readln";
+  char writeln[] = "writeln";
   struct_t *ztruct = struct_new(string_from_chars(-1, "io"));
   assert(struct_put_if_absent(ztruct, sizeof(std_in) - 1, std_in));
   assert(struct_put_if_absent(ztruct, sizeof(std_out) - 1, std_out));
@@ -259,9 +327,13 @@ void load_io(vm_t *vm)
   assert(struct_put_if_absent(ztruct, sizeof(eof) - 1, eof));
   assert(struct_put_if_absent(ztruct, sizeof(flush) - 1, flush));
   assert(struct_put_if_absent(ztruct, sizeof(sync) - 1, sync));
+  assert(struct_put_if_absent(ztruct, sizeof(tell) - 1, tell));
+  assert(struct_put_if_absent(ztruct, sizeof(rewind) - 1, rewind));
   assert(struct_put_if_absent(ztruct, sizeof(seek) - 1, seek));
   assert(struct_put_if_absent(ztruct, sizeof(read) - 1, read));
   assert(struct_put_if_absent(ztruct, sizeof(write) - 1, write));
+  assert(struct_put_if_absent(ztruct, sizeof(readln) - 1, readln));
+  assert(struct_put_if_absent(ztruct, sizeof(writeln) - 1, writeln));
   assert(vm_push_userdata(vm, (uint64_t) stdin) == STATUS_OK);
   assert(vm_push_userdata(vm, (uint64_t) stdout) == STATUS_OK);
   assert(vm_push_userdata(vm, (uint64_t) stderr) == STATUS_OK);
@@ -275,9 +347,13 @@ void load_io(vm_t *vm)
   assert(vm_push_native(vm, native_new(string_from_chars(-1, eof), 1, &eof_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, flush), 1, &flush_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, sync), 1, &sync_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, tell), 1, &tell_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, rewind), 1, &rewind_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, seek), 3, &seek_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, read), 2, &read_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, write), 2, &write_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, readln), 1, &readln_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, writeln), 2, &writeln_call)) == STATUS_OK);
   assert(vm_push_struct(vm, ztruct) == STATUS_OK);
   vm_instance(vm);
 }

@@ -52,6 +52,8 @@ static inline void resize(struct_t *ztruct)
   {
     field_t *field = &fields[i];
     int index = field->name->hash & mask;
+    while (table[index])
+      index = (index + 1) & mask;
     table[index] = field;
   }
 }

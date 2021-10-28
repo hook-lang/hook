@@ -1,0 +1,36 @@
+//
+// guessing_game.hook
+//
+
+let math = require("math");
+let io = require("io");
+
+println("Guess the number!");
+
+let secret_number = int(1 + math.random() * 99);
+
+loop {
+  println("Please input your guess.");
+
+  let mut guess = io.readln(io.STD_IN);
+
+  guess = trim(guess);
+
+  if (is_empty(guess))
+    continue;
+
+  guess = int(guess);
+
+  println("You guessed: " + str(guess));
+
+  let cmp = compare(guess, secret_number);
+  
+  if (cmp < 0)
+    println("Too small!");
+  else if (cmp > 0)
+    println("Too big!");
+  else {
+    println("You win!");
+    break;
+  }
+}

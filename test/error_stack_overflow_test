@@ -242,7 +242,6 @@ expect_failure "runtime error: stack overflow
   at f() in <stdin>:2
   at f() in <stdin>:2
   at f() in <stdin>:2
-  at f() in <stdin>:2
   at main() in <stdin>:5"
 
 run
