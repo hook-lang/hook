@@ -45,6 +45,7 @@ static const char *globals[] = {
   "compare",
   "lower",
   "upper",
+  "trim",
   "array",
   "index_of",
   "assert",
@@ -70,6 +71,7 @@ static int hash_call(vm_t *vm, value_t *frame);
 static int compare_call(vm_t *vm, value_t *frame);
 static int lower_call(vm_t *vm, value_t *frame);
 static int upper_call(vm_t *vm, value_t *frame);
+static int trim_call(vm_t *vm, value_t *frame);
 static int array_call(vm_t *vm, value_t *frame);
 static int index_of_call(vm_t *vm, value_t *frame);
 static int assert_call(vm_t *vm, value_t *frame);
@@ -442,6 +444,25 @@ static int upper_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
+static int trim_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_STRING(val))
+  {
+    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  string_t *str;
+  if (!string_trim(AS_STRING(val), &str))
+    return STATUS_OK;
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
+
 static int array_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[1];
@@ -480,7 +501,6 @@ static int index_of_call(vm_t *vm, value_t *frame)
 
 static int assert_call(vm_t *vm, value_t *frame)
 {
-  (void) vm;
   value_t val = frame[2];
   if (!IS_STRING(val))
   {
@@ -539,11 +559,12 @@ void load_globals(vm_t *vm)
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 2, &compare_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &lower_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &upper_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &array_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 2, &index_of_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 2, &assert_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &panic_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &require_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &trim_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &array_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 2, &index_of_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 2, &assert_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &panic_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &require_call)) == STATUS_OK);
 }
 
 int num_globals(void)

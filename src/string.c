@@ -32,15 +32,14 @@ static inline void append_char(string_t *str, char c)
 {
   resize(str, str->length + 1);
   str->chars[str->length] = c;
-  ++str->length;
 }
 
 static inline FILE *open_file(const char *filename, const char *mode)
 {
-  FILE *fp = fopen(filename, mode);
-  if (!fp)
+  FILE *stream = fopen(filename, mode);
+  if (!stream)
     fatal_error("unable to open file '%s'", filename);
-  return fp;
+  return stream;
 }
 
 string_t *string_allocate(int min_capacity)
@@ -76,20 +75,23 @@ string_t *string_from_chars(int length, const char *chars)
   return str;
 }
 
-string_t *string_from_stream(FILE *fp)
+string_t *string_from_stream(FILE *stream, char terminal)
 {
   string_t *str = string_allocate(0);
   str->length = 0;
   for (;;)
   {
-    int c = fgetc(fp);
+    int c = fgetc(stream);
     if (c == EOF)
     {
-      if (feof(fp))
+      if (feof(stream))
         break;
-      ASSERT(!ferror(fp), "unexpected error reading stream");
+      ASSERT(!ferror(stream), "unexpected error reading stream");
     }
     append_char(str, (char) c);
+    ++str->length;
+    if (c == terminal)
+      break;
   }
   append_char(str, '\0');
   return str;
@@ -97,15 +99,15 @@ string_t *string_from_stream(FILE *fp)
 
 string_t *string_from_file(const char *filename)
 {
-  FILE *fp = open_file(filename, "rb");
-  fseek(fp, 0L, SEEK_END);
-  int length = ftell(fp);
-  rewind(fp);
+  FILE *stream = open_file(filename, "rb");
+  fseek(stream, 0L, SEEK_END);
+  int length = ftell(stream);
+  rewind(stream);
   string_t *str = string_allocate(length);
   str->length = length;
-  ASSERT(fread(str->chars, length, 1, fp) == 1, "unexpected error reading stream");
+  ASSERT(fread(str->chars, length, 1, stream) == 1, "unexpected error reading stream");
   str->chars[length] = '\0';
-  fclose(fp);
+  fclose(stream);
   return str;
 }
 
@@ -177,7 +179,7 @@ string_t *string_lower(string_t *str)
   int length = str->length;
   string_t *result = string_allocate(length);
   result->length = length;
-  for (int i = 0; i < length; i++)
+  for (int i = 0; i < length; ++i)
     result->chars[i] = (char) tolower(str->chars[i]);
   result->chars[length] = '\0';
   return result;
@@ -188,8 +190,32 @@ string_t *string_upper(string_t *str)
   int length = str->length;
   string_t *result = string_allocate(length);
   result->length = length;
-  for (int i = 0; i < length; i++)
+  for (int i = 0; i < length; ++i)
     result->chars[i] = (char) toupper(str->chars[i]);
   result->chars[length] = '\0';
   return result;
+}
+
+bool string_trim(string_t *str, string_t **result)
+{
+  int length = str->length;
+  if (!length)
+    return false;
+  int l = 0;
+  while (isspace(str->chars[l]))
+    ++l;
+  int high = length - 1;
+  int h = high;
+  while (h > l && isspace(str->chars[h]))
+    --h;
+  if (!l && h == high)
+    return false;
+  string_t *_result = string_allocate(h - l + 1);
+  int j = 0;
+  for (int i = l; i <= h; ++i)
+    _result->chars[j++] = str->chars[i];
+  _result->chars[j] = '\0';
+  _result->length = j;
+  *result = _result;
+  return true;
 }

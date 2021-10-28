@@ -113,7 +113,7 @@ int main(int argc, const char **argv)
   int stack_size = sz ? atoi(sz) : 0;
   const char *filename = argument(0);
   string_t *file = string_from_chars(-1, filename ? filename : "<stdin>");
-  string_t *source = filename ? string_from_file(filename) : string_from_stream(stdin);
+  string_t *source = filename ? string_from_file(filename) : string_from_stream(stdin, '\0');
   vm_t vm;
   vm_init(&vm, stack_size);
   load_globals(&vm);
