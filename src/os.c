@@ -53,10 +53,10 @@ void load_os(vm_t *vm)
   char system[] = "system";
   char getenv[] = "getenv";
   struct_t *ztruct = struct_new(string_from_chars(-1, "os"));
-  assert(struct_put_if_absent(ztruct, sizeof(clocks_per_second) - 1, clocks_per_second));
-  assert(struct_put_if_absent(ztruct, sizeof(clock) - 1, clock));
-  assert(struct_put_if_absent(ztruct, sizeof(system) - 1, system));
-  assert(struct_put_if_absent(ztruct, sizeof(getenv) - 1, getenv));
+  struct_put(ztruct, sizeof(clocks_per_second) - 1, clocks_per_second);
+  struct_put(ztruct, sizeof(clock) - 1, clock);
+  struct_put(ztruct, sizeof(system) - 1, system);
+  struct_put(ztruct, sizeof(getenv) - 1, getenv);
   assert(vm_push_number(vm, CLOCKS_PER_SEC) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, clock), 0, &clock_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, system), 1, &system_call)) == STATUS_OK);

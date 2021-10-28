@@ -38,6 +38,7 @@ typedef struct
 struct_t *struct_new(string_t *name);
 void struct_free(struct_t *ztruct);
 int struct_index_of(struct_t *ztruct, string_t *name);
+void struct_put(struct_t *ztruct, int length, char *chars);
 bool struct_put_if_absent(struct_t *ztruct, int length, char *chars);
 bool struct_equal(struct_t *ztruct1, struct_t *ztruct2);
 instance_t *instance_allocate(struct_t *ztruct);

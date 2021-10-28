@@ -51,10 +51,10 @@ static inline void resize(struct_t *ztruct)
   for (int i = 0; i < length; i++)
   {
     field_t *field = &fields[i];
-    int index = field->name->hash & mask;
-    while (table[index])
-      index = (index + 1) & mask;
-    table[index] = field;
+    int i = field->name->hash & mask;
+    while (table[i])
+      i = (i + 1) & mask;
+    table[i] = field;
   }
 }
 
@@ -116,6 +116,20 @@ int struct_index_of(struct_t *ztruct, string_t *name)
     i = (i + 1) & mask;
   }
   return -1;
+}
+
+void struct_put(struct_t *ztruct, int length, char *chars)
+{
+  int mask = ztruct->mask;
+  field_t **table = ztruct->table;
+  uint32_t h = hash(length, chars);
+  int i = h & mask;
+  while (table[i])
+    i = (i + 1) & mask;
+  string_t *name = string_from_chars(length, chars);
+  name->hash = h;
+  table[i] = add_field(ztruct, name);
+  resize(ztruct);
 }
 
 bool struct_put_if_absent(struct_t *ztruct, int length, char *chars)

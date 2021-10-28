@@ -4,13 +4,14 @@
 
 let math = require("math");
 let io = require("io");
+let writeln = io.writeln;
 
-println("Guess the number!");
+writeln(io.STD_OUT, "Guess the number!");
 
 let secret_number = int(1 + math.random() * 99);
 
 loop {
-  println("Please input your guess.");
+  writeln(io.STD_OUT, "Please input your guess.");
 
   let mut guess = io.readln(io.STD_IN);
 
@@ -21,16 +22,16 @@ loop {
 
   guess = int(guess);
 
-  println("You guessed: " + str(guess));
+  writeln(io.STD_OUT, "You guessed: " + str(guess));
 
   let cmp = compare(guess, secret_number);
   
   if (cmp < 0)
-    println("Too small!");
+    writeln(io.STD_OUT, "Too small!");
   else if (cmp > 0)
-    println("Too big!");
+    writeln(io.STD_OUT, "Too big!");
   else {
-    println("You win!");
+    writeln(io.STD_OUT, "You win!");
     break;
   }
 }
