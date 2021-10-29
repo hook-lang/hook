@@ -34,7 +34,7 @@ int vm_push_native(vm_t *vm, native_t *native);
 int vm_push_userdata(vm_t *vm, uint64_t udata);
 void vm_pop(vm_t *vm);
 void vm_instance(vm_t *vm);
-int vm_initialize_struct(vm_t *vm, int num_args);
+int vm_initialize(vm_t *vm, int num_args);
 void vm_compile(vm_t *vm);
 int vm_call(vm_t *vm, int num_args);
 

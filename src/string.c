@@ -219,3 +219,21 @@ bool string_trim(string_t *str, string_t **result)
   *result = _result;
   return true;
 }
+
+bool string_slice(string_t *str, int start, int stop, string_t **result)
+{
+  if (start < 1 && stop >= str->length)
+    return false;
+  int length = stop - start;
+  length = length < 0 ? 0 : length;
+  string_t *slice = string_allocate(length);
+  slice->length = length;
+  if (!length)
+    goto end;
+  for (int i = start, j = 0; i < stop; ++i, ++j)
+    slice->chars[j] = str->chars[i];
+  slice->chars[length] = '\0';
+end:
+  *result = slice;
+  return true;
+}

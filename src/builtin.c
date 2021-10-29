@@ -47,6 +47,7 @@ static const char *globals[] = {
   "lower",
   "upper",
   "trim",
+  "slice",
   "array",
   "index_of",
   "sleep",
@@ -55,6 +56,7 @@ static const char *globals[] = {
   "require"
 };
 
+static inline int check_argument_integer(value_t *frame, int index);
 static inline int string_to_double(string_t *str, double *result);
 static inline int load_library(vm_t *vm, string_t *name);
 static int print_call(vm_t *vm, value_t *frame);
@@ -74,12 +76,30 @@ static int compare_call(vm_t *vm, value_t *frame);
 static int lower_call(vm_t *vm, value_t *frame);
 static int upper_call(vm_t *vm, value_t *frame);
 static int trim_call(vm_t *vm, value_t *frame);
+static int slice_call(vm_t *vm, value_t *frame);
 static int array_call(vm_t *vm, value_t *frame);
 static int index_of_call(vm_t *vm, value_t *frame);
 static int sleep_call(vm_t *vm, value_t *frame);
 static int assert_call(vm_t *vm, value_t *frame);
 static int panic_call(vm_t *vm, value_t *frame);
 static int require_call(vm_t *vm, value_t *frame);
+
+static inline int check_argument_integer(value_t *frame, int index)
+{
+  value_t val = frame[index];
+  if (!IS_INTEGER(val))
+  {
+    runtime_error("argument %d must be integer", index);
+    return STATUS_ERROR;
+  }
+  long data = (long) val.as.number;
+  if (data < INT_MIN || data > INT_MAX)
+  {
+    runtime_error("argument %d must be between %d and %d", index, INT_MIN, INT_MAX);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
 
 static inline int string_to_double(string_t *str, double *result)
 {
@@ -466,6 +486,68 @@ static int trim_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
+static int slice_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  switch (val.type)
+  {
+  case TYPE_STRING:
+    {
+      if (check_argument_integer(frame, 2) == STATUS_ERROR
+       || check_argument_integer(frame, 3) == STATUS_ERROR)
+        return STATUS_ERROR;
+      string_t *str = AS_STRING(val);
+      int start = (int) frame[2].as.number;
+      int stop = (int) frame[3].as.number;
+      string_t *result;
+      if (!string_slice(str, start, stop, &result))
+      {
+        vm_pop(vm);
+        vm_pop(vm);
+        return STATUS_OK;
+      }
+      if (vm_push_string(vm, result) == STATUS_ERROR)
+      {
+        string_free(result);
+        return STATUS_ERROR;
+      }
+    }
+    return STATUS_OK;
+  case TYPE_ARRAY:
+    {
+      if (check_argument_integer(frame, 2) == STATUS_ERROR
+       || check_argument_integer(frame, 3) == STATUS_ERROR)
+        return STATUS_ERROR;
+      array_t *arr = AS_ARRAY(val);
+      int start = (int) frame[2].as.number;
+      int stop = (int) frame[3].as.number;
+      array_t *result;
+      if (!array_slice(arr, start, stop, &result))
+      {
+        vm_pop(vm);
+        vm_pop(vm);
+        return STATUS_OK;
+      }
+      if (vm_push_array(vm, result) == STATUS_ERROR)
+      {
+        array_free(result);
+        return STATUS_ERROR;
+      }
+    }
+    return STATUS_OK;
+  case TYPE_NULL:
+  case TYPE_BOOLEAN:
+  case TYPE_NUMBER:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
+  case TYPE_CALLABLE:
+  case TYPE_USERDATA:
+    break;
+  }
+  runtime_error("invalid type: cannot slice value of type '%s'", type_name(val.type));
+  return STATUS_ERROR;
+}
+
 static int array_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[1];
@@ -585,12 +667,13 @@ void load_globals(vm_t *vm)
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &lower_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &upper_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &trim_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &array_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 2, &index_of_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &sleep_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 2, &assert_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &panic_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 1, &require_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 3, &slice_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &array_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 2, &index_of_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &sleep_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 2, &assert_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 1, &panic_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &require_call)) == STATUS_OK);
 }
 
 int num_globals(void)

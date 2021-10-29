@@ -224,3 +224,24 @@ bool array_equal(array_t *arr1, array_t *arr2)
       return false;  
   return true;
 }
+
+bool array_slice(array_t *arr, int start, int stop, array_t **result)
+{
+  if (start < 1 && stop >= arr->length)
+    return false;
+  int length = stop - start;
+  length = length < 0 ? 0 : length;
+  array_t *slice = array_allocate(length);
+  slice->length = length;
+  if (!length)
+    goto end;
+  for (int i = start, j = 0; i < stop; ++i, ++j)
+  {
+    value_t elem = arr->elements[i];
+    VALUE_INCR_REF(elem);
+    slice->elements[j] = elem;
+  }
+end:
+  *result = slice;
+  return true;
+}

@@ -17,7 +17,7 @@ static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline int array(vm_t *vm, int length);
 static inline void instance(vm_t *vm);
-static inline int initialize_struct(vm_t *vm, int num_args);
+static inline int initialize(vm_t *vm, int num_args);
 static inline int function(vm_t *vm, prototype_t *proto);
 static inline int unpack(vm_t *vm, int n);
 static inline int destruct(vm_t *vm, int n);
@@ -105,7 +105,7 @@ static inline void instance(vm_t *vm)
   DECR_REF(ztruct);
 }
 
-static inline int initialize_struct(vm_t *vm, int num_args)
+static inline int initialize(vm_t *vm, int num_args)
 {
   value_t *slots = &vm->slots[vm->index - num_args];
   value_t val = slots[0];
@@ -949,7 +949,7 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       instance(vm);
       break;
     case OP_INITILIZE:
-      if (initialize_struct(vm, read_byte(&pc)) == STATUS_ERROR)
+      if (initialize(vm, read_byte(&pc)) == STATUS_ERROR)
         goto error;
       break;
     case OP_FUNCTION:
@@ -1212,9 +1212,9 @@ void vm_instance(vm_t *vm)
   instance(vm);
 }
 
-int vm_initialize_struct(vm_t *vm, int num_args)
+int vm_initialize(vm_t *vm, int num_args)
 {
-  return initialize_struct(vm, num_args);
+  return initialize(vm, num_args);
 }
 
 void vm_compile(vm_t *vm)
