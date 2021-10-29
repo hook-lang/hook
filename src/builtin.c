@@ -24,6 +24,10 @@
 #define HOME "HOOK_HOME"
 
 #ifdef WIN32
+#define strtok_r strtok_s
+#endif
+
+#ifdef WIN32
 typedef int (__stdcall *load_library_t)(vm_t *);
 #else
 typedef void (*load_library_t)(vm_t *);
@@ -48,6 +52,8 @@ static const char *globals[] = {
   "upper",
   "trim",
   "slice",
+  "split",
+  "join",
   "array",
   "index_of",
   "sleep",
@@ -56,8 +62,12 @@ static const char *globals[] = {
   "require"
 };
 
+static inline int check_argument(value_t *frame, int index, type_t type);
 static inline int check_argument_integer(value_t *frame, int index);
 static inline int string_to_double(string_t *str, double *result);
+static inline string_t *to_string(value_t val);
+static inline array_t *split(string_t *str, string_t *separator);
+static inline int join(array_t *arr, string_t *separator, string_t **result);
 static inline int load_library(vm_t *vm, string_t *name);
 static int print_call(vm_t *vm, value_t *frame);
 static int println_call(vm_t *vm, value_t *frame);
@@ -77,12 +87,24 @@ static int lower_call(vm_t *vm, value_t *frame);
 static int upper_call(vm_t *vm, value_t *frame);
 static int trim_call(vm_t *vm, value_t *frame);
 static int slice_call(vm_t *vm, value_t *frame);
+static int split_call(vm_t *vm, value_t *frame);
+static int join_call(vm_t *vm, value_t *frame);
 static int array_call(vm_t *vm, value_t *frame);
 static int index_of_call(vm_t *vm, value_t *frame);
 static int sleep_call(vm_t *vm, value_t *frame);
 static int assert_call(vm_t *vm, value_t *frame);
 static int panic_call(vm_t *vm, value_t *frame);
 static int require_call(vm_t *vm, value_t *frame);
+
+static inline int check_argument(value_t *frame, int index, type_t type)
+{
+  if (frame[index].type != type)
+  {
+    runtime_error("argument %d must be `%s`", index, type_name(type));
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
 
 static inline int check_argument_integer(value_t *frame, int index)
 {
@@ -123,6 +145,67 @@ static inline int string_to_double(string_t *str, double *result)
     runtime_error("invalid type: cannot convert 'string' to 'number'");
     return STATUS_ERROR;
   }
+  return STATUS_OK;
+}
+
+static inline string_t *to_string(value_t val) {
+  string_t *str = NULL;
+  switch (val.type)
+  {
+  case TYPE_NULL:
+    str = string_from_chars(-1, "null");
+    break;
+  case TYPE_BOOLEAN:
+    str = string_from_chars(-1, val.as.boolean ? "true" : "false");
+    break;
+  case TYPE_NUMBER:
+    {
+      char chars[32];
+      sprintf(chars, "%g", val.as.number);
+      str = string_from_chars(-1, chars);
+    }
+    break;
+  case TYPE_STRING:
+    ASSERT(false, "passing string on to_string()");
+  case TYPE_ARRAY:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
+  case TYPE_CALLABLE:
+  case TYPE_USERDATA:
+    break;
+  }
+  return str;
+}
+
+static inline array_t *split(string_t *str, string_t *separator)
+{
+  array_t *arr = array_new(0);
+  char *cur = str->chars;
+  char *tk;
+  while ((tk = strtok_r(cur, separator->chars, &cur)))
+  {
+    value_t elem = STRING_VALUE(string_from_chars(-1, tk));
+    array_inplace_add_element(arr, elem);
+  }
+  return arr;
+}
+
+static inline int join(array_t *arr, string_t *separator, string_t **result)
+{
+  string_t *str = string_new(0);
+  for (int i = 0; i < arr->length; ++i)
+  {
+    value_t elem = arr->elements[i];
+    if (!IS_STRING(elem))
+    {
+      runtime_error("array contains non-string value");
+      return STATUS_ERROR;
+    }
+    if (i)
+      string_inplace_concat(str, separator);
+    string_inplace_concat(str, AS_STRING(elem));
+  }
+  *result = str;
   return STATUS_OK;
 }
 
@@ -266,31 +349,9 @@ static int float_call(vm_t *vm, value_t *frame)
 static int str_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[1];
-  string_t *str = NULL;
-  switch (val.type)
-  {
-  case TYPE_NULL:
-    str = string_from_chars(-1, "null");
-    break;
-  case TYPE_BOOLEAN:
-    str = string_from_chars(-1, val.as.boolean ? "true" : "false");
-    break;
-  case TYPE_NUMBER:
-    {
-      char chars[32];
-      sprintf(chars, "%g", val.as.number);
-      str = string_from_chars(-1, chars);
-    }
-    break;
-  case TYPE_STRING:
+  if (IS_STRING(val))
     return STATUS_OK;
-  case TYPE_ARRAY:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    break;
-  }
+  string_t *str = to_string(val);
   if (!str)
   {
     runtime_error("invalid type: cannot convert '%s' to 'string'", type_name(val.type));
@@ -548,6 +609,27 @@ static int slice_call(vm_t *vm, value_t *frame)
   return STATUS_ERROR;
 }
 
+static int split_call(vm_t *vm, value_t *frame)
+{
+  if (check_argument(frame, 1, TYPE_STRING) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (check_argument(frame, 2, TYPE_STRING) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_push_array(vm, split(AS_STRING(frame[1]), AS_STRING(frame[2])));
+}
+
+static int join_call(vm_t *vm, value_t *frame)
+{
+  if (check_argument(frame, 1, TYPE_ARRAY) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (check_argument(frame, 2, TYPE_STRING) == STATUS_ERROR)
+    return STATUS_ERROR;
+  string_t *str;
+  if (join(AS_ARRAY(frame[1]), AS_STRING(frame[2]), &str) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_push_string(vm, str);
+}
+
 static int array_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[1];
@@ -668,12 +750,14 @@ void load_globals(vm_t *vm)
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &upper_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &trim_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 3, &slice_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &array_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 2, &index_of_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &sleep_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 2, &assert_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 1, &panic_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &require_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 2, &split_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 2, &join_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &array_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 2, &index_of_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 1, &sleep_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 2, &assert_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[24]), 1, &panic_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[25]), 1, &require_call)) == STATUS_OK);
 }
 
 int num_globals(void)

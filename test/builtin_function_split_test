@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. test/__test
+
+title "Built-in function split()"
+
+script "println(split('a,b,c', ','));
+println(split('a,b', ','));
+println(split('a', ','));
+println(split('', ','));"
+
+expect_success "['a', 'b', 'c']
+['a', 'b']
+['a']
+[]"
+
+run

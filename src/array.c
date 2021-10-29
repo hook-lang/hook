@@ -34,6 +34,13 @@ array_t *array_allocate(int min_capacity)
   return arr;
 }
 
+array_t *array_new(int min_capacity)
+{
+  array_t *arr = array_allocate(min_capacity);
+  arr->length = 0;
+  return arr;
+}
+
 void array_free(array_t *arr)
 {
   for (int i = 0; i < arr->length; ++i)
