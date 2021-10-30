@@ -88,10 +88,10 @@ string_t *string_from_stream(FILE *stream, char terminal)
         break;
       ASSERT(!ferror(stream), "unexpected error on fgetc()");
     }
-    append_char(str, (char) c);
-    ++str->length;
     if (c == terminal)
       break;
+    append_char(str, (char) c);
+    ++str->length;
   }
   append_char(str, '\0');
   return str;

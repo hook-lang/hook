@@ -122,7 +122,7 @@ int main(int argc, const char **argv)
   vm_compile(&vm);
   if (option("-d") || option("--dump"))
   {
-    function_t *fn = AS_FUNCTION(vm.slots[vm.index]);
+    function_t *fn = AS_FUNCTION(vm.slots[vm.top]);
     dump(fn->proto);
     vm_free(&vm);
     return EXIT_SUCCESS;
@@ -133,10 +133,10 @@ int main(int argc, const char **argv)
     vm_free(&vm);
     return EXIT_FAILURE;
   }
-  value_t result = vm.slots[vm.index];
+  value_t result = vm.slots[vm.top];
   int status = IS_INTEGER(result) ? (int) result.as.number : 0;
-  --vm.index;
-  ASSERT(vm.index == num_globals() - 1, "must remain exactly the globals");
+  --vm.top;
+  ASSERT(vm.top == num_globals() - 1, "must remain exactly the globals");
   vm_free(&vm);
   return status;
 }

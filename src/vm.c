@@ -50,13 +50,13 @@ static inline void move_result(vm_t *vm, value_t *frame);
 
 static inline int push(vm_t *vm, value_t val)
 {
-  if (vm->index == vm->end)
+  if (vm->top == vm->limit)
   {
     runtime_error("stack overflow");
     return STATUS_ERROR;
   }
-  ++vm->index;
-  vm->slots[vm->index] = val;
+  ++vm->top;
+  vm->slots[vm->top] = val;
   return STATUS_OK;
 }
 
@@ -76,12 +76,12 @@ static inline int read_word(uint8_t **pc)
 
 static inline int array(vm_t *vm, int length)
 {
-  value_t *slots = &vm->slots[vm->index - length + 1];
+  value_t *slots = &vm->slots[vm->top - length + 1];
   array_t *arr = array_allocate(length);
   arr->length = length;
   for (int i = 0; i < length; ++i)
     arr->elements[i] = slots[i];
-  vm->index -= length;
+  vm->top -= length;
   if (push(vm, ARRAY_VALUE(arr)) == STATUS_ERROR)
   {
     array_free(arr);
@@ -93,13 +93,13 @@ static inline int array(vm_t *vm, int length)
 
 static inline void instance(vm_t *vm)
 {
-  struct_t *ztruct = AS_STRUCT(vm->slots[vm->index]);
+  struct_t *ztruct = AS_STRUCT(vm->slots[vm->top]);
   int length = ztruct->length;
-  value_t *slots = &vm->slots[vm->index - length];
+  value_t *slots = &vm->slots[vm->top - length];
   instance_t *inst = instance_allocate(ztruct);
   for (int i = 0; i < length; ++i)
     inst->values[i] = slots[i];
-  vm->index -= length;
+  vm->top -= length;
   INCR_REF(inst);
   slots[0] = INSTANCE_VALUE(inst);
   DECR_REF(ztruct);
@@ -107,7 +107,7 @@ static inline void instance(vm_t *vm)
 
 static inline int initialize(vm_t *vm, int num_args)
 {
-  value_t *slots = &vm->slots[vm->index - num_args];
+  value_t *slots = &vm->slots[vm->top - num_args];
   value_t val = slots[0];
   if (!IS_STRUCT(val))
   {
@@ -129,7 +129,7 @@ static inline int initialize(vm_t *vm, int num_args)
   instance_t *inst = instance_allocate(ztruct);
   for (int i = 0; i < length; ++i)
     inst->values[i] = slots[i + 1];
-  vm->index -= length;
+  vm->top -= length;
   INCR_REF(inst);
   slots[0] = INSTANCE_VALUE(inst);
   DECR_REF(ztruct);
@@ -141,11 +141,11 @@ static inline int initialize(vm_t *vm, int num_args)
 static inline int function(vm_t *vm, prototype_t *proto)
 {
   int num_nonlocals = proto->num_nonlocals;
-  value_t *slots = &vm->slots[vm->index - num_nonlocals + 1];
+  value_t *slots = &vm->slots[vm->top - num_nonlocals + 1];
   function_t *fn = function_new(proto);
   for (int i = 0; i < num_nonlocals; ++i)
     fn->nonlocals[i] = slots[i];
-  vm->index -= num_nonlocals;
+  vm->top -= num_nonlocals;
   if (push(vm, FUNCTION_VALUE(fn)) == STATUS_ERROR)
   {
     function_free(fn);
@@ -157,14 +157,14 @@ static inline int function(vm_t *vm, prototype_t *proto)
 
 static inline int unpack(vm_t *vm, int n)
 {
-  value_t val = vm->slots[vm->index];
+  value_t val = vm->slots[vm->top];
   if (!IS_ARRAY(val))
   {
     runtime_error("cannot unpack value of type '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val);
-  --vm->index;
+  --vm->top;
   int status = STATUS_OK;
   for (int i = 0; i < n && i < arr->length; ++i)
   {
@@ -185,7 +185,7 @@ end:
 
 static inline int destruct(vm_t *vm, int n)
 {
-  value_t val = vm->slots[vm->index];
+  value_t val = vm->slots[vm->top];
   if (!IS_INSTANCE(val))
   {
     runtime_error("cannot destructure value of type '%s'", type_name(val.type));
@@ -193,7 +193,7 @@ static inline int destruct(vm_t *vm, int n)
   }
   instance_t *inst = AS_INSTANCE(val);
   struct_t *ztruct = inst->ztruct;
-  value_t *slots = &vm->slots[vm->index - n];
+  value_t *slots = &vm->slots[vm->top - n];
   for (int i = 0; i < n; ++i)
   {
     string_t *name = AS_STRING(slots[i]);
@@ -203,7 +203,7 @@ static inline int destruct(vm_t *vm, int n)
     DECR_REF(name);
     slots[i] = value;
   }
-  --vm->index;
+  --vm->top;
   DECR_REF(inst);
   if (IS_UNREACHABLE(inst))
     instance_free(inst);
@@ -212,7 +212,7 @@ static inline int destruct(vm_t *vm, int n)
 
 static inline int append(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
@@ -224,7 +224,7 @@ static inline int append(vm_t *vm)
   array_t *result = array_add_element(arr, val2);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
-  --vm->index;
+  --vm->top;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
@@ -234,7 +234,7 @@ static inline int append(vm_t *vm)
 
 static inline int get_element(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
@@ -258,7 +258,7 @@ static inline int get_element(vm_t *vm)
   value_t elem = arr->elements[index];
   VALUE_INCR_REF(elem);
   slots[0] = elem;
-  --vm->index;
+  --vm->top;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
@@ -267,7 +267,7 @@ static inline int get_element(vm_t *vm)
 
 static inline int fetch_element(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
@@ -297,7 +297,7 @@ static inline int fetch_element(vm_t *vm)
 
 static inline void set_element(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 2];
+  value_t *slots = &vm->slots[vm->top - 2];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   value_t val3 = slots[2];
@@ -306,7 +306,7 @@ static inline void set_element(vm_t *vm)
   array_t *result = array_set_element(arr, index, val3);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
-  vm->index -= 2;
+  vm->top -= 2;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
@@ -315,7 +315,7 @@ static inline void set_element(vm_t *vm)
 
 static inline int put_element(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 2];
+  value_t *slots = &vm->slots[vm->top - 2];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   value_t val3 = slots[2];
@@ -340,7 +340,7 @@ static inline int put_element(vm_t *vm)
   array_t *result = array_set_element(arr, index, val3);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
-  vm->index -= 2;
+  vm->top -= 2;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
@@ -350,7 +350,7 @@ static inline int put_element(vm_t *vm)
 
 static inline int delete(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
@@ -374,7 +374,7 @@ static inline int delete(vm_t *vm)
   array_t *result = array_delete_element(arr, index);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
-  --vm->index;
+  --vm->top;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
@@ -383,7 +383,7 @@ static inline int delete(vm_t *vm)
 
 static inline int inplace_append(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
@@ -395,14 +395,14 @@ static inline int inplace_append(vm_t *vm)
   if (arr->ref_count == 2)
   {
     array_inplace_add_element(arr, val2);
-    --vm->index;
+    --vm->top;
     VALUE_DECR_REF(val2);
     return STATUS_OK;
   }
   array_t *result = array_add_element(arr, val2);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
-  --vm->index;
+  --vm->top;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
@@ -412,7 +412,7 @@ static inline int inplace_append(vm_t *vm)
 
 static inline int inplace_put_element(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 2];
+  value_t *slots = &vm->slots[vm->top - 2];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   value_t val3 = slots[2];
@@ -437,14 +437,14 @@ static inline int inplace_put_element(vm_t *vm)
   if (arr->ref_count == 2)
   {
     array_inplace_set_element(arr, index, val3);
-    vm->index -= 2;
+    vm->top -= 2;
     VALUE_DECR_REF(val3);
     return STATUS_OK;
   }
   array_t *result = array_set_element(arr, index, val3);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
-  vm->index -= 2;
+  vm->top -= 2;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
@@ -454,7 +454,7 @@ static inline int inplace_put_element(vm_t *vm)
 
 static inline int inplace_delete(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
@@ -478,13 +478,13 @@ static inline int inplace_delete(vm_t *vm)
   if (arr->ref_count == 2)
   {
     array_inplace_delete_element(arr, index);
-    --vm->index;
+    --vm->top;
     return STATUS_OK;
   }
   array_t *result = array_delete_element(arr, index);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
-  --vm->index;
+  --vm->top;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
@@ -493,7 +493,7 @@ static inline int inplace_delete(vm_t *vm)
 
 static inline int get_field(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_INSTANCE(val1))
@@ -512,7 +512,7 @@ static inline int get_field(vm_t *vm)
   value_t value = inst->values[index];
   VALUE_INCR_REF(value);
   slots[0] = value;
-  --vm->index;
+  --vm->top;
   DECR_REF(inst);
   if (IS_UNREACHABLE(inst))
     instance_free(inst);
@@ -524,25 +524,25 @@ static inline int get_field(vm_t *vm)
 
 static inline void equal(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   slots[0] = value_equal(val1, val2) ? TRUE_VALUE : FALSE_VALUE;
-  --vm->index;
+  --vm->top;
   value_release(val1);
   value_release(val2);
 }
 
 static inline int greater(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   int result;
   if (value_compare(val1, val2, &result) == STATUS_ERROR)
     return STATUS_ERROR;
   slots[0] = result > 0 ? TRUE_VALUE : FALSE_VALUE;
-  --vm->index;
+  --vm->top;
   value_release(val1);
   value_release(val2);
   return STATUS_OK;
@@ -550,14 +550,14 @@ static inline int greater(vm_t *vm)
 
 static inline int less(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   int result;
   if (value_compare(val1, val2, &result) == STATUS_ERROR)
     return STATUS_ERROR;
   slots[0] = result < 0 ? TRUE_VALUE : FALSE_VALUE;
-  --vm->index;
+  --vm->top;
   value_release(val1);
   value_release(val2);
   return STATUS_OK;
@@ -565,7 +565,7 @@ static inline int less(vm_t *vm)
 
 static inline int add(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   switch (val1.type)
@@ -579,7 +579,7 @@ static inline int add(vm_t *vm)
       }
       double data = val1.as.number + val2.as.number;
       slots[0] = NUMBER_VALUE(data);
-      --vm->index;
+      --vm->top;
     }
     return STATUS_OK;
   case TYPE_STRING:
@@ -593,7 +593,7 @@ static inline int add(vm_t *vm)
       if (!str1->length)
       {
         slots[0] = val2;
-        --vm->index;
+        --vm->top;
         DECR_REF(str1);
         if (IS_UNREACHABLE(str1))
           string_free(str1);
@@ -602,7 +602,7 @@ static inline int add(vm_t *vm)
       string_t *str2 = AS_STRING(val2);
       if (!str2->length)
       {
-        --vm->index;
+        --vm->top;
         DECR_REF(str2);
         if (IS_UNREACHABLE(str2))
           string_free(str2);
@@ -611,7 +611,7 @@ static inline int add(vm_t *vm)
       if (str1->ref_count == 1)
       {
         string_inplace_concat(str1, str2);
-        --vm->index;
+        --vm->top;
         DECR_REF(str2);
         if (IS_UNREACHABLE(str2))
           string_free(str2);
@@ -620,7 +620,7 @@ static inline int add(vm_t *vm)
       string_t *result = string_concat(str1, str2);
       INCR_REF(result);
       slots[0] = STRING_VALUE(result);
-      --vm->index;
+      --vm->top;
       DECR_REF(str1);
       if (IS_UNREACHABLE(str1))
         string_free(str1);
@@ -640,7 +640,7 @@ static inline int add(vm_t *vm)
       if (!arr1->length)
       {
         slots[0] = val2;
-        --vm->index;
+        --vm->top;
         DECR_REF(arr1);
         if (IS_UNREACHABLE(arr1))
           array_free(arr1);
@@ -649,7 +649,7 @@ static inline int add(vm_t *vm)
       array_t *arr2 = AS_ARRAY(val2);
       if (!arr2->length)
       {
-        --vm->index;
+        --vm->top;
         DECR_REF(arr2);
         if (IS_UNREACHABLE(arr2))
           array_free(arr2);
@@ -658,7 +658,7 @@ static inline int add(vm_t *vm)
       if (arr1->ref_count == 1)
       {
         array_inplace_concat(arr1, arr2);
-        --vm->index;
+        --vm->top;
         DECR_REF(arr2);
         if (IS_UNREACHABLE(arr2))
           array_free(arr2);
@@ -667,7 +667,7 @@ static inline int add(vm_t *vm)
       array_t *result = array_concat(arr1, arr2);
       INCR_REF(result);
       slots[0] = ARRAY_VALUE(result);
-      --vm->index;
+      --vm->top;
       DECR_REF(arr1);
       if (IS_UNREACHABLE(arr1))
         array_free(arr1);
@@ -690,7 +690,7 @@ static inline int add(vm_t *vm)
 
 static inline int subtract(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   switch (val1.type)
@@ -704,7 +704,7 @@ static inline int subtract(vm_t *vm)
       }
       double data = val1.as.number - val2.as.number;
       slots[0] = NUMBER_VALUE(data);
-      --vm->index;
+      --vm->top;
     }
     return STATUS_OK;
   case TYPE_ARRAY:
@@ -718,7 +718,7 @@ static inline int subtract(vm_t *vm)
       array_t *arr2 = AS_ARRAY(val2);
       if (!arr1->length || !arr2->length)
       {
-        --vm->index;
+        --vm->top;
         DECR_REF(arr2);
         if (IS_UNREACHABLE(arr2))
           array_free(arr2);
@@ -727,7 +727,7 @@ static inline int subtract(vm_t *vm)
       if (arr1->ref_count == 1)
       {
         array_inplace_diff(arr1, arr2);
-        --vm->index;
+        --vm->top;
         DECR_REF(arr2);
         if (IS_UNREACHABLE(arr2))
           array_free(arr2);
@@ -736,7 +736,7 @@ static inline int subtract(vm_t *vm)
       array_t *result = array_diff(arr1, arr2);
       INCR_REF(result);
       slots[0] = ARRAY_VALUE(result);
-      --vm->index;
+      --vm->top;
       DECR_REF(arr1);
       if (IS_UNREACHABLE(arr1))
         array_free(arr1);
@@ -760,7 +760,7 @@ static inline int subtract(vm_t *vm)
 
 static inline int multiply(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
@@ -770,13 +770,13 @@ static inline int multiply(vm_t *vm)
   }
   double data = val1.as.number * val2.as.number;
   slots[0] = NUMBER_VALUE(data);
-  --vm->index;
+  --vm->top;
   return STATUS_OK;
 }
 
 static inline int divide(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
@@ -786,13 +786,13 @@ static inline int divide(vm_t *vm)
   }
   double data = val1.as.number / val2.as.number;
   slots[0] = NUMBER_VALUE(data);
-  --vm->index;
+  --vm->top;
   return STATUS_OK;
 }
 
 static inline int modulo(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
@@ -802,13 +802,13 @@ static inline int modulo(vm_t *vm)
   }
   double data = fmod(val1.as.number, val2.as.number);
   slots[0] = NUMBER_VALUE(data);
-  --vm->index;
+  --vm->top;
   return STATUS_OK;
 }
 
 static inline int negate(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index];
+  value_t *slots = &vm->slots[vm->top];
   value_t val = slots[0];
   if (!IS_NUMBER(val))
   {
@@ -822,7 +822,7 @@ static inline int negate(vm_t *vm)
 
 static inline void not(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index];
+  value_t *slots = &vm->slots[vm->top];
   value_t val = slots[0];
   slots[0] = IS_FALSEY(val) ? TRUE_VALUE : FALSE_VALUE;
   value_release(val);
@@ -830,7 +830,7 @@ static inline void not(vm_t *vm)
 
 static inline int call(vm_t *vm, int num_args)
 {
-  value_t *frame = &vm->slots[vm->index - num_args];
+  value_t *frame = &vm->slots[vm->top - num_args];
   value_t val = frame[0];
   if (!IS_CALLABLE(val))
   {
@@ -965,7 +965,7 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
         goto error;
       break;
     case OP_POP:
-      value_release(slots[vm->index--]);
+      value_release(slots[vm->top--]);
       break;
     case OP_GLOBAL:
       {
@@ -994,8 +994,8 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
     case OP_SET_LOCAL:
       {
         int index = read_byte(&pc);
-        value_t val = slots[vm->index];
-        --vm->index;
+        value_t val = slots[vm->top];
+        --vm->top;
         value_release(frame[index]);
         frame[index] = val;
       }
@@ -1045,7 +1045,7 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
     case OP_JUMP_IF_FALSE:
       {
         int offset = read_word(&pc);
-        value_t val = slots[vm->index];
+        value_t val = slots[vm->top];
         if (IS_FALSEY(val))
           pc = &code[offset];
       }
@@ -1053,7 +1053,7 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
     case OP_JUMP_IF_TRUE:
       {
         int offset = read_word(&pc);
-        value_t val = slots[vm->index];
+        value_t val = slots[vm->top];
         if (IS_TRUTHY(val))
           pc = &code[offset];
       }
@@ -1111,16 +1111,16 @@ error:
 
 static inline void discard_frame(vm_t *vm, value_t *frame)
 {
-  while (&vm->slots[vm->index] >= frame)
-    value_release(vm->slots[vm->index--]);
+  while (&vm->slots[vm->top] >= frame)
+    value_release(vm->slots[vm->top--]);
 }
 
 static inline void move_result(vm_t *vm, value_t *frame)
 {
-  frame[0] = vm->slots[vm->index];
-  --vm->index;
-  while (&vm->slots[vm->index] > frame)
-    value_release(vm->slots[vm->index--]);
+  frame[0] = vm->slots[vm->top];
+  --vm->top;
+  while (&vm->slots[vm->top] > frame)
+    value_release(vm->slots[vm->top--]);
 }
 
 void vm_init(vm_t *vm, int min_capacity)
@@ -1129,15 +1129,15 @@ void vm_init(vm_t *vm, int min_capacity)
   while (capacity < min_capacity)
     capacity <<= 1;
   vm->capacity = capacity;
-  vm->end = capacity - 1;
+  vm->limit = capacity - 1;
   vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
-  vm->index = -1;
+  vm->top = -1;
 }
 
 void vm_free(vm_t *vm)
 {
-  while (vm->index > -1)
-    value_release(vm->slots[vm->index--]);
+  while (vm->top > -1)
+    value_release(vm->slots[vm->top--]);
   free(vm->slots);
 }
 
@@ -1201,9 +1201,9 @@ int vm_push_userdata(vm_t *vm, uint64_t udata)
 
 void vm_pop(vm_t *vm)
 {
-  ASSERT(vm->index > -1, "stack underflow");
-  value_t val = vm->slots[vm->index];
-  --vm->index;
+  ASSERT(vm->top > -1, "stack underflow");
+  value_t val = vm->slots[vm->top];
+  --vm->top;
   value_release(val);
 }
 
@@ -1219,7 +1219,7 @@ int vm_initialize(vm_t *vm, int num_args)
 
 void vm_compile(vm_t *vm)
 {
-  value_t *slots = &vm->slots[vm->index - 1];
+  value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
   if (!IS_STRING(val1))
@@ -1234,7 +1234,7 @@ void vm_compile(vm_t *vm)
   function_t *fn = function_new(proto);
   INCR_REF(fn);
   slots[0] = FUNCTION_VALUE(fn);
-  --vm->index;
+  --vm->top;
   DECR_REF(file);
   DECR_REF(source);
   scanner_free(&scan);

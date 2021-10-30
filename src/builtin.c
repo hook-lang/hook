@@ -131,16 +131,16 @@ static inline int string_to_double(string_t *str, double *result)
     return STATUS_ERROR;
   }
   errno = 0;
-  char *end;
-  *result = strtod(str->chars, &end);
+  char *ptr;
+  *result = strtod(str->chars, &ptr);
   if (errno == ERANGE)
   {
     runtime_error("invalid type: number literal is too large");
     return STATUS_ERROR;
   }
-  while (*end != 0 && isspace(*end))
-    ++end;
-  if (end < &str->chars[str->length])
+  while (*ptr != 0 && isspace(*ptr))
+    ++ptr;
+  if (ptr < &str->chars[str->length])
   {
     runtime_error("invalid type: cannot convert 'string' to 'number'");
     return STATUS_ERROR;
