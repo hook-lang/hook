@@ -135,7 +135,11 @@ void value_print(value_t val, bool quoted)
     }
     break;
   case TYPE_USERDATA:
+#ifdef __APPLE__
     printf("<userdata 0x%llx>", val.as.userdata);
+#else
+    printf("<userdata 0x%lx>", val.as.userdata);
+#endif
     break;
   }
 }

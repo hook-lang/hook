@@ -170,8 +170,7 @@ bool struct_equal(struct_t *ztruct1, struct_t *ztruct2)
 
 instance_t *instance_allocate(struct_t *ztruct)
 {
-  int length = ztruct->length;
-  int size = sizeof(instance_t) + sizeof(value_t) * length;
+  int size = sizeof(instance_t) + sizeof(value_t) * ztruct->length;
   instance_t *inst = (instance_t *) allocate(size);
   inst->ref_count = 0;
   INCR_REF(ztruct);
@@ -181,14 +180,42 @@ instance_t *instance_allocate(struct_t *ztruct)
 
 void instance_free(instance_t *inst)
 {
-  int length = inst->ztruct->length;
   struct_t *ztruct = inst->ztruct;
+  int length = ztruct->length;
   DECR_REF(ztruct);
   if (IS_UNREACHABLE(ztruct))
     struct_free(ztruct);
   for (int i = 0; i < length; ++i)
     value_release(inst->values[i]);
   free(inst);
+}
+
+instance_t *instance_set_field(instance_t *inst, int index, value_t value)
+{
+  struct_t *ztruct = inst->ztruct;
+  instance_t *result = instance_allocate(ztruct);
+  for (int i = 0; i < index; ++i)
+  {
+    value_t val = inst->values[i];
+    VALUE_INCR_REF(val);
+    result->values[i] = val;
+  }
+  VALUE_INCR_REF(value);
+  result->values[index] = value;
+  for (int i = index + 1; i < ztruct->length; ++i)
+  {
+    value_t val = inst->values[i];
+    VALUE_INCR_REF(val);
+    result->values[i] = val;
+  }
+  return result;
+}
+
+void instance_inplace_set_field(instance_t *inst, int index, value_t value)
+{
+  VALUE_INCR_REF(value);
+  value_release(inst->values[index]);
+  inst->values[index] = value;
 }
 
 void instance_print(instance_t *inst)

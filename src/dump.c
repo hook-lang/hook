@@ -38,47 +38,47 @@ void dump(prototype_t *proto)
       {
         int data = *((uint16_t*) &bytes[i]);
         i += 2;
-        printf("  [%05d] Int               %d\n", j, data);
+        printf("  [%05d] Int                   %d\n", j, data);
       }
       break;
     case OP_CONSTANT:
-      printf("  [%05d] Constant          %d\n", j, bytes[i++]);
+      printf("  [%05d] Constant              %d\n", j, bytes[i++]);
       break;
     case OP_ARRAY:
-      printf("  [%05d] Array             %d\n", j, bytes[i++]);
+      printf("  [%05d] Array                 %d\n", j, bytes[i++]);
       break;
     case OP_INSTANCE:
       printf("  [%05d] Instance\n", j);
       break;
     case OP_INITILIZE:
-      printf("  [%05d] Initialize        %d\n", j, bytes[i++]);
+      printf("  [%05d] Initialize            %d\n", j, bytes[i++]);
       break;
     case OP_FUNCTION:
-      printf("  [%05d] Function          %d\n", j, bytes[i++]);
+      printf("  [%05d] Function              %d\n", j, bytes[i++]);
       break;
     case OP_UNPACK:
-      printf("  [%05d] Unpack            %d\n", j, bytes[i++]);
+      printf("  [%05d] Unpack                %d\n", j, bytes[i++]);
       break;
     case OP_DESTRUCT:
-      printf("  [%05d] Destruct          %d\n", j, bytes[i++]);
+      printf("  [%05d] Destruct              %d\n", j, bytes[i++]);
       break;
     case OP_POP:
       printf("  [%05d] Pop\n", j);
       break;
     case OP_GLOBAL:
-      printf("  [%05d] Global            %d\n", j, bytes[i++]);
+      printf("  [%05d] Global                %d\n", j, bytes[i++]);
       break;
     case OP_NONLOCAL:
-      printf("  [%05d] NonLocal          %d\n", j, bytes[i++]);
+      printf("  [%05d] NonLocal              %d\n", j, bytes[i++]);
       break;
     case OP_GET_LOCAL:
-      printf("  [%05d] GetLocal          %d\n", j, bytes[i++]);
+      printf("  [%05d] GetLocal              %d\n", j, bytes[i++]);
       break;
     case OP_SET_LOCAL:
-      printf("  [%05d] SetLocal          %d\n", j, bytes[i++]);
+      printf("  [%05d] SetLocal              %d\n", j, bytes[i++]);
       break;
-    case OP_APPEND:
-      printf("  [%05d] Append\n", j);
+    case OP_ADD_ELEMENT:
+      printf("  [%05d] AddElement\n", j);
       break;
     case OP_GET_ELEMENT:
       printf("  [%05d] GetElement\n", j);
@@ -92,40 +92,52 @@ void dump(prototype_t *proto)
     case OP_PUT_ELEMENT:
       printf("  [%05d] PutElement\n", j);
       break;
-    case OP_DELETE:
-      printf("  [%05d] Delete\n", j);
+    case OP_DELETE_ELEMENT:
+      printf("  [%05d] DeleteElement\n", j);
       break;
-    case OP_INPLACE_APPEND:
-      printf("  [%05d] InplaceAppend\n", j);
+    case OP_INPLACE_ADD_ELEMENT:
+      printf("  [%05d] InplaceAddElement\n", j);
       break;
     case OP_INPLACE_PUT_ELEMENT:
       printf("  [%05d] InplacePutElement\n", j);
       break;
-    case OP_INPLACE_DELETE:
-      printf("  [%05d] InplaceDelete\n", j);
+    case OP_INPLACE_DELETE_ELEMENT:
+      printf("  [%05d] InplaceDeleteElement\n", j);
       break;
     case OP_GET_FIELD:
       printf("  [%05d] GetField\n", j);
+      break;
+    case OP_FETCH_FIELD:
+      printf("  [%05d] FetchField\n", j);
+      break;
+    case OP_SET_FIELD:
+      printf("  [%05d] SetField\n", j);
+      break;
+    case OP_PUT_FIELD:
+      printf("  [%05d] PutField\n", j);
+      break;
+    case OP_INPLACE_PUT_FIELD:
+      printf("  [%05d] InplacePutField\n", j);
       break;
     case OP_JUMP:
       {
         int offset = *((uint16_t*) &bytes[i]);
         i += 2;
-        printf("  [%05d] Jump              %d\n", j, offset);
+        printf("  [%05d] Jump                  %d\n", j, offset);
       }
       break;
     case OP_JUMP_IF_FALSE:
       {
         int offset = *((uint16_t*) &bytes[i]);
         i += 2;
-        printf("  [%05d] JumpIfFalse       %d\n", j, offset);
+        printf("  [%05d] JumpIfFalse           %d\n", j, offset);
       }
       break;
     case OP_JUMP_IF_TRUE:
       {
         int offset = *((uint16_t*) &bytes[i]);
         i += 2;
-        printf("  [%05d] JumpIfTrue        %d\n", j, offset);
+        printf("  [%05d] JumpIfTrue            %d\n", j, offset);
       }
       break;
     case OP_EQUAL:
@@ -159,7 +171,7 @@ void dump(prototype_t *proto)
       printf("  [%05d] Not\n", j);
       break;
     case OP_CALL:
-      printf("  [%05d] Call              %d\n", j, bytes[i++]);
+      printf("  [%05d] Call                  %d\n", j, bytes[i++]);
       break;
     case OP_RETURN:
       printf("  [%05d] Return\n", j);

@@ -1,6 +1,6 @@
 
 math:
-  
+
   PI: number
 
   abs(num: number) -> number

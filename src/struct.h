@@ -43,7 +43,9 @@ bool struct_put_if_absent(struct_t *ztruct, int length, char *chars);
 bool struct_equal(struct_t *ztruct1, struct_t *ztruct2);
 instance_t *instance_allocate(struct_t *ztruct);
 void instance_free(instance_t *inst);
-void instance_print(instance_t *ins);
-bool instance_equal(instance_t *ins1, instance_t *inst2);
+instance_t *instance_set_field(instance_t *inst, int index, value_t value);
+void instance_inplace_set_field(instance_t *inst, int index, value_t value);
+void instance_print(instance_t *inst);
+bool instance_equal(instance_t *inst1, instance_t *inst2);
 
 #endif

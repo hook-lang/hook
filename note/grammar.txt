@@ -3,16 +3,15 @@ chunk       ::= stmt* EOF
 
 stmt        ::= block
               | var_decl ';'
-              | assign ';'
-              | NAME call ';'
+              | assign_call ';'
               | 'struct' NAME '{' ( NAME ( ',' NAME )* )? '}'
               | 'fn' NAME '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')' block
-              | 'delete' NAME subscr* subscr ';'
+              | 'delete' NAME subscr* '[' expr ']' ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'loop' block
               | 'while' '(' expr ')' stmt
               | 'do' stmt 'while' '(' expr ')' ';'
-              | 'for' '(' var_decl | assign? ';' expr? ';' assign? ')' stmt
+              | 'for' '(' var_decl | assign_call? ';' expr? ';' assign_call? ')' stmt
               | 'continue' ';'
               | 'break' ';'
               | 'return' expr? ';'
@@ -24,12 +23,13 @@ var_decl    ::= 'let' NAME '=' expr
               | 'let' '[' 'mut'? NAME ( ',' 'mut'? NAME )* ']' '=' expr
               | 'let' '{' 'mut'? NAME ( ',' 'mut'? NAME )* '}' '=' expr
 
-assign      ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
+assign_call ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME subscr* ( '++' | '--' )
-              | NAME subscr* '[' ']' '=' expr ';'
-              | NAME subscr* subscr '=' expr ';'
+              | NAME subscr* '[' ']' '=' expr
+              | NAME subscr* subscr '=' expr
+              | NAME ( subscr | call )* call
 
-subscr      ::= '[' expr ']'
+subscr      ::= '[' expr ']' | '.' NAME 
 
 call        ::= '(' ( expr ( ',' expr )* )? ')'
 
@@ -53,5 +53,5 @@ prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | 'struct' '{' ( NAME ( ',' NAME )* )? '}'
               | 'fn' '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')' block
               | 'if' '(' expr ')' expr 'else' expr
-              | NAME ( '[' expr ']' | '.' NAME | call )* ( '{' ( expr ( ',' expr )* )? '}' )?
+              | NAME ( subscr | call )* ( '{' ( expr ( ',' expr )* )? '}' )?
               | '(' expr ')'

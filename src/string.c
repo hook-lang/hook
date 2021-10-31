@@ -14,7 +14,7 @@
 #include "error.h"
 
 static inline void resize(string_t *str, int min_capacity);
-static inline void append_char(string_t *str, char c);
+static inline void add_char(string_t *str, char c);
 static inline FILE *open_file(const char *filename, const char *mode);
 
 static inline void resize(string_t *str, int min_capacity)
@@ -28,7 +28,7 @@ static inline void resize(string_t *str, int min_capacity)
   str->chars = (char *) reallocate(str->chars, capacity);
 }
 
-static inline void append_char(string_t *str, char c)
+static inline void add_char(string_t *str, char c)
 {
   resize(str, str->length + 1);
   str->chars[str->length] = c;
@@ -90,10 +90,10 @@ string_t *string_from_stream(FILE *stream, char terminal)
     }
     if (c == terminal)
       break;
-    append_char(str, (char) c);
+    add_char(str, (char) c);
     ++str->length;
   }
-  append_char(str, '\0');
+  add_char(str, '\0');
   return str;
 }
 

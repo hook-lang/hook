@@ -21,16 +21,20 @@ static inline int initialize(vm_t *vm, int num_args);
 static inline int function(vm_t *vm, prototype_t *proto);
 static inline int unpack(vm_t *vm, int n);
 static inline int destruct(vm_t *vm, int n);
-static inline int append(vm_t *vm);
+static inline int add_element(vm_t *vm);
 static inline int get_element(vm_t *vm);
 static inline int fetch_element(vm_t *vm);
 static inline void set_element(vm_t *vm);
 static inline int put_element(vm_t *vm);
-static inline int delete(vm_t *vm);
-static inline int inplace_append(vm_t *vm);
+static inline int delete_element(vm_t *vm);
+static inline int inplace_add_element(vm_t *vm);
 static inline int inplace_put_element(vm_t *vm);
-static inline int inplace_delete(vm_t *vm);
+static inline int inplace_delete_element(vm_t *vm);
 static inline int get_field(vm_t *vm);
+static inline int fetch_field(vm_t *vm);
+static inline void set_field(vm_t *vm);
+static inline int put_field(vm_t *vm);
+static inline int inplace_put_field(vm_t *vm);
 static inline void equal(vm_t *vm);
 static inline int greater(vm_t *vm);
 static inline int less(vm_t *vm);
@@ -210,7 +214,7 @@ static inline int destruct(vm_t *vm, int n)
   return STATUS_OK;
 }
 
-static inline int append(vm_t *vm)
+static inline int add_element(vm_t *vm)
 {
   value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
@@ -348,7 +352,7 @@ static inline int put_element(vm_t *vm)
   return STATUS_OK;
 }
 
-static inline int delete(vm_t *vm)
+static inline int delete_element(vm_t *vm)
 {
   value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
@@ -381,7 +385,7 @@ static inline int delete(vm_t *vm)
   return STATUS_OK;
 }
 
-static inline int inplace_append(vm_t *vm)
+static inline int inplace_add_element(vm_t *vm)
 {
   value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
@@ -452,7 +456,7 @@ static inline int inplace_put_element(vm_t *vm)
   return STATUS_OK;
 }
 
-static inline int inplace_delete(vm_t *vm)
+static inline int inplace_delete_element(vm_t *vm)
 {
   value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
@@ -519,6 +523,126 @@ static inline int get_field(vm_t *vm)
   DECR_REF(name);
   if (IS_UNREACHABLE(name))
     string_free(name);
+  return STATUS_OK;
+}
+
+static inline int fetch_field(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  if (!IS_INSTANCE(val1))
+  {
+    runtime_error("cannot use '%s' as an instance", type_name(val1.type));
+    return STATUS_ERROR;
+  }
+  instance_t *inst = AS_INSTANCE(val1);
+  string_t *name = AS_STRING(val2);
+  int index = struct_index_of(inst->ztruct, name);
+  if (index == -1)
+  {
+    runtime_error("no field `%.*s` on struct", name->length, name->chars);
+    return STATUS_ERROR;
+  }
+  value_t value = inst->values[index];
+  if (push(vm, value) == STATUS_ERROR)
+    return STATUS_ERROR;
+  VALUE_INCR_REF(value);
+  slots[1] = NUMBER_VALUE(index);
+  DECR_REF(name);
+  if (IS_UNREACHABLE(name))
+    string_free(name);
+  return STATUS_OK;
+}
+
+static inline void set_field(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top - 2];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  value_t val3 = slots[2];
+  instance_t *inst = AS_INSTANCE(val1);
+  int index = (int) val2.as.number;
+  instance_t *result = instance_set_field(inst, index, val3);
+  INCR_REF(result);
+  slots[0] = INSTANCE_VALUE(result);
+  vm->top -= 2;
+  DECR_REF(inst);
+  if (IS_UNREACHABLE(inst))
+    instance_free(inst);
+  VALUE_DECR_REF(val3);
+}
+
+static inline int put_field(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top - 2];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  value_t val3 = slots[2];
+  if (!IS_INSTANCE(val1))
+  {
+    runtime_error("cannot use '%s' as an instance", type_name(val1.type));
+    return STATUS_ERROR;
+  }
+  instance_t *inst = AS_INSTANCE(val1);
+  string_t *name = AS_STRING(val2);
+  int index = struct_index_of(inst->ztruct, name);
+  if (index == -1)
+  {
+    runtime_error("no field `%.*s` on struct", name->length, name->chars);
+    return STATUS_ERROR;
+  }
+  instance_t *result = instance_set_field(inst, index, val3);
+  INCR_REF(result);
+  slots[0] = INSTANCE_VALUE(result);
+  vm->top -= 2;
+  DECR_REF(inst);
+  if (IS_UNREACHABLE(inst))
+    instance_free(inst);
+  DECR_REF(name);
+  if (IS_UNREACHABLE(name))
+    string_free(name);
+  VALUE_DECR_REF(val3);
+  return STATUS_OK;
+}
+
+static inline int inplace_put_field(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top - 2];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  value_t val3 = slots[2];
+  if (!IS_INSTANCE(val1))
+  {
+    runtime_error("cannot use '%s' as an instance", type_name(val1.type));
+    return STATUS_ERROR;
+  }
+  instance_t *inst = AS_INSTANCE(val1);
+  string_t *name = AS_STRING(val2);
+  int index = struct_index_of(inst->ztruct, name);
+  if (index == -1)
+  {
+    runtime_error("no field `%.*s` on struct", name->length, name->chars);
+    return STATUS_ERROR;
+  }
+  if (inst->ref_count == 2)
+  {
+    instance_inplace_set_field(inst, index, val3);
+    vm->top -= 2;
+    goto end;
+  }
+  instance_t *result = instance_set_field(inst, index, val3);
+  INCR_REF(result);
+  slots[0] = INSTANCE_VALUE(result);
+  vm->top -= 2;
+  DECR_REF(inst);
+  if (IS_UNREACHABLE(inst))
+    instance_free(inst);
+end:
+  DECR_REF(name);
+  if (IS_UNREACHABLE(name))
+    string_free(name);
+  VALUE_DECR_REF(val3);
   return STATUS_OK;
 }
 
@@ -1000,8 +1124,8 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
         frame[index] = val;
       }
       break;
-    case OP_APPEND:
-      if (append(vm) == STATUS_ERROR)
+    case OP_ADD_ELEMENT:
+      if (add_element(vm) == STATUS_ERROR)
         goto error;
       break;
     case OP_GET_ELEMENT:
@@ -1019,24 +1143,39 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       if (put_element(vm) == STATUS_ERROR)
         goto error;
       break;
-    case OP_DELETE:
-      if (delete(vm) == STATUS_ERROR)
+    case OP_DELETE_ELEMENT:
+      if (delete_element(vm) == STATUS_ERROR)
         goto error;
       break;
-    case OP_INPLACE_APPEND:
-      if (inplace_append(vm) == STATUS_ERROR)
+    case OP_INPLACE_ADD_ELEMENT:
+      if (inplace_add_element(vm) == STATUS_ERROR)
         goto error;
       break;
     case OP_INPLACE_PUT_ELEMENT:
       if (inplace_put_element(vm) == STATUS_ERROR)
         goto error;
       break;
-    case OP_INPLACE_DELETE:
-      if (inplace_delete(vm) == STATUS_ERROR)
+    case OP_INPLACE_DELETE_ELEMENT:
+      if (inplace_delete_element(vm) == STATUS_ERROR)
         goto error;
       break;
     case OP_GET_FIELD:
       if (get_field(vm) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_FETCH_FIELD:
+      if (fetch_field(vm) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_SET_FIELD:
+      set_field(vm);
+      break;
+    case OP_PUT_FIELD:
+      if (put_field(vm) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_INPLACE_PUT_FIELD:
+      if (inplace_put_field(vm) == STATUS_ERROR)
         goto error;
       break;
     case OP_JUMP:
