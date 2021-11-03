@@ -37,6 +37,7 @@ add_executable(${PROJECT_NAME}
   src/scanner.c
   src/string.c
   src/struct.c
+  src/userdata.c
   src/value.c
   src/vm.c)
 
@@ -63,6 +64,7 @@ add_library(math SHARED
   src/scanner.c
   src/string.c
   src/struct.c
+  src/userdata.c
   src/value.c
   src/vm.c)
 
@@ -79,6 +81,7 @@ add_library(os SHARED
   src/scanner.c
   src/string.c
   src/struct.c
+  src/userdata.c
   src/value.c
   src/vm.c)
 
@@ -95,6 +98,7 @@ add_library(io SHARED
   src/scanner.c
   src/string.c
   src/struct.c
+  src/userdata.c
   src/value.c
   src/vm.c)
 

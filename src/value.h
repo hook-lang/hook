@@ -7,7 +7,6 @@
 #define VALUE_H
 
 #include <stdbool.h>
-#include <stdint.h>
 
 #define FLAG_NONE   0b0000
 #define FLAG_OBJECT 0b0001
@@ -24,7 +23,7 @@
 #define INSTANCE_VALUE(i) ((value_t) {.type = TYPE_INSTANCE, .flags = FLAG_OBJECT, .as.pointer = (i)})
 #define FUNCTION_VALUE(f) ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT, .as.pointer = (f)})
 #define NATIVE_VALUE(n)   ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT | FLAG_NATIVE, .as.pointer = (n)})
-#define USERDATA_VALUE(u) ((value_t) {.type = TYPE_USERDATA, .flags = FLAG_NONE, .as.userdata = (u)})
+#define USERDATA_VALUE(u) ((value_t) {.type = TYPE_USERDATA, .flags = FLAG_OBJECT, .as.pointer = (u)})
 
 #define IS_NULL(v)     ((v).type == TYPE_NULL)
 #define IS_BOOLEAN(v)  ((v).type == TYPE_BOOLEAN)
@@ -47,6 +46,7 @@
 #define AS_INSTANCE(v) ((instance_t *) (v).as.pointer)
 #define AS_FUNCTION(v) ((function_t *) (v).as.pointer)
 #define AS_NATIVE(v)   ((native_t *) (v).as.pointer)
+#define AS_USERDATA(v) ((userdata_t *) (v).as.pointer)
 #define AS_OBJECT(v)   ((object_t *) (v).as.pointer)
 
 #define OBJECT_HEADER int ref_count;
@@ -80,7 +80,6 @@ typedef struct
     bool boolean;
     double number;
     void *pointer;
-    uint64_t userdata;
   } as;
 } value_t;
 

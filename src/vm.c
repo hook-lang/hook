@@ -1333,9 +1333,9 @@ int vm_push_native(vm_t *vm, native_t *native)
   return vm_push_value(vm, NATIVE_VALUE(native));
 }
 
-int vm_push_userdata(vm_t *vm, uint64_t udata)
+int vm_push_userdata(vm_t *vm, userdata_t *udata)
 {
-  return push(vm, USERDATA_VALUE(udata));
+  return vm_push_value(vm, USERDATA_VALUE(udata));
 }
 
 void vm_pop(vm_t *vm)

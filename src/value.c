@@ -6,6 +6,7 @@
 #include "value.h"
 #include "struct.h"
 #include "callable.h"
+#include "userdata.h"
 #include "common.h"
 #include "error.h"
 
@@ -18,7 +19,6 @@ static inline void value_free(value_t val)
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
-  case TYPE_USERDATA:
     break;
   case TYPE_STRING:
     string_free(AS_STRING(val));
@@ -41,6 +41,9 @@ static inline void value_free(value_t val)
       }
       function_free(AS_FUNCTION(val));
     }
+    break;
+  case TYPE_USERDATA:
+    userdata_free(AS_USERDATA(val));
     break;
   }
 }
@@ -135,11 +138,7 @@ void value_print(value_t val, bool quoted)
     }
     break;
   case TYPE_USERDATA:
-#ifdef __APPLE__
-    printf("<userdata 0x%llx>", val.as.userdata);
-#else
-    printf("<userdata 0x%lx>", val.as.userdata);
-#endif
+    printf("<userdata at %p>", val.as.pointer);
     break;
   }
 }

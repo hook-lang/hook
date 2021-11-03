@@ -13,8 +13,17 @@
 #include <unistd.h>
 #endif
 #include "common.h"
+#include "memory.h"
 #include "error.h"
 
+typedef struct
+{
+  USERDATA_HEADER
+  FILE *stream;
+} file_t;
+
+static inline file_t *file_new(FILE *stream);
+static void file_deinit(userdata_t *udata);
 static int open_call(vm_t *vm, value_t *frame);
 static int close_call(vm_t *vm, value_t *frame);
 static int popen_call(vm_t *vm, value_t *frame);
@@ -29,6 +38,22 @@ static int read_call(vm_t *vm, value_t *frame);
 static int write_call(vm_t *vm, value_t *frame);
 static int readln_call(vm_t *vm, value_t *frame);
 static int writeln_call(vm_t *vm, value_t *frame);
+
+static inline file_t *file_new(FILE *stream)
+{
+  file_t *file = (file_t *) allocate(sizeof(*file));
+  userdata_init((userdata_t *) file, &file_deinit);
+  file->stream = stream;
+  return file;
+}
+
+static void file_deinit(userdata_t *udata)
+{
+  FILE *stream = ((file_t *) udata)->stream;
+  if (stream == stdin || stream == stdout || stream == stderr)
+    return;
+  fclose(stream);
+}
 
 static int open_call(vm_t *vm, value_t *frame)
 {
@@ -49,7 +74,7 @@ static int open_call(vm_t *vm, value_t *frame)
   FILE *stream = fopen(filename->chars, mode->chars);
   if (!stream)
     vm_push_null(vm);
-  return vm_push_userdata(vm, (uint64_t) stream);
+  return vm_push_userdata(vm, (userdata_t *) file_new(stream));
 }
 
 static int close_call(vm_t *vm, value_t *frame)
@@ -60,8 +85,7 @@ static int close_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val.as.userdata;
-  return vm_push_number(vm, fclose(stream));
+  return vm_push_number(vm, fclose(((file_t *) AS_USERDATA(val))->stream));
 }
 
 static int popen_call(vm_t *vm, value_t *frame)
@@ -88,7 +112,7 @@ static int popen_call(vm_t *vm, value_t *frame)
 #endif
   if (!stream)
     vm_push_null(vm);
-  return vm_push_userdata(vm, (uint64_t) stream);
+  return vm_push_userdata(vm, (userdata_t *) file_new(stream));
 }
 
 static int pclose_call(vm_t *vm, value_t *frame)
@@ -99,7 +123,7 @@ static int pclose_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   int status;
 #ifdef WIN32
   status = _pclose(stream);
@@ -117,7 +141,7 @@ static int eof_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   return vm_push_boolean(vm, (bool) feof(stream));
 }
 
@@ -129,7 +153,7 @@ static int flush_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   return vm_push_number(vm, fflush(stream));
 }
 
@@ -141,7 +165,7 @@ static int sync_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   int fd = fileno(stream);
   bool result;
 #ifdef WIN32
@@ -160,7 +184,7 @@ static int tell_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   return vm_push_number(vm, ftell(stream));
 }
 
@@ -172,7 +196,7 @@ static int rewind_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   rewind(stream);
   return vm_push_null(vm);
 }
@@ -197,7 +221,7 @@ static int seek_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected integer but got '%s'", type_name(val3.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val1.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
   long offset = (long) val2.as.number;
   int whence = (int) val3.as.number;
   return vm_push_number(vm, fseek(stream, offset, whence));
@@ -217,7 +241,7 @@ static int read_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected integer but got '%s'", type_name(val2.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val1.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
   long size = (long) val2.as.number;
   string_t *str = string_allocate(size);
   int length = (int) fread(str->chars, 1, size, stream);
@@ -244,7 +268,7 @@ static int write_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected string but got '%s'", type_name(val2.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val1.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
   string_t *str = AS_STRING(val2);
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size)
@@ -260,7 +284,7 @@ static int readln_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   string_t *str = string_from_stream(stream, '\n');
   return vm_push_string(vm, str);
 }
@@ -279,7 +303,7 @@ static int writeln_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected string but got '%s'", type_name(val2.type));
     return STATUS_ERROR;
   }
-  FILE *stream = (FILE *) val1.as.userdata;
+  FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
   string_t *str = AS_STRING(val2);
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size || fwrite("\n", 1, 1, stream) < 1)
@@ -334,9 +358,9 @@ void load_io(vm_t *vm)
   struct_put(ztruct, sizeof(write) - 1, write);
   struct_put(ztruct, sizeof(readln) - 1, readln);
   struct_put(ztruct, sizeof(writeln) - 1, writeln);
-  assert(vm_push_userdata(vm, (uint64_t) stdin) == STATUS_OK);
-  assert(vm_push_userdata(vm, (uint64_t) stdout) == STATUS_OK);
-  assert(vm_push_userdata(vm, (uint64_t) stderr) == STATUS_OK);
+  assert(vm_push_userdata(vm, (userdata_t *) file_new(stdin)) == STATUS_OK);
+  assert(vm_push_userdata(vm, (userdata_t *) file_new(stdout)) == STATUS_OK);
+  assert(vm_push_userdata(vm, (userdata_t *) file_new(stderr)) == STATUS_OK);
   assert(vm_push_number(vm, SEEK_SET) == STATUS_OK);
   assert(vm_push_number(vm, SEEK_CUR) == STATUS_OK);
   assert(vm_push_number(vm, SEEK_END) == STATUS_OK);

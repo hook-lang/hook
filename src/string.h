@@ -7,6 +7,7 @@
 #define STRING_H
 
 #include <stdio.h>
+#include <stdint.h>
 #include "value.h"
 
 #define STRING_MIN_CAPACITY 8
