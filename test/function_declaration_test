@@ -8,7 +8,7 @@ script "fn f(a, b) {
   return a + b;
 }
 
-let g = fn (a, b) {
+const g = fn (a, b) {
   return a - b;
 };
 

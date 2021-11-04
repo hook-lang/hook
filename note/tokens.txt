@@ -35,6 +35,7 @@ TOKEN_INT        INT
 TOKEN_FLOAT      FLOAT
 TOKEN_STRING     STRING
 TOKEN_BREAK      'break'
+TOKEN_CONST      'const'
 TOKEN_CONTINUE   'continue'
 TOKEN_DELETE     'delete'
 TOKEN_DO         'do'
@@ -45,7 +46,6 @@ TOKEN_FOR        'for'
 TOKEN_IF         'if'
 TOKEN_LET        'let'
 TOKEN_LOOP       'loop'
-TOKEN_MUT        'mut'
 TOKEN_NULL       'null'
 TOKEN_RETURN     'return'
 TOKEN_STRUCT     'struct'

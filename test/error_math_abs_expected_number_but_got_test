@@ -4,8 +4,8 @@
 
 title "Error from math.abs(): expected number but got X"
 
-script "let math = require('math');
-let a = math.abs('foo');"
+script "const math = require('math');
+const a = math.abs('foo');"
 
 expect_failure "runtime error: invalid type: expected number but got 'string'
   at abs() in <native>

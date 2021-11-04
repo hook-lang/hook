@@ -2,29 +2,29 @@
 // mandelbrot.hook
 //
 
-let floor = require("math").floor;
-let pixels = [" ", ".", ":", ";", "+", "=", "x", "X", "$", "&"];
+const floor = require("math").floor;
+const pixels = [" ", ".", ":", ";", "+", "=", "x", "X", "$", "&"];
 
-let y_min = -0.2;
-let y_max = 0.1;
-let x_min = -1.5;
-let x_max = -1.1;
+const y_min = -0.2;
+const y_max = 0.1;
+const x_min = -1.5;
+const x_max = -1.1;
 
-for (let mut y_pixel = 0; y_pixel < 24; y_pixel++) {
-  let y = (y_pixel / 24) * (y_max - y_min) + y_min;
-  for (let mut x_pixel = 0; x_pixel < 80; x_pixel++) {
-    let x = (x_pixel / 79) * (x_max - x_min) + x_min;
-    let mut pixel = " ";
-    let mut x0 = x;
-    let mut y0 = y;
-    for (let mut iter = 0; iter < 80; iter++) {
-      let mut x1 = (x0 * x0) - (y0 * y0);
-      let mut y1 = 2 * x0 * y0;
+for (let y_pixel = 0; y_pixel < 24; y_pixel++) {
+  const y = (y_pixel / 24) * (y_max - y_min) + y_min;
+  for (let x_pixel = 0; x_pixel < 80; x_pixel++) {
+    const x = (x_pixel / 79) * (x_max - x_min) + x_min;
+    let pixel = " ";
+    let x0 = x;
+    let y0 = y;
+    for (let iter = 0; iter < 80; iter++) {
+      let x1 = (x0 * x0) - (y0 * y0);
+      let y1 = 2 * x0 * y0;
       x1 = x1 + x;
       y1 = y1 + y;
       x0 = x1;
       y0 = y1;
-      let d = (x0 * x0) + (y0 * y0);
+      const d = (x0 * x0) + (y0 * y0);
       if (d > 4) {
         pixel = pixels[floor(iter / 8)];
         break;

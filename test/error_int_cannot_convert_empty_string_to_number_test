@@ -4,7 +4,7 @@
 
 title "Error from int(): cannot convert empty string to number"
 
-script "let a = int('');"
+script "const a = int('');"
 
 expect_failure "runtime error: invalid type: cannot convert empty string to 'number'
   at int() in <native>

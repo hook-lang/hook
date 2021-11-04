@@ -2,14 +2,14 @@
 // quick_sort.hook
 //
 
-fn sort(mut arr) {
-  let n = len(arr);
+fn sort(arr) {
+  const n = len(arr);
   if (n <= 1)
     return arr;
-  let pivot = arr[0];
-  let mut left = []; 
-  let mut right = [];
-  for (let mut i = 1; i < n; i++) {
+  const pivot = arr[0];
+  let left = []; 
+  let right = [];
+  for (let i = 1; i < n; i++) {
     if (arr[i] < pivot)
       left[] = arr[i];
     else

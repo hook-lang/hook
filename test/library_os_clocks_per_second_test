@@ -4,7 +4,7 @@
 
 title "Library os: CLOCKS_PER_SECOND"
 
-script "let os = require('os');
+script "const os = require('os');
 println(os.CLOCKS_PER_SECOND);"
 
 expect_status_success

@@ -363,6 +363,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_BREAK;
     return;
   }
+  if (match_chars(scan, "const"))
+  {
+    scan->token.type = TOKEN_CONST;
+    return;
+  }
   if (match_chars(scan, "continue"))
   {
     scan->token.type = TOKEN_CONTINUE;
@@ -411,11 +416,6 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "loop"))
   {
     scan->token.type = TOKEN_LOOP;
-    return;
-  }
-  if (match_chars(scan, "mut"))
-  {
-    scan->token.type = TOKEN_MUT;
     return;
   }
   if (match_chars(scan, "null"))

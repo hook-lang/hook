@@ -1,5 +1,6 @@
 
 break
+const
 continue
 delete
 do
@@ -10,7 +11,6 @@ for
 if
 let
 loop
-mut
 null
 return
 struct

@@ -10,7 +10,7 @@ println([1] == [1, 2]);
 println([1, 2] == [1]);
 println([1, 2] == [1, 2]);
 println([1, 2] == [2, 1]);
-let a = ['foo'];
+const a = ['foo'];
 println(a == a);"
 
 expect_success "true

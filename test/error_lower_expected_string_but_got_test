@@ -4,7 +4,7 @@
 
 title "Error from lower(): expected string but got X"
 
-script "let a = lower(1);"
+script "const a = lower(1);"
 
 expect_failure "runtime error: invalid type: expected string but got 'number'
   at lower() in <native>

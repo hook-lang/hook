@@ -4,7 +4,7 @@
 
 title "Anonymous function"
 
-script "let sum = fn (a, b) {
+script "const sum = fn (a, b) {
   return a + b;
 };
 

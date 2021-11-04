@@ -4,12 +4,12 @@
 
 title "Built-in function slice()"
 
-script "let str = 'abc';
+script "const str = 'abc';
 println(slice(str, 0, 4));
 println(slice(str, 1, 3));
 println(slice(str, 2, 3));
 
-let arr = ['a', 'b', 'c'];
+const arr = ['a', 'b', 'c'];
 println(slice(arr, 0, 4));
 println(slice(arr, 1, 3));
 println(slice(arr, 2, 3));"

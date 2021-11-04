@@ -4,19 +4,19 @@
 
 title "Array: add element"
 
-script "let mut arr1 = [];
+script "let arr1 = [];
 arr1[] = 'foo';
 println(arr1);
 
-let mut arr2 = [[]];
+let arr2 = [[]];
 arr2[0][] = 'foo';
 println(arr2);
 
-let mut arr3 = [[[]]];
+let arr3 = [[[]]];
 arr3[0][0][] = 'foo';
 println(arr3);
 
-let mut arr4 = [[1, 2, 3]];
+let arr4 = [[1, 2, 3]];
 arr4[0][] = 4;
 println(arr4);"
 

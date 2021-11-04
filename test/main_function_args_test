@@ -4,7 +4,7 @@
 
 title "Main function args"
 
-script "for (let mut i = 0; i < len(args); i++)
+script "for (let i = 0; i < len(args); i++)
   println(args[i]);"
 
 expect_status_success

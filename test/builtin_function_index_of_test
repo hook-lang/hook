@@ -4,7 +4,7 @@
 
 title "Built-in function index_of()"
 
-script "let arr = ['foo', 'bar', 'baz']; 
+script "const arr = ['foo', 'bar', 'baz']; 
 println(index_of(arr, 'baz'));
 println(index_of(arr, 'qux'));"
 

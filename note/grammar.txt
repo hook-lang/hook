@@ -2,10 +2,13 @@
 chunk       ::= stmt* EOF
 
 stmt        ::= block
+              | 'const' NAME '=' expr ';'
+              | 'const' '[' NAME ( ',' NAME )* ']' '=' expr ';'
+              | 'const' '{' NAME ( ',' NAME )* '}' '=' expr ';'
               | var_decl ';'
               | assign_call ';'
               | 'struct' NAME '{' ( NAME ( ',' NAME )* )? '}'
-              | 'fn' NAME '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')' block
+              | 'fn' NAME '(' ( 'const'? NAME ( ',' 'const'? NAME )* )? ')' block
               | 'delete' NAME subscr* '[' expr ']' ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'loop' block
@@ -18,10 +21,9 @@ stmt        ::= block
 
 block       ::= '{' stmt* '}'
 
-var_decl    ::= 'let' NAME '=' expr
-              | 'let' 'mut' NAME ( '=' expr )?
-              | 'let' '[' 'mut'? NAME ( ',' 'mut'? NAME )* ']' '=' expr
-              | 'let' '{' 'mut'? NAME ( ',' 'mut'? NAME )* '}' '=' expr
+var_decl    ::= 'let' NAME ( '=' expr )?
+              | 'let' '[' NAME ( ',' NAME )* ']' '=' expr
+              | 'let' '{' NAME ( ',' NAME )* '}' '=' expr
 
 assign_call ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME subscr* ( '++' | '--' )
@@ -51,7 +53,7 @@ prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'
               | '{' ( NAME ':' expr ( ',' NAME ':' expr )* )? '}'
               | 'struct' '{' ( NAME ( ',' NAME )* )? '}'
-              | 'fn' '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')' block
+              | 'fn' '(' ( 'const'? NAME ( ',' 'const'? NAME )* )? ')' block
               | 'if' '(' expr ')' expr 'else' expr
               | NAME ( subscr | call )* ( '{' ( expr ( ',' expr )* )? '}' )?
               | '(' expr ')'

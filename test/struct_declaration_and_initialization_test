@@ -9,7 +9,7 @@ script "struct Foo {
 }
 println(Foo{1, 2});
 
-let Bar = struct {
+const Bar = struct {
   c, d
 };
 println(Bar{3, 4});"

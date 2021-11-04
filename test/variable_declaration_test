@@ -4,17 +4,17 @@
 
 title "Variable declaration"
 
-script "let a = 1;
-let [b, c] = [2, 3];
-let mut d;
-let mut e = 4;
-let [f, g] = ['foo', 'bar'];
-let [mut h] = ['baz'];
-let [i, mut j] = ['qux', 'quux'];
+script "const a = 1;
+const [b, c] = [2, 3];
+let d;
+let e = 4;
+const [f, g] = ['foo', 'bar'];
+let [h] = ['baz'];
+let [i, j] = ['qux', 'quux'];
 
-let {k, l} = {k: 'foo', l: 'bar'};
-let {mut m} = {m: 'baz'};
-let {n, mut o, p} = {n: 'qux', p: 'quux'};
+const {k, l} = {k: 'foo', l: 'bar'};
+let {m} = {m: 'baz'};
+let {n, o, p} = {n: 'qux', p: 'quux'};
 
 println(a);
 println(b);

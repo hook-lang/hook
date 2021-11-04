@@ -4,7 +4,7 @@
 
 title "Error from hash(): expected string but got X"
 
-script "let a = hash(1);"
+script "const a = hash(1);"
 
 expect_failure "runtime error: invalid type: expected string but got 'number'
   at hash() in <native>

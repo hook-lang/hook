@@ -4,7 +4,7 @@
 
 title "Library math: pow()"
 
-script "let math = require('math');
+script "const math = require('math');
 println(math.pow(2, 3));"
 
 expect_success "8"

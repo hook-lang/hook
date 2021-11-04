@@ -4,7 +4,7 @@
 
 title "Error from array(): invalid type"
 
-script "let arr = array('foo');"
+script "const arr = array('foo');"
 
 expect_failure "runtime error: invalid type: expected integer but got 'string'
   at array() in <native>

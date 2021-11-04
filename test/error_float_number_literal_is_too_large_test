@@ -4,7 +4,7 @@
 
 title "Error from float(): number literal is too large"
 
-script "let a = float('4.9e-324');"
+script "const a = float('4.9e-324');"
 
 expect_failure "runtime error: invalid type: number literal is too large
   at float() in <native>

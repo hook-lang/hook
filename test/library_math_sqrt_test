@@ -4,7 +4,7 @@
 
 title "Library math: sqrt()"
 
-script "let math = require('math');
+script "const math = require('math');
 println(math.sqrt(9));"
 
 expect_success "3"
