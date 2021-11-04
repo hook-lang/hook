@@ -483,7 +483,7 @@ static void compile_variable_declaration(compiler_t *comp)
     }
     EXPECT(scan, TOKEN_RBRACKET);
     EXPECT(scan, TOKEN_EQ);
-    int line = scan->line;
+    int line = scan->token.line;
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_UNPACK);
     chunk_emit_byte(chunk, n);
@@ -499,7 +499,6 @@ static void compile_variable_declaration(compiler_t *comp)
       scanner_next_token(scan);
       is_mutable = true;
     }
-    int line = scan->line;
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
     token_t tk = scan->token;
@@ -508,7 +507,7 @@ static void compile_variable_declaration(compiler_t *comp)
     uint8_t index = add_string_constant(proto, &tk);
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
-    prototype_add_line(proto, line);
+    prototype_add_line(proto, tk.line);
     uint8_t n = 1;
     while (MATCH(scan, TOKEN_COMMA))
     {
@@ -519,7 +518,6 @@ static void compile_variable_declaration(compiler_t *comp)
         scanner_next_token(scan);
         is_mutable = true;
       }
-      line = scan->line;
       if (!MATCH(scan, TOKEN_NAME))
         fatal_error_unexpected_token(scan);
       token_t tk = scan->token;
@@ -528,12 +526,12 @@ static void compile_variable_declaration(compiler_t *comp)
       uint8_t index = add_string_constant(proto, &tk);
       chunk_emit_opcode(chunk, OP_CONSTANT);
       chunk_emit_byte(chunk, index);
-      prototype_add_line(proto, line);
+      prototype_add_line(proto, tk.line);
       ++n;
     }
     EXPECT(scan, TOKEN_RBRACE);
     EXPECT(scan, TOKEN_EQ);
-    line = scan->line;
+    int line = scan->token.line;
     compile_expression(comp);
     chunk_emit_opcode(chunk, OP_DESTRUCT);
     chunk_emit_byte(chunk, n);
@@ -663,7 +661,7 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     prototype_add_line(proto, line);
     int syn = compile_assign(comp, SYN_SUBSCRIPT, false);
     if (syn == SYN_ASSIGN) {
-      *((uint8_t *) &chunk->bytes[offset]) = (uint8_t) OP_FETCH_ELEMENT;
+      chunk->bytes[offset] = (uint8_t) OP_FETCH_ELEMENT;
       chunk_emit_opcode(chunk, OP_SET_ELEMENT);
     }
     return syn;
@@ -692,7 +690,7 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     prototype_add_line(proto, tk.line);
     int syn = compile_assign(comp, SYN_SUBSCRIPT, false);
     if (syn == SYN_ASSIGN) {
-      *((uint8_t *) &chunk->bytes[offset]) = (uint8_t) OP_FETCH_FIELD;
+      chunk->bytes[offset] = (uint8_t) OP_FETCH_FIELD;
       chunk_emit_opcode(chunk, OP_SET_FIELD);
     }
     return syn;
@@ -732,7 +730,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
-  int line = scan->line;
+  int line = scan->token.line;
   scanner_next_token(scan);
   token_t tk;
   string_t *name = NULL;
@@ -784,7 +782,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
-  int line = scan->line;
+  int line = scan->token.line;
   scanner_next_token(scan);
   compiler_t child_comp;
   if (!is_anonymous)
@@ -883,7 +881,7 @@ static void compile_delete(compiler_t *comp, bool inplace)
   chunk_t *chunk = &proto->chunk;
   if (MATCH(scan, TOKEN_LBRACKET))
   {
-    int line = scan->line;
+    int line = scan->token.line;
     scanner_next_token(scan);
     compile_expression(comp);
     EXPECT(scan, TOKEN_RBRACKET);
@@ -1029,7 +1027,7 @@ static void compile_for_statement(compiler_t *comp)
   uint16_t jump1 = (uint16_t) chunk->length;
   if (MATCH(scan, TOKEN_SEMICOLON))
   {
-    int line = scan->line;
+    int line = scan->token.line;
     scanner_next_token(scan);
     chunk_emit_opcode(chunk, OP_TRUE);
     prototype_add_line(proto, line);
@@ -1106,7 +1104,7 @@ static void compile_return_statement(compiler_t *comp)
   scanner_next_token(scan);
   if (MATCH(scan, TOKEN_SEMICOLON))
   {
-    int line = scan->line;
+    int line = scan->token.line;
     scanner_next_token(scan);
     chunk_emit_opcode(chunk, OP_NULL);
     prototype_add_line(proto, line);
@@ -1182,9 +1180,9 @@ static void compile_comp_expression(compiler_t *comp)
   compile_add_expression(comp);
   for (;;)
   {
+    int line = scan->token.line;
     if (MATCH(scan, TOKEN_GT))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_add_expression(comp);
       chunk_emit_opcode(chunk, OP_GREATER);
@@ -1193,7 +1191,6 @@ static void compile_comp_expression(compiler_t *comp)
     }
     if (MATCH(scan, TOKEN_GTEQ))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_add_expression(comp);
       chunk_emit_opcode(chunk, OP_LESS);
@@ -1203,7 +1200,6 @@ static void compile_comp_expression(compiler_t *comp)
     }
     if (MATCH(scan, TOKEN_LT))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_add_expression(comp);
       chunk_emit_opcode(chunk, OP_LESS);
@@ -1212,7 +1208,6 @@ static void compile_comp_expression(compiler_t *comp)
     }
     if (MATCH(scan, TOKEN_LTEQ))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_add_expression(comp);
       chunk_emit_opcode(chunk, OP_GREATER);
@@ -1232,9 +1227,9 @@ static void compile_add_expression(compiler_t *comp)
   compile_mul_expression(comp);
   for (;;)
   {
+    int line = scan->token.line;
     if (MATCH(scan, TOKEN_PLUS))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_mul_expression(comp);
       chunk_emit_opcode(chunk, OP_ADD);
@@ -1243,7 +1238,6 @@ static void compile_add_expression(compiler_t *comp)
     }
     if (MATCH(scan, TOKEN_MINUS))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_mul_expression(comp);
       chunk_emit_opcode(chunk, OP_SUBTRACT);
@@ -1262,9 +1256,9 @@ static void compile_mul_expression(compiler_t *comp)
   chunk_t *chunk = &proto->chunk;
   for (;;)
   {
+    int line = scan->token.line;
     if (MATCH(scan, TOKEN_STAR))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_unary_expression(comp);
       chunk_emit_opcode(chunk, OP_MULTIPLY);
@@ -1273,7 +1267,6 @@ static void compile_mul_expression(compiler_t *comp)
     }
     if (MATCH(scan, TOKEN_SLASH))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_unary_expression(comp);
       chunk_emit_opcode(chunk, OP_DIVIDE);
@@ -1282,7 +1275,6 @@ static void compile_mul_expression(compiler_t *comp)
     }
     if (MATCH(scan, TOKEN_PERCENT))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_unary_expression(comp);
       chunk_emit_opcode(chunk, OP_MODULO);
@@ -1300,7 +1292,7 @@ static void compile_unary_expression(compiler_t *comp)
   chunk_t *chunk = &proto->chunk;
   if (MATCH(scan, TOKEN_MINUS))
   {
-    int line = scan->line;
+    int line = scan->token.line;
     scanner_next_token(scan);
     compile_unary_expression(comp);
     chunk_emit_opcode(chunk, OP_NEGATE);
@@ -1322,7 +1314,7 @@ static void compile_prim_expression(compiler_t *comp)
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
-  int line = scan->line;
+  int line = scan->token.line;
   if (MATCH(scan, TOKEN_NULL))
   {
     scanner_next_token(scan);
@@ -1426,7 +1418,7 @@ static void compile_array_initializer(compiler_t *comp)
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
-  int line = scan->line;
+  int line = scan->token.line;
   scanner_next_token(scan);
   uint8_t length = 0;
   if (MATCH(scan, TOKEN_RBRACKET))
@@ -1455,7 +1447,7 @@ static void compile_struct_initializer(compiler_t *comp)
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
-  int line = scan->line;
+  int line = scan->token.line;
   scanner_next_token(scan);
   struct_t *ztruct = struct_new(NULL);
   if (MATCH(scan, TOKEN_RBRACE))
@@ -1524,9 +1516,9 @@ static void compile_subscript(compiler_t *comp)
   scanner_next_token(scan);
   for (;;)
   {
+    int line = scan->token.line;
     if (MATCH(scan, TOKEN_LBRACKET))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       compile_expression(comp);
       EXPECT(scan, TOKEN_RBRACKET);
@@ -1546,12 +1538,11 @@ static void compile_subscript(compiler_t *comp)
       chunk_emit_byte(chunk, index);
       prototype_add_line(proto, tk.line);
       chunk_emit_opcode(chunk, OP_GET_FIELD);
-      prototype_add_line(proto, tk.line);
+      prototype_add_line(proto, line);
       continue;
     }
     if (MATCH(scan, TOKEN_LPAREN))
     {
-      int line = scan->line;
       scanner_next_token(scan);
       if (MATCH(scan, TOKEN_RPAREN))
       {
@@ -1579,7 +1570,7 @@ static void compile_subscript(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_LBRACE))
   {
-    int line = scan->line;
+    int line = scan->token.line;
     scanner_next_token(scan);
     if (MATCH(scan, TOKEN_RBRACE))
     {
