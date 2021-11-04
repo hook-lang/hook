@@ -1,0 +1,15 @@
+#!/bin/sh
+
+. test/__test
+
+title "Built-in function sum()"
+
+script "println(sum([]));
+println(sum([1]));
+println(sum([10, 5, -5]));"
+
+expect_success "0
+1
+10"
+
+run

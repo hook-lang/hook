@@ -51,6 +51,9 @@ static const char *globals[] = {
   "lower",
   "upper",
   "trim",
+  "min",
+  "max",
+  "sum",
   "slice",
   "split",
   "join",
@@ -86,6 +89,9 @@ static int compare_call(vm_t *vm, value_t *frame);
 static int lower_call(vm_t *vm, value_t *frame);
 static int upper_call(vm_t *vm, value_t *frame);
 static int trim_call(vm_t *vm, value_t *frame);
+static int min_call(vm_t *vm, value_t *frame);
+static int max_call(vm_t *vm, value_t *frame);
+static int sum_call(vm_t *vm, value_t *frame);
 static int slice_call(vm_t *vm, value_t *frame);
 static int split_call(vm_t *vm, value_t *frame);
 static int join_call(vm_t *vm, value_t *frame);
@@ -547,6 +553,86 @@ static int trim_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
+static int min_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_ARRAY(val))
+  {
+    runtime_error("invalid type: expected array but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  array_t *arr = AS_ARRAY(val);
+  int length = arr->length;
+  if (!length)
+  {
+    vm_push_null(vm);
+    return STATUS_OK;
+  }
+  value_t min = arr->elements[0];
+  for (int i = 1; i < length; ++i)
+  {
+    value_t elem = arr->elements[i];
+    int result;
+    if (value_compare(elem, min, &result) == STATUS_ERROR)
+      return STATUS_ERROR;
+    min = result < 0 ? elem : min;
+  }
+  vm_push_value(vm, min);
+  return STATUS_OK;
+}
+
+static int max_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_ARRAY(val))
+  {
+    runtime_error("invalid type: expected array but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  array_t *arr = AS_ARRAY(val);
+  int length = arr->length;
+  if (!length)
+  {
+    vm_push_null(vm);
+    return STATUS_OK;
+  }
+  value_t max = arr->elements[0];
+  for (int i = 1; i < length; ++i)
+  {
+    value_t elem = arr->elements[i];
+    int result;
+    if (value_compare(elem, max, &result) == STATUS_ERROR)
+      return STATUS_ERROR;
+    max = result > 0 ? elem : max;
+  }
+  vm_push_value(vm, max);
+  return STATUS_OK;
+}
+
+static int sum_call(vm_t *vm, value_t *frame)
+{
+  value_t val = frame[1];
+  if (!IS_ARRAY(val))
+  {
+    runtime_error("invalid type: expected array but got '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  array_t *arr = AS_ARRAY(val);
+  double sum = 0;
+  for (int i = 0; i < arr->length; ++i)
+  {
+    value_t elem = arr->elements[i];
+    if (!IS_NUMBER(elem))
+    {
+      runtime_error("invalid type: expected array of numbers, found '%s' in array", type_name(elem.type));
+      return STATUS_ERROR;
+    }
+    sum += elem.as.number;
+  }
+  vm_push_number(vm, sum);
+  return STATUS_OK;
+}
+
 static int slice_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[1];
@@ -749,15 +835,18 @@ void load_globals(vm_t *vm)
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &lower_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &upper_call)) == STATUS_OK);
   assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &trim_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 3, &slice_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 2, &split_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 2, &join_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 1, &array_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 2, &index_of_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 1, &sleep_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 2, &assert_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[24]), 1, &panic_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[25]), 1, &require_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &min_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &max_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &sum_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 3, &slice_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 2, &split_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 2, &join_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &array_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[24]), 2, &index_of_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[25]), 1, &sleep_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[26]), 2, &assert_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[27]), 1, &panic_call)) == STATUS_OK);
+  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[28]), 1, &require_call)) == STATUS_OK);
 }
 
 int num_globals(void)

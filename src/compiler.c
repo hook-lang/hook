@@ -427,11 +427,6 @@ static void compile_block(compiler_t *comp)
   pop_scope(comp);
 }
 
-/* TODO
-  | 'const' NAME '=' expr ';'
-  | 'const' '[' NAME ( ',' NAME )* ']' '=' expr ';'
-  | 'const' '{' NAME ( ',' NAME )* '}' '=' expr ';'
-*/
 static void compile_constant_declaration(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
@@ -514,11 +509,6 @@ static void compile_constant_declaration(compiler_t *comp)
   fatal_error_unexpected_token(scan);
 }
 
-/* TODO
-var_decl    ::= 'let' NAME ( '=' expr )?
-              | 'let' '[' NAME ( ',' NAME )* ']' '=' expr
-              | 'let' '{' NAME ( ',' NAME )* '}' '=' expr
-*/
 static void compile_variable_declaration(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
@@ -1695,7 +1685,7 @@ static variable_t compile_variable(compiler_t *comp, token_t *tk, bool emit)
 static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk)
 {
   if (!comp)
-    return false;
+    return NULL;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
   variable_t *var = lookup_variable(comp, tk);

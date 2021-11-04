@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. test/__test
+
+title "Built-in function max()"
+
+script "println(max([]));
+println(max([1]));
+println(max([10, 5, -5]));
+println(max(['foo', 'bar']));"
+
+expect_success "null
+1
+10
+foo"
+
+run

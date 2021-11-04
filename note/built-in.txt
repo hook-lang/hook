@@ -16,6 +16,9 @@ compare(val1: value, val2: value) -> integer
 lower(str: string) -> string
 upper(str: string) -> string
 trim(str: string) -> string
+min(arr: array) -> value
+max(arr: array) -> value
+sum(arr: array) -> number
 slice(val: string|array, start: integer, stop: integer) -> string|array
 split(src: string, separator: string) -> array
 join(arr: array, separator: string) -> string

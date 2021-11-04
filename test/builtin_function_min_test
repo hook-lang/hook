@@ -1,0 +1,17 @@
+#!/bin/sh
+
+. test/__test
+
+title "Built-in function min()"
+
+script "println(min([]));
+println(min([1]));
+println(min([10, 5, -5]));
+println(min(['foo', 'bar']));"
+
+expect_success "null
+1
+-5
+bar"
+
+run
