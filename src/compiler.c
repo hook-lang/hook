@@ -8,6 +8,7 @@
 #include <string.h>
 #include <errno.h>
 #include <limits.h>
+#include "scanner.h"
 #include "struct.h"
 #include "builtin.h"
 #include "error.h"
@@ -526,7 +527,7 @@ static void compile_variable_declaration(compiler_t *comp)
       return;  
     }
     chunk_emit_opcode(chunk, OP_NULL);
-    prototype_add_line(proto, scan->line);
+    prototype_add_line(proto, scan->token.line);
     return;
   }
   if (MATCH(scan, TOKEN_LBRACKET))
@@ -860,7 +861,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
       fatal_error_unexpected_token(scan);
     compile_block(&child_comp);
     chunk_emit_opcode(child_chunk, OP_NULL);
-    prototype_add_line(proto, scan->line);
+    prototype_add_line(proto, scan->token.line);
     goto end;
   }
   bool is_mutable = true;
@@ -895,7 +896,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     fatal_error_unexpected_token(scan);
   compile_block(&child_comp);
   chunk_emit_opcode(child_chunk, OP_NULL);
-  prototype_add_line(proto, scan->line);
+  prototype_add_line(proto, scan->token.line);
 end:
   chunk_emit_opcode(child_chunk, OP_RETURN);
   uint8_t index = proto->num_protos;
@@ -1716,10 +1717,12 @@ static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk)
   return NULL;
 }
 
-prototype_t *compile(scanner_t *scan)
+function_t *compile(string_t *file, string_t *source)
 {
+  scanner_t scan;
+  scanner_init(&scan, file, source);
   compiler_t comp;
-  compiler_init(&comp, NULL, scan, string_from_chars(-1, "main"));
+  compiler_init(&comp, NULL, &scan, string_from_chars(-1, "main"));
   char args_name[] = "args";
   token_t tk = {.length = sizeof(args_name) - 1, .start = args_name};
   add_local(&comp, &tk, false);
@@ -1728,7 +1731,9 @@ prototype_t *compile(scanner_t *scan)
   prototype_t *proto = comp.proto;
   chunk_t *chunk = &proto->chunk;
   chunk_emit_opcode(chunk, OP_NULL);
-  prototype_add_line(proto, scan->line);
+  prototype_add_line(proto, scan.token.line);
   chunk_emit_opcode(chunk, OP_RETURN);
-  return comp.proto;
+  function_t *fn = function_new(proto);
+  scanner_free(&scan);
+  return fn;
 }

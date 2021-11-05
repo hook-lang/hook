@@ -36,7 +36,6 @@ int vm_push_userdata(vm_t *vm, userdata_t *udata);
 void vm_pop(vm_t *vm);
 void vm_instance(vm_t *vm);
 int vm_initialize(vm_t *vm, int num_args);
-void vm_compile(vm_t *vm);
 int vm_call(vm_t *vm, int num_args);
 
 #endif

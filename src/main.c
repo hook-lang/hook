@@ -4,8 +4,8 @@
 //
 
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
+#include "compiler.h"
 #include "dump.h"
 #include "vm.h"
 #include "builtin.h"
@@ -23,6 +23,7 @@ static inline int option_length(const char *opt);
 static inline void print_help(void);
 static inline void print_version(void);
 static inline array_t *args_array(void);
+static inline int run(int stack_size, function_t *fn);
 
 static inline const char *argument(int index)
 {
@@ -35,8 +36,7 @@ static inline const char *argument(int index)
 
 static inline int option(const char *opt)
 {
-  int i = 1;
-  for (; i < _argc; ++i)
+  for (int i = 1; i < _argc; ++i)
     if (!strcmp(_argv[i], opt))
       return i;
   return 0;
@@ -45,8 +45,7 @@ static inline int option(const char *opt)
 static inline const char *option_value(const char *opt)
 {
   int len = option_length(opt);
-  int i = 1;
-  for (; i < _argc; ++i)
+  for (int i = 1; i < _argc; ++i)
   {
     const char *arg = _argv[i];
     if (!memcmp(arg, opt, len))
@@ -95,6 +94,26 @@ static inline array_t *args_array(void)
   return args;
 }
 
+static inline int run(int stack_size, function_t *fn)
+{
+  vm_t vm;
+  vm_init(&vm, stack_size);
+  load_globals(&vm);
+  vm_push_function(&vm, fn);
+  vm_push_array(&vm, args_array());
+  if (vm_call(&vm, 1) == STATUS_ERROR)
+  {
+    vm_free(&vm);
+    return EXIT_FAILURE;
+  }
+  value_t result = vm.slots[vm.top];
+  int status = IS_INTEGER(result) ? (int) result.as.number : 0;
+  --vm.top;
+  ASSERT(vm.top == num_globals() - 1, "stack must contain the globals");
+  vm_free(&vm);
+  return status;
+}
+
 int main(int argc, const char **argv)
 {
   _argc = argc;
@@ -114,29 +133,12 @@ int main(int argc, const char **argv)
   const char *filename = argument(0);
   string_t *file = string_from_chars(-1, filename ? filename : "<stdin>");
   string_t *source = filename ? string_from_file(filename) : string_from_stream(stdin, '\0');
-  vm_t vm;
-  vm_init(&vm, stack_size);
-  load_globals(&vm);
-  vm_push_string(&vm, file);
-  vm_push_string(&vm, source);
-  vm_compile(&vm);
+  function_t *fn = compile(file, source);
   if (option("-d") || option("--dump"))
   {
-    function_t *fn = AS_FUNCTION(vm.slots[vm.top]);
     dump(fn->proto);
-    vm_free(&vm);
+    function_free(fn);
     return EXIT_SUCCESS;
   }
-  vm_push_array(&vm, args_array());
-  if (vm_call(&vm, 1) == STATUS_ERROR)
-  {
-    vm_free(&vm);
-    return EXIT_FAILURE;
-  }
-  value_t result = vm.slots[vm.top];
-  int status = IS_INTEGER(result) ? (int) result.as.number : 0;
-  --vm.top;
-  ASSERT(vm.top == num_globals() - 1, "must remain exactly the globals");
-  vm_free(&vm);
-  return status;
+  return run(stack_size, fn);
 }

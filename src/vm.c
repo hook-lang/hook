@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include "common.h"
-#include "compiler.h"
 #include "struct.h"
 #include "memory.h"
 #include "error.h"
@@ -1354,29 +1353,6 @@ void vm_instance(vm_t *vm)
 int vm_initialize(vm_t *vm, int num_args)
 {
   return initialize(vm, num_args);
-}
-
-void vm_compile(vm_t *vm)
-{
-  value_t *slots = &vm->slots[vm->top - 1];
-  value_t val1 = slots[0];
-  value_t val2 = slots[1];
-  if (!IS_STRING(val1))
-    fatal_error("invalid type: expected string but got '%s'", type_name(val1.type));
-  if (!IS_STRING(val2))
-    fatal_error("invalid type: expected string but got '%s'", type_name(val2.type));
-  string_t *file = AS_STRING(val1);
-  string_t *source = AS_STRING(val2);
-  scanner_t scan;
-  scanner_init(&scan, file, source);
-  prototype_t *proto = compile(&scan);
-  function_t *fn = function_new(proto);
-  INCR_REF(fn);
-  slots[0] = FUNCTION_VALUE(fn);
-  --vm->top;
-  DECR_REF(file);
-  DECR_REF(source);
-  scanner_free(&scan);
 }
 
 int vm_call(vm_t *vm, int num_args)

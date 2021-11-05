@@ -7,8 +7,7 @@
 #define COMPILER_H
 
 #include "callable.h"
-#include "scanner.h"
 
-prototype_t *compile(scanner_t *scan);
+function_t *compile(string_t *file, string_t *source);
 
 #endif
