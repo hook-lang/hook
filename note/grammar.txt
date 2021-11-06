@@ -8,10 +8,11 @@ stmt        ::= block
               | var_decl ';'
               | assign_call ';'
               | 'struct' NAME '{' ( NAME ( ',' NAME )* )? '}'
-              | 'fn' NAME '(' ( 'const'? NAME ( ',' 'const'? NAME )* )? ')' block
+              | 'fn' NAME '(' ( 'const'? NAME ( ',' 'const'? NAME )* )? ')'
+                ( '=>' expr | block )
               | 'delete' NAME subscr* '[' expr ']' ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
-              | 'loop' block
+              | 'loop' stmt
               | 'while' '(' expr ')' stmt
               | 'do' stmt 'while' '(' expr ')' ';'
               | 'for' '(' var_decl | assign_call? ';' expr? ';' assign_call? ')' stmt
@@ -53,7 +54,8 @@ prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'
               | '{' ( NAME ':' expr ( ',' NAME ':' expr )* )? '}'
               | 'struct' '{' ( NAME ( ',' NAME )* )? '}'
-              | 'fn' '(' ( 'const'? NAME ( ',' 'const'? NAME )* )? ')' block
+              | 'fn' '(' ( 'const'? NAME ( ',' 'const'? NAME )* )? ')'
+                ( '=>' expr | block )
               | 'if' '(' expr ')' expr 'else' expr
               | NAME ( subscr | call )* ( '{' ( expr ( ',' expr )* )? '}' )?
               | '(' expr ')'

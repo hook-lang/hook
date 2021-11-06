@@ -857,6 +857,12 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   if (MATCH(scan, TOKEN_RPAREN))
   {
     scanner_next_token(scan);
+    if (MATCH(scan, TOKEN_ARROW))
+    {
+      scanner_next_token(scan);
+      compile_expression(&child_comp);
+      goto end;
+    }
     if (!MATCH(scan, TOKEN_LBRACE))
       fatal_error_unexpected_token(scan);
     compile_block(&child_comp);
@@ -892,6 +898,12 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   }
   child_comp.proto->arity = arity;
   EXPECT(scan, TOKEN_RPAREN);
+  if (MATCH(scan, TOKEN_ARROW))
+  {
+    scanner_next_token(scan);
+    compile_expression(&child_comp);
+    goto end;
+  }
   if (!MATCH(scan, TOKEN_LBRACE))
     fatal_error_unexpected_token(scan);
   compile_block(&child_comp);
@@ -1003,7 +1015,7 @@ static void compile_loop_statement(compiler_t *comp)
     fatal_error_unexpected_token(scan);
   loop_t loop;
   start_loop(comp, &loop);
-  compile_block(comp);
+  compile_statement(comp);
   chunk_emit_opcode(chunk, OP_JUMP);
   chunk_emit_word(chunk, loop.jump);
   end_loop(comp);
