@@ -6,7 +6,6 @@
 #include "os.h"
 #include <stdlib.h>
 #include <time.h>
-#include <assert.h>
 #include "common.h"
 #include "error.h"
 
@@ -57,10 +56,10 @@ void load_os(vm_t *vm)
   struct_put(ztruct, sizeof(clock) - 1, clock);
   struct_put(ztruct, sizeof(system) - 1, system);
   struct_put(ztruct, sizeof(getenv) - 1, getenv);
-  assert(vm_push_number(vm, CLOCKS_PER_SEC) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, clock), 0, &clock_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, system), 1, &system_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, getenv), 1, &getenv_call)) == STATUS_OK);
-  assert(vm_push_struct(vm, ztruct) == STATUS_OK);
+  vm_push_number(vm, CLOCKS_PER_SEC);
+  vm_push_native(vm, native_new(string_from_chars(-1, clock), 0, &clock_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, system), 1, &system_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, getenv), 1, &getenv_call));
+  vm_push_struct(vm, ztruct);
   vm_instance(vm);
 }

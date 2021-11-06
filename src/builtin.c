@@ -16,7 +16,6 @@
 #include <unistd.h>
 #endif
 #include <errno.h>
-#include <assert.h>
 #include "struct.h"
 #include "common.h"
 #include "error.h"
@@ -46,11 +45,7 @@ static const char *globals[] = {
   "cap",
   "len",
   "is_empty",
-  "hash",
   "compare",
-  "lower",
-  "upper",
-  "trim",
   "min",
   "max",
   "sum",
@@ -84,11 +79,7 @@ static int chr_call(vm_t *vm, value_t *frame);
 static int cap_call(vm_t *vm, value_t *frame);
 static int len_call(vm_t *vm, value_t *frame);
 static int is_empty_call(vm_t *vm, value_t *frame);
-static int hash_call(vm_t *vm, value_t *frame);
 static int compare_call(vm_t *vm, value_t *frame);
-static int lower_call(vm_t *vm, value_t *frame);
-static int upper_call(vm_t *vm, value_t *frame);
-static int trim_call(vm_t *vm, value_t *frame);
 static int min_call(vm_t *vm, value_t *frame);
 static int max_call(vm_t *vm, value_t *frame);
 static int sum_call(vm_t *vm, value_t *frame);
@@ -479,17 +470,6 @@ static int is_empty_call(vm_t *vm, value_t *frame)
   return STATUS_ERROR;
 }
 
-static int hash_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  return vm_push_number(vm, string_hash(AS_STRING(val)));
-}
-
 static int compare_call(vm_t *vm, value_t *frame)
 {
   value_t val1 = frame[1];
@@ -498,59 +478,6 @@ static int compare_call(vm_t *vm, value_t *frame)
   if (value_compare(val1, val2, &result) == STATUS_ERROR)
     return STATUS_ERROR;
   return vm_push_number(vm, result);
-}
-
-static int lower_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  string_t *str = string_lower(AS_STRING(val));
-  if (vm_push_string(vm, str) == STATUS_ERROR)
-  {
-    string_free(str);
-    return STATUS_ERROR;
-  }
-  return STATUS_OK;
-}
-
-static int upper_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  string_t *str = string_upper(AS_STRING(val));
-  if (vm_push_string(vm, str) == STATUS_ERROR)
-  {
-    string_free(str);
-    return STATUS_ERROR;
-  }
-  return STATUS_OK;
-}
-
-static int trim_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  string_t *str;
-  if (!string_trim(AS_STRING(val), &str))
-    return STATUS_OK;
-  if (vm_push_string(vm, str) == STATUS_ERROR)
-  {
-    string_free(str);
-    return STATUS_ERROR;
-  }
-  return STATUS_OK;
 }
 
 static int min_call(vm_t *vm, value_t *frame)
@@ -818,35 +745,31 @@ static int require_call(vm_t *vm, value_t *frame)
 
 void load_globals(vm_t *vm)
 {
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[0]), 1, &print_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[1]), 1, &println_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[2]), 1, &type_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[3]), 1, &bool_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[4]), 1, &int_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[5]), 1, &float_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[6]), 1, &str_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[7]), 1, &ord_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[8]), 1, &chr_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[9]), 1, &cap_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &len_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 1, &is_empty_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 1, &hash_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 2, &compare_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &lower_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &upper_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &trim_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 1, &min_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &max_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &sum_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 3, &slice_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 2, &split_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 2, &join_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &array_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[24]), 2, &index_of_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[25]), 1, &sleep_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[26]), 2, &assert_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[27]), 1, &panic_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, globals[28]), 1, &require_call)) == STATUS_OK);
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[0]), 1, &print_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[1]), 1, &println_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[2]), 1, &type_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[3]), 1, &bool_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[4]), 1, &int_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[5]), 1, &float_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[6]), 1, &str_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[7]), 1, &ord_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[8]), 1, &chr_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[9]), 1, &cap_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &len_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 1, &is_empty_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 2, &compare_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 1, &min_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &max_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &sum_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 3, &slice_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 2, &split_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 2, &join_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &array_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 2, &index_of_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &sleep_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 2, &assert_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &panic_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[24]), 1, &require_call));
 }
 
 int num_globals(void)

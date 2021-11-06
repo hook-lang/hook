@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. test/__test
+
+title "Library strings: lower()"
+
+script "const strings = require('strings');
+println(strings.lower(''));
+println(strings.lower('foo'));
+println(strings.lower('Bar'));
+println(strings.lower('BAZ'));"
+
+expect_success "
+foo
+bar
+baz"
+
+run

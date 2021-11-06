@@ -6,7 +6,6 @@
 #include "io.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 #ifdef WIN32
 #include <windows.h>
 #else
@@ -358,26 +357,26 @@ void load_io(vm_t *vm)
   struct_put(ztruct, sizeof(write) - 1, write);
   struct_put(ztruct, sizeof(readln) - 1, readln);
   struct_put(ztruct, sizeof(writeln) - 1, writeln);
-  assert(vm_push_userdata(vm, (userdata_t *) file_new(stdin)) == STATUS_OK);
-  assert(vm_push_userdata(vm, (userdata_t *) file_new(stdout)) == STATUS_OK);
-  assert(vm_push_userdata(vm, (userdata_t *) file_new(stderr)) == STATUS_OK);
-  assert(vm_push_number(vm, SEEK_SET) == STATUS_OK);
-  assert(vm_push_number(vm, SEEK_CUR) == STATUS_OK);
-  assert(vm_push_number(vm, SEEK_END) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, open), 2, &open_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, close), 1, &close_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, popen), 2, &popen_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, pclose), 1, &pclose_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, eof), 1, &eof_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, flush), 1, &flush_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, sync), 1, &sync_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, tell), 1, &tell_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, rewind), 1, &rewind_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, seek), 3, &seek_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, read), 2, &read_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, write), 2, &write_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, readln), 1, &readln_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, writeln), 2, &writeln_call)) == STATUS_OK);
-  assert(vm_push_struct(vm, ztruct) == STATUS_OK);
+  vm_push_userdata(vm, (userdata_t *) file_new(stdin));
+  vm_push_userdata(vm, (userdata_t *) file_new(stdout));
+  vm_push_userdata(vm, (userdata_t *) file_new(stderr));
+  vm_push_number(vm, SEEK_SET);
+  vm_push_number(vm, SEEK_CUR);
+  vm_push_number(vm, SEEK_END);
+  vm_push_native(vm, native_new(string_from_chars(-1, open), 2, &open_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, close), 1, &close_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, popen), 2, &popen_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, pclose), 1, &pclose_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, eof), 1, &eof_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, flush), 1, &flush_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, sync), 1, &sync_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, tell), 1, &tell_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, rewind), 1, &rewind_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, seek), 3, &seek_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, read), 2, &read_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, write), 2, &write_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, readln), 1, &readln_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, writeln), 2, &writeln_call));
+  vm_push_struct(vm, ztruct);
   vm_instance(vm);
 }

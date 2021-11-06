@@ -58,8 +58,8 @@ add_library(math SHARED
   src/chunk.c
   src/compiler.c
   src/error.c
-  src/math.c
   src/hash.c
+  src/math.c
   src/memory.c
   src/scanner.c
   src/string.c
@@ -97,6 +97,20 @@ add_library(io SHARED
   src/memory.c
   src/scanner.c
   src/string.c
+  src/struct.c
+  src/userdata.c
+  src/value.c
+  src/vm.c)
+
+add_library(strings SHARED
+  src/array.c
+  src/callable.c
+  src/chunk.c
+  src/error.c
+  src/hash.c
+  src/memory.c
+  src/string.c
+  src/strings.c
   src/struct.c
   src/userdata.c
   src/value.c

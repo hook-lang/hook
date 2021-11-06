@@ -1,0 +1,12 @@
+#!/bin/sh
+
+. test/__test
+
+title "Library strings: hash()"
+
+script "const strings = require('strings');
+println(strings.hash('foo'));"
+
+expect_success "2.85131e+09"
+
+run

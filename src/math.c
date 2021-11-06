@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <assert.h>
 #include "common.h"
 #include "error.h"
 
@@ -112,13 +111,13 @@ void load_math(vm_t *vm)
   struct_put(ztruct, sizeof(pow) - 1, pow);
   struct_put(ztruct, sizeof(sqrt) - 1, sqrt);
   struct_put(ztruct, sizeof(random) - 1, random);
-  assert(vm_push_number(vm, M_PI) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, abs), 1, &abs_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, floor), 1, &floor_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, ceil), 1, &ceil_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, pow), 2, &pow_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, sqrt), 1, &sqrt_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, random), 0, &random_call)) == STATUS_OK);
-  assert(vm_push_struct(vm, ztruct) == STATUS_OK);
+  vm_push_number(vm, M_PI);
+  vm_push_native(vm, native_new(string_from_chars(-1, abs), 1, &abs_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, floor), 1, &floor_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, ceil), 1, &ceil_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, pow), 2, &pow_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, sqrt), 1, &sqrt_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, random), 0, &random_call));
+  vm_push_struct(vm, ztruct);
   vm_instance(vm);
 }

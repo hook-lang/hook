@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. test/__test
+
+title "Library strings: trim()"
+
+script "const strings = require('strings');
+println(strings.trim(''));
+println(strings.trim('   '));
+println(strings.trim('   foo'));
+println(strings.trim('bar   '));
+println(strings.trim('   baz   '));"
+
+expect_success "
+
+foo
+bar
+baz"
+
+run

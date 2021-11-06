@@ -1,0 +1,18 @@
+#!/bin/sh
+
+. test/__test
+
+title "Library strings: upper()"
+
+script "const strings = require('strings');
+println(strings.upper(''));
+println(strings.upper('foo'));
+println(strings.upper('Bar'));
+println(strings.upper('BAZ'));"
+
+expect_success "
+FOO
+BAR
+BAZ"
+
+run
