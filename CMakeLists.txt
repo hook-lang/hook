@@ -116,6 +116,21 @@ add_library(strings SHARED
   src/value.c
   src/vm.c)
 
+add_library(sqlite SHARED
+  src/array.c
+  src/callable.c
+  src/chunk.c
+  src/error.c
+  src/hash.c
+  src/memory.c
+  src/sqlite.c
+  src/sqlite3.c
+  src/string.c
+  src/struct.c
+  src/userdata.c
+  src/value.c
+  src/vm.c)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
