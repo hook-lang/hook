@@ -951,6 +951,32 @@ static inline void not(vm_t *vm)
   value_release(val);
 }
 
+static inline int incr(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top];
+  value_t val = slots[0];
+  if (!IS_NUMBER(val))
+  {
+    runtime_error("cannot increment value of type '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  ++slots[0].as.number;
+  return STATUS_OK;
+}
+
+static inline int decr(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top];
+  value_t val = slots[0];
+  if (!IS_NUMBER(val))
+  {
+    runtime_error("cannot decrement value of type '%s'", type_name(val.type));
+    return STATUS_ERROR;
+  }
+  --slots[0].as.number;
+  return STATUS_OK;
+}
+
 static inline int call(vm_t *vm, int num_args)
 {
   value_t *frame = &vm->slots[vm->top - num_args];
@@ -1233,6 +1259,14 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       break;
     case OP_NOT:
       not(vm);
+      break;
+    case OP_INCR:
+      if (incr(vm) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_DECR:
+      if (decr(vm) == STATUS_ERROR)
+        goto error;
       break;
     case OP_CALL:
       if (call(vm, read_byte(&pc)) == STATUS_ERROR)

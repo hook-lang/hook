@@ -170,6 +170,12 @@ void dump(prototype_t *proto)
     case OP_NOT:
       printf("  [%05d] Not\n", j);
       break;
+    case OP_INCR:
+      printf("  [%05d] Incr\n", j);
+      break;
+    case OP_DECR:
+      printf("  [%05d] Decr\n", j);
+      break;
     case OP_CALL:
       printf("  [%05d] Call                  %d\n", j, bytes[i++]);
       break;

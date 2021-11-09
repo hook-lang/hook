@@ -671,21 +671,13 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
   if (MATCH(scan, TOKEN_PLUSPLUS))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_INT);
-    chunk_emit_word(chunk, 1);
-    prototype_add_line(proto, line);
-    chunk_emit_opcode(chunk, OP_ADD);
-    prototype_add_line(proto, line);
+    chunk_emit_opcode(chunk, OP_INCR);
     return SYN_ASSIGN;
   }
   if (MATCH(scan, TOKEN_MINUSMINUS))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_INT);
-    chunk_emit_word(chunk, 1);
-    prototype_add_line(proto, line);
-    chunk_emit_opcode(chunk, OP_SUBTRACT);
-    prototype_add_line(proto, line);
+    chunk_emit_opcode(chunk, OP_DECR);
     return SYN_ASSIGN;
   }
   if (MATCH(scan, TOKEN_LBRACKET))

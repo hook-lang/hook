@@ -53,6 +53,8 @@ typedef enum
   OP_MODULO,
   OP_NEGATE,
   OP_NOT,
+  OP_INCR,
+  OP_DECR,
   OP_CALL,
   OP_RETURN
 } opcode_t;
