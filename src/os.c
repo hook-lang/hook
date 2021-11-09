@@ -38,7 +38,9 @@ static int getenv_call(vm_t *vm, value_t *frame)
     runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
     return STATUS_ERROR;
   }
-  return vm_push_string(vm, string_from_chars(-1, getenv(AS_STRING(val)->chars)));
+  const char *chars = getenv(AS_STRING(val)->chars);
+  chars = chars ? chars : "";
+  return vm_push_string(vm, string_from_chars(-1, chars));
 }
 
 #ifdef WIN32
