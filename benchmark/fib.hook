@@ -1,0 +1,11 @@
+const os = require("os");
+
+fn fib(n) =>
+  if (n < 2) n
+  else fib(n - 1) + fib(n - 2)
+
+const start = os.clock();
+for (let i = 0; i < 5; i++)
+  println(fib(28));
+
+println("elapsed: " + str(os.clock() - start));
