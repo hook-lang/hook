@@ -4,6 +4,7 @@
 
 const math = require("math");
 const io = require("io");
+const strings = require("strings");
 
 io.writeln(io.STD_OUT, "Guess the number!");
 
@@ -14,7 +15,7 @@ loop {
 
   let guess = io.readln(io.STD_IN);
 
-  guess = trim(guess);
+  guess = strings.trim(guess);
 
   if (is_empty(guess))
     continue;
