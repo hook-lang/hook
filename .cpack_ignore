@@ -1,0 +1,9 @@
+\\.git/
+\\.github/
+\\.trash/
+\\.vscode/
+
+bin/
+build/
+lib/
+package/
