@@ -132,6 +132,30 @@ add_library(sqlite SHARED
   src/value.c
   src/vm.c)
 
+if(MSVC)
+  find_package(CURL CONFIG REQUIRED)
+endif(MSVC)
+
+add_library(url SHARED
+  src/array.c
+  src/callable.c
+  src/chunk.c
+  src/url.c
+  src/error.c
+  src/hash.c
+  src/memory.c
+  src/string.c
+  src/struct.c
+  src/userdata.c
+  src/value.c
+  src/vm.c)
+
+if(MSVC)
+  target_link_libraries(url PRIVATE CURL::libcurl)
+else(MSVC)
+  target_link_libraries(url curl)
+endif(MSVC)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 

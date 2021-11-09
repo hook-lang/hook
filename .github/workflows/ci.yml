@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        sudo apt-get install -y libcurl4-openssl-dev
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug
     - name: Build
@@ -35,8 +38,15 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        git clone https://github.com/microsoft/vcpkg
+        cd vcpkg
+        bootstrap-vcpkg.bat
+        vcpkg integrate install
+        vcpkg install curl:x64-windows
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build
+      run: cmake -B ${{github.workspace}}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake
     - name: Build
       run: cmake --build ${{github.workspace}}/build
     - name: Packing
