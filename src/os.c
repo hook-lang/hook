@@ -16,7 +16,7 @@ static int getenv_call(vm_t *vm, value_t *frame);
 static int clock_call(vm_t *vm, value_t *frame)
 {
   (void) frame;
-  return vm_push_number(vm, clock());
+  return vm_push_number(vm, (double) clock() / CLOCKS_PER_SEC);
 }
 
 static int system_call(vm_t *vm, value_t *frame)
