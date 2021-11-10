@@ -44,6 +44,7 @@ jobs:
         cd vcpkg
         bootstrap-vcpkg.bat
         vcpkg integrate install
+        vcpkg install sqlite3:x64-windows
         vcpkg install curl:x64-windows
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake

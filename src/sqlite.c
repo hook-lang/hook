@@ -4,7 +4,7 @@
 //
 
 #include "sqlite.h"
-#include "sqlite3.h"
+#include <sqlite3.h>
 #include <assert.h>
 #include "common.h"
 #include "memory.h"

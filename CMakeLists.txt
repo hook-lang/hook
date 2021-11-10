@@ -117,6 +117,11 @@ add_library(strings SHARED
   src/value.c
   src/vm.c)
 
+if(MSVC)
+  find_package(unofficial-sqlite3 CONFIG REQUIRED)
+  find_package(CURL CONFIG REQUIRED)
+endif(MSVC)
+
 add_library(sqlite SHARED
   src/array.c
   src/callable.c
@@ -125,16 +130,11 @@ add_library(sqlite SHARED
   src/hash.c
   src/memory.c
   src/sqlite.c
-  src/sqlite3.c
   src/string.c
   src/struct.c
   src/userdata.c
   src/value.c
   src/vm.c)
-
-if(MSVC)
-  find_package(CURL CONFIG REQUIRED)
-endif(MSVC)
 
 add_library(url SHARED
   src/array.c
@@ -151,8 +151,10 @@ add_library(url SHARED
   src/vm.c)
 
 if(MSVC)
+  target_link_libraries(sqlite PRIVATE unofficial::sqlite3::sqlite3)
   target_link_libraries(url PRIVATE CURL::libcurl)
 else(MSVC)
+  target_link_libraries(sqlite sqlite3)
   target_link_libraries(url curl)
 endif(MSVC)
 
