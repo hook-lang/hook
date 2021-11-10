@@ -76,7 +76,7 @@ static int trim_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 void __declspec(dllexport) __stdcall load_strings(vm_t *vm)
 #else
 void load_strings(vm_t *vm)

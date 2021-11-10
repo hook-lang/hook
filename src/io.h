@@ -8,7 +8,7 @@
 
 #include "vm.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 void __declspec(dllexport) __stdcall load_io(vm_t *vm);
 #else
 void load_io(vm_t *vm);

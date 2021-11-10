@@ -257,7 +257,7 @@ static int fetch_call(vm_t *vm, value_t *frame)
   return row ? vm_push_array(vm, row) : vm_push_null(vm);
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 void __declspec(dllexport) __stdcall load_sqlite(vm_t *vm)
 #else
 void load_sqlite(vm_t *vm)

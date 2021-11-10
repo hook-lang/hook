@@ -7,6 +7,7 @@
 #define VALUE_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #define FLAG_NONE   0b0000
 #define FLAG_OBJECT 0b0001
@@ -93,5 +94,7 @@ void value_release(value_t val);
 void value_print(value_t val, bool quoted);
 bool value_equal(value_t val1, value_t val2);
 int value_compare(value_t val1, value_t val2, int *result);
+void value_serialize(value_t val, FILE *stream);
+value_t value_deserialize(FILE *stream);
 
 #endif

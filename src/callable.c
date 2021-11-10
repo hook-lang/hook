@@ -10,11 +10,25 @@
 
 #define MIN_CAPACITY 8
 
+prototype_t *prototype_allocate(int arity, string_t *name, string_t *file);
 static inline void init_lines(prototype_t *proto);
 static inline void init_protos(prototype_t *proto);
 static inline void free_protos(prototype_t *proto);
 static inline void resize_lines(prototype_t *proto);
 static inline void resize_protos(prototype_t *proto);
+
+prototype_t *prototype_allocate(int arity, string_t *name, string_t *file)
+{
+  prototype_t *proto = (prototype_t *) allocate(sizeof(*proto));
+  proto->ref_count = 0;
+  proto->arity = arity;
+  if (name)
+    INCR_REF(name);
+  proto->name = name;
+  INCR_REF(file);
+  proto->file = file;
+  return proto;
+}
 
 static inline void init_lines(prototype_t *proto)
 {
@@ -64,14 +78,7 @@ static inline void resize_protos(prototype_t *proto)
 
 prototype_t *prototype_new(int arity, string_t *name, string_t *file)
 {
-  prototype_t *proto = (prototype_t *) allocate(sizeof(*proto));
-  proto->ref_count = 0;
-  proto->arity = arity;
-  if (name)
-    INCR_REF(name);
-  proto->name = name;
-  INCR_REF(file);
-  proto->file = file;
+  prototype_t *proto = prototype_allocate(arity, name, file);
   init_lines(proto);
   chunk_init(&proto->chunk);
   proto->consts = array_allocate(0);
@@ -133,6 +140,60 @@ void prototype_add_child(prototype_t *proto, prototype_t *child)
   INCR_REF(child);
   proto->protos[proto->num_protos] = child;
   ++proto->num_protos;
+}
+
+void prototype_serialize(prototype_t *proto, FILE *stream)
+{
+  fwrite(&proto->arity, sizeof(proto->arity), 1, stream);
+  string_serialize(proto->name, stream);
+  string_serialize(proto->file, stream);
+  fwrite(&proto->lines_capacity, sizeof(proto->lines_capacity), 1, stream);
+  fwrite(&proto->num_lines, sizeof(proto->num_lines), 1, stream);
+  for (int i = 0; i < proto->num_lines; ++i)
+  {
+    line_t *line = &proto->lines[i];
+    fwrite(line, sizeof(*line), 1, stream);
+  }
+  chunk_serialize(&proto->chunk, stream);
+  array_serialize(proto->consts, stream);
+  fwrite(&proto->protos_capacity, sizeof(proto->protos_capacity), 1, stream);
+  fwrite(&proto->num_protos, sizeof(proto->num_protos), 1, stream);
+  prototype_t **protos = proto->protos;
+  for (int i = 0; i < proto->num_protos; ++i)
+    prototype_serialize(protos[i], stream);
+  fwrite(&proto->num_nonlocals, sizeof(proto->num_nonlocals), 1, stream);
+}
+
+prototype_t *prototype_deserialize(FILE *stream)
+{
+  int arity;
+  fread(&arity, sizeof(arity), 1, stream);
+  string_t *name = string_deserialize(stream);
+  string_t *file = string_deserialize(stream);
+  prototype_t *proto = prototype_allocate(arity, name, file);
+  fread(&proto->lines_capacity, sizeof(proto->lines_capacity), 1, stream);
+  fread(&proto->num_lines, sizeof(proto->num_lines), 1, stream);
+  proto->lines = (line_t *) allocate(sizeof(*proto->lines) * proto->lines_capacity);
+  for (int i = 0; i < proto->num_lines; ++i)
+  {
+    line_t *line = &proto->lines[i];
+    fread(line, sizeof(*line), 1, stream);
+  }
+  chunk_deserialize(&proto->chunk, stream);
+  proto->consts = array_deserialize(stream);
+  INCR_REF(proto->consts);
+  fread(&proto->protos_capacity, sizeof(proto->protos_capacity), 1, stream);
+  fread(&proto->num_protos, sizeof(proto->num_protos), 1, stream);
+  prototype_t **protos = (prototype_t **) allocate(sizeof(*protos) * proto->protos_capacity);
+  for (int i = 0; i < proto->num_protos; ++i)
+  {
+    prototype_t *proto = prototype_deserialize(stream);
+    INCR_REF(proto);
+    protos[i] = proto;
+  }
+  proto->protos = protos;
+  fread(&proto->num_nonlocals, sizeof(proto->num_nonlocals), 1, stream);
+  return proto;
 }
 
 function_t *function_new(prototype_t *proto)

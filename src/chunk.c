@@ -52,3 +52,18 @@ void chunk_emit_opcode(chunk_t *chunk, opcode_t op)
 {
   chunk_emit_byte(chunk, (uint8_t) op);
 }
+
+void chunk_serialize(chunk_t *chunk, FILE *stream)
+{
+  fwrite(&chunk->capacity, sizeof(chunk->capacity), 1, stream);
+  fwrite(&chunk->length, sizeof(chunk->length), 1, stream);
+  fwrite(chunk->bytes, chunk->length, 1, stream);
+}
+
+void chunk_deserialize(chunk_t *chunk, FILE *stream)
+{
+  fread(&chunk->capacity, sizeof(chunk->capacity), 1, stream);
+  fread(&chunk->length, sizeof(chunk->length), 1, stream);
+  chunk->bytes = (uint8_t *) allocate(chunk->capacity);
+  fread(chunk->bytes, chunk->length, 1, stream);
+}

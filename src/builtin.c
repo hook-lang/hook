@@ -9,7 +9,7 @@
 #include <float.h>
 #include <ctype.h>
 #include <limits.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <Windows.h>
 #else
 #include <dlfcn.h>
@@ -22,11 +22,11 @@
 
 #define HOME "HOOK_HOME"
 
-#ifdef WIN32
+#ifdef _WIN32
 #define strtok_r strtok_s
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 typedef int (__stdcall *load_library_t)(vm_t *);
 #else
 typedef void (*load_library_t)(vm_t *);
@@ -208,7 +208,7 @@ static inline int join(array_t *arr, string_t *separator, string_t **result)
 
 static inline int load_library(vm_t *vm, string_t *name)
 {
-#ifdef WIN32
+#ifdef _WIN32
   const char *file_infix = "\\lib\\";
   const char *file_ext = ".dll";
 #else
@@ -230,7 +230,7 @@ static inline int load_library(vm_t *vm, string_t *name)
   string_inplace_concat_chars(file, -1, file_infix);
   string_inplace_concat(file, name);
   string_inplace_concat_chars(file, -1, file_ext);
-#ifdef WIN32
+#ifdef _WIN32
   HINSTANCE handle = LoadLibrary(file->chars);
 #else
   void *handle = dlopen(file->chars, RTLD_NOW | RTLD_GLOBAL);
@@ -244,7 +244,7 @@ static inline int load_library(vm_t *vm, string_t *name)
   string_free(file);
   string_t *func = string_from_chars(-1, func_prefix);
   string_inplace_concat(func, name);
-#ifdef WIN32
+#ifdef _WIN32
   load_library_t load = GetProcAddress(handle, func->chars);
 #else
   load_library_t load = dlsym(handle, func->chars);
@@ -693,7 +693,7 @@ static int sleep_call(vm_t *vm, value_t *frame)
     runtime_error("invalid range: argument must be between 0 and %d", INT_MAX);
     return STATUS_ERROR;
   }
-#ifdef WIN32
+#ifdef _WIN32
   Sleep((int) ms);
 #else
   ASSERT(!usleep((int) ms * 1000), "unexpected error on usleep()");

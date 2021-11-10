@@ -237,3 +237,24 @@ end:
   *result = slice;
   return true;
 }
+
+void string_serialize(string_t *str, FILE *stream)
+{
+  fwrite(&str->capacity, sizeof(str->capacity), 1, stream);
+  fwrite(&str->length, sizeof(str->length), 1, stream);
+  fwrite(str->chars, str->length + 1, 1, stream);
+  fwrite(&str->hash, sizeof(str->hash), 1, stream);
+}
+
+string_t *string_deserialize(FILE *stream)
+{
+  int capacity;
+  int length;
+  fread(&capacity, sizeof(capacity), 1, stream);
+  fread(&length, sizeof(length), 1, stream);
+  string_t *str = string_allocate(capacity);
+  str->length = length;
+  fread(str->chars, length + 1, 1, stream);
+  fread(&str->hash, sizeof(str->hash), 1, stream);
+  return str;
+}

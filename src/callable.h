@@ -55,6 +55,8 @@ void prototype_free(prototype_t *proto);
 void prototype_add_line(prototype_t *proto, int line_no);
 int prototype_get_line(prototype_t *proto, int offset);
 void prototype_add_child(prototype_t *proto, prototype_t *child);
+void prototype_serialize(prototype_t *proto, FILE *stream);
+prototype_t *prototype_deserialize(FILE *stream);
 function_t *function_new(prototype_t *proto);
 void function_free(function_t *fn);
 native_t *native_new(string_t *name, int arity, int (*call)(struct vm *, value_t *));

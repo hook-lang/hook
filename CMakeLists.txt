@@ -32,6 +32,7 @@ add_executable(${PROJECT_NAME}
   src/compiler.c
   src/dump.c
   src/error.c
+  src/fs.c
   src/hash.c
   src/main.c
   src/memory.c

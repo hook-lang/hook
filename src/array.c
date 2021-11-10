@@ -5,7 +5,6 @@
 
 #include "array.h"
 #include <stdlib.h>
-#include <stdio.h>
 #include "memory.h"
 
 static inline void resize(array_t *arr, int min_capacity);
@@ -251,4 +250,30 @@ bool array_slice(array_t *arr, int start, int stop, array_t **result)
 end:
   *result = slice;
   return true;
+}
+
+void array_serialize(array_t *arr, FILE *stream)
+{
+  fwrite(&arr->capacity, sizeof(arr->capacity), 1, stream);
+  fwrite(&arr->length, sizeof(arr->length), 1, stream);
+  value_t *elements = arr->elements;
+  for (int i = 0; i < arr->length; ++i)
+    value_serialize(elements[i], stream);
+}
+
+array_t *array_deserialize(FILE *stream)
+{
+  int capacity;
+  int length;
+  fread(&capacity, sizeof(capacity), 1, stream);
+  fread(&length, sizeof(length), 1, stream);
+  array_t *arr = array_allocate(capacity);
+  arr->length = length;
+  for (int i = 0; i < length; ++i)
+  {
+    value_t elem = value_deserialize(stream);
+    VALUE_INCR_REF(elem);
+    arr->elements[i] = elem;
+  }
+  return arr;
 }

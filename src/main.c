@@ -5,11 +5,13 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "fs.h"
 #include "compiler.h"
 #include "dump.h"
 #include "vm.h"
 #include "builtin.h"
 #include "common.h"
+#include "error.h"
 
 #define VERSION "0.1.0"
 
@@ -23,7 +25,9 @@ static inline int option_length(const char *opt);
 static inline void print_help(void);
 static inline void print_version(void);
 static inline array_t *args_array(void);
-static inline int run(int stack_size, function_t *fn);
+static inline void save(function_t *fn);
+static inline function_t *load(void);
+static inline int run(function_t *fn);
 
 static inline const char *argument(int index)
 {
@@ -68,10 +72,13 @@ static inline void print_help(void)
     "usage: %s [options] [filename]\n"
     "\n"
     "options:\n"
-    "  -h, --help      prints this message\n"
-    "  -v, --version   shows version information\n"
-    "  -d, --dump      shows the bytecode\n"
-    "  -sz=<size>      sets the stack size \n"
+    "  -h, --help     prints this message\n"
+    "  -v, --version  shows version information\n"
+    "  -d, --dump     shows the bytecode\n"
+    "  -c, --compile  compiles source code\n"
+    "  -r, --run      Runs directly from bytecode\n"
+    "  -s=<size>      sets the stack size\n"
+    "  -o=<output>    sets output directory\n"
     "\n",
   _argv[0]);
 }
@@ -94,8 +101,33 @@ static inline array_t *args_array(void)
   return args;
 }
 
-static inline int run(int stack_size, function_t *fn)
+static inline void save(function_t *fn)
 {
+  const char *o = option_value("-o");
+  const char *filename = o ? o : "a.out";
+  ensure_path(filename);
+  FILE *stream = fopen(filename, "w");
+  if (!stream)
+    fatal_error("unable to open file '%s'", filename);
+  prototype_serialize(fn->proto, stream);
+  fclose(stream);
+}
+
+static inline function_t *load(void)
+{
+  const char *filename = argument(0);
+  FILE *stream = fopen(filename, "r");
+  if (!stream)
+    fatal_error("unable to open file '%s'", filename);
+  prototype_t *proto = prototype_deserialize(stream);
+  fclose(stream);
+  return function_new(proto);
+}
+
+static inline int run(function_t *fn)
+{
+  const char *s = option_value("-s");
+  int stack_size = s ? atoi(s) : 0;
   vm_t vm;
   vm_init(&vm, stack_size);
   load_globals(&vm);
@@ -128,8 +160,11 @@ int main(int argc, const char **argv)
     print_version();
     return EXIT_SUCCESS;
   }
-  const char *sz = option_value("-sz");
-  int stack_size = sz ? atoi(sz) : 0;
+  if (option("-r") || option("--run"))
+  {
+    function_t *fn = load();
+    return run(fn);
+  }
   const char *filename = argument(0);
   string_t *file = string_from_chars(-1, filename ? filename : "<stdin>");
   string_t *source = filename ? string_from_file(filename) : string_from_stream(stdin, '\0');
@@ -140,5 +175,11 @@ int main(int argc, const char **argv)
     function_free(fn);
     return EXIT_SUCCESS;
   }
-  return run(stack_size, fn);
+  if (option("-c") || option("--compile"))
+  {
+    save(fn);
+    function_free(fn);
+    return EXIT_SUCCESS;
+  }
+  return run(fn);
 }

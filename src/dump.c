@@ -4,7 +4,6 @@
 //
 
 #include "dump.h"
-#include <stdio.h>
 
 void dump(prototype_t *proto)
 {

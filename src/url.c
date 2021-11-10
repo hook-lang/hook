@@ -94,7 +94,7 @@ static int perform_call(vm_t *vm, value_t *frame)
   return vm_push_string(vm, str);
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 void __declspec(dllexport) __stdcall load_url(vm_t *vm)
 #else
 void load_url(vm_t *vm)

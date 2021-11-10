@@ -4,6 +4,7 @@
 //
 
 #include "value.h"
+#include <stdlib.h>
 #include "struct.h"
 #include "callable.h"
 #include "userdata.h"
@@ -219,4 +220,67 @@ int value_compare(value_t val1, value_t val2, int *result)
   }
   runtime_error("cannot compare value of type '%s'", type_name(val1.type));
   return STATUS_ERROR;
+}
+
+void value_serialize(value_t val, FILE *stream)
+{
+  int type = val.type;
+  int flags = val.flags;
+  fwrite(&type, sizeof(type), 1, stream);
+  fwrite(&flags, sizeof(flags), 1, stream);
+  switch ((type_t) type)
+  {
+  case TYPE_NUMBER:
+    fwrite(&val.as.number, sizeof(val.as.number), 1, stream);
+    break;
+  case TYPE_STRING:
+    string_serialize(AS_STRING(val), stream);
+    break;
+  case TYPE_STRUCT:
+    struct_serialize(AS_STRUCT(val), stream);
+    break;
+  case TYPE_NULL:
+  case TYPE_BOOLEAN:
+  case TYPE_ARRAY:
+  case TYPE_INSTANCE:
+  case TYPE_CALLABLE:
+  case TYPE_USERDATA:
+    ASSERT(false, "unimplemented serialization");
+    break;
+  }
+}
+
+value_t value_deserialize(FILE *stream)
+{
+  int type;
+  int flags;
+  fread(&type, sizeof(type), 1, stream);
+  fread(&flags, sizeof(flags), 1, stream);
+  value_t val;
+  switch ((type_t) type)
+  {
+  case TYPE_NUMBER:
+    {
+      double data;
+      fread(&data, sizeof(data), 1, stream);
+      val = NUMBER_VALUE(data);
+    }
+    break;
+  case TYPE_STRING:
+    val = STRING_VALUE(string_deserialize(stream));
+    break;
+  case TYPE_STRUCT:
+    val = STRUCT_VALUE(struct_deserialize(stream));
+    break;
+  case TYPE_NULL:
+  case TYPE_BOOLEAN:
+  case TYPE_ARRAY:
+  case TYPE_INSTANCE:
+  case TYPE_CALLABLE:
+  case TYPE_USERDATA:
+    printf("DEBUG: type == %s\n", type_name((type_t) type));
+    ASSERT(false, "unimplemented deserialization");
+    break;
+  }
+  return val;
 }

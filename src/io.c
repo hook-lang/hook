@@ -6,7 +6,7 @@
 #include "io.h"
 #include <stdlib.h>
 #include <stdio.h>
-#ifdef WIN32
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <unistd.h>
@@ -14,6 +14,11 @@
 #include "common.h"
 #include "memory.h"
 #include "error.h"
+
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
 
 typedef struct
 {
@@ -104,11 +109,7 @@ static int popen_call(vm_t *vm, value_t *frame)
   string_t *command = AS_STRING(val1);
   string_t *mode = AS_STRING(val2);
   FILE *stream;
-#ifdef WIN32
-  stream = _popen(command->chars, mode->chars);
-#else
   stream = popen(command->chars, mode->chars);
-#endif
   if (!stream)
     vm_push_null(vm);
   return vm_push_userdata(vm, (userdata_t *) file_new(stream));
@@ -124,11 +125,7 @@ static int pclose_call(vm_t *vm, value_t *frame)
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   int status;
-#ifdef WIN32
-  status = _pclose(stream);
-#else
   status = pclose(stream);
-#endif
   return vm_push_number(vm, status);
 }
 
@@ -167,7 +164,7 @@ static int sync_call(vm_t *vm, value_t *frame)
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   int fd = fileno(stream);
   bool result;
-#ifdef WIN32
+#ifdef _WIN32
   result = FlushFileBuffers(fd);
 #else
   result = !fsync(fd);
@@ -310,7 +307,7 @@ static int writeln_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, size + 1);
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 void __declspec(dllexport) __stdcall load_io(vm_t *vm)
 #else
 void load_io(vm_t *vm)

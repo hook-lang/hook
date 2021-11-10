@@ -7,6 +7,7 @@
 #define CHUNK_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 typedef enum
 {
@@ -71,5 +72,7 @@ void chunk_free(chunk_t *chunk);
 void chunk_emit_byte(chunk_t *chunk, uint8_t byte);
 void chunk_emit_word(chunk_t *chunk, uint16_t word);
 void chunk_emit_opcode(chunk_t *chunk, opcode_t op);
+void chunk_serialize(chunk_t *chunk, FILE *stream);
+void chunk_deserialize(chunk_t *chunk, FILE *stream);
 
 #endif

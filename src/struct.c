@@ -11,6 +11,7 @@
 #include "memory.h"
 
 static inline field_t **allocate_table(int capacity);
+static inline void put_field(struct_t *ztruct, string_t *name);
 static inline field_t *add_field(struct_t *ztruct, string_t *name);
 static inline void resize(struct_t *ztruct);
 static inline bool name_match(int length, char *chars, string_t *name);
@@ -21,6 +22,17 @@ static inline field_t **allocate_table(int capacity)
   for (int i = 0; i < capacity; ++i)
     table[i] = NULL;
   return table;
+}
+
+static inline void put_field(struct_t *ztruct, string_t *name)
+{
+  int mask = ztruct->mask;
+  field_t **table = ztruct->table;
+  int i = name->hash & mask;
+  while (table[i])
+    i = (i + 1) & mask;
+  table[i] = add_field(ztruct, name);
+  resize(ztruct);
 }
 
 static inline field_t *add_field(struct_t *ztruct, string_t *name)
@@ -120,16 +132,9 @@ int struct_index_of(struct_t *ztruct, string_t *name)
 
 void struct_put(struct_t *ztruct, int length, char *chars)
 {
-  int mask = ztruct->mask;
-  field_t **table = ztruct->table;
-  uint32_t h = hash(length, chars);
-  int i = h & mask;
-  while (table[i])
-    i = (i + 1) & mask;
   string_t *name = string_from_chars(length, chars);
-  name->hash = h;
-  table[i] = add_field(ztruct, name);
-  resize(ztruct);
+  name->hash = hash(length, chars);
+  put_field(ztruct, name);
 }
 
 bool struct_put_if_absent(struct_t *ztruct, int length, char *chars)
@@ -166,6 +171,29 @@ bool struct_equal(struct_t *ztruct1, struct_t *ztruct2)
     if (!string_equal(ztruct1->fields[i].name, ztruct2->fields[i].name))
       return false;
   return true;
+}
+
+void struct_serialize(struct_t *ztruct, FILE *stream)
+{
+  fwrite(&ztruct->capacity, sizeof(ztruct->capacity), 1, stream);
+  fwrite(&ztruct->length, sizeof(ztruct->length), 1, stream);
+  string_serialize(ztruct->name, stream);
+  field_t *fields = ztruct->fields;
+  for (int i = 0; i < ztruct->length; ++i)
+    string_serialize(fields[i].name, stream);
+}
+
+struct_t *struct_deserialize(FILE *stream)
+{
+  int capacity;
+  int length;
+  fread(&capacity, sizeof(capacity), 1, stream);
+  fread(&length, sizeof(length), 1, stream);
+  string_t *name = string_deserialize(stream);
+  struct_t *ztruct = struct_new(name);
+  for (int i = 0; i < length; ++i)
+    put_field(ztruct, string_deserialize(stream));
+  return ztruct;
 }
 
 instance_t *instance_allocate(struct_t *ztruct)

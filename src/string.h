@@ -6,7 +6,6 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include <stdio.h>
 #include <stdint.h>
 #include "value.h"
 
@@ -38,5 +37,7 @@ string_t *string_lower(string_t *str);
 string_t *string_upper(string_t *str);
 bool string_trim(string_t *str, string_t **result);
 bool string_slice(string_t *str, int start, int stop, string_t **result);
+void string_serialize(string_t *str, FILE *stream);
+string_t *string_deserialize(FILE *stream);
 
 #endif
