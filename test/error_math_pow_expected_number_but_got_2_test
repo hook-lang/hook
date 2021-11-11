@@ -4,7 +4,7 @@
 
 title "Error from math.pow(): expected number but got X (2)"
 
-script "const math = require('math');
+script "use math;
 const a = math.pow(1, 'foo');"
 
 expect_failure "runtime error: invalid type: expected number but got 'string'

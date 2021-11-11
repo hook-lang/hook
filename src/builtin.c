@@ -12,7 +12,6 @@
 #ifdef _WIN32
 #include <Windows.h>
 #else
-#include <dlfcn.h>
 #include <unistd.h>
 #endif
 #include <errno.h>
@@ -20,16 +19,8 @@
 #include "common.h"
 #include "error.h"
 
-#define HOME "HOOK_HOME"
-
 #ifdef _WIN32
 #define strtok_r strtok_s
-#endif
-
-#ifdef _WIN32
-typedef int (__stdcall *load_library_t)(vm_t *);
-#else
-typedef void (*load_library_t)(vm_t *);
 #endif
 
 static const char *globals[] = {
@@ -56,8 +47,7 @@ static const char *globals[] = {
   "index_of",
   "sleep",
   "assert",
-  "panic",
-  "require"
+  "panic"
 };
 
 static inline int check_argument(value_t *frame, int index, type_t type);
@@ -66,7 +56,6 @@ static inline int string_to_double(string_t *str, double *result);
 static inline string_t *to_string(value_t val);
 static inline array_t *split(string_t *str, string_t *separator);
 static inline int join(array_t *arr, string_t *separator, string_t **result);
-static inline int load_library(vm_t *vm, string_t *name);
 static int print_call(vm_t *vm, value_t *frame);
 static int println_call(vm_t *vm, value_t *frame);
 static int type_call(vm_t *vm, value_t *frame);
@@ -91,7 +80,6 @@ static int index_of_call(vm_t *vm, value_t *frame);
 static int sleep_call(vm_t *vm, value_t *frame);
 static int assert_call(vm_t *vm, value_t *frame);
 static int panic_call(vm_t *vm, value_t *frame);
-static int require_call(vm_t *vm, value_t *frame);
 
 static inline int check_argument(value_t *frame, int index, type_t type)
 {
@@ -203,60 +191,6 @@ static inline int join(array_t *arr, string_t *separator, string_t **result)
     string_inplace_concat(str, AS_STRING(elem));
   }
   *result = str;
-  return STATUS_OK;
-}
-
-static inline int load_library(vm_t *vm, string_t *name)
-{
-#ifdef _WIN32
-  const char *file_infix = "\\lib\\";
-  const char *file_ext = ".dll";
-#else
-  const char *file_infix = "/lib/lib";
-#ifdef __APPLE__
-  const char *file_ext = ".dylib";
-#else
-  const char *file_ext = ".so";
-#endif
-#endif
-  const char *func_prefix = "load_";
-  char *home = getenv(HOME);
-  if (!home)
-  {
-    runtime_error("environment variable `%s` not defined", HOME);
-    return STATUS_ERROR;
-  }
-  string_t *file = string_from_chars(-1, home);
-  string_inplace_concat_chars(file, -1, file_infix);
-  string_inplace_concat(file, name);
-  string_inplace_concat_chars(file, -1, file_ext);
-#ifdef _WIN32
-  HINSTANCE handle = LoadLibrary(file->chars);
-#else
-  void *handle = dlopen(file->chars, RTLD_NOW | RTLD_GLOBAL);
-#endif
-  if (!handle)
-  {
-    runtime_error("cannot load library `%.*s`", name->length, name->chars);
-    string_free(file);
-    return STATUS_ERROR;
-  }
-  string_free(file);
-  string_t *func = string_from_chars(-1, func_prefix);
-  string_inplace_concat(func, name);
-#ifdef _WIN32
-  load_library_t load = GetProcAddress(handle, func->chars);
-#else
-  load_library_t load = dlsym(handle, func->chars);
-#endif
-  if (!load)
-  {
-    runtime_error("no such function %.*s()", func->length, func->chars);
-    string_free(func);
-    return STATUS_ERROR;
-  }
-  string_free(func);
-  load(vm);
   return STATUS_OK;
 }
 
@@ -732,17 +666,6 @@ static int panic_call(vm_t *vm, value_t *frame)
   return STATUS_NO_TRACE;
 }
 
-static int require_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  return load_library(vm, AS_STRING(val));
-}
-
 void load_globals(vm_t *vm)
 {
   vm_push_native(vm, native_new(string_from_chars(-1, globals[0]), 1, &print_call));
@@ -769,7 +692,6 @@ void load_globals(vm_t *vm)
   vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &sleep_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 2, &assert_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &panic_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[24]), 1, &require_call));
 }
 
 int num_globals(void)

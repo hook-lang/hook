@@ -363,6 +363,11 @@ void scanner_next_token(scanner_t *scan)
     return;
   if (match_string(scan))
     return;
+  if (match_chars(scan, "as"))
+  {
+    scan->token.type = TOKEN_AS;
+    return;
+  }
   if (match_chars(scan, "break"))
   {
     scan->token.type = TOKEN_BREAK;
@@ -413,6 +418,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_IF;
     return;
   }
+  if (match_chars(scan, "in"))
+  {
+    scan->token.type = TOKEN_IN;
+    return;
+  }
   if (match_chars(scan, "let"))
   {
     scan->token.type = TOKEN_LET;
@@ -441,6 +451,11 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "true"))
   {
     scan->token.type = TOKEN_TRUE;
+    return;
+  }
+  if (match_chars(scan, "use"))
+  {
+    scan->token.type = TOKEN_USE;
     return;
   }
   if (match_chars(scan, "while"))

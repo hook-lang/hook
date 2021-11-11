@@ -4,7 +4,7 @@
 
 title "Error from os.system(): expected string but got X"
 
-script "const system = require('os').system;
+script "use { system } in os;
 system(1);"
 
 expect_failure "runtime error: invalid type: expected string but got 'number'

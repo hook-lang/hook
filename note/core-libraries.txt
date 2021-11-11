@@ -41,3 +41,10 @@ io:
   write(stream: userdata, str: string) -> null|number
   readln(stream: userdata) -> string
   writeln(stream: userdata, str: string) -> null|number
+
+strings:
+
+  hash(str: string) -> integer
+  lower(str: string) -> string
+  upper(str: string) -> string
+  trim(str: string) -> string

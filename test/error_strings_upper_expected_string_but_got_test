@@ -4,7 +4,7 @@
 
 title "Error from strings.upper(): expected string but got X"
 
-script "const upper = require('strings').upper;
+script "use { upper } in strings;
 const a = upper(1);"
 
 expect_failure "runtime error: invalid type: expected string but got 'number'

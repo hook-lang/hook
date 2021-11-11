@@ -2,7 +2,7 @@
 // distance.hook
 //
 
-const math = require("math");
+use math;
 
 struct Point {
   x, y

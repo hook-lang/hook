@@ -4,7 +4,7 @@
 
 title "Error from strings.hash(): expected string but got X"
 
-script "const hash = require('strings').hash;
+script "use { hash } in strings;
 const a = hash(1);"
 
 expect_failure "runtime error: invalid type: expected string but got 'number'

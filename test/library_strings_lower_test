@@ -4,7 +4,7 @@
 
 title "Library strings: lower()"
 
-script "const strings = require('strings');
+script "use strings;
 println(strings.lower(''));
 println(strings.lower('foo'));
 println(strings.lower('Bar'));

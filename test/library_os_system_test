@@ -4,7 +4,7 @@
 
 title "Library os: system()"
 
-script "const system = require('os').system;
+script "use { system } in os;
 system('echo foo');"
 
 expect_success "foo"

@@ -4,7 +4,7 @@
 
 title "Library os: clock()"
 
-script "const os = require('os');
+script "use os;
 println(os.clock() / os.CLOCKS_PER_SECOND);"
 
 expect_status_success

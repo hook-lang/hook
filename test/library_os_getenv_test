@@ -4,7 +4,7 @@
 
 title "Library os: getenv()"
 
-script "const os = require('os');
+script "use os;
 println(os.getenv('HOOK_HOME'));"
 
 expect_status_success

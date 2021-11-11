@@ -11,11 +11,7 @@ chr(val: integer) -> string
 cap(val: string|array) -> integer
 len(val: string|array) -> integer
 is_empty(val: string|array) -> boolean
-hash(str: string) -> integer
 compare(val1: value, val2: value) -> integer
-lower(str: string) -> string
-upper(str: string) -> string
-trim(str: string) -> string
 min(arr: array) -> value
 max(arr: array) -> value
 sum(arr: array) -> number
@@ -27,4 +23,3 @@ index_of(arr: array, elem: value) -> integer
 sleep(ms: integer)
 assert(assertion: value, msg: string)
 panic(msg: string)
-require(lib: string) -> instance

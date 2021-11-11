@@ -1,7 +1,8 @@
 
 chunk       ::= stmt* EOF
 
-stmt        ::= block
+stmt        ::= 'use' NAME ( 'as' NAME )? ';'
+              | 'use' '{' NAME ( ',' NAME )* '}' 'in' NAME ';'
               | 'const' NAME '=' expr ';'
               | 'const' '[' NAME ( ',' NAME )* ']' '=' expr ';'
               | 'const' '{' NAME ( ',' NAME )* '}' '=' expr ';'
@@ -19,6 +20,7 @@ stmt        ::= block
               | 'continue' ';'
               | 'break' ';'
               | 'return' expr? ';'
+              | block
 
 block       ::= '{' stmt* '}'
 

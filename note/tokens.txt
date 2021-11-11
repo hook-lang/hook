@@ -35,6 +35,7 @@ TOKEN_PERCENTEQ  '%='
 TOKEN_INT        INT
 TOKEN_FLOAT      FLOAT
 TOKEN_STRING     STRING
+TOKEN_AS         'as'
 TOKEN_BREAK      'break'
 TOKEN_CONST      'const'
 TOKEN_CONTINUE   'continue'
@@ -45,11 +46,13 @@ TOKEN_FALSE      'false'
 TOKEN_FN         'fn'
 TOKEN_FOR        'for'
 TOKEN_IF         'if'
+TOKEN_IN         'in'
 TOKEN_LET        'let'
 TOKEN_LOOP       'loop'
 TOKEN_NULL       'null'
 TOKEN_RETURN     'return'
 TOKEN_STRUCT     'struct'
 TOKEN_TRUE       'true'
+TOKEN_USE        'use'
 TOKEN_WHILE      'while'
 TOKEN_NAME       NAME

@@ -1,4 +1,4 @@
-const os = require("os");
+use os;
 
 fn fib(n) =>
   if (n < 2) n
@@ -7,5 +7,4 @@ fn fib(n) =>
 const start = os.clock();
 for (let i = 0; i < 5; i++)
   println(fib(28));
-
 println("elapsed: " + str(os.clock() - start));

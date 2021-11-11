@@ -8,6 +8,7 @@
 #include <math.h>
 #include "common.h"
 #include "struct.h"
+#include "library.h"
 #include "memory.h"
 #include "error.h"
 
@@ -1325,6 +1326,10 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       break;
     case OP_CALL:
       if (call(vm, read_byte(&pc)) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_IMPORT_LIBRARY:
+      if (import_library(vm) == STATUS_ERROR)
         goto error;
       break;
     case OP_RETURN:

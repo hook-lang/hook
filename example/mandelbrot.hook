@@ -2,7 +2,7 @@
 // mandelbrot.hook
 //
 
-const floor = require("math").floor;
+use { floor } in math;
 const pixels = [" ", ".", ":", ";", "+", "=", "x", "X", "$", "&"];
 
 const y_min = -0.2;

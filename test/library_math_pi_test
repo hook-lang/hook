@@ -4,7 +4,7 @@
 
 title "Library math: PI"
 
-script "const math = require('math');
+script "use math;
 println(math.PI);"
 
 expect_status_success

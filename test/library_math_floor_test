@@ -4,7 +4,7 @@
 
 title "Library math: floor()"
 
-script "const math = require('math');
+script "use math;
 println(math.floor(1.23));"
 
 expect_success "1"

@@ -187,6 +187,9 @@ void dump(prototype_t *proto)
     case OP_CALL:
       printf("  [%05d] Call                  %d\n", j, bytes[i++]);
       break;
+    case OP_IMPORT_LIBRARY:
+      printf("  [%05d] ImportLibrary\n", j);
+      break;
     case OP_RETURN:
       printf("  [%05d] Return\n", j);
       break;

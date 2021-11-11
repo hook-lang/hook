@@ -4,7 +4,7 @@
 
 title "Library strings: trim()"
 
-script "const strings = require('strings');
+script "use strings;
 println(strings.trim(''));
 println(strings.trim('   '));
 println(strings.trim('   foo'));

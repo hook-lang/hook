@@ -2,9 +2,9 @@
 // guessing_game.hook
 //
 
-const math = require("math");
-const io = require("io");
-const strings = require("strings");
+use math;
+use io;
+use strings;
 
 io.writeln(io.STD_OUT, "Guess the number!");
 

@@ -4,7 +4,7 @@
 
 title "Library strings: hash()"
 
-script "const strings = require('strings');
+script "use strings;
 println(strings.hash('foo'));"
 
 expect_success "2.85131e+09"

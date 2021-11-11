@@ -4,7 +4,7 @@
 
 title "Library strings: upper()"
 
-script "const strings = require('strings');
+script "use strings;
 println(strings.upper(''));
 println(strings.upper('foo'));
 println(strings.upper('Bar'));

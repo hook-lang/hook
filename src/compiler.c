@@ -87,7 +87,7 @@ static inline void end_loop(compiler_t *comp);
 static inline void compiler_init(compiler_t *comp, compiler_t *parent, scanner_t *scan,
   string_t *name);
 static void compile_statement(compiler_t *comp);
-static void compile_block(compiler_t *comp);
+static void compile_import_library(compiler_t *comp);
 static void compile_constant_declaration(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assign_statement(compiler_t *comp, token_t *tk);
@@ -104,6 +104,7 @@ static void compile_for_statement(compiler_t *comp);
 static void compile_continue_statement(compiler_t *comp);
 static void compile_break_statement(compiler_t *comp);
 static void compile_return_statement(compiler_t *comp);
+static void compile_block(compiler_t *comp);
 static void compile_expression(compiler_t *comp);
 static void compile_and_expression(compiler_t *comp);
 static void compile_equal_expression(compiler_t *comp);
@@ -335,9 +336,9 @@ static inline void compiler_init(compiler_t *comp, compiler_t *parent, scanner_t
 static void compile_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  if (MATCH(scan, TOKEN_LBRACE))
+  if (MATCH(scan, TOKEN_USE))
   {
-    compile_block(comp);
+    compile_import_library(comp);
     return;
   }
   if (MATCH(scan, TOKEN_CONST))
@@ -414,18 +415,89 @@ static void compile_statement(compiler_t *comp)
     compile_return_statement(comp);
     return;
   }
+  if (MATCH(scan, TOKEN_LBRACE))
+  {
+    compile_block(comp);
+    return;
+  }
   fatal_error_unexpected_token(scan);
 }
 
-static void compile_block(compiler_t *comp)
+static void compile_import_library(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
+  prototype_t *proto = comp->proto;
+  chunk_t *chunk = &proto->chunk;
   scanner_next_token(scan);
-  push_scope(comp);
-  while (!MATCH(scan, TOKEN_RBRACE))
-    compile_statement(comp);
-  scanner_next_token(scan);
-  pop_scope(comp);
+  if (MATCH(scan, TOKEN_NAME))
+  {
+    token_t tk = scan->token;
+    scanner_next_token(scan);
+    uint8_t index = add_string_constant(proto, &tk);
+    chunk_emit_opcode(chunk, OP_CONSTANT);
+    chunk_emit_byte(chunk, index);
+    prototype_add_line(proto, tk.line);
+    if (MATCH(scan, TOKEN_AS))
+    {
+      scanner_next_token(scan);
+      if (!MATCH(scan, TOKEN_NAME))
+        fatal_error_unexpected_token(scan);
+      tk = scan->token;
+      scanner_next_token(scan);
+    }
+    define_local(comp, &tk, false);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    chunk_emit_opcode(chunk, OP_IMPORT_LIBRARY);
+    prototype_add_line(proto, tk.line);
+    return;
+  }
+  if (MATCH(scan, TOKEN_LBRACE))
+  {
+    scanner_next_token(scan);
+    if (!MATCH(scan, TOKEN_NAME))
+      fatal_error_unexpected_token(scan);
+    token_t tk = scan->token;
+    scanner_next_token(scan);
+    define_local(comp, &tk, false);
+    uint8_t index = add_string_constant(proto, &tk);
+    chunk_emit_opcode(chunk, OP_CONSTANT);
+    chunk_emit_byte(chunk, index);
+    prototype_add_line(proto, tk.line);
+    uint8_t n = 1;
+    while (MATCH(scan, TOKEN_COMMA))
+    {
+      scanner_next_token(scan);
+      if (!MATCH(scan, TOKEN_NAME))
+        fatal_error_unexpected_token(scan);
+      token_t tk = scan->token;
+      scanner_next_token(scan);
+      define_local(comp, &tk, false);
+      uint8_t index = add_string_constant(proto, &tk);
+      chunk_emit_opcode(chunk, OP_CONSTANT);
+      chunk_emit_byte(chunk, index);
+      prototype_add_line(proto, tk.line);
+      ++n;
+    }
+    EXPECT(scan, TOKEN_RBRACE);
+    EXPECT(scan, TOKEN_IN);
+    int line = scan->token.line;
+    if (!MATCH(scan, TOKEN_NAME))
+      fatal_error_unexpected_token(scan);
+    tk = scan->token;
+    scanner_next_token(scan);
+    EXPECT(scan, TOKEN_SEMICOLON);
+    index = add_string_constant(proto, &tk);
+    chunk_emit_opcode(chunk, OP_CONSTANT);
+    chunk_emit_byte(chunk, index);
+    prototype_add_line(proto, tk.line);
+    chunk_emit_opcode(chunk, OP_IMPORT_LIBRARY);
+    prototype_add_line(proto, tk.line);
+    chunk_emit_opcode(chunk, OP_DESTRUCT);
+    chunk_emit_byte(chunk, n);
+    prototype_add_line(proto, line);
+    return;
+  }
+  fatal_error_unexpected_token(scan);
 }
 
 static void compile_constant_declaration(compiler_t *comp)
@@ -1172,6 +1244,17 @@ static void compile_return_statement(compiler_t *comp)
   compile_expression(comp);
   EXPECT(scan, TOKEN_SEMICOLON);
   chunk_emit_opcode(chunk, OP_RETURN);
+}
+
+static void compile_block(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  scanner_next_token(scan);
+  push_scope(comp);
+  while (!MATCH(scan, TOKEN_RBRACE))
+    compile_statement(comp);
+  scanner_next_token(scan);
+  pop_scope(comp);
 }
 
 static void compile_expression(compiler_t *comp)
