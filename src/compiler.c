@@ -1222,8 +1222,7 @@ static void compile_equal_expression(compiler_t *comp)
     {
       scanner_next_token(scan);
       compile_comp_expression(comp);
-      chunk_emit_opcode(chunk, OP_EQUAL);
-      chunk_emit_opcode(chunk, OP_NOT);
+      chunk_emit_opcode(chunk, OP_NOT_EQUAL);
       continue;
     }
     break;
@@ -1251,9 +1250,8 @@ static void compile_comp_expression(compiler_t *comp)
     {
       scanner_next_token(scan);
       compile_add_expression(comp);
-      chunk_emit_opcode(chunk, OP_LESS);
+      chunk_emit_opcode(chunk, OP_NOT_LESS);
       prototype_add_line(proto, line);
-      chunk_emit_opcode(chunk, OP_NOT);
       continue;
     }
     if (MATCH(scan, TOKEN_LT))
@@ -1268,9 +1266,8 @@ static void compile_comp_expression(compiler_t *comp)
     {
       scanner_next_token(scan);
       compile_add_expression(comp);
-      chunk_emit_opcode(chunk, OP_GREATER);
+      chunk_emit_opcode(chunk, OP_NOT_GREATER);
       prototype_add_line(proto, line);
-      chunk_emit_opcode(chunk, OP_NOT);
       continue;
     }
     break;

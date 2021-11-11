@@ -37,6 +37,9 @@ static inline int inplace_put_field(vm_t *vm);
 static inline void equal(vm_t *vm);
 static inline int greater(vm_t *vm);
 static inline int less(vm_t *vm);
+static inline void not_equal(vm_t *vm);
+static inline int not_greater(vm_t *vm);
+static inline int not_less(vm_t *vm);
 static inline int add(vm_t *vm);
 static inline int subtract(vm_t *vm);
 static inline int multiply(vm_t *vm);
@@ -686,6 +689,47 @@ static inline int less(vm_t *vm)
   return STATUS_OK;
 }
 
+static inline void not_equal(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  slots[0] = value_equal(val1, val2) ? FALSE_VALUE : TRUE_VALUE;
+  --vm->top;
+  value_release(val1);
+  value_release(val2);
+}
+
+static inline int not_greater(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  int result;
+  if (value_compare(val1, val2, &result) == STATUS_ERROR)
+    return STATUS_ERROR;
+  slots[0] = result > 0 ? FALSE_VALUE : TRUE_VALUE;
+  --vm->top;
+  value_release(val1);
+  value_release(val2);
+  return STATUS_OK;
+}
+
+static inline int not_less(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  int result;
+  if (value_compare(val1, val2, &result) == STATUS_ERROR)
+    return STATUS_ERROR;
+  slots[0] = result < 0 ? FALSE_VALUE : TRUE_VALUE;
+  --vm->top;
+  value_release(val1);
+  value_release(val2);
+  return STATUS_OK;
+}
+
 static inline int add(vm_t *vm)
 {
   value_t *slots = &vm->slots[vm->top - 1];
@@ -1231,6 +1275,17 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       break;
     case OP_LESS:
       if (less(vm) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_NOT_EQUAL:
+      not_equal(vm);
+      break;
+    case OP_NOT_GREATER:
+      if (not_greater(vm) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_NOT_LESS:
+      if (not_less(vm) == STATUS_ERROR)
         goto error;
       break;
     case OP_ADD:

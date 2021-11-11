@@ -148,6 +148,15 @@ void dump(prototype_t *proto)
     case OP_LESS:
       printf("  [%05d] Less\n", j);
       break;
+    case OP_NOT_EQUAL:
+      printf("  [%05d] NotEqual\n", j);
+      break;
+    case OP_NOT_GREATER:
+      printf("  [%05d] NotGreater\n", j);
+      break;
+    case OP_NOT_LESS:
+      printf("  [%05d] NotLess\n", j);
+      break;
     case OP_ADD:
       printf("  [%05d] Add\n", j);
       break;
