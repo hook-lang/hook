@@ -1059,11 +1059,9 @@ static void compile_if_statement(compiler_t *comp)
   compile_expression(comp);
   EXPECT(scan, TOKEN_RPAREN);
   int offset1 = emit_jump(chunk, OP_JUMP_IF_FALSE);
-  chunk_emit_opcode(chunk, OP_POP);
   compile_statement(comp);
   int offset2 = emit_jump(chunk, OP_JUMP);
   patch_jump(chunk, offset1);
-  chunk_emit_opcode(chunk, OP_POP);
   if (MATCH(scan, TOKEN_ELSE))
   {
     scanner_next_token(scan);
@@ -1098,12 +1096,10 @@ static void compile_while_statement(compiler_t *comp)
   compile_expression(comp);
   EXPECT(scan, TOKEN_RPAREN);
   int offset = emit_jump(chunk, OP_JUMP_IF_FALSE);
-  chunk_emit_opcode(chunk, OP_POP);
   compile_statement(comp);
   chunk_emit_opcode(chunk, OP_JUMP);
   chunk_emit_word(chunk, loop.jump);
   patch_jump(chunk, offset);
-  chunk_emit_opcode(chunk, OP_POP);
   end_loop(comp);
 }
 
@@ -1121,11 +1117,9 @@ static void compile_do_statement(compiler_t *comp)
   EXPECT(scan, TOKEN_RPAREN);
   EXPECT(scan, TOKEN_SEMICOLON);
   int offset = emit_jump(chunk, OP_JUMP_IF_FALSE);
-  chunk_emit_opcode(chunk, OP_POP);
   chunk_emit_opcode(chunk, OP_JUMP);
   chunk_emit_word(chunk, loop.jump);
   patch_jump(chunk, offset);
-  chunk_emit_opcode(chunk, OP_POP);
   end_loop(comp);
 }
 
@@ -1157,20 +1151,16 @@ static void compile_for_statement(compiler_t *comp)
       fatal_error_unexpected_token(scan);
   }
   uint16_t jump1 = (uint16_t) chunk->length;
-  if (MATCH(scan, TOKEN_SEMICOLON))
-  {
-    int line = scan->token.line;
+  bool missing = MATCH(scan, TOKEN_SEMICOLON);
+  int offset1;
+  if (missing)
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_TRUE);
-    prototype_add_line(proto, line);
-  }
   else
   {
     compile_expression(comp);
     EXPECT(scan, TOKEN_SEMICOLON);
+    offset1 = emit_jump(chunk, OP_JUMP_IF_FALSE);
   }
-  int offset1 = emit_jump(chunk, OP_JUMP_IF_FALSE);
-  chunk_emit_opcode(chunk, OP_POP);
   int offset2 = emit_jump(chunk, OP_JUMP);
   uint16_t jump2 = (uint16_t) chunk->length;
   loop_t loop;
@@ -1192,8 +1182,8 @@ static void compile_for_statement(compiler_t *comp)
   compile_statement(comp);
   chunk_emit_opcode(chunk, OP_JUMP);
   chunk_emit_word(chunk, jump2);
-  patch_jump(chunk, offset1);
-  chunk_emit_opcode(chunk, OP_POP);
+  if (!missing)
+    patch_jump(chunk, offset1);
   end_loop(comp);
   pop_scope(comp);
 }
@@ -1266,8 +1256,7 @@ static void compile_expression(compiler_t *comp)
   while (MATCH(scan, TOKEN_PIPEPIPE))
   {
     scanner_next_token(scan);
-    int offset = emit_jump(chunk, OP_JUMP_IF_TRUE);
-    chunk_emit_opcode(chunk, OP_POP);
+    int offset = emit_jump(chunk, OP_OR);
     compile_and_expression(comp);
     patch_jump(chunk, offset);
   }
@@ -1281,8 +1270,7 @@ static void compile_and_expression(compiler_t *comp)
   while (MATCH(scan, TOKEN_AMPAMP))
   {
     scanner_next_token(scan);
-    int offset = emit_jump(chunk, OP_JUMP_IF_FALSE);
-    chunk_emit_opcode(chunk, OP_POP);
+    int offset = emit_jump(chunk, OP_AND);
     compile_equal_expression(comp);
     patch_jump(chunk, offset);
   }
@@ -1636,11 +1624,9 @@ static void compile_if_expression(compiler_t *comp)
   compile_expression(comp);
   EXPECT(scan, TOKEN_RPAREN);
   int offset1 = emit_jump(chunk, OP_JUMP_IF_FALSE);
-  chunk_emit_opcode(chunk, OP_POP);
   compile_expression(comp);
   int offset2 = emit_jump(chunk, OP_JUMP);
   patch_jump(chunk, offset1);
-  chunk_emit_opcode(chunk, OP_POP);
   EXPECT(scan, TOKEN_ELSE);
   compile_expression(comp);
   patch_jump(chunk, offset2);

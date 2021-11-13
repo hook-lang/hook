@@ -1257,14 +1257,34 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
         value_t val = slots[vm->top];
         if (IS_FALSEY(val))
           pc = &code[offset];
+        value_release(val);
+        --vm->top;
       }
       break;
-    case OP_JUMP_IF_TRUE:
+    case OP_OR:
       {
         int offset = read_word(&pc);
         value_t val = slots[vm->top];
         if (IS_TRUTHY(val))
+        {
           pc = &code[offset];
+          break;
+        }
+        value_release(val);
+        --vm->top;
+      }
+      break;
+    case OP_AND:
+      {
+        int offset = read_word(&pc);
+        value_t val = slots[vm->top];
+        if (IS_FALSEY(val))
+        {
+          pc = &code[offset];
+          break;
+        }
+        value_release(val);
+        --vm->top;
       }
       break;
     case OP_EQUAL:
