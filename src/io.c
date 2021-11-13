@@ -313,12 +313,12 @@ void __declspec(dllexport) __stdcall load_io(vm_t *vm)
 void load_io(vm_t *vm)
 #endif
 {
-  char std_in[] = "STD_IN";
-  char std_out[] = "STD_OUT";
-  char std_err[] = "STD_ERR";
-  char seek_set[] = "SEEK_SET";
-  char seek_current[] = "SEEK_CURRENT";
-  char seek_end[] = "SEEK_END";
+  char std_in[] = "StdIn";
+  char std_out[] = "StdOut";
+  char std_err[] = "StdErr";
+  char seek_set[] = "SeekSet";
+  char seek_current[] = "SeekCurrent";
+  char seek_end[] = "SeekEnd";
   char open[] = "open";
   char close[] = "close";
   char popen[] = "popen";

@@ -1,7 +1,7 @@
 
 math:
 
-  PI: number
+  Pi: number
 
   abs(num: number) -> number
   floor(num: number) -> number
@@ -12,7 +12,7 @@ math:
 
 os:
 
-  CLOCKS_PER_SECOND: number
+  ClocksPerSecond: number
 
   clock() -> number
   system(cmd: string) -> number
@@ -20,12 +20,12 @@ os:
 
 io:
 
-  STD_IN: userdata
-  STD_OUT: userdata
-  STD_ERR: userdata
-  SEEK_SET: number
-  SEEK_CURRENT: number
-  SEEK_END: number
+  StdIn: userdata
+  StdOut: userdata
+  StdErr: userdata
+  SeekSet: number
+  SeekCurrent: number
+  SeekEnd: number
 
   open(filename: string, mode: string) -> null|userdata
   close(stream: userdata) -> number

@@ -49,7 +49,7 @@ void __declspec(dllexport) __stdcall load_os(vm_t *vm)
 void load_os(vm_t *vm)
 #endif
 {
-  char clocks_per_second[] = "CLOCKS_PER_SECOND";
+  char clocks_per_second[] = "ClocksPerSecond";
   char clock[] = "clock";
   char system[] = "system";
   char getenv[] = "getenv";

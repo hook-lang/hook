@@ -5,7 +5,7 @@
 title "Library os: clock()"
 
 script "use os;
-println(os.clock() / os.CLOCKS_PER_SECOND);"
+println(os.clock());"
 
 expect_status_success
 

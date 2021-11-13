@@ -2,10 +2,10 @@
 
 . test/__test
 
-title "Library math: PI"
+title "Library math: Pi"
 
 script "use math;
-println(math.PI);"
+println(math.Pi);"
 
 expect_status_success
 

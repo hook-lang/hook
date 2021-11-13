@@ -96,7 +96,7 @@ void __declspec(dllexport) __stdcall load_math(vm_t *vm)
 void load_math(vm_t *vm)
 #endif
 {
-  char pi[] = "PI";
+  char pi[] = "Pi";
   char abs[] = "abs";
   char floor[] = "floor";
   char ceil[] = "ceil";

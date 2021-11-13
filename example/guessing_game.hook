@@ -6,14 +6,14 @@ use math;
 use io;
 use strings;
 
-io.writeln(io.STD_OUT, "Guess the number!");
+io.writeln(io.StdOut, "Guess the number!");
 
 const secret_number = int(1 + math.random() * 99);
 
 loop {
-  io.writeln(io.STD_OUT, "Please input your guess.");
+  io.writeln(io.StdOut, "Please input your guess.");
 
-  let guess = io.readln(io.STD_IN);
+  let guess = io.readln(io.StdIn);
 
   guess = strings.trim(guess);
 
@@ -22,16 +22,16 @@ loop {
 
   guess = int(guess);
 
-  io.writeln(io.STD_OUT, "You guessed: " + str(guess));
+  io.writeln(io.StdOut, "You guessed: " + str(guess));
 
   const cmp = compare(guess, secret_number);
   
   if (cmp < 0)
-    io.writeln(io.STD_OUT, "Too small!");
+    io.writeln(io.StdOut, "Too small!");
   else if (cmp > 0)
-    io.writeln(io.STD_OUT, "Too big!");
+    io.writeln(io.StdOut, "Too big!");
   else {
-    io.writeln(io.STD_OUT, "You win!");
+    io.writeln(io.StdOut, "You win!");
     break;
   }
 }

@@ -2,10 +2,10 @@
 
 . test/__test
 
-title "Library os: CLOCKS_PER_SECOND"
+title "Library os: ClocksPerSecond"
 
 script "use os;
-println(os.CLOCKS_PER_SECOND);"
+println(os.ClocksPerSecond);"
 
 expect_status_success
 
