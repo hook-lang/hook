@@ -925,12 +925,13 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     {
       scanner_next_token(scan);
       compile_expression(&child_comp);
+      chunk_emit_opcode(child_chunk, OP_RETURN);
       goto end;
     }
     if (!MATCH(scan, TOKEN_LBRACE))
       fatal_error_unexpected_token(scan);
     compile_block(&child_comp);
-    chunk_emit_opcode(child_chunk, OP_NULL);
+    chunk_emit_opcode(child_chunk, OP_RETURN_NULL);
     prototype_add_line(proto, scan->token.line);
     goto end;
   }
@@ -966,16 +967,17 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   {
     scanner_next_token(scan);
     compile_expression(&child_comp);
+    chunk_emit_opcode(child_chunk, OP_RETURN);
     goto end;
   }
   if (!MATCH(scan, TOKEN_LBRACE))
     fatal_error_unexpected_token(scan);
   compile_block(&child_comp);
-  chunk_emit_opcode(child_chunk, OP_NULL);
+  chunk_emit_opcode(child_chunk, OP_RETURN_NULL);
   prototype_add_line(proto, scan->token.line);
+  uint8_t index;
 end:
-  chunk_emit_opcode(child_chunk, OP_RETURN);
-  uint8_t index = proto->num_protos;
+  index = proto->num_protos;
   prototype_add_child(proto, child_comp.proto);
   chunk_emit_opcode(chunk, OP_FUNCTION);
   chunk_emit_byte(chunk, index);
@@ -1236,9 +1238,8 @@ static void compile_return_statement(compiler_t *comp)
   {
     int line = scan->token.line;
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_NULL);
+    chunk_emit_opcode(chunk, OP_RETURN_NULL);
     prototype_add_line(proto, line);
-    chunk_emit_opcode(chunk, OP_RETURN);
     return;
   }
   compile_expression(comp);
@@ -1814,9 +1815,8 @@ function_t *compile(string_t *file, string_t *source)
     compile_statement(&comp);
   prototype_t *proto = comp.proto;
   chunk_t *chunk = &proto->chunk;
-  chunk_emit_opcode(chunk, OP_NULL);
+  chunk_emit_opcode(chunk, OP_RETURN_NULL);
   prototype_add_line(proto, scan.token.line);
-  chunk_emit_opcode(chunk, OP_RETURN);
   function_t *fn = function_new(proto);
   scanner_free(&scan);
   return fn;

@@ -61,7 +61,8 @@ typedef enum
   OP_DECR,
   OP_CALL,
   OP_IMPORT_LIBRARY,
-  OP_RETURN
+  OP_RETURN,
+  OP_RETURN_NULL
 } opcode_t;
 
 typedef struct

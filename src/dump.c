@@ -193,6 +193,9 @@ void dump(prototype_t *proto)
     case OP_RETURN:
       printf("  [%05d] Return\n", j);
       break;
+    case OP_RETURN_NULL:
+      printf("  [%05d] ReturnNull\n", j);
+      break;
     }
   }
   printf("%d instruction(s)\n\n", n);

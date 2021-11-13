@@ -1334,6 +1334,10 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       break;
     case OP_RETURN:
       return STATUS_OK;
+    case OP_RETURN_NULL:
+      if (push(vm, NULL_VALUE) == STATUS_ERROR)
+        goto error;
+      return STATUS_OK;
     }
   }
 error:
