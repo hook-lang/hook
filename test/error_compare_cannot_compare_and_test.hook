@@ -1,0 +1,2 @@
+
+const a = compare(1, "foo");

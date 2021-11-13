@@ -1,0 +1,5 @@
+
+println(split("a,b,c", ","));
+println(split("a,b", ","));
+println(split("a", ","));
+println(split("", ","));

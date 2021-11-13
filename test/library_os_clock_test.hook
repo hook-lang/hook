@@ -1,0 +1,3 @@
+
+use os;
+println(os.clock());

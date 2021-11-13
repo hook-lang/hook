@@ -1,0 +1,6 @@
+
+const sum = fn (a, b) {
+  return a + b;
+};
+
+println(sum(1, 2));

@@ -1,0 +1,3 @@
+
+use { system } in os;
+system("echo foo");

@@ -1,0 +1,6 @@
+
+println([] - ["foo"]);
+println(["foo"] - []);
+println(["foo", "bar", "baz"] - ["bar"]);
+const arr = ["foo", "bar", "baz", "bar", "qux"];
+println(arr - ["bar", "baz"]);

@@ -1,0 +1,7 @@
+
+println(null);
+println(false);
+println(true);
+println(123);
+println(4.56);
+println("foo");

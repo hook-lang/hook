@@ -1,0 +1,7 @@
+
+println(bool(null));
+println(bool(false));
+println(bool(true));
+println(bool(0));
+println(bool(""));
+println(bool([]));

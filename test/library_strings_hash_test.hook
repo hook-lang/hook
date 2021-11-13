@@ -1,0 +1,3 @@
+
+use strings;
+println(strings.hash("foo"));

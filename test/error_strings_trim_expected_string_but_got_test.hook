@@ -1,0 +1,3 @@
+
+use { trim } in strings;
+const a = trim(1);

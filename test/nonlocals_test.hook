@@ -1,0 +1,17 @@
+
+const a = 1;
+fn f (const x) {
+  const b = 2;
+  fn g (const y) {
+    const c = 3;
+    const h = fn (z) {
+      return z + c + y + b * x * x;
+    };
+    return h;
+  }
+  const h = g(a);
+  return h;
+}
+const h = f(4);
+const r = h(5);
+println(r);

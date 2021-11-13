@@ -1,0 +1,2 @@
+
+println(is_empty(1));

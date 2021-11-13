@@ -1,0 +1,4 @@
+
+use math;
+println(math.abs(1.23));
+println(math.abs(-1.23));

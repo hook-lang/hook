@@ -1,0 +1,5 @@
+
+println(join(["a", "b", "c"], ","));
+println(join(["a", "b"], ","));
+println(join(["a"], ","));
+println(join([], ","));

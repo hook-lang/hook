@@ -1,0 +1,2 @@
+
+println([str(null), str(false), str(true), str(1.23), str("foo")]);

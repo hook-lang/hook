@@ -1,0 +1,7 @@
+
+use strings;
+println(strings.trim(""));
+println(strings.trim("   "));
+println(strings.trim("   foo"));
+println(strings.trim("bar   "));
+println(strings.trim("   baz   "));

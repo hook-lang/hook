@@ -1,0 +1,7 @@
+
+println(is_empty("foo"));
+println(is_empty(""));
+println(is_empty([1, 2, 3]));
+println(is_empty([]));
+println(is_empty({a: 1, b: 2, c: 3}));
+println(is_empty({}));

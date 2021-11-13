@@ -1,0 +1,4 @@
+
+println(ord("f"));
+println(ord("foo"));
+

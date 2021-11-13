@@ -1,0 +1,10 @@
+
+struct Foo {
+  a, b
+}
+println(Foo{1, 2});
+
+const Bar = struct {
+  c, d
+};
+println(Bar{3, 4});

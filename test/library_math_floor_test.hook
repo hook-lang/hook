@@ -1,0 +1,3 @@
+
+use math;
+println(math.floor(1.23));

@@ -1,0 +1,2 @@
+
+const i = index_of("foo", 0);

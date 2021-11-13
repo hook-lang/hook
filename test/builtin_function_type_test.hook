@@ -1,0 +1,9 @@
+
+println(type(null));
+println(type(false));
+println(type(true));
+println(type(123));
+println(type(1.23));
+println(type("foo"));
+println(type([]));
+println(type(fn(){}));

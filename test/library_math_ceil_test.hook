@@ -1,0 +1,3 @@
+
+use math;
+println(math.ceil(1.23));

@@ -1,0 +1,3 @@
+
+use { hash } in strings;
+const a = hash(1);

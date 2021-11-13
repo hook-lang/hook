@@ -1,0 +1,3 @@
+
+use math;
+const a = math.sqrt("foo");

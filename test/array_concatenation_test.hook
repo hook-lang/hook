@@ -1,0 +1,6 @@
+
+println([] + ["foo"]);
+println(["foo"] + []);
+println(["foo", "bar"] + ["baz"]);
+const arr = ["foo", "bar"];
+println(arr + ["baz", "qux"]);

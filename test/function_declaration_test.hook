@@ -1,0 +1,29 @@
+
+fn f(a, b) {
+  return a + b;
+}
+
+const g = fn (a, b) {
+  return a - b;
+};
+
+fn h(a, b) => a + b
+
+const i = fn (a, b) => a - b;
+
+fn j() {
+  fn f() {}
+  fn g() {}
+  fn h() {}
+  fn i() {}
+  fn j() {}
+  fn k() {}
+  fn l() {}
+  fn m() {}
+  fn n() {}
+}
+
+println(f(1, 2));
+println(g(3, 2));
+println(h(1, 2));
+println(i(3, 2));

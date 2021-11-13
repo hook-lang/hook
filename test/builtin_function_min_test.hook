@@ -1,0 +1,5 @@
+
+println(min([]));
+println(min([1]));
+println(min([10, 5, -5]));
+println(min(["foo", "bar"]));

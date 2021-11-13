@@ -1,0 +1,3 @@
+
+use os;
+println(os.getenv("HOOK_HOME"));
