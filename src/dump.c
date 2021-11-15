@@ -104,19 +104,19 @@ void dump(prototype_t *proto)
       printf("  [%05d] InplaceDeleteElement\n", j);
       break;
     case OP_GET_FIELD:
-      printf("  [%05d] GetField\n", j);
+      printf("  [%05d] GetField              %d\n", j, bytes[i++]);
       break;
     case OP_FETCH_FIELD:
-      printf("  [%05d] FetchField\n", j);
+      printf("  [%05d] FetchField            %d\n", j, bytes[i++]);
       break;
     case OP_SET_FIELD:
       printf("  [%05d] SetField\n", j);
       break;
     case OP_PUT_FIELD:
-      printf("  [%05d] PutField\n", j);
+      printf("  [%05d] PutField              %d\n", j, bytes[i++]);
       break;
     case OP_INPLACE_PUT_FIELD:
-      printf("  [%05d] InplacePutField\n", j);
+      printf("  [%05d] InplacePutField       %d\n", j, bytes[i++]);
       break;
     case OP_JUMP:
       {

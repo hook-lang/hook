@@ -792,19 +792,18 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     token_t tk = scan->token;
     scanner_next_token(scan);
     uint8_t index = add_string_constant(proto, &tk);
-    chunk_emit_opcode(chunk, OP_CONSTANT);
-    chunk_emit_byte(chunk, index);
-    prototype_add_line(proto, tk.line);
     if (MATCH(scan, TOKEN_EQ))
     {
       scanner_next_token(scan);
       compile_expression(comp);
       chunk_emit_opcode(chunk, inplace ? OP_INPLACE_PUT_FIELD : OP_PUT_FIELD);
+      chunk_emit_byte(chunk, index);
       prototype_add_line(proto, tk.line);
       return SYN_ASSIGN;
     }
     int offset = chunk->length;
     chunk_emit_opcode(chunk, OP_GET_FIELD);
+    chunk_emit_byte(chunk, index);
     prototype_add_line(proto, tk.line);
     int syn = compile_assign(comp, SYN_SUBSCRIPT, false);
     if (syn == SYN_ASSIGN) {
@@ -1038,10 +1037,8 @@ static void compile_delete(compiler_t *comp, bool inplace)
     token_t tk = scan->token;
     scanner_next_token(scan);
     uint8_t index = add_string_constant(proto, &tk);
-    chunk_emit_opcode(chunk, OP_CONSTANT);
-    chunk_emit_byte(chunk, index);
-    prototype_add_line(proto, tk.line);
     chunk_emit_opcode(chunk, OP_FETCH_FIELD);
+    chunk_emit_byte(chunk, index);
     prototype_add_line(proto, tk.line);
     compile_delete(comp, false);
     chunk_emit_opcode(chunk, OP_SET_FIELD);
@@ -1659,10 +1656,8 @@ static void compile_subscript(compiler_t *comp)
       token_t tk = scan->token;
       scanner_next_token(scan);
       uint8_t index = add_string_constant(proto, &tk);
-      chunk_emit_opcode(chunk, OP_CONSTANT);
-      chunk_emit_byte(chunk, index);
-      prototype_add_line(proto, tk.line);
       chunk_emit_opcode(chunk, OP_GET_FIELD);
+      chunk_emit_byte(chunk, index);
       prototype_add_line(proto, line);
       continue;
     }
