@@ -278,13 +278,13 @@ void load_sqlite(vm_t *vm)
   struct_put(ztruct, sizeof(finalize) - 1, finalize);
   struct_put(ztruct, sizeof(bind) - 1, bind);
   struct_put(ztruct, sizeof(fetch) - 1, fetch);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, open), 1, &open_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, close), 1, &close_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, execute), 2, &execute_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, prepare), 2, &prepare_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, finalize), 1, &finalize_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, bind), 3, &bind_call)) == STATUS_OK);
-  assert(vm_push_native(vm, native_new(string_from_chars(-1, fetch), 1, &fetch_call)) == STATUS_OK);
-  assert(vm_push_struct(vm, ztruct) == STATUS_OK);
+  vm_push_native(vm, native_new(string_from_chars(-1, open), 1, &open_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, close), 1, &close_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, execute), 2, &execute_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, prepare), 2, &prepare_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, finalize), 1, &finalize_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, bind), 3, &bind_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, fetch), 1, &fetch_call));
+  vm_push_struct(vm, ztruct);
   vm_instance(vm);
 }

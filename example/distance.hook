@@ -21,5 +21,3 @@ const p2 = Point { 11, 13 };
 const result = distance(p1, p2);
 
 println("the distance between p1 and p2 is: " + str(result));
-
-assert(result == 5, "the distance must be 5");

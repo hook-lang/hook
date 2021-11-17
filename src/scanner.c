@@ -94,11 +94,17 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
 
 static inline bool match_number(scanner_t *scan)
 {
-  if (!isdigit(CURRENT_CHAR(scan)))
-    return false;
-  int n = 1;
-  while (isdigit(CHAR_AT(scan, n)))
+  int n = 0;
+  if (CHAR_AT(scan, n) == '0')
     ++n;
+  else
+  {
+    if (CHAR_AT(scan, n) < '1' || CHAR_AT(scan, n) > '9')
+      return false;
+    ++n;
+    while (isdigit(CHAR_AT(scan, n)))
+      ++n;
+  }
   token_type_t type = TOKEN_INT;
   if (CHAR_AT(scan, n) == '.')
   {
@@ -106,6 +112,17 @@ static inline bool match_number(scanner_t *scan)
     while (isdigit(CHAR_AT(scan, n)))
       ++n;
     type = TOKEN_FLOAT;
+  }
+  if (CHAR_AT(scan, n) == 'e' || CHAR_AT(scan, n) == 'E')
+  {
+    ++n;
+    if (CHAR_AT(scan, n) == '+' || CHAR_AT(scan, n) == '-')
+      ++n;
+    if (!isdigit(CHAR_AT(scan, n)))
+      return false;
+    ++n;
+    while (isdigit(CHAR_AT(scan, n)))
+      ++n;
   }
   if (isalnum(CHAR_AT(scan, n)) || CHAR_AT(scan, n) == '_')
     return false;
