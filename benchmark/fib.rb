@@ -6,8 +6,6 @@ def fib(n)
   end
 end
 
-start = Time.now
 for i in 0...5
   puts fib(28)
 end
-puts "elapsed: " + (Time.now - start).to_s
