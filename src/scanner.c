@@ -9,7 +9,7 @@
 #include <string.h>
 #include "error.h"
 
-#define MATCH_MAX_LENGTH 8
+#define MATCH_MAX_LENGTH (1 << 3)
 
 #define CHAR_AT(s, i)   ((s)->pos[(i)])
 #define CURRENT_CHAR(s) CHAR_AT(s, 0)

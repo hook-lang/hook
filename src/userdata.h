@@ -19,4 +19,4 @@ typedef struct userdata
 void userdata_init(userdata_t *udata, void (*deinit)(struct userdata *));
 void userdata_free(userdata_t *udata);
 
-#endif
+#endif // USERDATA_H

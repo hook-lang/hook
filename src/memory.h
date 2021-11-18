@@ -9,4 +9,4 @@
 void *allocate(int size);
 void *reallocate(void *ptr, int size);
 
-#endif
+#endif // MEMORY_H

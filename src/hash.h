@@ -10,4 +10,4 @@
 
 uint32_t hash(int length, char *chars);
 
-#endif
+#endif // HASH_H

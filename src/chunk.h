@@ -81,4 +81,4 @@ void chunk_emit_opcode(chunk_t *chunk, opcode_t op);
 void chunk_serialize(chunk_t *chunk, FILE *stream);
 void chunk_deserialize(chunk_t *chunk, FILE *stream);
 
-#endif
+#endif // CHUNK_H

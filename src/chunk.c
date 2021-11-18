@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include "memory.h"
 
-#define CHUNK_MIN_CAPACITY 8
+#define CHUNK_MIN_CAPACITY (1 << 3)
 
 static inline void resize(chunk_t *chunk, int min_capacity);
 

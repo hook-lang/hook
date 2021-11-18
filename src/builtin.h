@@ -12,4 +12,4 @@ void load_globals(vm_t *vm);
 int num_globals(void);
 int lookup_global(int length, char *chars);
 
-#endif
+#endif // BUILTIN_H

@@ -10,4 +10,4 @@
 
 void dump(prototype_t *proto);
 
-#endif
+#endif // DUMP_H

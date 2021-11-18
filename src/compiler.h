@@ -10,4 +10,4 @@
 
 function_t *compile(string_t *file, string_t *source);
 
-#endif
+#endif // COMPILER_H

@@ -8,7 +8,7 @@
 
 #include "value.h"
 
-#define ARRAY_MIN_CAPACITY 8
+#define ARRAY_MIN_CAPACITY (1 << 3)
 
 typedef struct
 {
@@ -38,4 +38,4 @@ bool array_slice(array_t *arr, int start, int stop, array_t **result);
 void array_serialize(array_t *arr, FILE *stream);
 array_t *array_deserialize(FILE *stream);
 
-#endif
+#endif // ARRAY_H

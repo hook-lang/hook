@@ -8,7 +8,7 @@
 #include "common.h"
 #include "memory.h"
 
-#define MIN_CAPACITY 8
+#define MIN_CAPACITY (1 << 3)
 
 prototype_t *prototype_allocate(int arity, string_t *name, string_t *file);
 static inline void init_lines(prototype_t *proto);

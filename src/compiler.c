@@ -13,9 +13,9 @@
 #include "builtin.h"
 #include "error.h"
 
-#define MAX_CONSTANTS (UINT8_MAX + 1)
-#define MAX_VARIABLES (UINT8_MAX + 1)
-#define MAX_BREAKS    (UINT8_MAX + 1)
+#define MAX_CONSTANTS UINT8_MAX
+#define MAX_VARIABLES UINT8_MAX
+#define MAX_BREAKS    UINT8_MAX
 
 #define MATCH(s, t) ((s)->token.type == (t))
 
@@ -26,10 +26,10 @@
     scanner_next_token(s); \
   } while(0)
 
-#define SYN_NONE      0
-#define SYN_ASSIGN    1
-#define SYN_CALL      2
-#define SYN_SUBSCRIPT 3
+#define SYN_NONE      0x00
+#define SYN_ASSIGN    0x01
+#define SYN_CALL      0x02
+#define SYN_SUBSCRIPT 0x03
 
 typedef struct
 {
@@ -82,6 +82,7 @@ static inline variable_t *lookup_variable(compiler_t *comp, token_t *tk);
 static inline bool nonlocal_exists(compiler_t *comp, token_t *tk);
 static inline int emit_jump(chunk_t *chunk, opcode_t op);
 static inline void patch_jump(chunk_t *chunk, int offset);
+static inline void patch_opcode(chunk_t *chunk, int offset, opcode_t op);
 static inline void start_loop(compiler_t *comp, loop_t *loop);
 static inline void end_loop(compiler_t *comp);
 static inline void compiler_init(compiler_t *comp, compiler_t *parent, scanner_t *scan,
@@ -301,6 +302,11 @@ static inline void patch_jump(chunk_t *chunk, int offset)
   if (jump > UINT16_MAX)
     fatal_error("code too large");
   *((uint16_t *) &chunk->bytes[offset]) = (uint16_t) jump;
+}
+
+static inline void patch_opcode(chunk_t *chunk, int offset, opcode_t op)
+{
+  chunk->bytes[offset] = (uint8_t) op;
 }
 
 static inline void start_loop(compiler_t *comp, loop_t *loop)
@@ -778,8 +784,9 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     chunk_emit_opcode(chunk, OP_GET_ELEMENT);
     prototype_add_line(proto, line);
     int syn = compile_assign(comp, SYN_SUBSCRIPT, false);
-    if (syn == SYN_ASSIGN) {
-      chunk->bytes[offset] = (uint8_t) OP_FETCH_ELEMENT;
+    if (syn == SYN_ASSIGN)
+    {
+      patch_opcode(chunk, offset, OP_FETCH_ELEMENT);
       chunk_emit_opcode(chunk, OP_SET_ELEMENT);
     }
     return syn;
@@ -806,8 +813,9 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     chunk_emit_byte(chunk, index);
     prototype_add_line(proto, tk.line);
     int syn = compile_assign(comp, SYN_SUBSCRIPT, false);
-    if (syn == SYN_ASSIGN) {
-      chunk->bytes[offset] = (uint8_t) OP_FETCH_FIELD;
+    if (syn == SYN_ASSIGN)
+    {
+      patch_opcode(chunk, offset, OP_SET_FIELD);
       chunk_emit_opcode(chunk, OP_SET_FIELD);
     }
     return syn;

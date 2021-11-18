@@ -8,7 +8,7 @@
 
 #include "string.h"
 
-#define STRUCT_MIN_CAPACITY 8
+#define STRUCT_MIN_CAPACITY (1 << 3)
 #define STRUCT_LOAD_FACTOR  0.75
 
 typedef struct
@@ -32,7 +32,7 @@ typedef struct
 {
   OBJECT_HEADER
   struct_t *ztruct;
-  value_t values[1];
+  value_t values[0];
 } instance_t;
 
 struct_t *struct_new(string_t *name);
@@ -50,4 +50,4 @@ void instance_inplace_set_field(instance_t *inst, int index, value_t value);
 void instance_print(instance_t *inst);
 bool instance_equal(instance_t *inst1, instance_t *inst2);
 
-#endif
+#endif // STRUCT_H

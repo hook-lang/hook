@@ -14,4 +14,4 @@ void __declspec(dllexport) __stdcall load_sqlite(vm_t *vm);
 void load_sqlite(vm_t *vm);
 #endif
 
-#endif
+#endif // SQLITE_H

@@ -9,4 +9,4 @@
 void fatal_error(const char *fmt, ...);
 void runtime_error(const char *fmt, ...);
 
-#endif
+#endif // ERROR_H

@@ -10,4 +10,4 @@
 
 int import_library(vm_t *vm);
 
-#endif
+#endif // LIBRARY_H

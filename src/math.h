@@ -14,4 +14,4 @@ void __declspec(dllexport) __stdcall load_math(vm_t *vm);
 void load_math(vm_t *vm);
 #endif
 
-#endif
+#endif // MATH_H

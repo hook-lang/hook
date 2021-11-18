@@ -14,4 +14,4 @@ void __declspec(dllexport) __stdcall load_io(vm_t *vm);
 void load_io(vm_t *vm);
 #endif
 
-#endif
+#endif // IO_H

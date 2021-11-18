@@ -8,4 +8,4 @@
 
 void ensure_path(const char *filename);
 
-#endif
+#endif // FS_H

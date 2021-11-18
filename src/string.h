@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include "value.h"
 
-#define STRING_MIN_CAPACITY 8
+#define STRING_MIN_CAPACITY (1 << 3)
 
 typedef struct
 {
@@ -40,4 +40,4 @@ bool string_slice(string_t *str, int start, int stop, string_t **result);
 void string_serialize(string_t *str, FILE *stream);
 string_t *string_deserialize(FILE *stream);
 
-#endif
+#endif // STRING_H

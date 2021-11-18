@@ -37,7 +37,7 @@ typedef struct
 {
   OBJECT_HEADER
   prototype_t *proto;
-  value_t nonlocals[1];
+  value_t nonlocals[0];
 } function_t;
 
 struct vm;
@@ -62,4 +62,4 @@ void function_free(function_t *fn);
 native_t *native_new(string_t *name, int arity, int (*call)(struct vm *, value_t *));
 void native_free(native_t *native);
 
-#endif
+#endif // CALLABLE_H

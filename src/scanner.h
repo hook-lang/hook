@@ -93,4 +93,4 @@ void scanner_init(scanner_t *scan, string_t *file, string_t *source);
 void scanner_free(scanner_t *scan);
 void scanner_next_token(scanner_t *scan);
 
-#endif
+#endif // SCANNER_H

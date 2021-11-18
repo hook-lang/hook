@@ -10,7 +10,7 @@
 #include "callable.h"
 #include "userdata.h"
 
-#define VM_MIN_CAPACITY 256
+#define VM_MIN_CAPACITY (1 << 8)
 
 typedef struct vm
 {
@@ -38,4 +38,4 @@ void vm_instance(vm_t *vm);
 int vm_initialize(vm_t *vm, int num_args);
 int vm_call(vm_t *vm, int num_args);
 
-#endif
+#endif // VM_H
