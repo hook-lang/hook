@@ -5,5 +5,7 @@ function fib($n) {
   return fib($n - 1) + fib($n - 2);
 }
 
-for ($i = 0; $i < 5; $i++)
-  echo fib(28) . "\n";
+$n = $argv[1];
+$m = $argv[2];
+for ($i = 0; $i < $n; $i++)
+  echo fib($m) . "\n";

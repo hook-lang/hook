@@ -4,5 +4,7 @@ function fib(n) {
   return fib(n - 1) + fib(n - 2);
 } 
 
-for (let i = 0; i < 5; i++)
-  console.log(fib(28));
+const n = process.argv[2];
+const m = process.argv[3];
+for (let i = 0; i < n; i++)
+  console.log(fib(m));
