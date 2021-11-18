@@ -1,0 +1,5 @@
+
+use arrays;
+println(arrays.sum([]));
+println(arrays.sum([1]));
+println(arrays.sum([10, 5, -5]));

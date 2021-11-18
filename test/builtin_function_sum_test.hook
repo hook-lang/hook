@@ -1,4 +1,0 @@
-
-println(sum([]));
-println(sum([1]));
-println(sum([10, 5, -5]));

@@ -12,14 +12,9 @@ cap(val: string|array) -> integer
 len(val: string|array) -> integer
 is_empty(val: string|array) -> boolean
 compare(val1: value, val2: value) -> integer
-min(arr: array) -> value
-max(arr: array) -> value
-sum(arr: array) -> number
 slice(val: string|array, start: integer, stop: integer) -> string|array
 split(src: string, separator: string) -> array
 join(arr: array, separator: string) -> string
-array(min_capacity: integer) -> array
-index_of(arr: array, elem: value) -> integer
 sleep(ms: integer)
 assert(assertion: value, msg: string)
 panic(msg: string)

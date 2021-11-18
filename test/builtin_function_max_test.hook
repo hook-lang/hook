@@ -1,5 +1,0 @@
-
-println(max([]));
-println(max([1]));
-println(max([10, 5, -5]));
-println(max(["foo", "bar"]));

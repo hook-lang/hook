@@ -1,0 +1,3 @@
+
+use arrays;
+const arr = arrays.new_array("foo");

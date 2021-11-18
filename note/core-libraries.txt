@@ -48,3 +48,11 @@ strings:
   lower(str: string) -> string
   upper(str: string) -> string
   trim(str: string) -> string
+
+arrays:
+
+  new_array(min_capacity: integer) -> array
+  index_of(arr: array, elem: value) -> integer
+  min(arr: array) -> value
+  max(arr: array) -> value
+  sum(arr: array) -> number

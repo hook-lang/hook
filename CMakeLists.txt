@@ -123,6 +123,21 @@ add_library(strings SHARED
   src/value.c
   src/vm.c)
 
+add_library(arrays SHARED
+  src/array.c
+  src/arrays.c
+  src/callable.c
+  src/chunk.c
+  src/error.c
+  src/hash.c
+  src/library.c
+  src/memory.c
+  src/string.c
+  src/struct.c
+  src/userdata.c
+  src/value.c
+  src/vm.c)
+
 if(MSVC)
   find_package(unofficial-sqlite3 CONFIG REQUIRED)
   find_package(CURL CONFIG REQUIRED)

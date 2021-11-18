@@ -1,0 +1,3 @@
+
+use arrays;
+const i = arrays.index_of("foo", 0);

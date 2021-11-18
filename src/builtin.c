@@ -37,14 +37,9 @@ static const char *globals[] = {
   "len",
   "is_empty",
   "compare",
-  "min",
-  "max",
-  "sum",
   "slice",
   "split",
   "join",
-  "array",
-  "index_of",
   "sleep",
   "assert",
   "panic"
@@ -69,14 +64,9 @@ static int cap_call(vm_t *vm, value_t *frame);
 static int len_call(vm_t *vm, value_t *frame);
 static int is_empty_call(vm_t *vm, value_t *frame);
 static int compare_call(vm_t *vm, value_t *frame);
-static int min_call(vm_t *vm, value_t *frame);
-static int max_call(vm_t *vm, value_t *frame);
-static int sum_call(vm_t *vm, value_t *frame);
 static int slice_call(vm_t *vm, value_t *frame);
 static int split_call(vm_t *vm, value_t *frame);
 static int join_call(vm_t *vm, value_t *frame);
-static int array_call(vm_t *vm, value_t *frame);
-static int index_of_call(vm_t *vm, value_t *frame);
 static int sleep_call(vm_t *vm, value_t *frame);
 static int assert_call(vm_t *vm, value_t *frame);
 static int panic_call(vm_t *vm, value_t *frame);
@@ -414,86 +404,6 @@ static int compare_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, result);
 }
 
-static int min_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_ARRAY(val))
-  {
-    runtime_error("invalid type: expected array but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  array_t *arr = AS_ARRAY(val);
-  int length = arr->length;
-  if (!length)
-  {
-    vm_push_null(vm);
-    return STATUS_OK;
-  }
-  value_t min = arr->elements[0];
-  for (int i = 1; i < length; ++i)
-  {
-    value_t elem = arr->elements[i];
-    int result;
-    if (value_compare(elem, min, &result) == STATUS_ERROR)
-      return STATUS_ERROR;
-    min = result < 0 ? elem : min;
-  }
-  vm_push_value(vm, min);
-  return STATUS_OK;
-}
-
-static int max_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_ARRAY(val))
-  {
-    runtime_error("invalid type: expected array but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  array_t *arr = AS_ARRAY(val);
-  int length = arr->length;
-  if (!length)
-  {
-    vm_push_null(vm);
-    return STATUS_OK;
-  }
-  value_t max = arr->elements[0];
-  for (int i = 1; i < length; ++i)
-  {
-    value_t elem = arr->elements[i];
-    int result;
-    if (value_compare(elem, max, &result) == STATUS_ERROR)
-      return STATUS_ERROR;
-    max = result > 0 ? elem : max;
-  }
-  vm_push_value(vm, max);
-  return STATUS_OK;
-}
-
-static int sum_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_ARRAY(val))
-  {
-    runtime_error("invalid type: expected array but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  array_t *arr = AS_ARRAY(val);
-  double sum = 0;
-  for (int i = 0; i < arr->length; ++i)
-  {
-    value_t elem = arr->elements[i];
-    if (!IS_NUMBER(elem))
-    {
-      runtime_error("invalid type: expected array of numbers, found '%s' in array", type_name(elem.type));
-      return STATUS_ERROR;
-    }
-    sum += elem.as.number;
-  }
-  vm_push_number(vm, sum);
-  return STATUS_OK;
-}
-
 static int slice_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[1];
@@ -577,42 +487,6 @@ static int join_call(vm_t *vm, value_t *frame)
   return vm_push_string(vm, str);
 }
 
-static int array_call(vm_t *vm, value_t *frame)
-{
-  value_t val = frame[1];
-  if (!IS_INTEGER(val))
-  {
-    runtime_error("invalid type: expected integer but got '%s'", type_name(val.type));
-    return STATUS_ERROR;
-  }
-  long capacity = (long) val.as.number;
-  if (capacity < 0 || capacity > INT_MAX)
-  {
-    runtime_error("invalid range: capacity must be between 0 and %d", INT_MAX);
-    return STATUS_ERROR;
-  }
-  array_t *arr = array_allocate((int) capacity);
-  arr->length = 0;
-  if (vm_push_array(vm, arr) == STATUS_ERROR)
-  {
-    array_free(arr);
-    return STATUS_ERROR;
-  }
-  return STATUS_OK;
-}
-
-static int index_of_call(vm_t *vm, value_t *frame)
-{
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
-  if (!IS_ARRAY(val1))
-  {
-    runtime_error("invalid type: expected array but got '%s'", type_name(val1.type));
-    return STATUS_ERROR;
-  }
-  return vm_push_number(vm, array_index_of(AS_ARRAY(val1), val2));
-}
-
 static int sleep_call(vm_t *vm, value_t *frame)
 {
   value_t val = frame[1];
@@ -681,17 +555,12 @@ void load_globals(vm_t *vm)
   vm_push_native(vm, native_new(string_from_chars(-1, globals[10]), 1, &len_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[11]), 1, &is_empty_call));
   vm_push_native(vm, native_new(string_from_chars(-1, globals[12]), 2, &compare_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 1, &min_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 1, &max_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 1, &sum_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 3, &slice_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 2, &split_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 2, &join_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[19]), 1, &array_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[20]), 2, &index_of_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[21]), 1, &sleep_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[22]), 2, &assert_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, globals[23]), 1, &panic_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[13]), 3, &slice_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[14]), 2, &split_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[15]), 2, &join_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[16]), 1, &sleep_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[17]), 2, &assert_call));
+  vm_push_native(vm, native_new(string_from_chars(-1, globals[18]), 1, &panic_call));
 }
 
 int num_globals(void)

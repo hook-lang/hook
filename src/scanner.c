@@ -14,7 +14,8 @@
 #define CHAR_AT(s, i)   ((s)->pos[(i)])
 #define CURRENT_CHAR(s) CHAR_AT(s, 0)
 
-static inline void skip(scanner_t *scan);
+static inline void skip_shebang(scanner_t *scan);
+static inline void skip_spaces_comments(scanner_t *scan);
 static inline void next_char(scanner_t *scan);
 static inline void next_chars(scanner_t *scan, int n);
 static inline bool match_char(scanner_t *scan, const char c);
@@ -23,13 +24,27 @@ static inline bool match_number(scanner_t *scan);
 static inline bool match_string(scanner_t *scan);
 static inline bool match_name(scanner_t *scan);
 
-static inline void skip(scanner_t *scan)
+static inline void skip_shebang(scanner_t *scan)
+{
+  if (CHAR_AT(scan, 0) == '#' && CHAR_AT(scan, 1) == '!')
+    next_chars(scan, 2);
+  while (CURRENT_CHAR(scan) != '\0')
+  {
+    if (CURRENT_CHAR(scan) == '\n')
+    {
+      next_char(scan);
+      break;
+    }
+    next_char(scan);
+  }
+}
+
+static inline void skip_spaces_comments(scanner_t *scan)
 {
 begin:
   while (isspace(CURRENT_CHAR(scan)))
     next_char(scan);
-  if ((CHAR_AT(scan, 0) == '/' && CHAR_AT(scan, 1) == '/')
-   || (CHAR_AT(scan, 0) == '#' && CHAR_AT(scan, 1) == '!'))
+  if ((CHAR_AT(scan, 0) == '/' && CHAR_AT(scan, 1) == '/'))
   {
     next_chars(scan, 2);
     for (;;)
@@ -188,6 +203,7 @@ void scanner_init(scanner_t *scan, string_t *file, string_t *source)
   scan->pos = source->chars;
   scan->line = 1;
   scan->col = 1;
+  skip_shebang(scan);
   scanner_next_token(scan);
 }
 
@@ -205,7 +221,7 @@ void scanner_free(scanner_t *scan)
 
 void scanner_next_token(scanner_t *scan)
 {
-  skip(scan);
+  skip_spaces_comments(scan);
   if (match_char(scan, 0))
   {
     scan->token.type = TOKEN_EOF;

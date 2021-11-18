@@ -1,3 +1,0 @@
-
-const arr = array(100);
-println(arr);

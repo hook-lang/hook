@@ -1,0 +1,6 @@
+
+use arrays;
+println(arrays.min([]));
+println(arrays.min([1]));
+println(arrays.min([10, 5, -5]));
+println(arrays.min(["foo", "bar"]));

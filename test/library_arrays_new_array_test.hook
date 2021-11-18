@@ -1,0 +1,4 @@
+
+use arrays;
+const arr = arrays.new_array(100);
+println(arr);
