@@ -34,6 +34,7 @@ void array_inplace_concat(array_t *dest, array_t *src);
 void array_inplace_diff(array_t *dest, array_t *src);
 void array_print(array_t *arr);
 bool array_equal(array_t *arr1, array_t *arr2);
+int array_compare(array_t *arr1, array_t *arr2, int *result);
 bool array_slice(array_t *arr, int start, int stop, array_t **result);
 void array_serialize(array_t *arr, FILE *stream);
 array_t *array_deserialize(FILE *stream);

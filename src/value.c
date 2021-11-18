@@ -212,6 +212,7 @@ int value_compare(value_t val1, value_t val2, int *result)
     *result = string_compare(AS_STRING(val1), AS_STRING(val2));
     return STATUS_OK;
   case TYPE_ARRAY:
+    return array_compare(AS_ARRAY(val1), AS_ARRAY(val2), result);
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
