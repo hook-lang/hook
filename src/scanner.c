@@ -26,8 +26,9 @@ static inline bool match_name(scanner_t *scan);
 
 static inline void skip_shebang(scanner_t *scan)
 {
-  if (CHAR_AT(scan, 0) == '#' && CHAR_AT(scan, 1) == '!')
-    next_chars(scan, 2);
+  if (CHAR_AT(scan, 0) != '#' || CHAR_AT(scan, 1) != '!')
+    return;
+  next_chars(scan, 2);
   while (CURRENT_CHAR(scan) != '\0')
   {
     if (CURRENT_CHAR(scan) == '\n')
