@@ -1,4 +1,4 @@
-name: CI
+name: Build and test
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
     branches: [ main ]
 
 jobs:
+
   ubuntu-build:
     runs-on: ubuntu-latest
     steps:
@@ -17,24 +18,21 @@ jobs:
         sudo apt-get install -y libcurl4-openssl-dev
     - name: Configure CMake
       run: |
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Debug
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug
     - name: Build
       run: |
-        cmake --build ${{github.workspace}}/build
+        cmake --build ${{ github.workspace }}/build
     - name: Running tests
       run: |
         ./run-tests.sh
       env:
-        HOOK_HOME: ${{github.workspace}}
+        HOOK_HOME: ${{ github.workspace }}
     - name: Code coverage
       run: |
         gcov src/*.c
         bash <(curl -s https://codecov.io/bash)
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-    - name: Packing
-      run: |
-        cpack --config build/CPackConfig.cmake
 
   windows-build:
     runs-on: windows-latest
@@ -50,18 +48,15 @@ jobs:
         vcpkg install curl:x64-windows
     - name: Configure CMake
       run: |
-        cmake -B ${{github.workspace}}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake
+        cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
     - name: Build
       run: |
-        cmake --build ${{github.workspace}}/build
+        cmake --build ${{ github.workspace }}/build
     - name: Running tests
       run: |
-        ${{github.workspace}}/run-tests.bat
+        ${{ github.workspace }}/run-tests.bat
       env:
-        HOOK_HOME: ${{github.workspace}}
-    - name: Packing
-      run: |
-        cpack --config build/CPackConfig.cmake
+        HOOK_HOME: ${{ github.workspace }}
 
   macos-build:
     runs-on: macos-latest
@@ -69,15 +64,12 @@ jobs:
     - uses: actions/checkout@v2
     - name: Configure CMake
       run: |
-        cmake -B ${{github.workspace}}/build
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug
     - name: Build
       run: |
-        cmake --build ${{github.workspace}}/build
+        cmake --build ${{ github.workspace }}/build
     - name: Running tests
       run: |
         ./run-tests.sh
       env:
-        HOOK_HOME: ${{github.workspace}}
-    - name: Packing
-      run: |
-        cpack --config build/CPackConfig.cmake
+        HOOK_HOME: ${{ github.workspace }}
