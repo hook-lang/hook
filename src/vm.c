@@ -1122,7 +1122,7 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
     case OP_INSTANCE:
       instance(vm);
       break;
-    case OP_INITILIZE:
+    case OP_INITIALIZE:
       if (initialize(vm, read_byte(&pc)) == STATUS_ERROR)
         goto error;
       break;

@@ -49,7 +49,7 @@ void dump(prototype_t *proto)
     case OP_INSTANCE:
       printf("  [%05d] Instance\n", j);
       break;
-    case OP_INITILIZE:
+    case OP_INITIALIZE:
       printf("  [%05d] Initialize            %d\n", j, bytes[i++]);
       break;
     case OP_FUNCTION:

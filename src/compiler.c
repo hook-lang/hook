@@ -1703,7 +1703,7 @@ static void compile_subscript(compiler_t *comp)
     if (MATCH(scan, TOKEN_RBRACE))
     {
       scanner_next_token(scan);
-      chunk_emit_opcode(chunk, OP_INITILIZE);
+      chunk_emit_opcode(chunk, OP_INITIALIZE);
       chunk_emit_byte(chunk, 0);
       prototype_add_line(proto, line);
       return;
@@ -1717,7 +1717,7 @@ static void compile_subscript(compiler_t *comp)
       ++num_args;
     }
     EXPECT(scan, TOKEN_RBRACE);
-    chunk_emit_opcode(chunk, OP_INITILIZE);
+    chunk_emit_opcode(chunk, OP_INITIALIZE);
     chunk_emit_byte(chunk, num_args);
     prototype_add_line(proto, line);
   }
