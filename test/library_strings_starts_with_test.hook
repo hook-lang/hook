@@ -1,0 +1,9 @@
+
+use { starts_with } in strings;
+
+assert(starts_with("", "") == false, "starts_with('', '') == false");
+assert(starts_with("foo", "") == false, "starts_with('foo', '') == false");
+assert(starts_with("", "foo") == false, "starts_with('', 'foo') == false");
+assert(starts_with("foo", "foobar") == false, "starts_with('foo', 'foobar') == false");
+assert(starts_with("foobar", "foo") == true, "starts_with('foobar', 'foo') == true");
+assert(starts_with("foobar", "bar") == false, "starts_with('foobar', 'bar') == false");

@@ -36,6 +36,8 @@ int string_compare(string_t *str1, string_t *str2);
 string_t *string_lower(string_t *str);
 string_t *string_upper(string_t *str);
 bool string_trim(string_t *str, string_t **result);
+bool string_starts_with(string_t *str1, string_t *str2);
+bool string_ends_with(string_t *str1, string_t *str2);
 bool string_slice(string_t *str, int start, int stop, string_t **result);
 void string_serialize(string_t *str, FILE *stream);
 string_t *string_deserialize(FILE *stream);

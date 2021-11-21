@@ -18,8 +18,8 @@
 static int _argc;
 static const char **_argv;
 
-static inline const char *argument(int index);
-static inline int option(const char *opt);
+static inline const char *get_arg(int index);
+static inline bool has_option(const char *opt);
 static inline const char *option_value(const char *opt);
 static inline int option_length(const char *opt);
 static inline void print_help(void);
@@ -29,7 +29,7 @@ static inline void save(function_t *fn);
 static inline function_t *load(void);
 static inline int run(function_t *fn);
 
-static inline const char *argument(int index)
+static inline const char *get_arg(int index)
 {
   int j = 0;
   for (int i = 1; i < _argc; ++i)
@@ -38,12 +38,12 @@ static inline const char *argument(int index)
   return NULL;
 }
 
-static inline int option(const char *opt)
+static inline bool has_option(const char *opt)
 {
   for (int i = 1; i < _argc; ++i)
     if (!strcmp(_argv[i], opt))
-      return i;
-  return 0;
+      return true;
+  return false;
 }
 
 static inline const char *option_value(const char *opt)
@@ -115,7 +115,7 @@ static inline void save(function_t *fn)
 
 static inline function_t *load(void)
 {
-  const char *filename = argument(0);
+  const char *filename = get_arg(0);
   FILE *stream = fopen(filename, "r");
   if (!stream)
     fatal_error("unable to open file '%s'", filename);
@@ -152,32 +152,32 @@ int main(int argc, const char **argv)
 {
   _argc = argc;
   _argv = argv;
-  if (option("-h") || option("--help"))
+  if (has_option("-h") || has_option("--help"))
   {
     print_help();
     return EXIT_SUCCESS;
   }
-  if (option("-v") || option("--version"))
+  if (has_option("-v") || has_option("--version"))
   {
     print_version();
     return EXIT_SUCCESS;
   }
-  if (option("-r") || option("--run"))
+  if (has_option("-r") || has_option("--run"))
   {
     function_t *fn = load();
     return run(fn);
   }
-  const char *filename = argument(0);
+  const char *filename = get_arg(0);
   string_t *file = string_from_chars(-1, filename ? filename : "<stdin>");
   string_t *source = filename ? string_from_file(filename) : string_from_stream(stdin, '\0');
   function_t *fn = compile(file, source);
-  if (option("-d") || option("--dump"))
+  if (has_option("-d") || has_option("--dump"))
   {
     dump(fn->proto);
     function_free(fn);
     return EXIT_SUCCESS;
   }
-  if (option("-c") || option("--compile"))
+  if (has_option("-c") || has_option("--compile"))
   {
     save(fn);
     function_free(fn);

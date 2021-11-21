@@ -220,6 +220,20 @@ bool string_trim(string_t *str, string_t **result)
   return true;
 }
 
+bool string_starts_with(string_t *str1, string_t *str2)
+{
+  if (!str1->length || !str2->length || str1->length < str2->length)
+    return false;
+  return !memcmp(str1->chars, str2->chars, str2->length);
+}
+
+bool string_ends_with(string_t *str1, string_t *str2)
+{
+  if (!str1->length || !str2->length || str1->length < str2->length)
+    return false;
+  return !memcmp(&str1->chars[str1->length - str2->length], str2->chars, str2->length);
+}
+
 bool string_slice(string_t *str, int start, int stop, string_t **result)
 {
   if (start < 1 && stop >= str->length)
