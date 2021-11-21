@@ -36,8 +36,8 @@ To install Hook on Linux, Windows, and macOS, download a prebuilt version from t
 
 ```
 cd ~
-wget https://github.com/fabiosvm/hook-lang/releases/download/v0.1.0-alpha/hook-0.1.0-linux-x86_64.tar.gz
-tar -xvf hook-0.1.0-linux-x86_64.tar.gz -C ./hook
+wget https://github.com/fabiosvm/hook-lang/releases/download/0.1.0-pre/hook-0.1.0-linux-x64.tar.gz
+tar -xvf hook-0.1.0-linux-x64.tar.gz -C ./hook
 ```
 
 ### Setting environment variable 

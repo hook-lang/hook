@@ -10,7 +10,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 if(NOT MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -fsanitize=address -fprofile-arcs -ftest-coverage")
-endif(NOT MSVC)
+endif()
 
 set(BINARY_DIR ${CMAKE_BINARY_DIR}/../bin)
 set(LIBRARY_DIR ${CMAKE_BINARY_DIR}/../lib)
@@ -19,10 +19,10 @@ set(PACKAGE_DIR ${CMAKE_BINARY_DIR}/../package)
 if(MSVC)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BINARY_DIR})
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BINARY_DIR})
-else(MSVC)
+else()
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_DIR})
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_DIR})
-endif(MSVC)
+endif()
 
 add_executable(${PROJECT_NAME}
   src/array.c
@@ -47,12 +47,12 @@ add_executable(${PROJECT_NAME}
 if(NOT MSVC)
   target_link_libraries(${PROJECT_NAME} m)
   target_link_libraries(${PROJECT_NAME} dl)
-endif(NOT MSVC)
+endif()
 
 if(MSVC)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${LIBRARY_DIR})
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${LIBRARY_DIR})
-endif(MSVC)
+endif()
 
 add_library(math SHARED
   src/array.c
@@ -141,7 +141,7 @@ add_library(arrays SHARED
 if(MSVC)
   find_package(unofficial-sqlite3 CONFIG REQUIRED)
   find_package(CURL CONFIG REQUIRED)
-endif(MSVC)
+endif()
 
 add_library(sqlite SHARED
   src/array.c
@@ -176,10 +176,10 @@ add_library(url SHARED
 if(MSVC)
   target_link_libraries(sqlite PRIVATE unofficial::sqlite3::sqlite3)
   target_link_libraries(url PRIVATE CURL::libcurl)
-else(MSVC)
+else()
   target_link_libraries(sqlite sqlite3)
   target_link_libraries(url curl)
-endif(MSVC)
+endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
@@ -194,11 +194,23 @@ set(CPACK_SOURCE_GENERATOR ${fmt})
 set(CPACK_OUTPUT_FILE_PREFIX ${PACKAGE_DIR})
 set(CPACK_PACKAGE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-string(TOLOWER "${PROJECT_NAME}" project)
-string(TOLOWER "${CMAKE_SYSTEM_NAME}" sys)
-string(TOLOWER "${CMAKE_HOST_SYSTEM_PROCESSOR}" arch)
+string(TOLOWER ${PROJECT_NAME} project)
+string(TOLOWER ${CMAKE_SYSTEM_NAME} os)
+string(TOLOWER ${CMAKE_HOST_SYSTEM_PROCESSOR} arch)
 
-set(CPACK_PACKAGE_FILE_NAME "${project}-${PROJECT_VERSION}-${sys}-${arch}")
+if(${os} STREQUAL "darwin")
+  set(os "macos")
+endif()
+
+if(${arch} MATCHES "^(x86_64|amd64)$")
+  set(arch "x64")
+elseif(${arch} MATCHES "^(i386|i586|i686|i786|i886)$")
+  set(arch "x86")
+elseif(${arch} MATCHES "^(aarch64|armv8)$")
+  set(arch "arm64")
+endif()
+
+set(CPACK_PACKAGE_FILE_NAME "${project}-${PROJECT_VERSION}-${os}-${arch}")
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "${project}-${PROJECT_VERSION}")
 
 file(READ ${CMAKE_CURRENT_LIST_DIR}/.cpack_ignore cpack_ignore)
