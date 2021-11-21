@@ -250,11 +250,15 @@ string_t *string_deserialize(FILE *stream)
 {
   int capacity;
   int length;
-  fread(&capacity, sizeof(capacity), 1, stream);
-  fread(&length, sizeof(length), 1, stream);
+  if (fread(&capacity, sizeof(capacity), 1, stream) != 1)
+    return NULL;
+  if (fread(&length, sizeof(length), 1, stream) != 1)
+    return NULL;
   string_t *str = string_allocate(capacity);
   str->length = length;
-  fread(str->chars, length + 1, 1, stream);
-  fread(&str->hash, sizeof(str->hash), 1, stream);
+  if (fread(str->chars, length + 1, 1, stream) != 1)
+    return NULL;
+  if (fread(&str->hash, sizeof(str->hash), 1, stream) != 1)
+    return NULL;
   return str;
 }

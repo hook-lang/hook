@@ -187,12 +187,21 @@ struct_t *struct_deserialize(FILE *stream)
 {
   int capacity;
   int length;
-  fread(&capacity, sizeof(capacity), 1, stream);
-  fread(&length, sizeof(length), 1, stream);
+  if (fread(&capacity, sizeof(capacity), 1, stream) != 1)
+    return NULL;
+  if (fread(&length, sizeof(length), 1, stream) != 1)
+    return NULL;
   string_t *name = string_deserialize(stream);
+  if (!name)
+    return NULL;
   struct_t *ztruct = struct_new(name);
   for (int i = 0; i < length; ++i)
-    put_field(ztruct, string_deserialize(stream));
+  {
+    string_t *name = string_deserialize(stream);
+    if (!name)
+      return NULL;
+    put_field(ztruct, name);
+  }
   return ztruct;
 }
 

@@ -60,10 +60,12 @@ void chunk_serialize(chunk_t *chunk, FILE *stream)
   fwrite(chunk->bytes, chunk->length, 1, stream);
 }
 
-void chunk_deserialize(chunk_t *chunk, FILE *stream)
+bool chunk_deserialize(chunk_t *chunk, FILE *stream)
 {
-  fread(&chunk->capacity, sizeof(chunk->capacity), 1, stream);
-  fread(&chunk->length, sizeof(chunk->length), 1, stream);
+  if (fread(&chunk->capacity, sizeof(chunk->capacity), 1, stream) != 1)
+    return false;
+  if (fread(&chunk->length, sizeof(chunk->length), 1, stream) != 1)
+    return false;
   chunk->bytes = (uint8_t *) allocate(chunk->capacity);
-  fread(chunk->bytes, chunk->length, 1, stream);
+  return fread(chunk->bytes, chunk->length, 1, stream) == 1;
 }

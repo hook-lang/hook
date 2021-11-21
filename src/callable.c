@@ -167,32 +167,48 @@ void prototype_serialize(prototype_t *proto, FILE *stream)
 prototype_t *prototype_deserialize(FILE *stream)
 {
   int arity;
-  fread(&arity, sizeof(arity), 1, stream);
+  if (fread(&arity, sizeof(arity), 1, stream) != 1)
+    return NULL;
   string_t *name = string_deserialize(stream);
+  if (!name)
+    return NULL;
   string_t *file = string_deserialize(stream);
+  if (!file)
+    return NULL;
   prototype_t *proto = prototype_allocate(arity, name, file);
-  fread(&proto->lines_capacity, sizeof(proto->lines_capacity), 1, stream);
-  fread(&proto->num_lines, sizeof(proto->num_lines), 1, stream);
+  if (fread(&proto->lines_capacity, sizeof(proto->lines_capacity), 1, stream) != 1)
+    return NULL;
+  if (fread(&proto->num_lines, sizeof(proto->num_lines), 1, stream) != 1)
+    return NULL;
   proto->lines = (line_t *) allocate(sizeof(*proto->lines) * proto->lines_capacity);
   for (int i = 0; i < proto->num_lines; ++i)
   {
     line_t *line = &proto->lines[i];
-    fread(line, sizeof(*line), 1, stream);
+    if (fread(line, sizeof(*line), 1, stream) != 1)
+      return NULL;
   }
-  chunk_deserialize(&proto->chunk, stream);
+  if (!chunk_deserialize(&proto->chunk, stream))
+    return NULL;
   proto->consts = array_deserialize(stream);
+  if (!proto->consts)
+    return NULL;
   INCR_REF(proto->consts);
-  fread(&proto->protos_capacity, sizeof(proto->protos_capacity), 1, stream);
-  fread(&proto->num_protos, sizeof(proto->num_protos), 1, stream);
+  if (fread(&proto->protos_capacity, sizeof(proto->protos_capacity), 1, stream) != 1)
+    return NULL;
+  if (fread(&proto->num_protos, sizeof(proto->num_protos), 1, stream) != 1)
+    return NULL;
   prototype_t **protos = (prototype_t **) allocate(sizeof(*protos) * proto->protos_capacity);
   for (int i = 0; i < proto->num_protos; ++i)
   {
     prototype_t *proto = prototype_deserialize(stream);
+    if (!proto)
+      return NULL;
     INCR_REF(proto);
     protos[i] = proto;
   }
   proto->protos = protos;
-  fread(&proto->num_nonlocals, sizeof(proto->num_nonlocals), 1, stream);
+  if (fread(&proto->num_nonlocals, sizeof(proto->num_nonlocals), 1, stream) != 1)
+    return NULL;
   return proto;
 }
 

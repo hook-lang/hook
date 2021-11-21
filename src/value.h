@@ -95,6 +95,6 @@ void value_print(value_t val, bool quoted);
 bool value_equal(value_t val1, value_t val2);
 int value_compare(value_t val1, value_t val2, int *result);
 void value_serialize(value_t val, FILE *stream);
-value_t value_deserialize(FILE *stream);
+bool value_deserialize(FILE *stream, value_t *result);
 
 #endif // VALUE_H

@@ -120,6 +120,8 @@ static inline function_t *load(void)
   if (!stream)
     fatal_error("unable to open file '%s'", filename);
   prototype_t *proto = prototype_deserialize(stream);
+  if (!proto)
+    fatal_error("unable to load file '%s'", filename);
   fclose(stream);
   return function_new(proto);
 }

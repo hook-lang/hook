@@ -251,27 +251,40 @@ void value_serialize(value_t val, FILE *stream)
   }
 }
 
-value_t value_deserialize(FILE *stream)
+bool value_deserialize(FILE *stream, value_t *result)
 {
   int type;
   int flags;
-  fread(&type, sizeof(type), 1, stream);
-  fread(&flags, sizeof(flags), 1, stream);
+  if (fread(&type, sizeof(type), 1, stream) != 1)
+    return false;
+  if (fread(&flags, sizeof(flags), 1, stream) != 1)
+    return false;
   value_t val;
   switch ((type_t) type)
   {
   case TYPE_NUMBER:
     {
       double data;
-      fread(&data, sizeof(data), 1, stream);
+      if (fread(&data, sizeof(data), 1, stream) != 1)
+        return false;
       val = NUMBER_VALUE(data);
     }
     break;
   case TYPE_STRING:
-    val = STRING_VALUE(string_deserialize(stream));
+    {
+      string_t *str = string_deserialize(stream);
+      if (!str)
+        return false;
+      val = STRING_VALUE(str);
+    }
     break;
   case TYPE_STRUCT:
-    val = STRUCT_VALUE(struct_deserialize(stream));
+    {
+      struct_t *ztruct = struct_deserialize(stream);
+      if (!ztruct)
+        return false;
+      val = STRUCT_VALUE(ztruct);
+    }
     break;
   case TYPE_NULL:
   case TYPE_BOOLEAN:
@@ -279,9 +292,9 @@ value_t value_deserialize(FILE *stream)
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
-    printf("DEBUG: type == %s\n", type_name((type_t) type));
     ASSERT(false, "unimplemented deserialization");
     break;
   }
-  return val;
+  *result = val;
+  return true;
 }

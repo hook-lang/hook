@@ -290,13 +290,17 @@ array_t *array_deserialize(FILE *stream)
 {
   int capacity;
   int length;
-  fread(&capacity, sizeof(capacity), 1, stream);
-  fread(&length, sizeof(length), 1, stream);
+  if (fread(&capacity, sizeof(capacity), 1, stream) != 1)
+    return NULL;
+  if (fread(&length, sizeof(length), 1, stream) != 1)
+    return NULL;
   array_t *arr = array_allocate(capacity);
   arr->length = length;
   for (int i = 0; i < length; ++i)
   {
-    value_t elem = value_deserialize(stream);
+    value_t elem;
+    if (!value_deserialize(stream, &elem))
+      return NULL;
     VALUE_INCR_REF(elem);
     arr->elements[i] = elem;
   }
