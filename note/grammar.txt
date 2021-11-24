@@ -13,6 +13,7 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
                 ( '=>' expr | block )
               | 'delete' NAME subscr* '[' expr ']' ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
+              | 'match' '(' expr ')' '{' ( expr '=>' stmt )+ ( '_' '=>' stmt )? '}'
               | 'loop' stmt
               | 'while' '(' expr ')' stmt
               | 'do' stmt 'while' '(' expr ')' ';'

@@ -46,6 +46,7 @@ typedef enum
   OP_JUMP_IF_FALSE,
   OP_OR,
   OP_AND,
+  OP_MATCH,
   OP_EQUAL,
   OP_GREATER,
   OP_LESS,

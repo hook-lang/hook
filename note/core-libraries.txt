@@ -48,6 +48,8 @@ strings:
   lower(str: string) -> string
   upper(str: string) -> string
   trim(str: string) -> string
+  starts_with(str1: string, str1: string) -> boolean
+  ends_with(str1: string, str1: string) -> boolean
 
 arrays:
 

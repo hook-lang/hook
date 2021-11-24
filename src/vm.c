@@ -1267,6 +1267,23 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
         --vm->top;
       }
       break;
+    case OP_MATCH:
+      {
+        int offset = read_word(&pc);
+        value_t val1 = slots[vm->top - 1];
+        value_t val2 = slots[vm->top];
+        if (value_equal(val1, val2))
+        {
+          value_release(val1);
+          value_release(val2);
+          vm->top -= 2;
+          break;
+        }
+        pc = &code[offset];
+        value_release(val2);
+        --vm->top;
+      }
+      break;
     case OP_EQUAL:
       equal(vm);
       break;

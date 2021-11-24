@@ -264,15 +264,12 @@ bool array_slice(array_t *arr, int start, int stop, array_t **result)
   length = length < 0 ? 0 : length;
   array_t *slice = array_allocate(length);
   slice->length = length;
-  if (!length)
-    goto end;
   for (int i = start, j = 0; i < stop; ++i, ++j)
   {
     value_t elem = arr->elements[i];
     VALUE_INCR_REF(elem);
     slice->elements[j] = elem;
   }
-end:
   *result = slice;
   return true;
 }

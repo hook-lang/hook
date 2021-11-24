@@ -98,6 +98,8 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_delete_statement(compiler_t *comp);
 static void compile_delete(compiler_t *comp, bool inplace);
 static void compile_if_statement(compiler_t *comp);
+static void compile_match_statement(compiler_t *comp);
+static void compile_match(compiler_t *comp);
 static void compile_loop_statement(compiler_t *comp);
 static void compile_while_statement(compiler_t *comp);
 static void compile_do_statement(compiler_t *comp);
@@ -384,6 +386,11 @@ static void compile_statement(compiler_t *comp)
   if (MATCH(scan, TOKEN_IF))
   {
     compile_if_statement(comp);
+    return;
+  }
+  if (MATCH(scan, TOKEN_MATCH))
+  {
+    compile_match_statement(comp);
     return;
   }
   if (MATCH(scan, TOKEN_LOOP))
@@ -1072,6 +1079,52 @@ static void compile_if_statement(compiler_t *comp)
     scanner_next_token(scan);
     compile_statement(comp);
   }
+  patch_jump(chunk, offset2);
+}
+
+static void compile_match_statement(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->proto->chunk;
+  scanner_next_token(scan);
+  EXPECT(scan, TOKEN_LPAREN);
+  compile_expression(comp);
+  EXPECT(scan, TOKEN_RPAREN);
+  EXPECT(scan, TOKEN_LBRACE);
+  compile_expression(comp);
+  EXPECT(scan, TOKEN_ARROW);
+  int offset1 = emit_jump(chunk, OP_MATCH);
+  compile_statement(comp);
+  int offset2 = emit_jump(chunk, OP_JUMP);
+  patch_jump(chunk, offset1);
+  compile_match(comp);
+  patch_jump(chunk, offset2);
+}
+
+static void compile_match(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->proto->chunk;
+  if (MATCH(scan, TOKEN_RBRACE))
+  {
+    scanner_next_token(scan);
+    return;
+  }
+  if (MATCH(scan, TOKEN_UNDERSCORE))
+  {
+    scanner_next_token(scan);
+    EXPECT(scan, TOKEN_ARROW);
+    compile_statement(comp);
+    EXPECT(scan, TOKEN_RBRACE);
+    return;
+  }
+  compile_expression(comp);
+  EXPECT(scan, TOKEN_ARROW);
+  int offset1 = emit_jump(chunk, OP_MATCH);
+  compile_statement(comp);
+  int offset2 = emit_jump(chunk, OP_JUMP);
+  patch_jump(chunk, offset1);
+  compile_match(comp);
   patch_jump(chunk, offset2);
 }
 

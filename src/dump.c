@@ -146,6 +146,13 @@ void dump(prototype_t *proto)
         printf("  [%05d] And                   %d\n", j, offset);
       }
       break;
+    case OP_MATCH:
+      {
+        int offset = *((uint16_t*) &bytes[i]);
+        i += 2;
+        printf("  [%05d] Match                 %d\n", j, offset);
+      }
+      break;
     case OP_EQUAL:
       printf("  [%05d] Equal\n", j);
       break;

@@ -1,0 +1,24 @@
+
+match ("foo") {
+  "foo" => println("foo");
+}
+
+match ("foo") {
+  "bar" => println("bar");
+}
+
+match ("bar") {
+  "foo" => println("foo");
+  "bar" => println("bar");
+}
+
+match ("bar") {
+  "foo" => println("foo");
+  _ => println("_");
+}
+
+match ("bar") {
+  "foo" => println("foo");
+  "bar" => println("bar");
+  _ => println("_");
+}
