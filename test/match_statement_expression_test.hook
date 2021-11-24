@@ -2,23 +2,23 @@
 match ("foo") {
   "foo" => println("foo");
 }
-
 match ("foo") {
   "bar" => println("bar");
 }
-
 match ("bar") {
   "foo" => println("foo");
   "bar" => println("bar");
 }
-
 match ("bar") {
   "foo" => println("foo");
   _ => println("_");
 }
-
 match ("bar") {
   "foo" => println("foo");
   "bar" => println("bar");
   _ => println("_");
 }
+println(match ("foo") { "foo" => 1, _ => null });
+println(match ("bar") { "foo" => 1, _ => null });
+println(match ("bar") { "foo" => 1, "bar" => 2, _ => null });
+println(match ("baz") { "foo" => 1, "bar" => 2, _ => null });

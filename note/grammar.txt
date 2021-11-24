@@ -60,5 +60,7 @@ prim_expr   ::= 'null' | 'false' | 'true' | INT | FLOAT | STRING
               | 'fn' '(' ( 'const'? NAME ( ',' 'const'? NAME )* )? ')'
                 ( '=>' expr | block )
               | 'if' '(' expr ')' expr 'else' expr
+              | 'match' '(' expr ')' '{' expr '=>' expr ( ',' expr '=>' expr )*
+                ',' '_' '=>' expr '}'
               | NAME ( subscr | call )* ( '{' ( expr ( ',' expr )* )? '}' )?
               | '(' expr ')'

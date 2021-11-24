@@ -99,7 +99,7 @@ static void compile_delete_statement(compiler_t *comp);
 static void compile_delete(compiler_t *comp, bool inplace);
 static void compile_if_statement(compiler_t *comp);
 static void compile_match_statement(compiler_t *comp);
-static void compile_match(compiler_t *comp);
+static void compile_match_statement_member(compiler_t *comp);
 static void compile_loop_statement(compiler_t *comp);
 static void compile_while_statement(compiler_t *comp);
 static void compile_do_statement(compiler_t *comp);
@@ -119,6 +119,8 @@ static void compile_prim_expression(compiler_t *comp);
 static void compile_array_initializer(compiler_t *comp);
 static void compile_struct_initializer(compiler_t *comp);
 static void compile_if_expression(compiler_t *comp);
+static void compile_match_expression(compiler_t *comp);
+static void compile_match_expression_member(compiler_t *comp);
 static void compile_subscript(compiler_t *comp);
 static variable_t compile_variable(compiler_t *comp, token_t *tk, bool emit);
 static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk);
@@ -1097,23 +1099,25 @@ static void compile_match_statement(compiler_t *comp)
   compile_statement(comp);
   int offset2 = emit_jump(chunk, OP_JUMP);
   patch_jump(chunk, offset1);
-  compile_match(comp);
+  compile_match_statement_member(comp);
   patch_jump(chunk, offset2);
 }
 
-static void compile_match(compiler_t *comp)
+static void compile_match_statement_member(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   chunk_t *chunk = &comp->proto->chunk;
   if (MATCH(scan, TOKEN_RBRACE))
   {
     scanner_next_token(scan);
+    chunk_emit_opcode(chunk, OP_POP);
     return;
   }
   if (MATCH(scan, TOKEN_UNDERSCORE))
   {
     scanner_next_token(scan);
     EXPECT(scan, TOKEN_ARROW);
+    chunk_emit_opcode(chunk, OP_POP);
     compile_statement(comp);
     EXPECT(scan, TOKEN_RBRACE);
     return;
@@ -1124,7 +1128,7 @@ static void compile_match(compiler_t *comp)
   compile_statement(comp);
   int offset2 = emit_jump(chunk, OP_JUMP);
   patch_jump(chunk, offset1);
-  compile_match(comp);
+  compile_match_statement_member(comp);
   patch_jump(chunk, offset2);
 }
 
@@ -1583,6 +1587,11 @@ static void compile_prim_expression(compiler_t *comp)
     compile_if_expression(comp);
     return;
   }
+  if (MATCH(scan, TOKEN_MATCH))
+  {
+    compile_match_expression(comp);
+    return;
+  }
   if (MATCH(scan, TOKEN_NAME))
   {
     compile_subscript(comp);
@@ -1688,6 +1697,71 @@ static void compile_if_expression(compiler_t *comp)
   EXPECT(scan, TOKEN_ELSE);
   compile_expression(comp);
   patch_jump(chunk, offset2);
+}
+
+static void compile_match_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->proto->chunk;
+  scanner_next_token(scan);
+  EXPECT(scan, TOKEN_LPAREN);
+  compile_expression(comp);
+  EXPECT(scan, TOKEN_RPAREN);
+  EXPECT(scan, TOKEN_LBRACE);
+  compile_expression(comp);
+  EXPECT(scan, TOKEN_ARROW);
+  int offset1 = emit_jump(chunk, OP_MATCH);
+  compile_expression(comp);
+  int offset2 = emit_jump(chunk, OP_JUMP);
+  patch_jump(chunk, offset1);
+  if (MATCH(scan, TOKEN_COMMA))
+  {
+    scanner_next_token(scan);
+    if (MATCH(scan, TOKEN_UNDERSCORE))
+    {
+      scanner_next_token(scan);
+      EXPECT(scan, TOKEN_ARROW);
+      chunk_emit_opcode(chunk, OP_POP);
+      compile_expression(comp);
+      EXPECT(scan, TOKEN_RBRACE);
+      patch_jump(chunk, offset2);
+      return;
+    }
+    compile_match_expression_member(comp);
+    patch_jump(chunk, offset2);
+    return;
+  }
+  fatal_error_unexpected_token(scan);
+}
+
+static void compile_match_expression_member(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  chunk_t *chunk = &comp->proto->chunk;
+  compile_expression(comp);
+  EXPECT(scan, TOKEN_ARROW);
+  int offset1 = emit_jump(chunk, OP_MATCH);
+  compile_expression(comp);
+  int offset2 = emit_jump(chunk, OP_JUMP);
+  patch_jump(chunk, offset1);
+  if (MATCH(scan, TOKEN_COMMA))
+  {
+    scanner_next_token(scan);
+    if (MATCH(scan, TOKEN_UNDERSCORE))
+    {
+      scanner_next_token(scan);
+      EXPECT(scan, TOKEN_ARROW);
+      chunk_emit_opcode(chunk, OP_POP);
+      compile_expression(comp);
+      EXPECT(scan, TOKEN_RBRACE);
+      patch_jump(chunk, offset2);
+      return;
+    }
+    compile_match_expression_member(comp);
+    patch_jump(chunk, offset2);
+    return;
+  }
+  fatal_error_unexpected_token(scan);
 }
 
 static void compile_subscript(compiler_t *comp)
