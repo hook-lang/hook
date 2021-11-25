@@ -239,20 +239,28 @@ int array_compare(array_t *arr1, array_t *arr2, int *result)
     *result = 0;
     return STATUS_OK;
   }
-  int _result = 0;
   for (int i = 0; i < arr1->length && i < arr2->length; ++i)
   {
+    int _result;
     if (value_compare(arr1->elements[i], arr2->elements[i], &_result) == STATUS_ERROR)
       return STATUS_ERROR;
     if (_result)
-      goto end;
+    {
+      *result = _result;
+      return STATUS_OK;
+    }
   }
   if (arr1->length > arr2->length)
-    _result = 1;
-  else if (arr1->length < arr2->length)
-    _result = -1;
-end:
-  *result = _result;
+  {
+    *result = 1;
+    return STATUS_OK;
+  }
+  if (arr1->length < arr2->length)
+  {
+    *result = -1;
+    return STATUS_OK;
+  }
+  *result = 0;
   return STATUS_OK;
 }
 
