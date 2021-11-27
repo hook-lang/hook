@@ -183,7 +183,7 @@ int value_compare(value_t val1, value_t val2, int *result)
 {
   if (val1.type != val2.type)
   {
-    runtime_error("cannot compare '%s' and '%s'", type_name(val1.type),
+    runtime_error("cannot compare `%s` and `%s`", type_name(val1.type),
       type_name(val2.type));
     return STATUS_ERROR;
   }
@@ -219,7 +219,7 @@ int value_compare(value_t val1, value_t val2, int *result)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("cannot compare value of type '%s'", type_name(val1.type));
+  runtime_error("cannot compare value of type `%s`", type_name(val1.type));
   return STATUS_ERROR;
 }
 

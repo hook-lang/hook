@@ -26,7 +26,7 @@ static int abs_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_NUMBER(val))
   {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected number but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, fabs(val.as.number));
@@ -37,7 +37,7 @@ static int floor_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_NUMBER(val))
   {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected number but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, floor(val.as.number));
@@ -48,7 +48,7 @@ static int ceil_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_NUMBER(val))
   {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected number but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, ceil(val.as.number));
@@ -60,12 +60,12 @@ static int pow_call(vm_t *vm, value_t *frame)
   value_t val2 = frame[2];
   if (!IS_NUMBER(val1))
   {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val1.type));
+    runtime_error("invalid type: expected number but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_NUMBER(val2))
   {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val2.type));
+    runtime_error("invalid type: expected number but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, pow(val1.as.number, val2.as.number));
@@ -76,7 +76,7 @@ static int sqrt_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_NUMBER(val))
   {
-    runtime_error("invalid type: expected number but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected number but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, sqrt(val.as.number));

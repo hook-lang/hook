@@ -130,7 +130,7 @@ static inline void fatal_error_unexpected_token(scanner_t *scan)
   token_t *tk = &scan->token;
   if (tk->type == TOKEN_EOF)
     fatal_error("unexpected end of file at %d:%d", tk->line, tk->col);
-  fatal_error("unexpected token '%.*s' at %d:%d", tk->length, tk->start,
+  fatal_error("unexpected token `%.*s` at %d:%d", tk->length, tk->start,
     tk->line, tk->col);
 }
 
@@ -255,7 +255,7 @@ static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable)
     if (var->depth < comp->scope_depth)
       break;
     if (variable_match(tk, var))
-      fatal_error("variable '%.*s' is already defined in this scope at %d:%d",
+      fatal_error("variable `%.*s` is already defined in this scope at %d:%d",
         tk->length, tk->start, tk->line, tk->col);
   }
   add_local(comp, tk, is_mutable);
@@ -268,7 +268,7 @@ static inline variable_t resolve_variable(compiler_t *comp, token_t *tk)
     return *var;
   if (!nonlocal_exists(comp->parent, tk) && lookup_global(tk->length, tk->start) == -1)
   {
-    fatal_error("variable '%.*s' is used but not defined at %d:%d", tk->length,
+    fatal_error("variable `%.*s` is used but not defined at %d:%d", tk->length,
       tk->start, tk->line, tk->col);
   }
   return (variable_t) {.is_mutable = false};
@@ -703,7 +703,7 @@ static void compile_assign_statement(compiler_t *comp, token_t *tk)
   }
 end:
   if (!var.is_mutable)
-    fatal_error("cannot assign to immutable variable '%.*s' at %d:%d",
+    fatal_error("cannot assign to immutable variable `%.*s` at %d:%d",
       tk->length, tk->start, tk->line, tk->col);
   chunk_emit_opcode(chunk, OP_SET_LOCAL);
   chunk_emit_byte(chunk, var.index);
@@ -1012,7 +1012,7 @@ static void compile_delete_statement(compiler_t *comp)
   scanner_next_token(scan);
   variable_t var = resolve_variable(comp, &tk);
   if (!var.is_mutable)
-    fatal_error("cannot delete element from immutable variable '%.*s' at %d:%d",
+    fatal_error("cannot delete element from immutable variable `%.*s` at %d:%d",
       tk.length, tk.start, tk.line, tk.col);
   chunk_emit_opcode(chunk, OP_GET_LOCAL);
   chunk_emit_byte(chunk, var.index);
@@ -1875,7 +1875,7 @@ static variable_t compile_variable(compiler_t *comp, token_t *tk, bool emit)
   }
   int index = lookup_global(tk->length, tk->start);
   if (index == -1)
-    fatal_error("variable '%.*s' is used but not defined at %d:%d", tk->length,
+    fatal_error("variable `%.*s` is used but not defined at %d:%d", tk->length,
       tk->start, tk->line, tk->col);
   chunk_emit_opcode(chunk, OP_GLOBAL);
   chunk_emit_byte(chunk, (uint8_t) index);
@@ -1897,7 +1897,7 @@ static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk)
     if (var->is_local)
     {
       if (var->is_mutable)
-        fatal_error("cannot capture mutable variable '%.*s' at %d:%d", tk->length,
+        fatal_error("cannot capture mutable variable `%.*s` at %d:%d", tk->length,
           tk->start, tk->line, tk->col);
       op = OP_GET_LOCAL;
     }

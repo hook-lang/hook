@@ -48,7 +48,7 @@ static int new_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *url = AS_STRING(val);
@@ -65,7 +65,7 @@ static int cleanup_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   curl_easy_cleanup(((url_t *) AS_USERDATA(val))->curl);
@@ -77,7 +77,7 @@ static int perform_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   CURL *curl = ((url_t *) AS_USERDATA(val))->curl;

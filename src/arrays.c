@@ -19,7 +19,7 @@ static int new_array_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_INTEGER(val))
   {
-    runtime_error("invalid type: expected integer but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected integer but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   long capacity = (long) val.as.number;
@@ -44,7 +44,7 @@ static int index_of_call(vm_t *vm, value_t *frame)
   value_t val2 = frame[2];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("invalid type: expected array but got '%s'", type_name(val1.type));
+    runtime_error("invalid type: expected array but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, array_index_of(AS_ARRAY(val1), val2));
@@ -55,7 +55,7 @@ static int min_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_ARRAY(val))
   {
-    runtime_error("invalid type: expected array but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected array but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val);
@@ -83,7 +83,7 @@ static int max_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_ARRAY(val))
   {
-    runtime_error("invalid type: expected array but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected array but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val);
@@ -111,7 +111,7 @@ static int sum_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_ARRAY(val))
   {
-    runtime_error("invalid type: expected array but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected array but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val);
@@ -121,7 +121,7 @@ static int sum_call(vm_t *vm, value_t *frame)
     value_t elem = arr->elements[i];
     if (!IS_NUMBER(elem))
     {
-      runtime_error("invalid type: expected array of numbers, found '%s' in array", type_name(elem.type));
+      runtime_error("invalid type: expected array of numbers, found `%s` in array", type_name(elem.type));
       return STATUS_ERROR;
     }
     sum += elem.as.number;

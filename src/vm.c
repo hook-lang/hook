@@ -167,7 +167,7 @@ static inline int unpack(vm_t *vm, int n)
   value_t val = vm->slots[vm->top];
   if (!IS_ARRAY(val))
   {
-    runtime_error("cannot unpack value of type '%s'", type_name(val.type));
+    runtime_error("cannot unpack value of type `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val);
@@ -195,7 +195,7 @@ static inline int destruct(vm_t *vm, int n)
   value_t val = vm->slots[vm->top];
   if (!IS_INSTANCE(val))
   {
-    runtime_error("cannot destructure value of type '%s'", type_name(val.type));
+    runtime_error("cannot destructure value of type `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   instance_t *inst = AS_INSTANCE(val);
@@ -224,7 +224,7 @@ static inline int add_element(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("cannot use '%s' as an array", type_name(val1.type));
+    runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
@@ -246,12 +246,12 @@ static inline int get_element(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("cannot use '%s' as an array", type_name(val1.type));
+    runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val2))
   {
-    runtime_error("array cannot be indexed by '%s'", type_name(val2.type));
+    runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
@@ -279,12 +279,12 @@ static inline int fetch_element(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("cannot use '%s' as an array", type_name(val1.type));
+    runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val2))
   {
-    runtime_error("array cannot be indexed by '%s'", type_name(val2.type));
+    runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
@@ -328,12 +328,12 @@ static inline int put_element(vm_t *vm)
   value_t val3 = slots[2];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("cannot use '%s' as an array", type_name(val1.type));
+    runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val2))
   {
-    runtime_error("array cannot be indexed by '%s'", type_name(val2.type));
+    runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
@@ -362,12 +362,12 @@ static inline int delete_element(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("cannot use '%s' as an array", type_name(val1.type));
+    runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val2))
   {
-    runtime_error("array cannot be indexed by '%s'", type_name(val2.type));
+    runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
@@ -395,7 +395,7 @@ static inline int inplace_add_element(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("cannot use '%s' as an array", type_name(val1.type));
+    runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
@@ -425,12 +425,12 @@ static inline int inplace_put_element(vm_t *vm)
   value_t val3 = slots[2];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("cannot use '%s' as an array", type_name(val1.type));
+    runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val2))
   {
-    runtime_error("array cannot be indexed by '%s'", type_name(val2.type));
+    runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
@@ -466,12 +466,12 @@ static inline int inplace_delete_element(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("cannot use '%s' as an array", type_name(val1.type));
+    runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val2))
   {
-    runtime_error("array cannot be indexed by '%s'", type_name(val2.type));
+    runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
@@ -504,7 +504,7 @@ static inline int get_field(vm_t *vm, string_t *name)
   value_t val = slots[0];
   if (!IS_INSTANCE(val))
   {
-    runtime_error("cannot use '%s' as an struct instance", type_name(val.type));
+    runtime_error("cannot use `%s` as an struct instance", type_name(val.type));
     return STATUS_ERROR;
   }
   instance_t *inst = AS_INSTANCE(val);
@@ -529,7 +529,7 @@ static inline int fetch_field(vm_t *vm, string_t *name)
   value_t val = slots[0];
   if (!IS_INSTANCE(val))
   {
-    runtime_error("cannot use '%s' as an instance", type_name(val.type));
+    runtime_error("cannot use `%s` as an instance", type_name(val.type));
     return STATUS_ERROR;
   }
   instance_t *inst = AS_INSTANCE(val);
@@ -573,7 +573,7 @@ static inline int put_field(vm_t *vm, string_t *name)
   value_t val2 = slots[1];
   if (!IS_INSTANCE(val1))
   {
-    runtime_error("cannot use '%s' as an instance", type_name(val1.type));
+    runtime_error("cannot use `%s` as an instance", type_name(val1.type));
     return STATUS_ERROR;
   }
   instance_t *inst = AS_INSTANCE(val1);
@@ -601,7 +601,7 @@ static inline int inplace_put_field(vm_t *vm, string_t *name)
   value_t val2 = slots[1];
   if (!IS_INSTANCE(val1))
   {
-    runtime_error("cannot use '%s' as an instance", type_name(val1.type));
+    runtime_error("cannot use `%s` as an instance", type_name(val1.type));
     return STATUS_ERROR;
   }
   instance_t *inst = AS_INSTANCE(val1);
@@ -722,7 +722,7 @@ static inline int add(vm_t *vm)
     {
       if (!IS_NUMBER(val2))
       {
-        runtime_error("cannot add '%s' to 'number'", type_name(val2.type));
+        runtime_error("cannot add `%s` to 'number'", type_name(val2.type));
         return STATUS_ERROR;
       }
       double data = val1.as.number + val2.as.number;
@@ -734,7 +734,7 @@ static inline int add(vm_t *vm)
     {
       if (!IS_STRING(val2))
       {
-        runtime_error("cannot concatenate 'string' and '%s'", type_name(val2.type));
+        runtime_error("cannot concatenate 'string' and `%s`", type_name(val2.type));
         return STATUS_ERROR;
       }
       string_t *str1 = AS_STRING(val1);
@@ -781,7 +781,7 @@ static inline int add(vm_t *vm)
     {
       if (!IS_ARRAY(val2))
       {
-        runtime_error("cannot concatenate 'array' and '%s'", type_name(val2.type));
+        runtime_error("cannot concatenate 'array' and `%s`", type_name(val2.type));
         return STATUS_ERROR;
       }
       array_t *arr1 = AS_ARRAY(val1);
@@ -832,7 +832,7 @@ static inline int add(vm_t *vm)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("cannot add '%s' to '%s'", type_name(val2.type), type_name(val1.type));
+  runtime_error("cannot add `%s` to `%s`", type_name(val2.type), type_name(val1.type));
   return STATUS_ERROR;
 }
 
@@ -847,7 +847,7 @@ static inline int subtract(vm_t *vm)
     {
       if (!IS_NUMBER(val2))
       {
-        runtime_error("cannot subtract '%s' from 'number'", type_name(val2.type));
+        runtime_error("cannot subtract `%s` from 'number'", type_name(val2.type));
         return STATUS_ERROR;
       }
       double data = val1.as.number - val2.as.number;
@@ -859,7 +859,7 @@ static inline int subtract(vm_t *vm)
     {
       if (!IS_ARRAY(val2))
       {
-        runtime_error("cannot diff between 'array' and '%s'", type_name(val2.type));
+        runtime_error("cannot diff between 'array' and `%s`", type_name(val2.type));
         return STATUS_ERROR;
       }
       array_t *arr1 = AS_ARRAY(val1);
@@ -902,7 +902,7 @@ static inline int subtract(vm_t *vm)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("cannot subtract '%s' from '%s'", type_name(val2.type), type_name(val1.type));
+  runtime_error("cannot subtract `%s` from `%s`", type_name(val2.type), type_name(val1.type));
   return STATUS_ERROR;
 }
 
@@ -913,7 +913,7 @@ static inline int multiply(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
   {
-    runtime_error("cannot multiply '%s' to '%s'", type_name(val2.type), type_name(val1.type));
+    runtime_error("cannot multiply `%s` to `%s`", type_name(val2.type), type_name(val1.type));
     return STATUS_ERROR;
   }
   double data = val1.as.number * val2.as.number;
@@ -929,7 +929,7 @@ static inline int divide(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
   {
-    runtime_error("cannot divide '%s' by '%s'", type_name(val1.type), type_name(val2.type));
+    runtime_error("cannot divide `%s` by `%s`", type_name(val1.type), type_name(val2.type));
     return STATUS_ERROR;
   }
   double data = val1.as.number / val2.as.number;
@@ -945,7 +945,7 @@ static inline int modulo(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
   {
-    runtime_error("cannot mod '%s' by '%s'", type_name(val1.type), type_name(val2.type));
+    runtime_error("cannot mod `%s` by `%s`", type_name(val1.type), type_name(val2.type));
     return STATUS_ERROR;
   }
   double data = fmod(val1.as.number, val2.as.number);
@@ -960,7 +960,7 @@ static inline int negate(vm_t *vm)
   value_t val = slots[0];
   if (!IS_NUMBER(val))
   {
-    runtime_error("cannot apply unary minus operator to '%s'", type_name(val.type));
+    runtime_error("cannot apply unary minus operator to `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   double data = -val.as.number;
@@ -982,7 +982,7 @@ static inline int incr(vm_t *vm)
   value_t val = slots[0];
   if (!IS_NUMBER(val))
   {
-    runtime_error("cannot increment value of type '%s'", type_name(val.type));
+    runtime_error("cannot increment value of type `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   ++slots[0].as.number;
@@ -995,7 +995,7 @@ static inline int decr(vm_t *vm)
   value_t val = slots[0];
   if (!IS_NUMBER(val))
   {
-    runtime_error("cannot decrement value of type '%s'", type_name(val.type));
+    runtime_error("cannot decrement value of type `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   --slots[0].as.number;
@@ -1008,7 +1008,7 @@ static inline int call(vm_t *vm, int num_args)
   value_t val = frame[0];
   if (!IS_CALLABLE(val))
   {
-    runtime_error("cannot call value of type '%s'", type_name(val.type));
+    runtime_error("cannot call value of type `%s`", type_name(val.type));
     discard_frame(vm, frame);
     return STATUS_ERROR;
   }

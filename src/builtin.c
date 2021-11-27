@@ -236,7 +236,7 @@ static int int_call(vm_t *vm, value_t *frame)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: cannot convert '%s' to 'integer'", type_name(val.type));
+  runtime_error("invalid type: cannot convert `%s` to 'integer'", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -263,7 +263,7 @@ static int float_call(vm_t *vm, value_t *frame)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: cannot convert '%s' to 'number'", type_name(val.type));
+  runtime_error("invalid type: cannot convert `%s` to 'number'", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -275,7 +275,7 @@ static int str_call(vm_t *vm, value_t *frame)
   string_t *str = to_string(val);
   if (!str)
   {
-    runtime_error("invalid type: cannot convert '%s' to 'string'", type_name(val.type));
+    runtime_error("invalid type: cannot convert `%s` to 'string'", type_name(val.type));
     return STATUS_ERROR;
   }
   if (vm_push_string(vm, str) == STATUS_ERROR)
@@ -291,7 +291,7 @@ static int ord_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *str = AS_STRING(val);
@@ -308,7 +308,7 @@ static int chr_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_INTEGER(val))
   {
-    runtime_error("invalid type: expected integer but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected integer but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   long data = (long) val.as.number;
@@ -342,7 +342,7 @@ static int cap_call(vm_t *vm, value_t *frame)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: '%s' has no capacity property", type_name(val.type));
+  runtime_error("invalid type: `%s` has no capacity property", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -366,7 +366,7 @@ static int len_call(vm_t *vm, value_t *frame)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: '%s' has no length property", type_name(val.type));
+  runtime_error("invalid type: `%s` has no length property", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -390,7 +390,7 @@ static int is_empty_call(vm_t *vm, value_t *frame)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: '%s' has no length property", type_name(val.type));
+  runtime_error("invalid type: `%s` has no length property", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -462,7 +462,7 @@ static int slice_call(vm_t *vm, value_t *frame)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: cannot slice value of type '%s'", type_name(val.type));
+  runtime_error("invalid type: cannot slice value of type `%s`", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -492,7 +492,7 @@ static int sleep_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_INTEGER(val))
   {
-    runtime_error("invalid type: expected integer but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected integer but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   long ms = (long) val.as.number;
@@ -514,7 +514,7 @@ static int assert_call(vm_t *vm, value_t *frame)
   value_t val = frame[2];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   if (IS_FALSEY(frame[1]))
@@ -532,7 +532,7 @@ static int panic_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *str = AS_STRING(val);

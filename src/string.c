@@ -38,7 +38,7 @@ static inline FILE *open_file(const char *filename, const char *mode)
 {
   FILE *stream = fopen(filename, mode);
   if (!stream)
-    fatal_error("unable to open file '%s'", filename);
+    fatal_error("unable to open file `%s`", filename);
   return stream;
 }
 
@@ -152,7 +152,7 @@ void string_inplace_concat(string_t *dest, string_t *src)
 
 void string_print(string_t *str, bool quoted)
 {
-  printf(quoted ? "'%.*s'" : "%.*s", str->length, str->chars);
+  printf(quoted ? "`%.*s`" : "%.*s", str->length, str->chars);
 }
 
 uint32_t string_hash(string_t *str)

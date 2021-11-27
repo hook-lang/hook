@@ -65,12 +65,12 @@ static int open_call(vm_t *vm, value_t *frame)
   value_t val2 = frame[2];
   if (!IS_STRING(val1))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val1.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_STRING(val2))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val2.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   string_t *filename = AS_STRING(val1);
@@ -86,7 +86,7 @@ static int close_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, fclose(((file_t *) AS_USERDATA(val))->stream));
@@ -98,12 +98,12 @@ static int popen_call(vm_t *vm, value_t *frame)
   value_t val2 = frame[2];
   if (!IS_STRING(val1))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val1.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_STRING(val2))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val2.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   string_t *command = AS_STRING(val1);
@@ -120,7 +120,7 @@ static int pclose_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
@@ -134,7 +134,7 @@ static int eof_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
@@ -146,7 +146,7 @@ static int flush_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
@@ -158,7 +158,7 @@ static int sync_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
@@ -177,7 +177,7 @@ static int tell_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
@@ -189,7 +189,7 @@ static int rewind_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
@@ -204,17 +204,17 @@ static int seek_call(vm_t *vm, value_t *frame)
   value_t val3 = frame[3];
   if (!IS_USERDATA(val1))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val1.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val2))
   {
-    runtime_error("invalid type: expected integer but got '%s'", type_name(val2.type));
+    runtime_error("invalid type: expected integer but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val3))
   {
-    runtime_error("invalid type: expected integer but got '%s'", type_name(val3.type));
+    runtime_error("invalid type: expected integer but got `%s`", type_name(val3.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
@@ -229,12 +229,12 @@ static int read_call(vm_t *vm, value_t *frame)
   value_t val2 = frame[2];
   if (!IS_USERDATA(val1))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val1.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val2))
   {
-    runtime_error("invalid type: expected integer but got '%s'", type_name(val2.type));
+    runtime_error("invalid type: expected integer but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
@@ -256,12 +256,12 @@ static int write_call(vm_t *vm, value_t *frame)
   value_t val2 = frame[2];
   if (!IS_USERDATA(val1))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val1.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_STRING(val2))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val2.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
@@ -277,7 +277,7 @@ static int readln_call(vm_t *vm, value_t *frame)
   value_t val = frame[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
@@ -291,12 +291,12 @@ static int writeln_call(vm_t *vm, value_t *frame)
   value_t val2 = frame[2];
   if (!IS_USERDATA(val1))
   {
-    runtime_error("invalid type: expected userdata but got '%s'", type_name(val1.type));
+    runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_STRING(val2))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val2.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;

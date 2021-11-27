@@ -41,7 +41,7 @@ int import_library(vm_t *vm)
   value_t val = slots[0];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got '%s'", type_name(val.type));
+    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *name = AS_STRING(val);
