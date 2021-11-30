@@ -37,7 +37,8 @@ To install Hook on Linux, Windows, and macOS, download a prebuilt version from t
 ```
 cd ~
 wget https://github.com/fabiosvm/hook-lang/releases/download/0.1.0-pre/hook-0.1.0-linux-x64.tar.gz
-tar -xvf hook-0.1.0-linux-x64.tar.gz -C ./hook
+tar -xvf hook-0.1.0-linux-x64.tar.gz
+mv hook-0.1.0-linux-x64 hook
 ```
 
 ### Setting environment variable 
@@ -57,7 +58,7 @@ This project uses the CMake build tool. Use the following commands to build the 
 ```
 cd ~
 git clone https://github.com/fabiosvm/hook-lang.git
-cd hook-lang
+mv hook-lang hook && cd hook
 cmake -B build
 cmake --build build
 ```
