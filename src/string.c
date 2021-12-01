@@ -15,7 +15,6 @@
 
 static inline void resize(string_t *str, int min_capacity);
 static inline void add_char(string_t *str, char c);
-static inline FILE *open_file(const char *filename, const char *mode);
 
 static inline void resize(string_t *str, int min_capacity)
 {
@@ -32,14 +31,6 @@ static inline void add_char(string_t *str, char c)
 {
   resize(str, str->length + 1);
   str->chars[str->length] = c;
-}
-
-static inline FILE *open_file(const char *filename, const char *mode)
-{
-  FILE *stream = fopen(filename, mode);
-  if (!stream)
-    fatal_error("unable to open file `%s`", filename);
-  return stream;
 }
 
 string_t *string_allocate(int min_capacity)
@@ -94,20 +85,6 @@ string_t *string_from_stream(FILE *stream, char terminal)
     ++str->length;
   }
   add_char(str, '\0');
-  return str;
-}
-
-string_t *string_from_file(const char *filename)
-{
-  FILE *stream = open_file(filename, "rb");
-  fseek(stream, 0L, SEEK_END);
-  int length = ftell(stream);
-  rewind(stream);
-  string_t *str = string_allocate(length);
-  str->length = length;
-  ASSERT(fread(str->chars, length, 1, stream) == 1, "unexpected error on fread()");
-  str->chars[length] = '\0';
-  fclose(stream);
   return str;
 }
 
