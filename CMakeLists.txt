@@ -29,6 +29,7 @@ add_executable(${PROJECT_NAME}
   src/builtin.c
   src/callable.c
   src/chunk.c
+  src/common.c
   src/compiler.c
   src/dump.c
   src/error.c
@@ -59,6 +60,7 @@ add_library(math SHARED
   src/builtin.c
   src/callable.c
   src/chunk.c
+  src/common.c
   src/compiler.c
   src/error.c
   src/hash.c
@@ -77,6 +79,7 @@ add_library(os SHARED
   src/builtin.c
   src/callable.c
   src/chunk.c
+  src/common.c
   src/compiler.c
   src/error.c
   src/hash.c
@@ -95,6 +98,7 @@ add_library(io SHARED
   src/builtin.c
   src/callable.c
   src/chunk.c
+  src/common.c
   src/compiler.c
   src/error.c
   src/hash.c
@@ -112,6 +116,7 @@ add_library(strings SHARED
   src/array.c
   src/callable.c
   src/chunk.c
+  src/common.c
   src/error.c
   src/hash.c
   src/library.c
@@ -128,6 +133,7 @@ add_library(arrays SHARED
   src/arrays.c
   src/callable.c
   src/chunk.c
+  src/common.c
   src/error.c
   src/hash.c
   src/library.c
@@ -147,6 +153,7 @@ add_library(sqlite SHARED
   src/array.c
   src/callable.c
   src/chunk.c
+  src/common.c
   src/error.c
   src/hash.c
   src/library.c
@@ -162,6 +169,7 @@ add_library(url SHARED
   src/array.c
   src/callable.c
   src/chunk.c
+  src/common.c
   src/url.c
   src/error.c
   src/hash.c

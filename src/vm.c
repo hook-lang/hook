@@ -1378,9 +1378,7 @@ static inline void move_result(vm_t *vm, value_t *frame)
 
 void vm_init(vm_t *vm, int min_capacity)
 {
-  int capacity = VM_MIN_CAPACITY;
-  while (capacity < min_capacity)
-    capacity <<= 1;
+  int capacity = nearest_power_of_two(VM_MIN_CAPACITY, min_capacity);
   vm->capacity = capacity;
   vm->limit = capacity - 1;
   vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);

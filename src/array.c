@@ -14,9 +14,7 @@ static inline void resize(array_t *arr, int min_capacity)
 {
   if (min_capacity <= arr->capacity)
     return;
-  int capacity = arr->capacity;
-  while (capacity < min_capacity)
-    capacity <<= 1;
+  int capacity = nearest_power_of_two(arr->capacity, min_capacity);
   arr->capacity = capacity;
   arr->elements = (value_t *) reallocate(arr->elements,
     sizeof(*arr->elements) * capacity);
@@ -25,9 +23,7 @@ static inline void resize(array_t *arr, int min_capacity)
 array_t *array_allocate(int min_capacity)
 {
   array_t *arr = (array_t *) allocate(sizeof(*arr));
-  int capacity = ARRAY_MIN_CAPACITY;
-  while (capacity < min_capacity)
-    capacity <<= 1;
+  int capacity = nearest_power_of_two(ARRAY_MIN_CAPACITY, min_capacity);
   arr->ref_count = 0;
   arr->capacity = capacity;
   arr->elements = (value_t *) allocate(sizeof(*arr->elements) * capacity);

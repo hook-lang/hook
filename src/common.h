@@ -20,4 +20,6 @@
     } \
   } while(0)
 
+int nearest_power_of_two(int m, int n);
+
 #endif // COMMON_H

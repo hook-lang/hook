@@ -20,9 +20,7 @@ static inline void resize(string_t *str, int min_capacity)
 {
   if (min_capacity <= str->capacity)
     return;
-  int capacity = str->capacity;
-  while (capacity < min_capacity)
-    capacity <<= 1;
+  int capacity = nearest_power_of_two(str->capacity, min_capacity);
   str->capacity = capacity;
   str->chars = (char *) reallocate(str->chars, capacity);
 }
@@ -37,9 +35,7 @@ string_t *string_allocate(int min_capacity)
 {
   ++min_capacity;
   string_t *str = (string_t *) allocate(sizeof(*str));
-  int capacity = STRING_MIN_CAPACITY;
-  while (capacity < min_capacity)
-    capacity <<= 1;
+  int capacity = nearest_power_of_two(STRING_MIN_CAPACITY, min_capacity);
   str->ref_count = 0;
   str->capacity = capacity;
   str->chars = (char *) allocate(capacity);

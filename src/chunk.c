@@ -5,6 +5,7 @@
 
 #include "chunk.h"
 #include <stdlib.h>
+#include "common.h"
 #include "memory.h"
 
 #define CHUNK_MIN_CAPACITY (1 << 3)
@@ -15,9 +16,7 @@ static inline void resize(chunk_t *chunk, int min_capacity)
 {
   if (min_capacity <= chunk->capacity)
     return;
-  int capacity = chunk->capacity;
-  while (capacity < min_capacity)
-    capacity <<= 1;
+  int capacity = nearest_power_of_two(chunk->capacity, min_capacity);
   chunk->capacity = capacity;
   chunk->bytes = (uint8_t *) reallocate(chunk->bytes, capacity);
 }
