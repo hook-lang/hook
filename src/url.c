@@ -100,16 +100,12 @@ void __declspec(dllexport) __stdcall load_url(vm_t *vm)
 void load_url(vm_t *vm)
 #endif
 {
-  char new[] = "new";
-  char cleanup[] = "cleanup";
-  char perform[] = "perform";
-  struct_t *ztruct = struct_new(string_from_chars(-1, "url"));
-  struct_put(ztruct, sizeof(new) - 1, new);
-  struct_put(ztruct, sizeof(cleanup) - 1, cleanup);
-  struct_put(ztruct, sizeof(perform) - 1, perform);
-  vm_push_native(vm, native_new(string_from_chars(-1, new), 1, &new_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, cleanup), 1, &cleanup_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, perform), 1, &perform_call));
-  vm_push_struct(vm, ztruct);
-  vm_instance(vm);
+  vm_push_string(vm, string_from_chars(-1, "url"));
+  vm_push_string(vm, string_from_chars(-1, "new"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "new"), 1, &new_call));
+  vm_push_string(vm, string_from_chars(-1, "cleanup"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "cleanup"), 1, &cleanup_call));
+  vm_push_string(vm, string_from_chars(-1, "perform"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "perform"), 1, &perform_call));
+  vm_construct(vm, 3);
 }

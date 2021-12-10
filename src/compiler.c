@@ -116,8 +116,8 @@ static void compile_add_expression(compiler_t *comp);
 static void compile_mul_expression(compiler_t *comp);
 static void compile_unary_expression(compiler_t *comp);
 static void compile_prim_expression(compiler_t *comp);
-static void compile_array_initializer(compiler_t *comp);
-static void compile_struct_initializer(compiler_t *comp);
+static void compile_array_constructor(compiler_t *comp);
+static void compile_struct_constructor(compiler_t *comp);
 static void compile_if_expression(compiler_t *comp);
 static void compile_match_expression(compiler_t *comp);
 static void compile_match_expression_member(compiler_t *comp);
@@ -867,30 +867,42 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
   int line = scan->token.line;
   scanner_next_token(scan);
   token_t tk;
-  string_t *name = NULL;
-  if (!is_anonymous)
+  uint8_t index;
+  if (is_anonymous)
+  {
+    chunk_emit_opcode(chunk, OP_NULL);
+    prototype_add_line(proto, line);
+  }
+  else
   {
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
     tk = scan->token;
     scanner_next_token(scan);
     define_local(comp, &tk, false);
-    name = string_from_chars(tk.length, tk.start);
+    index = add_string_constant(proto, &tk);
+    chunk_emit_opcode(chunk, OP_CONSTANT);
+    chunk_emit_byte(chunk, index);
+    prototype_add_line(proto, tk.line);
   }
-  struct_t *ztruct = struct_new(name);
   EXPECT(scan, TOKEN_LBRACE);
   if (MATCH(scan, TOKEN_RBRACE))
   {
     scanner_next_token(scan);
-    goto end;
+    chunk_emit_opcode(chunk, OP_STRUCT);
+    chunk_emit_byte(chunk, 0);
+    prototype_add_line(proto, line);
+    return;
   }
   if (!MATCH(scan, TOKEN_NAME))
     fatal_error_unexpected_token(scan);
   tk = scan->token;
   scanner_next_token(scan);
-  if (!struct_put_if_absent(ztruct, tk.length, tk.start))
-    fatal_error("field `%.*s` is already declared at %d:%d", tk.length,
-      tk.start, tk.line, tk.col);
+  index = add_string_constant(proto, &tk);
+  chunk_emit_opcode(chunk, OP_CONSTANT);
+  chunk_emit_byte(chunk, index);
+  prototype_add_line(proto, tk.line);
+  uint8_t length = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
@@ -898,16 +910,15 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
       fatal_error_unexpected_token(scan);
     tk = scan->token;
     scanner_next_token(scan);
-    if (!struct_put_if_absent(ztruct, tk.length, tk.start))
-      fatal_error("field `%.*s` is already declared at %d:%d", tk.length,
-        tk.start, tk.line, tk.col);
+    index = add_string_constant(proto, &tk);
+    chunk_emit_opcode(chunk, OP_CONSTANT);
+    chunk_emit_byte(chunk, index);
+    prototype_add_line(proto, tk.line);
+    ++length;
   }
   EXPECT(scan, TOKEN_RBRACE);
-  uint8_t index;
-end:
-  index = add_constant(proto, STRUCT_VALUE(ztruct));
-  chunk_emit_opcode(chunk, OP_CONSTANT);
-  chunk_emit_byte(chunk, index);
+  chunk_emit_opcode(chunk, OP_STRUCT);
+  chunk_emit_byte(chunk, length);
   prototype_add_line(proto, line);
 }
 
@@ -1564,12 +1575,12 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (MATCH(scan, TOKEN_LBRACKET))
   {
-    compile_array_initializer(comp);
+    compile_array_constructor(comp);
     return;
   }
   if (MATCH(scan, TOKEN_LBRACE))
   {
-    compile_struct_initializer(comp);
+    compile_struct_constructor(comp);
     return;
   }
   if (MATCH(scan, TOKEN_STRUCT))
@@ -1607,7 +1618,7 @@ static void compile_prim_expression(compiler_t *comp)
   fatal_error_unexpected_token(scan);
 }
 
-static void compile_array_initializer(compiler_t *comp)
+static void compile_array_constructor(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
@@ -1636,28 +1647,34 @@ end:
   return;
 }
 
-static void compile_struct_initializer(compiler_t *comp)
+static void compile_struct_constructor(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
   int line = scan->token.line;
   scanner_next_token(scan);
-  struct_t *ztruct = struct_new(NULL);
+  chunk_emit_opcode(chunk, OP_NULL);
+  prototype_add_line(proto, line);
   if (MATCH(scan, TOKEN_RBRACE))
   {
     scanner_next_token(scan);
-    goto end;
+    chunk_emit_opcode(chunk, OP_CONSTRUCT);
+    chunk_emit_byte(chunk, 0);
+    prototype_add_line(proto, line);
+    return;
   }
   if (!MATCH(scan, TOKEN_NAME))
     fatal_error_unexpected_token(scan);
   token_t tk = scan->token;
   scanner_next_token(scan);
-  if (!struct_put_if_absent(ztruct, tk.length, tk.start))
-    fatal_error("field `%.*s` is already declared at %d:%d", tk.length,
-      tk.start, tk.line, tk.col);
+  uint8_t index = add_string_constant(proto, &tk);
+  chunk_emit_opcode(chunk, OP_CONSTANT);
+  chunk_emit_byte(chunk, index);
+  prototype_add_line(proto, tk.line);
   EXPECT(scan, TOKEN_COLON);
   compile_expression(comp);
+  uint8_t length = 1;
   while (MATCH(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
@@ -1665,20 +1682,17 @@ static void compile_struct_initializer(compiler_t *comp)
       fatal_error_unexpected_token(scan);
     tk = scan->token;
     scanner_next_token(scan);
-    if (!struct_put_if_absent(ztruct, tk.length, tk.start))
-      fatal_error("field `%.*s` is already declared at %d:%d", tk.length,
-        tk.start, tk.line, tk.col);
+    index = add_string_constant(proto, &tk);
+    chunk_emit_opcode(chunk, OP_CONSTANT);
+    chunk_emit_byte(chunk, index);
+    prototype_add_line(proto, tk.line);
     EXPECT(scan, TOKEN_COLON);
     compile_expression(comp);
+    ++length;
   }
   EXPECT(scan, TOKEN_RBRACE);
-  uint8_t index;
-end:
-  index = add_constant(proto, STRUCT_VALUE(ztruct));
-  chunk_emit_opcode(chunk, OP_CONSTANT);
-  chunk_emit_byte(chunk, index);
-  prototype_add_line(proto, line);
-  chunk_emit_opcode(chunk, OP_INSTANCE);
+  chunk_emit_opcode(chunk, OP_CONSTRUCT);
+  chunk_emit_byte(chunk, length);
   prototype_add_line(proto, line);
 }
 
@@ -1830,7 +1844,7 @@ static void compile_subscript(compiler_t *comp)
     if (MATCH(scan, TOKEN_RBRACE))
     {
       scanner_next_token(scan);
-      chunk_emit_opcode(chunk, OP_INITIALIZE);
+      chunk_emit_opcode(chunk, OP_INSTANCE);
       chunk_emit_byte(chunk, 0);
       prototype_add_line(proto, line);
       return;
@@ -1844,7 +1858,7 @@ static void compile_subscript(compiler_t *comp)
       ++num_args;
     }
     EXPECT(scan, TOKEN_RBRACE);
-    chunk_emit_opcode(chunk, OP_INITIALIZE);
+    chunk_emit_opcode(chunk, OP_INSTANCE);
     chunk_emit_byte(chunk, num_args);
     prototype_add_line(proto, line);
   }

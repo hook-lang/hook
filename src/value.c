@@ -237,12 +237,10 @@ void value_serialize(value_t val, FILE *stream)
   case TYPE_STRING:
     string_serialize(AS_STRING(val), stream);
     break;
-  case TYPE_STRUCT:
-    struct_serialize(AS_STRUCT(val), stream);
-    break;
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
+  case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
@@ -278,17 +276,10 @@ bool value_deserialize(FILE *stream, value_t *result)
       val = STRING_VALUE(str);
     }
     break;
-  case TYPE_STRUCT:
-    {
-      struct_t *ztruct = struct_deserialize(stream);
-      if (!ztruct)
-        return false;
-      val = STRUCT_VALUE(ztruct);
-    }
-    break;
   case TYPE_NULL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
+  case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:

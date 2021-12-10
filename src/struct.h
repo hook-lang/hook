@@ -38,11 +38,8 @@ typedef struct
 struct_t *struct_new(string_t *name);
 void struct_free(struct_t *ztruct);
 int struct_index_of(struct_t *ztruct, string_t *name);
-void struct_put(struct_t *ztruct, int length, char *chars);
-bool struct_put_if_absent(struct_t *ztruct, int length, char *chars);
+bool struct_define_field(struct_t *ztruct, string_t *name);
 bool struct_equal(struct_t *ztruct1, struct_t *ztruct2);
-void struct_serialize(struct_t *ztruct, FILE *stream);
-struct_t *struct_deserialize(FILE *stream);
 instance_t *instance_allocate(struct_t *ztruct);
 void instance_free(instance_t *inst);
 instance_t *instance_set_field(instance_t *inst, int index, value_t value);

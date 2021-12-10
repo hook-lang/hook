@@ -46,11 +46,14 @@ void dump(prototype_t *proto)
     case OP_ARRAY:
       printf("  [%05d] Array                 %d\n", j, bytes[i++]);
       break;
-    case OP_INSTANCE:
-      printf("  [%05d] Instance\n", j);
+    case OP_STRUCT:
+      printf("  [%05d] Struct                %d\n", j, bytes[i++]);
       break;
-    case OP_INITIALIZE:
-      printf("  [%05d] Initialize            %d\n", j, bytes[i++]);
+    case OP_INSTANCE:
+      printf("  [%05d] Instance              %d\n", j, bytes[i++]);
+      break;
+    case OP_CONSTRUCT:
+      printf("  [%05d] Construct             %d\n", j, bytes[i++]);
       break;
     case OP_FUNCTION:
       printf("  [%05d] Function              %d\n", j, bytes[i++]);

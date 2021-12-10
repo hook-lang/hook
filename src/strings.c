@@ -118,25 +118,18 @@ void __declspec(dllexport) __stdcall load_strings(vm_t *vm)
 void load_strings(vm_t *vm)
 #endif
 {
-  char hash[] = "hash";
-  char lower[] = "lower";
-  char upper[] = "upper";
-  char trim[] = "trim";
-  char starts_with[] = "starts_with";
-  char ends_with[] = "ends_with";
-  struct_t *ztruct = struct_new(string_from_chars(-1, "strings"));
-  struct_put(ztruct, sizeof(hash) - 1, hash);
-  struct_put(ztruct, sizeof(lower) - 1, lower);
-  struct_put(ztruct, sizeof(upper) - 1, upper);
-  struct_put(ztruct, sizeof(trim) - 1, trim);
-  struct_put(ztruct, sizeof(starts_with) - 1, starts_with);
-  struct_put(ztruct, sizeof(ends_with) - 1, ends_with);
-  vm_push_native(vm, native_new(string_from_chars(-1, hash), 1, &hash_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, lower), 1, &lower_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, upper), 1, &upper_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, trim), 1, &trim_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, starts_with), 2, &starts_with_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, ends_with), 2, &ends_with_call));
-  vm_push_struct(vm, ztruct);
-  vm_instance(vm);
+  vm_push_string(vm, string_from_chars(-1, "strings"));
+  vm_push_string(vm, string_from_chars(-1, "hash"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "hash"), 1, &hash_call));
+  vm_push_string(vm, string_from_chars(-1, "lower"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "lower"), 1, &lower_call));
+  vm_push_string(vm, string_from_chars(-1, "upper"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "upper"), 1, &upper_call));
+  vm_push_string(vm, string_from_chars(-1, "trim"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "trim"), 1, &trim_call));
+  vm_push_string(vm, string_from_chars(-1, "starts_with"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "starts_with"), 2, &starts_with_call));
+  vm_push_string(vm, string_from_chars(-1, "ends_with"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "ends_with"), 2, &ends_with_call));
+  vm_construct(vm, 6);
 }

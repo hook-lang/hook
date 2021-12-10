@@ -16,8 +16,9 @@ static inline int push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
 static inline int array(vm_t *vm, int length);
-static inline void instance(vm_t *vm);
-static inline int initialize(vm_t *vm, int num_args);
+static inline int ztruct(vm_t *vm, int length);
+static inline int instance(vm_t *vm, int length);
+static inline int construct(vm_t *vm, int length);
 static inline int function(vm_t *vm, prototype_t *proto);
 static inline int unpack(vm_t *vm, int n);
 static inline int destruct(vm_t *vm, int n);
@@ -98,23 +99,36 @@ static inline int array(vm_t *vm, int length)
   return STATUS_OK;
 }
 
-static inline void instance(vm_t *vm)
+static inline int ztruct(vm_t *vm, int length)
 {
-  struct_t *ztruct = AS_STRUCT(vm->slots[vm->top]);
-  int length = ztruct->length;
   value_t *slots = &vm->slots[vm->top - length];
-  instance_t *inst = instance_allocate(ztruct);
-  for (int i = 0; i < length; ++i)
-    inst->values[i] = slots[i];
+  value_t val = slots[0];
+  string_t *struct_name = IS_NULL(val) ? NULL : AS_STRING(val);
+  struct_t *ztruct = struct_new(struct_name);
+  for (int i = 1; i <= length; ++i)
+  {
+    string_t *field_name = AS_STRING(slots[i]);
+    if (!struct_define_field(ztruct, field_name))
+    {
+      runtime_error("field `%.*s` is already defined", field_name->length,
+        field_name->chars);
+      struct_free(ztruct);
+      return STATUS_ERROR;
+    }
+  }
+  for (int i = 1; i <= length; ++i)
+    DECR_REF(AS_OBJECT(slots[i]));
   vm->top -= length;
-  INCR_REF(inst);
-  slots[0] = INSTANCE_VALUE(inst);
-  DECR_REF(ztruct);
+  INCR_REF(ztruct);
+  slots[0] = STRUCT_VALUE(ztruct);
+  if (struct_name)
+    DECR_REF(struct_name);
+  return STATUS_OK;
 }
 
-static inline int initialize(vm_t *vm, int num_args)
+static inline int instance(vm_t *vm, int length)
 {
-  value_t *slots = &vm->slots[vm->top - num_args];
+  value_t *slots = &vm->slots[vm->top - length];
   value_t val = slots[0];
   if (!IS_STRUCT(val))
   {
@@ -122,15 +136,21 @@ static inline int initialize(vm_t *vm, int num_args)
     return STATUS_ERROR;
   }
   struct_t *ztruct = AS_STRUCT(val);
-  int length = ztruct->length;
-  if (length != num_args)
+  if (ztruct->length > length)
   {
-    const char *fmt = length == 1 ? 
-      "initializer of %s expects %d argument but got %d" :
-      "initializer of %s expects %d arguments but got %d";
+    int n = ztruct->length - length;
+    const char *fmt = n == 1 ? 
+      "missing %d value in initializer of `%s`" :
+      "missing %d values in initializer of `%s`";  
     string_t *name = ztruct->name;
-    char *name_chars = name ? name->chars : "<anonymous>";
-    runtime_error(fmt, name_chars, length, num_args);
+    runtime_error(fmt, n, name ? name->chars : "<anonymous>");
+    return STATUS_ERROR;
+  }
+  if (ztruct->length < length)
+  {
+    const char *fmt = "too many values in initializer of `%s`";
+    string_t *name = ztruct->name;
+    runtime_error(fmt, name ? name->chars : "<anonymous>");
     return STATUS_ERROR;
   }
   instance_t *inst = instance_allocate(ztruct);
@@ -142,6 +162,37 @@ static inline int initialize(vm_t *vm, int num_args)
   DECR_REF(ztruct);
   if (IS_UNREACHABLE(ztruct))
     struct_free(ztruct);
+  return STATUS_OK;
+}
+
+static inline int construct(vm_t *vm, int length)
+{
+  int n = length << 1;
+  value_t *slots = &vm->slots[vm->top - n];
+  value_t val = slots[0];
+  string_t *struct_name = IS_NULL(val) ? NULL : AS_STRING(val);
+  struct_t *ztruct = struct_new(struct_name);
+  for (int i = 1; i <= n; i += 2)
+  {
+    string_t *field_name = AS_STRING(slots[i]);
+    if (!struct_define_field(ztruct, field_name))
+    {
+      runtime_error("field `%.*s` is already defined", field_name->length,
+        field_name->chars);
+      struct_free(ztruct);
+      return STATUS_ERROR;
+    }
+  }
+  for (int i = 1; i <= n; i += 2)
+    DECR_REF(AS_OBJECT(slots[i]));
+  instance_t *inst = instance_allocate(ztruct);
+  for (int i = 2, j = 0; i <= n + 1; i += 2, ++j)
+    inst->values[j] = slots[i];
+  vm->top -= n;
+  INCR_REF(inst);
+  slots[0] = INSTANCE_VALUE(inst);
+  if (struct_name)
+    DECR_REF(struct_name);
   return STATUS_OK;
 }
 
@@ -1119,11 +1170,16 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       if (array(vm, read_byte(&pc)) == STATUS_ERROR)
         goto error;
       break;
-    case OP_INSTANCE:
-      instance(vm);
+    case OP_STRUCT:
+      if (ztruct(vm, read_byte(&pc)) == STATUS_ERROR)
+        goto error;
       break;
-    case OP_INITIALIZE:
-      if (initialize(vm, read_byte(&pc)) == STATUS_ERROR)
+    case OP_INSTANCE:
+      if (instance(vm, read_byte(&pc)) == STATUS_ERROR)
+        goto error;
+      break;
+    case OP_CONSTRUCT:
+      if (construct(vm, read_byte(&pc)) == STATUS_ERROR)
         goto error;
       break;
     case OP_FUNCTION:
@@ -1458,14 +1514,19 @@ void vm_pop(vm_t *vm)
   value_release(val);
 }
 
-void vm_instance(vm_t *vm)
+void vm_struct(vm_t *vm, int length)
 {
-  instance(vm);
+  ztruct(vm, length);
 }
 
-int vm_initialize(vm_t *vm, int num_args)
+void vm_instance(vm_t *vm, int length)
 {
-  return initialize(vm, num_args);
+  instance(vm, length);
+}
+
+int vm_construct(vm_t *vm, int length)
+{
+  return construct(vm, length);
 }
 
 int vm_call(vm_t *vm, int num_args)

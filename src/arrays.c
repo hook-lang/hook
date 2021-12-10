@@ -136,22 +136,16 @@ void __declspec(dllexport) __stdcall load_arrays(vm_t *vm)
 void load_arrays(vm_t *vm)
 #endif
 {
-  char new_array[] = "new_array";
-  char index_of[] = "index_of";
-  char min[] = "min";
-  char max[] = "max";
-  char sum[] = "sum";
-  struct_t *ztruct = struct_new(string_from_chars(-1, "arrays"));
-  struct_put(ztruct, sizeof(new_array) - 1, new_array);
-  struct_put(ztruct, sizeof(index_of) - 1, index_of);
-  struct_put(ztruct, sizeof(min) - 1, min);
-  struct_put(ztruct, sizeof(max) - 1, max);
-  struct_put(ztruct, sizeof(sum) - 1, sum);
-  vm_push_native(vm, native_new(string_from_chars(-1, new_array), 1, &new_array_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, new_array), 2, &index_of_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, new_array), 1, &min_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, new_array), 1, &max_call));
-  vm_push_native(vm, native_new(string_from_chars(-1, new_array), 1, &sum_call));
-  vm_push_struct(vm, ztruct);
-  vm_instance(vm);
+  vm_push_string(vm, string_from_chars(-1, "arrays"));
+  vm_push_string(vm, string_from_chars(-1, "new_array"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "new_array"), 1, &new_array_call));
+  vm_push_string(vm, string_from_chars(-1, "index_of"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "index_of"), 2, &index_of_call));
+  vm_push_string(vm, string_from_chars(-1, "min"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "min"), 1, &min_call));
+  vm_push_string(vm, string_from_chars(-1, "max"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "max"), 1, &max_call));
+  vm_push_string(vm, string_from_chars(-1, "sum"));
+  vm_push_native(vm, native_new(string_from_chars(-1, "sum"), 1, &sum_call));
+  vm_construct(vm, 5);
 }
