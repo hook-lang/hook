@@ -248,11 +248,6 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_SEMICOLON;
     return;
   }
-  if (match_char(scan, '_'))
-  {
-    scan->token.type = TOKEN_UNDERSCORE;
-    return;
-  }
   if (match_char(scan, '('))
   {
     scan->token.type = TOKEN_LPAREN;
@@ -402,6 +397,11 @@ void scanner_next_token(scanner_t *scan)
     return;
   if (match_string(scan))
     return;
+  if (match_chars(scan, "_"))
+  {
+    scan->token.type = TOKEN_UNDERSCORE;
+    return;
+  }
   if (match_chars(scan, "as"))
   {
     scan->token.type = TOKEN_AS;
