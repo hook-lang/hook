@@ -96,20 +96,20 @@ void __declspec(dllexport) __stdcall load_math(vm_t *vm)
 void load_math(vm_t *vm)
 #endif
 {
-  vm_push_string(vm, string_from_chars(-1, "math"));
-  vm_push_string(vm, string_from_chars(-1, "Pi"));
+  vm_push_string_from_chars(vm, -1, "math");
+  vm_push_string_from_chars(vm, -1, "Pi");
   vm_push_number(vm, M_PI);
-  vm_push_string(vm, string_from_chars(-1, "abs"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "abs"), 1, &abs_call));
-  vm_push_string(vm, string_from_chars(-1, "floor"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "floor"), 1, &floor_call));
-  vm_push_string(vm, string_from_chars(-1, "ceil"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "ceil"), 1, &ceil_call));
-  vm_push_string(vm, string_from_chars(-1, "pow"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "pow"), 2, &pow_call));
-  vm_push_string(vm, string_from_chars(-1, "sqrt"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "sqrt"), 1, &sqrt_call));
-  vm_push_string(vm, string_from_chars(-1, "random"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "random"), 0, &random_call));
-  vm_construct(vm, 7);
+  vm_push_string_from_chars(vm, -1, "abs");
+  vm_push_new_native(vm, "abs", 1, &abs_call);
+  vm_push_string_from_chars(vm, -1, "floor");
+  vm_push_new_native(vm, "floor", 1, &floor_call);
+  vm_push_string_from_chars(vm, -1, "ceil");
+  vm_push_new_native(vm, "ceil", 1, &ceil_call);
+  vm_push_string_from_chars(vm, -1, "pow");
+  vm_push_new_native(vm, "pow", 2, &pow_call);
+  vm_push_string_from_chars(vm, -1, "sqrt");
+  vm_push_new_native(vm, "sqrt", 1, &sqrt_call);
+  vm_push_string_from_chars(vm, -1, "random");
+  vm_push_new_native(vm, "random", 0, &random_call);
+  ASSERT(vm_construct(vm, 7) == STATUS_OK, "cannot load library `math`");
 }

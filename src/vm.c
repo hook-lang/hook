@@ -1448,7 +1448,7 @@ void vm_free(vm_t *vm)
   free(vm->slots);
 }
 
-int vm_push_value(vm_t *vm, value_t val)
+int vm_push(vm_t *vm, value_t val)
 {
   if (push(vm, val) == STATUS_ERROR)
     return STATUS_ERROR;
@@ -1473,37 +1473,100 @@ int vm_push_number(vm_t *vm, double data)
 
 int vm_push_string(vm_t *vm, string_t *str)
 {
-  return vm_push_value(vm, STRING_VALUE(str));
+  if (push(vm, STRING_VALUE(str)) == STATUS_ERROR)
+    return STATUS_ERROR;
+  INCR_REF(str);
+  return STATUS_OK;
+}
+
+int vm_push_string_from_chars(vm_t *vm, int length, const char *chars)
+{   
+  string_t *str = string_from_chars(length, chars);
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
 }
 
 int vm_push_array(vm_t *vm, array_t *arr)
 {
-  return vm_push_value(vm, ARRAY_VALUE(arr));
+  if (push(vm, ARRAY_VALUE(arr)) == STATUS_ERROR)
+    return STATUS_ERROR;
+  INCR_REF(arr);
+  return STATUS_OK;
 }
 
 int vm_push_struct(vm_t *vm, struct_t *ztruct)
 {
-  return vm_push_value(vm, STRUCT_VALUE(ztruct));
+  if (push(vm, STRUCT_VALUE(ztruct)) == STATUS_ERROR)
+    return STATUS_ERROR;
+  INCR_REF(ztruct);
+  return STATUS_OK;
 }
 
 int vm_push_instance(vm_t *vm, instance_t *inst)
 {
-  return vm_push_value(vm, INSTANCE_VALUE(inst));
+  if (push(vm, INSTANCE_VALUE(inst)) == STATUS_ERROR)
+    return STATUS_ERROR;
+  INCR_REF(inst);
+  return STATUS_OK;
 }
 
 int vm_push_function(vm_t *vm, function_t *fn)
 {
-  return vm_push_value(vm, FUNCTION_VALUE(fn));
+  if (push(vm, FUNCTION_VALUE(fn)) == STATUS_ERROR)
+    return STATUS_ERROR;
+  INCR_REF(fn);
+  return STATUS_OK;
 }
 
 int vm_push_native(vm_t *vm, native_t *native)
 {
-  return vm_push_value(vm, NATIVE_VALUE(native));
+  if (push(vm, NATIVE_VALUE(native)) == STATUS_ERROR)
+    return STATUS_ERROR;
+  INCR_REF(native);
+  return STATUS_OK;
+}
+
+int vm_push_new_native(vm_t *vm, const char *name, int arity, int (*call)(vm_t *, value_t *))
+{
+  native_t *native = native_new(string_from_chars(-1, name), arity, call);
+  if (vm_push_native(vm, native) == STATUS_ERROR)
+  {
+    native_free(native);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
 }
 
 int vm_push_userdata(vm_t *vm, userdata_t *udata)
 {
-  return vm_push_value(vm, USERDATA_VALUE(udata));
+  if (push(vm, USERDATA_VALUE(udata)) == STATUS_ERROR)
+    return STATUS_ERROR;
+  INCR_REF(udata);
+  return STATUS_OK;
+}
+
+int vm_array(vm_t *vm, int length)
+{
+  return array(vm, length);
+}
+
+int vm_struct(vm_t *vm, int length)
+{
+  return ztruct(vm, length);
+}
+
+int vm_instance(vm_t *vm, int length)
+{
+  return instance(vm, length);
+}
+
+int vm_construct(vm_t *vm, int length)
+{
+  return construct(vm, length);
 }
 
 void vm_pop(vm_t *vm)
@@ -1512,21 +1575,6 @@ void vm_pop(vm_t *vm)
   value_t val = vm->slots[vm->top];
   --vm->top;
   value_release(val);
-}
-
-void vm_struct(vm_t *vm, int length)
-{
-  ztruct(vm, length);
-}
-
-void vm_instance(vm_t *vm, int length)
-{
-  instance(vm, length);
-}
-
-int vm_construct(vm_t *vm, int length)
-{
-  return construct(vm, length);
 }
 
 int vm_call(vm_t *vm, int num_args)

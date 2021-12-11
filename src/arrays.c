@@ -4,6 +4,7 @@
 //
 
 #include "arrays.h"
+#include <stdlib.h>
 #include <limits.h>
 #include "common.h"
 #include "error.h"
@@ -74,7 +75,7 @@ static int min_call(vm_t *vm, value_t *frame)
       return STATUS_ERROR;
     min = result < 0 ? elem : min;
   }
-  vm_push_value(vm, min);
+  vm_push(vm, min);
   return STATUS_OK;
 }
 
@@ -102,7 +103,7 @@ static int max_call(vm_t *vm, value_t *frame)
       return STATUS_ERROR;
     max = result > 0 ? elem : max;
   }
-  vm_push_value(vm, max);
+  vm_push(vm, max);
   return STATUS_OK;
 }
 
@@ -136,16 +137,16 @@ void __declspec(dllexport) __stdcall load_arrays(vm_t *vm)
 void load_arrays(vm_t *vm)
 #endif
 {
-  vm_push_string(vm, string_from_chars(-1, "arrays"));
-  vm_push_string(vm, string_from_chars(-1, "new_array"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "new_array"), 1, &new_array_call));
-  vm_push_string(vm, string_from_chars(-1, "index_of"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "index_of"), 2, &index_of_call));
-  vm_push_string(vm, string_from_chars(-1, "min"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "min"), 1, &min_call));
-  vm_push_string(vm, string_from_chars(-1, "max"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "max"), 1, &max_call));
-  vm_push_string(vm, string_from_chars(-1, "sum"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "sum"), 1, &sum_call));
-  vm_construct(vm, 5);
+  vm_push_string_from_chars(vm,-1, "arrays");
+  vm_push_string_from_chars(vm,-1, "new_array");
+  vm_push_new_native(vm, "new_array", 1, &new_array_call);
+  vm_push_string_from_chars(vm,-1, "index_of");
+  vm_push_new_native(vm, "index_of", 2, &index_of_call);
+  vm_push_string_from_chars(vm,-1, "min");
+  vm_push_new_native(vm, "min", 1, &min_call);
+  vm_push_string_from_chars(vm,-1, "max");
+  vm_push_new_native(vm, "max", 1, &max_call);
+  vm_push_string_from_chars(vm,-1, "sum");
+  vm_push_new_native(vm, "sum", 1, &sum_call);
+  ASSERT(vm_construct(vm, 5) == STATUS_OK, "cannot load library `arrays`");
 }

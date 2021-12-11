@@ -4,6 +4,7 @@
 //
 
 #include "url.h"
+#include <stdlib.h>
 #include <curl/curl.h>
 #include "memory.h"
 #include "common.h"
@@ -100,12 +101,12 @@ void __declspec(dllexport) __stdcall load_url(vm_t *vm)
 void load_url(vm_t *vm)
 #endif
 {
-  vm_push_string(vm, string_from_chars(-1, "url"));
-  vm_push_string(vm, string_from_chars(-1, "new"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "new"), 1, &new_call));
-  vm_push_string(vm, string_from_chars(-1, "cleanup"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "cleanup"), 1, &cleanup_call));
-  vm_push_string(vm, string_from_chars(-1, "perform"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "perform"), 1, &perform_call));
-  vm_construct(vm, 3);
+  vm_push_string_from_chars(vm, -1, "url");
+  vm_push_string_from_chars(vm, -1, "new");
+  vm_push_new_native(vm, "new", 1, &new_call);
+  vm_push_string_from_chars(vm, -1, "cleanup");
+  vm_push_new_native(vm, "cleanup", 1, &cleanup_call);
+  vm_push_string_from_chars(vm, -1, "perform");
+  vm_push_new_native(vm, "perform", 1, &perform_call);
+  ASSERT(vm_construct(vm, 3) == STATUS_OK, "cannot load library `url`");
 }

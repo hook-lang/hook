@@ -4,6 +4,7 @@
 //
 
 #include "sqlite.h"
+#include <stdlib.h>
 #include <sqlite3.h>
 #include <assert.h>
 #include "common.h"
@@ -263,20 +264,20 @@ void __declspec(dllexport) __stdcall load_sqlite(vm_t *vm)
 void load_sqlite(vm_t *vm)
 #endif
 {
-  vm_push_string(vm, string_from_chars(-1, "sqlite"));
-  vm_push_string(vm, string_from_chars(-1, "open"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "open"), 1, &open_call));
-  vm_push_string(vm, string_from_chars(-1, "close"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "close"), 1, &close_call));
-  vm_push_string(vm, string_from_chars(-1, "execute"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "execute"), 2, &execute_call));
-  vm_push_string(vm, string_from_chars(-1, "prepare"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "prepare"), 2, &prepare_call));
-  vm_push_string(vm, string_from_chars(-1, "finalize"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "finalize"), 1, &finalize_call));
-  vm_push_string(vm, string_from_chars(-1, "bind"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "bind"), 3, &bind_call));
-  vm_push_string(vm, string_from_chars(-1, "fetch"));
-  vm_push_native(vm, native_new(string_from_chars(-1, "fetch"), 1, &fetch_call));
-  vm_construct(vm, 7);
+  vm_push_string_from_chars(vm, -1, "sqlite");
+  vm_push_string_from_chars(vm, -1, "open");
+  vm_push_new_native(vm, "open", 1, &open_call);
+  vm_push_string_from_chars(vm, -1, "close");
+  vm_push_new_native(vm, "close", 1, &close_call);
+  vm_push_string_from_chars(vm, -1, "execute");
+  vm_push_new_native(vm, "execute", 2, &execute_call);
+  vm_push_string_from_chars(vm, -1, "prepare");
+  vm_push_new_native(vm, "prepare", 2, &prepare_call);
+  vm_push_string_from_chars(vm, -1, "finalize");
+  vm_push_new_native(vm, "finalize", 1, &finalize_call);
+  vm_push_string_from_chars(vm, -1, "bind");
+  vm_push_new_native(vm, "bind", 3, &bind_call);
+  vm_push_string_from_chars(vm, -1, "fetch");
+  vm_push_new_native(vm, "fetch", 1, &fetch_call);
+  ASSERT(vm_construct(vm, 7) == STATUS_OK, "cannot load library `sqlite`");
 }
