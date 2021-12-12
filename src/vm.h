@@ -28,6 +28,7 @@ int vm_push_boolean(vm_t *vm, bool data);
 int vm_push_number(vm_t *vm, double data);
 int vm_push_string(vm_t *vm, string_t *str);
 int vm_push_string_from_chars(vm_t *vm, int length, const char *chars);
+int vm_push_string_from_stream(vm_t *vm, FILE *stream, const char terminal);
 int vm_push_array(vm_t *vm, array_t *arr);
 int vm_push_struct(vm_t *vm, struct_t *ztruct);
 int vm_push_instance(vm_t *vm, instance_t *inst);

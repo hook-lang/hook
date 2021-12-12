@@ -62,7 +62,7 @@ string_t *string_from_chars(int length, const char *chars)
   return str;
 }
 
-string_t *string_from_stream(FILE *stream, char terminal)
+string_t *string_from_stream(FILE *stream, const char terminal)
 {
   string_t *str = string_allocate(0);
   str->length = 0;

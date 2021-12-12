@@ -281,8 +281,7 @@ static int readln_call(vm_t *vm, value_t *frame)
     return STATUS_ERROR;
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
-  string_t *str = string_from_stream(stream, '\n');
-  return vm_push_string(vm, str);
+  return vm_push_string_from_stream(vm, stream, '\n');
 }
 
 static int writeln_call(vm_t *vm, value_t *frame)

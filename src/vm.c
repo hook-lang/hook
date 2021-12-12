@@ -1490,6 +1490,17 @@ int vm_push_string_from_chars(vm_t *vm, int length, const char *chars)
   return STATUS_OK;
 }
 
+int vm_push_string_from_stream(vm_t *vm, FILE *stream, const char terminal)
+{
+  string_t *str = string_from_stream(stream, terminal);
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
+
 int vm_push_array(vm_t *vm, array_t *arr)
 {
   if (push(vm, ARRAY_VALUE(arr)) == STATUS_ERROR)
