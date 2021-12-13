@@ -124,7 +124,9 @@ static inline bool match_number(scanner_t *scan)
   token_type_t type = TOKEN_INT;
   if (CHAR_AT(scan, n) == '.')
   {
-    ++n;
+    if (!isdigit(CHAR_AT(scan, n + 1)))
+      goto end;
+    n += 2;
     while (isdigit(CHAR_AT(scan, n)))
       ++n;
     type = TOKEN_FLOAT;
@@ -142,6 +144,7 @@ static inline bool match_number(scanner_t *scan)
   }
   if (isalnum(CHAR_AT(scan, n)) || CHAR_AT(scan, n) == '_')
     return false;
+end:
   scan->token.type = type;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
