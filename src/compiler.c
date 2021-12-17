@@ -824,7 +824,7 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     int syn = compile_assign(comp, SYN_SUBSCRIPT, false);
     if (syn == SYN_ASSIGN)
     {
-      patch_opcode(chunk, offset, OP_SET_FIELD);
+      patch_opcode(chunk, offset, OP_FETCH_FIELD);
       chunk_emit_opcode(chunk, OP_SET_FIELD);
     }
     return syn;
