@@ -125,7 +125,7 @@ void string_inplace_concat(string_t *dest, string_t *src)
 
 void string_print(string_t *str, bool quoted)
 {
-  printf(quoted ? "`%.*s`" : "%.*s", str->length, str->chars);
+  printf(quoted ? "\"%.*s\"" : "%.*s", str->length, str->chars);
 }
 
 uint32_t string_hash(string_t *str)
