@@ -45,35 +45,35 @@ static const char *globals[] = {
   "panic"
 };
 
-static inline int check_argument(value_t *frame, int index, type_t type);
-static inline int check_argument_integer(value_t *frame, int index);
+static inline int check_argument(value_t *args, int index, type_t type);
+static inline int check_argument_integer(value_t *args, int index);
 static inline int string_to_double(string_t *str, double *result);
 static inline string_t *to_string(value_t val);
 static inline array_t *split(string_t *str, string_t *separator);
 static inline int join(array_t *arr, string_t *separator, string_t **result);
-static int print_call(vm_t *vm, value_t *frame);
-static int println_call(vm_t *vm, value_t *frame);
-static int type_call(vm_t *vm, value_t *frame);
-static int bool_call(vm_t *vm, value_t *frame);
-static int int_call(vm_t *vm, value_t *frame);
-static int float_call(vm_t *vm, value_t *frame);
-static int str_call(vm_t *vm, value_t *frame);
-static int ord_call(vm_t *vm, value_t *frame);
-static int chr_call(vm_t *vm, value_t *frame);
-static int cap_call(vm_t *vm, value_t *frame);
-static int len_call(vm_t *vm, value_t *frame);
-static int is_empty_call(vm_t *vm, value_t *frame);
-static int compare_call(vm_t *vm, value_t *frame);
-static int slice_call(vm_t *vm, value_t *frame);
-static int split_call(vm_t *vm, value_t *frame);
-static int join_call(vm_t *vm, value_t *frame);
-static int sleep_call(vm_t *vm, value_t *frame);
-static int assert_call(vm_t *vm, value_t *frame);
-static int panic_call(vm_t *vm, value_t *frame);
+static int print_call(vm_t *vm, value_t *args);
+static int println_call(vm_t *vm, value_t *args);
+static int type_call(vm_t *vm, value_t *args);
+static int bool_call(vm_t *vm, value_t *args);
+static int int_call(vm_t *vm, value_t *args);
+static int float_call(vm_t *vm, value_t *args);
+static int str_call(vm_t *vm, value_t *args);
+static int ord_call(vm_t *vm, value_t *args);
+static int chr_call(vm_t *vm, value_t *args);
+static int cap_call(vm_t *vm, value_t *args);
+static int len_call(vm_t *vm, value_t *args);
+static int is_empty_call(vm_t *vm, value_t *args);
+static int compare_call(vm_t *vm, value_t *args);
+static int slice_call(vm_t *vm, value_t *args);
+static int split_call(vm_t *vm, value_t *args);
+static int join_call(vm_t *vm, value_t *args);
+static int sleep_call(vm_t *vm, value_t *args);
+static int assert_call(vm_t *vm, value_t *args);
+static int panic_call(vm_t *vm, value_t *args);
 
-static inline int check_argument(value_t *frame, int index, type_t type)
+static inline int check_argument(value_t *args, int index, type_t type)
 {
-  if (frame[index].type != type)
+  if (args[index].type != type)
   {
     runtime_error("argument %d must be `%s`", index, type_name(type));
     return STATUS_ERROR;
@@ -81,9 +81,9 @@ static inline int check_argument(value_t *frame, int index, type_t type)
   return STATUS_OK;
 }
 
-static inline int check_argument_integer(value_t *frame, int index)
+static inline int check_argument_integer(value_t *args, int index)
 {
-  value_t val = frame[index];
+  value_t val = args[index];
   if (!IS_INTEGER(val))
   {
     runtime_error("argument %d must be integer", index);
@@ -184,32 +184,32 @@ static inline int join(array_t *arr, string_t *separator, string_t **result)
   return STATUS_OK;
 }
 
-static int print_call(vm_t *vm, value_t *frame)
+static int print_call(vm_t *vm, value_t *args)
 {
-  value_print(frame[1], false);
+  value_print(args[1], false);
   return vm_push_null(vm);
 }
 
-static int println_call(vm_t *vm, value_t *frame)
+static int println_call(vm_t *vm, value_t *args)
 {
-  value_print(frame[1], false);
+  value_print(args[1], false);
   printf("\n");
   return vm_push_null(vm);
 }
 
-static int type_call(vm_t *vm, value_t *frame)
+static int type_call(vm_t *vm, value_t *args)
 {
-  return vm_push_string_from_chars(vm, -1, type_name(frame[1].type));
+  return vm_push_string_from_chars(vm, -1, type_name(args[1].type));
 }
 
-static int bool_call(vm_t *vm, value_t *frame)
+static int bool_call(vm_t *vm, value_t *args)
 {
-  return vm_push_boolean(vm, IS_TRUTHY(frame[1]));
+  return vm_push_boolean(vm, IS_TRUTHY(args[1]));
 }
 
-static int int_call(vm_t *vm, value_t *frame)
+static int int_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   switch (val.type)
   {
   case TYPE_NUMBER:
@@ -217,7 +217,7 @@ static int int_call(vm_t *vm, value_t *frame)
   case TYPE_STRING:
     {
       double result;
-      if (string_to_double(AS_STRING(frame[1]), &result) == STATUS_ERROR)
+      if (string_to_double(AS_STRING(args[1]), &result) == STATUS_ERROR)
         return STATUS_ERROR;
       return vm_push_number(vm, (long) result);
     }
@@ -234,9 +234,9 @@ static int int_call(vm_t *vm, value_t *frame)
   return STATUS_ERROR;
 }
 
-static int float_call(vm_t *vm, value_t *frame)
+static int float_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   switch (val.type)
   {
   case TYPE_NUMBER:
@@ -244,7 +244,7 @@ static int float_call(vm_t *vm, value_t *frame)
   case TYPE_STRING:
     {
       double result;
-      if (string_to_double(AS_STRING(frame[1]), &result) == STATUS_ERROR)
+      if (string_to_double(AS_STRING(args[1]), &result) == STATUS_ERROR)
         return STATUS_ERROR;
       return vm_push_number(vm, result);
     }
@@ -261,9 +261,9 @@ static int float_call(vm_t *vm, value_t *frame)
   return STATUS_ERROR;
 }
 
-static int str_call(vm_t *vm, value_t *frame)
+static int str_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (IS_STRING(val))
     return STATUS_OK;
   string_t *str = to_string(val);
@@ -280,9 +280,9 @@ static int str_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
-static int ord_call(vm_t *vm, value_t *frame)
+static int ord_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
@@ -297,9 +297,9 @@ static int ord_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, (unsigned int) str->chars[0]);
 }
 
-static int chr_call(vm_t *vm, value_t *frame)
+static int chr_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_INTEGER(val))
   {
     runtime_error("invalid type: expected integer but got `%s`", type_name(val.type));
@@ -318,9 +318,9 @@ static int chr_call(vm_t *vm, value_t *frame)
   return vm_push_string(vm, str);
 }
 
-static int cap_call(vm_t *vm, value_t *frame)
+static int cap_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   switch (val.type)
   {
   case TYPE_STRING:
@@ -340,9 +340,9 @@ static int cap_call(vm_t *vm, value_t *frame)
   return STATUS_ERROR;
 }
 
-static int len_call(vm_t *vm, value_t *frame)
+static int len_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   switch (val.type)
   {
   case TYPE_STRING:
@@ -364,9 +364,9 @@ static int len_call(vm_t *vm, value_t *frame)
   return STATUS_ERROR;
 }
 
-static int is_empty_call(vm_t *vm, value_t *frame)
+static int is_empty_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   switch (val.type)
   {
   case TYPE_STRING:
@@ -388,29 +388,29 @@ static int is_empty_call(vm_t *vm, value_t *frame)
   return STATUS_ERROR;
 }
 
-static int compare_call(vm_t *vm, value_t *frame)
+static int compare_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   int result;
   if (value_compare(val1, val2, &result) == STATUS_ERROR)
     return STATUS_ERROR;
   return vm_push_number(vm, result);
 }
 
-static int slice_call(vm_t *vm, value_t *frame)
+static int slice_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   switch (val.type)
   {
   case TYPE_STRING:
     {
-      if (check_argument_integer(frame, 2) == STATUS_ERROR
-       || check_argument_integer(frame, 3) == STATUS_ERROR)
+      if (check_argument_integer(args, 2) == STATUS_ERROR
+       || check_argument_integer(args, 3) == STATUS_ERROR)
         return STATUS_ERROR;
       string_t *str = AS_STRING(val);
-      int start = (int) frame[2].as.number;
-      int stop = (int) frame[3].as.number;
+      int start = (int) args[2].as.number;
+      int stop = (int) args[3].as.number;
       string_t *result;
       if (!string_slice(str, start, stop, &result))
       {
@@ -427,12 +427,12 @@ static int slice_call(vm_t *vm, value_t *frame)
     return STATUS_OK;
   case TYPE_ARRAY:
     {
-      if (check_argument_integer(frame, 2) == STATUS_ERROR
-       || check_argument_integer(frame, 3) == STATUS_ERROR)
+      if (check_argument_integer(args, 2) == STATUS_ERROR
+       || check_argument_integer(args, 3) == STATUS_ERROR)
         return STATUS_ERROR;
       array_t *arr = AS_ARRAY(val);
-      int start = (int) frame[2].as.number;
-      int stop = (int) frame[3].as.number;
+      int start = (int) args[2].as.number;
+      int stop = (int) args[3].as.number;
       array_t *result;
       if (!array_slice(arr, start, stop, &result))
       {
@@ -460,30 +460,30 @@ static int slice_call(vm_t *vm, value_t *frame)
   return STATUS_ERROR;
 }
 
-static int split_call(vm_t *vm, value_t *frame)
+static int split_call(vm_t *vm, value_t *args)
 {
-  if (check_argument(frame, 1, TYPE_STRING) == STATUS_ERROR)
+  if (check_argument(args, 1, TYPE_STRING) == STATUS_ERROR)
     return STATUS_ERROR;
-  if (check_argument(frame, 2, TYPE_STRING) == STATUS_ERROR)
+  if (check_argument(args, 2, TYPE_STRING) == STATUS_ERROR)
     return STATUS_ERROR;
-  return vm_push_array(vm, split(AS_STRING(frame[1]), AS_STRING(frame[2])));
+  return vm_push_array(vm, split(AS_STRING(args[1]), AS_STRING(args[2])));
 }
 
-static int join_call(vm_t *vm, value_t *frame)
+static int join_call(vm_t *vm, value_t *args)
 {
-  if (check_argument(frame, 1, TYPE_ARRAY) == STATUS_ERROR)
+  if (check_argument(args, 1, TYPE_ARRAY) == STATUS_ERROR)
     return STATUS_ERROR;
-  if (check_argument(frame, 2, TYPE_STRING) == STATUS_ERROR)
+  if (check_argument(args, 2, TYPE_STRING) == STATUS_ERROR)
     return STATUS_ERROR;
   string_t *str;
-  if (join(AS_ARRAY(frame[1]), AS_STRING(frame[2]), &str) == STATUS_ERROR)
+  if (join(AS_ARRAY(args[1]), AS_STRING(args[2]), &str) == STATUS_ERROR)
     return STATUS_ERROR;
   return vm_push_string(vm, str);
 }
 
-static int sleep_call(vm_t *vm, value_t *frame)
+static int sleep_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_INTEGER(val))
   {
     runtime_error("invalid type: expected integer but got `%s`", type_name(val.type));
@@ -503,15 +503,15 @@ static int sleep_call(vm_t *vm, value_t *frame)
   return vm_push_null(vm);
 }
 
-static int assert_call(vm_t *vm, value_t *frame)
+static int assert_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[2];
+  value_t val = args[2];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
-  if (IS_FALSEY(frame[1]))
+  if (IS_FALSEY(args[1]))
   {
     string_t *str = AS_STRING(val);
     fprintf(stderr, "assertion failed: %.*s\n", str->length, str->chars);
@@ -520,10 +520,10 @@ static int assert_call(vm_t *vm, value_t *frame)
   return vm_push_null(vm);
 }
 
-static int panic_call(vm_t *vm, value_t *frame)
+static int panic_call(vm_t *vm, value_t *args)
 {
   (void) vm;
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));

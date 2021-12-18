@@ -14,10 +14,9 @@
 
 typedef struct vm
 {
-  int capacity;
   int limit;
-  value_t *slots;
   int top;
+  value_t *slots;
 } vm_t;
 
 void vm_init(vm_t *vm, int min_capacity);

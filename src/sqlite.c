@@ -27,13 +27,13 @@ static inline sqlite_t *sqlite_new(sqlite3 *db);
 static inline sqlite_stmt_t *sqlite_stmt_new(sqlite3_stmt *stmt);
 static void sqlite_deinit(userdata_t *udata);
 static void sqlite_stmt_deinit(userdata_t *udata);
-static int open_call(vm_t *vm, value_t *frame);
-static int close_call(vm_t *vm, value_t *frame);
-static int execute_call(vm_t *vm, value_t *frame);
-static int prepare_call(vm_t *vm, value_t *frame);
-static int finalize_call(vm_t *vm, value_t *frame);
-static int bind_call(vm_t *vm, value_t *frame);
-static int fetch_call(vm_t *vm, value_t *frame);
+static int open_call(vm_t *vm, value_t *args);
+static int close_call(vm_t *vm, value_t *args);
+static int execute_call(vm_t *vm, value_t *args);
+static int prepare_call(vm_t *vm, value_t *args);
+static int finalize_call(vm_t *vm, value_t *args);
+static int bind_call(vm_t *vm, value_t *args);
+static int fetch_call(vm_t *vm, value_t *args);
 
 static inline sqlite_t *sqlite_new(sqlite3 *db)
 {
@@ -61,9 +61,9 @@ static void sqlite_stmt_deinit(userdata_t *udata)
   sqlite3_finalize(((sqlite_stmt_t *) udata)->stmt);
 }
 
-static int open_call(vm_t *vm, value_t *frame)
+static int open_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
@@ -79,9 +79,9 @@ static int open_call(vm_t *vm, value_t *frame)
   return vm_push_userdata(vm, (userdata_t *) sqlite_new(db));
 }
 
-static int close_call(vm_t *vm, value_t *frame)
+static int close_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -90,10 +90,10 @@ static int close_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, sqlite3_close(((sqlite_t *) AS_USERDATA(val))->db));
 }
 
-static int execute_call(vm_t *vm, value_t *frame)
+static int execute_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_USERDATA(val1))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
@@ -116,10 +116,10 @@ static int execute_call(vm_t *vm, value_t *frame)
   return vm_push_null(vm);
 }
 
-static int prepare_call(vm_t *vm, value_t *frame)
+static int prepare_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_USERDATA(val1))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
@@ -141,9 +141,9 @@ static int prepare_call(vm_t *vm, value_t *frame)
   return vm_push_userdata(vm, (userdata_t *) sqlite_stmt_new(stmt));
 }
 
-static int finalize_call(vm_t *vm, value_t *frame)
+static int finalize_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -153,11 +153,11 @@ static int finalize_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, sqlite3_finalize(stmt));
 }
 
-static int bind_call(vm_t *vm, value_t *frame)
+static int bind_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
-  value_t val3 = frame[3];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
+  value_t val3 = args[3];
   if (!IS_USERDATA(val1))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
@@ -209,9 +209,9 @@ static int bind_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, rc);
 }
 
-static int fetch_call(vm_t *vm, value_t *frame)
+static int fetch_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));

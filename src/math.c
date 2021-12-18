@@ -14,16 +14,16 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-static int abs_call(vm_t *vm, value_t *frame);
-static int floor_call(vm_t *vm, value_t *frame);
-static int ceil_call(vm_t *vm, value_t *frame);
-static int pow_call(vm_t *vm, value_t *frame);
-static int sqrt_call(vm_t *vm, value_t *frame);
-static int random_call(vm_t *vm, value_t *frame);
+static int abs_call(vm_t *vm, value_t *args);
+static int floor_call(vm_t *vm, value_t *args);
+static int ceil_call(vm_t *vm, value_t *args);
+static int pow_call(vm_t *vm, value_t *args);
+static int sqrt_call(vm_t *vm, value_t *args);
+static int random_call(vm_t *vm, value_t *args);
 
-static int abs_call(vm_t *vm, value_t *frame)
+static int abs_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_NUMBER(val))
   {
     runtime_error("invalid type: expected number but got `%s`", type_name(val.type));
@@ -32,9 +32,9 @@ static int abs_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, fabs(val.as.number));
 }
 
-static int floor_call(vm_t *vm, value_t *frame)
+static int floor_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_NUMBER(val))
   {
     runtime_error("invalid type: expected number but got `%s`", type_name(val.type));
@@ -43,9 +43,9 @@ static int floor_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, floor(val.as.number));
 }
 
-static int ceil_call(vm_t *vm, value_t *frame)
+static int ceil_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_NUMBER(val))
   {
     runtime_error("invalid type: expected number but got `%s`", type_name(val.type));
@@ -54,10 +54,10 @@ static int ceil_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, ceil(val.as.number));
 }
 
-static int pow_call(vm_t *vm, value_t *frame)
+static int pow_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_NUMBER(val1))
   {
     runtime_error("invalid type: expected number but got `%s`", type_name(val1.type));
@@ -71,9 +71,9 @@ static int pow_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, pow(val1.as.number, val2.as.number));
 }
 
-static int sqrt_call(vm_t *vm, value_t *frame)
+static int sqrt_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_NUMBER(val))
   {
     runtime_error("invalid type: expected number but got `%s`", type_name(val.type));
@@ -82,9 +82,9 @@ static int sqrt_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, sqrt(val.as.number));
 }
 
-static int random_call(vm_t *vm, value_t *frame)
+static int random_call(vm_t *vm, value_t *args)
 {
-  (void) frame;
+  (void) args;
   srand((unsigned) time(NULL));
   double result = (double) rand() / RAND_MAX;
   return vm_push_number(vm, result);

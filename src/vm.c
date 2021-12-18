@@ -52,9 +52,9 @@ static inline void not(vm_t *vm);
 static inline int call(vm_t *vm, int num_args);
 static inline int check_arity(int arity, string_t *name, int num_args);
 static inline void print_trace(string_t *name, string_t *file, int line);
-static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *line);
-static inline void discard_frame(vm_t *vm, value_t *frame);
-static inline void move_result(vm_t *vm, value_t *frame);
+static inline int call_function(vm_t *vm, value_t *locals, function_t *fn, int *line);
+static inline void discard_frame(vm_t *vm, value_t *slots);
+static inline void move_result(vm_t *vm, value_t *slots);
 
 static inline int push(vm_t *vm, value_t val)
 {
@@ -1055,12 +1055,12 @@ static inline int decr(vm_t *vm)
 
 static inline int call(vm_t *vm, int num_args)
 {
-  value_t *frame = &vm->slots[vm->top - num_args];
-  value_t val = frame[0];
+  value_t *slots = &vm->slots[vm->top - num_args];
+  value_t val = slots[0];
   if (!IS_CALLABLE(val))
   {
     runtime_error("cannot call value of type `%s`", type_name(val.type));
-    discard_frame(vm, frame);
+    discard_frame(vm, slots);
     return STATUS_ERROR;
   }
   if (IS_NATIVE(val))
@@ -1068,41 +1068,41 @@ static inline int call(vm_t *vm, int num_args)
     native_t *native = AS_NATIVE(val);
     if (check_arity(native->arity, native->name, num_args) == STATUS_ERROR)
     {
-      discard_frame(vm, frame);
+      discard_frame(vm, slots);
       return STATUS_ERROR;
     }
     int status;
-    if ((status = native->call(vm, frame)) != STATUS_OK)
+    if ((status = native->call(vm, slots)) != STATUS_OK)
     {
       if (status != STATUS_NO_TRACE)
         print_trace(native->name, NULL, 0);
-      discard_frame(vm, frame);
+      discard_frame(vm, slots);
       return STATUS_ERROR;
     }
     DECR_REF(native);
     if (IS_UNREACHABLE(native))
       native_free(native);
-    move_result(vm, frame);
+    move_result(vm, slots);
     return STATUS_OK;
   }
   function_t *fn = AS_FUNCTION(val);
   prototype_t *proto = fn->proto;
   if (check_arity(proto->arity, proto->name, num_args) == STATUS_ERROR)
   {
-    discard_frame(vm, frame);
+    discard_frame(vm, slots);
     return STATUS_ERROR;
   }
   int line;
-  if (call_function(vm, frame, fn, &line) == STATUS_ERROR)
+  if (call_function(vm, slots, fn, &line) == STATUS_ERROR)
   {
     print_trace(proto->name, proto->file, line);
-    discard_frame(vm, frame);
+    discard_frame(vm, slots);
     return STATUS_ERROR;
   }
   DECR_REF(fn);
   if (IS_UNREACHABLE(fn))
     function_free(fn);
-  move_result(vm, frame);
+  move_result(vm, slots);
   return STATUS_OK;
 }
 
@@ -1128,7 +1128,7 @@ static inline void print_trace(string_t *name, string_t *file, int line)
   fprintf(stderr, "  at %s() in <native>\n", name_chars);
 }
 
-static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *line)
+static inline int call_function(vm_t *vm, value_t *locals, function_t *fn, int *line)
 {
   value_t *slots = vm->slots;
   prototype_t *proto = fn->proto;
@@ -1215,7 +1215,7 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
       break;
     case OP_GET_LOCAL:
       {
-        value_t val = frame[read_byte(&pc)];
+        value_t val = locals[read_byte(&pc)];
         if (push(vm, val) == STATUS_ERROR)
           goto error;
         VALUE_INCR_REF(val);
@@ -1226,8 +1226,8 @@ static inline int call_function(vm_t *vm, value_t *frame, function_t *fn, int *l
         int index = read_byte(&pc);
         value_t val = slots[vm->top];
         --vm->top;
-        value_release(frame[index]);
-        frame[index] = val;
+        value_release(locals[index]);
+        locals[index] = val;
       }
       break;
     case OP_ADD_ELEMENT:
@@ -1418,27 +1418,26 @@ error:
   return STATUS_ERROR;
 }
 
-static inline void discard_frame(vm_t *vm, value_t *frame)
+static inline void discard_frame(vm_t *vm, value_t *slots)
 {
-  while (&vm->slots[vm->top] >= frame)
+  while (&vm->slots[vm->top] >= slots)
     value_release(vm->slots[vm->top--]);
 }
 
-static inline void move_result(vm_t *vm, value_t *frame)
+static inline void move_result(vm_t *vm, value_t *slots)
 {
-  frame[0] = vm->slots[vm->top];
+  slots[0] = vm->slots[vm->top];
   --vm->top;
-  while (&vm->slots[vm->top] > frame)
+  while (&vm->slots[vm->top] > slots)
     value_release(vm->slots[vm->top--]);
 }
 
 void vm_init(vm_t *vm, int min_capacity)
 {
   int capacity = nearest_power_of_two(VM_MIN_CAPACITY, min_capacity);
-  vm->capacity = capacity;
   vm->limit = capacity - 1;
-  vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
   vm->top = -1;
+  vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
 }
 
 void vm_free(vm_t *vm)

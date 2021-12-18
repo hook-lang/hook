@@ -8,16 +8,16 @@
 #include "common.h"
 #include "error.h"
 
-static int hash_call(vm_t *vm, value_t *frame);
-static int lower_call(vm_t *vm, value_t *frame);
-static int upper_call(vm_t *vm, value_t *frame);
-static int trim_call(vm_t *vm, value_t *frame);
-static int starts_with_call(vm_t *vm, value_t *frame);
-static int ends_with_call(vm_t *vm, value_t *frame);
+static int hash_call(vm_t *vm, value_t *args);
+static int lower_call(vm_t *vm, value_t *args);
+static int upper_call(vm_t *vm, value_t *args);
+static int trim_call(vm_t *vm, value_t *args);
+static int starts_with_call(vm_t *vm, value_t *args);
+static int ends_with_call(vm_t *vm, value_t *args);
 
-static int hash_call(vm_t *vm, value_t *frame)
+static int hash_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
@@ -26,9 +26,9 @@ static int hash_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, string_hash(AS_STRING(val)));
 }
 
-static int lower_call(vm_t *vm, value_t *frame)
+static int lower_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
@@ -43,9 +43,9 @@ static int lower_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
-static int upper_call(vm_t *vm, value_t *frame)
+static int upper_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
@@ -60,9 +60,9 @@ static int upper_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
-static int trim_call(vm_t *vm, value_t *frame)
+static int trim_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
@@ -79,10 +79,10 @@ static int trim_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
-static int starts_with_call(vm_t *vm, value_t *frame)
+static int starts_with_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_STRING(val1))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val1.type));
@@ -96,10 +96,10 @@ static int starts_with_call(vm_t *vm, value_t *frame)
   return vm_push_boolean(vm, string_starts_with(AS_STRING(val1), AS_STRING(val2)));
 }
 
-static int ends_with_call(vm_t *vm, value_t *frame)
+static int ends_with_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_STRING(val1))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val1.type));

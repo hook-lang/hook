@@ -28,20 +28,20 @@ typedef struct
 
 static inline file_t *file_new(FILE *stream);
 static void file_deinit(userdata_t *udata);
-static int open_call(vm_t *vm, value_t *frame);
-static int close_call(vm_t *vm, value_t *frame);
-static int popen_call(vm_t *vm, value_t *frame);
-static int pclose_call(vm_t *vm, value_t *frame);
-static int eof_call(vm_t *vm, value_t *frame);
-static int flush_call(vm_t *vm, value_t *frame);
-static int sync_call(vm_t *vm, value_t *frame);
-static int tell_call(vm_t *vm, value_t *frame);
-static int rewind_call(vm_t *vm, value_t *frame);
-static int seek_call(vm_t *vm, value_t *frame);
-static int read_call(vm_t *vm, value_t *frame);
-static int write_call(vm_t *vm, value_t *frame);
-static int readln_call(vm_t *vm, value_t *frame);
-static int writeln_call(vm_t *vm, value_t *frame);
+static int open_call(vm_t *vm, value_t *args);
+static int close_call(vm_t *vm, value_t *args);
+static int popen_call(vm_t *vm, value_t *args);
+static int pclose_call(vm_t *vm, value_t *args);
+static int eof_call(vm_t *vm, value_t *args);
+static int flush_call(vm_t *vm, value_t *args);
+static int sync_call(vm_t *vm, value_t *args);
+static int tell_call(vm_t *vm, value_t *args);
+static int rewind_call(vm_t *vm, value_t *args);
+static int seek_call(vm_t *vm, value_t *args);
+static int read_call(vm_t *vm, value_t *args);
+static int write_call(vm_t *vm, value_t *args);
+static int readln_call(vm_t *vm, value_t *args);
+static int writeln_call(vm_t *vm, value_t *args);
 
 static inline file_t *file_new(FILE *stream)
 {
@@ -59,10 +59,10 @@ static void file_deinit(userdata_t *udata)
   fclose(stream);
 }
 
-static int open_call(vm_t *vm, value_t *frame)
+static int open_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_STRING(val1))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val1.type));
@@ -81,9 +81,9 @@ static int open_call(vm_t *vm, value_t *frame)
   return vm_push_userdata(vm, (userdata_t *) file_new(stream));
 }
 
-static int close_call(vm_t *vm, value_t *frame)
+static int close_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -92,10 +92,10 @@ static int close_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, fclose(((file_t *) AS_USERDATA(val))->stream));
 }
 
-static int popen_call(vm_t *vm, value_t *frame)
+static int popen_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_STRING(val1))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val1.type));
@@ -115,9 +115,9 @@ static int popen_call(vm_t *vm, value_t *frame)
   return vm_push_userdata(vm, (userdata_t *) file_new(stream));
 }
 
-static int pclose_call(vm_t *vm, value_t *frame)
+static int pclose_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -129,9 +129,9 @@ static int pclose_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, status);
 }
 
-static int eof_call(vm_t *vm, value_t *frame)
+static int eof_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -141,9 +141,9 @@ static int eof_call(vm_t *vm, value_t *frame)
   return vm_push_boolean(vm, (bool) feof(stream));
 }
 
-static int flush_call(vm_t *vm, value_t *frame)
+static int flush_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -153,9 +153,9 @@ static int flush_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, fflush(stream));
 }
 
-static int sync_call(vm_t *vm, value_t *frame)
+static int sync_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -172,9 +172,9 @@ static int sync_call(vm_t *vm, value_t *frame)
   return vm_push_boolean(vm, result);
 }
 
-static int tell_call(vm_t *vm, value_t *frame)
+static int tell_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -184,9 +184,9 @@ static int tell_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, ftell(stream));
 }
 
-static int rewind_call(vm_t *vm, value_t *frame)
+static int rewind_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -197,11 +197,11 @@ static int rewind_call(vm_t *vm, value_t *frame)
   return vm_push_null(vm);
 }
 
-static int seek_call(vm_t *vm, value_t *frame)
+static int seek_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
-  value_t val3 = frame[3];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
+  value_t val3 = args[3];
   if (!IS_USERDATA(val1))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
@@ -223,10 +223,10 @@ static int seek_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, fseek(stream, offset, whence));
 }
 
-static int read_call(vm_t *vm, value_t *frame)
+static int read_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_USERDATA(val1))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
@@ -250,10 +250,10 @@ static int read_call(vm_t *vm, value_t *frame)
   return vm_push_string(vm, str);
 }
 
-static int write_call(vm_t *vm, value_t *frame)
+static int write_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_USERDATA(val1))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
@@ -272,9 +272,9 @@ static int write_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, size);
 }
 
-static int readln_call(vm_t *vm, value_t *frame)
+static int readln_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -284,10 +284,10 @@ static int readln_call(vm_t *vm, value_t *frame)
   return vm_push_string_from_stream(vm, stream, '\n');
 }
 
-static int writeln_call(vm_t *vm, value_t *frame)
+static int writeln_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_USERDATA(val1))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));

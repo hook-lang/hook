@@ -9,19 +9,19 @@
 #include "common.h"
 #include "error.h"
 
-static int clock_call(vm_t *vm, value_t *frame);
-static int system_call(vm_t *vm, value_t *frame);
-static int getenv_call(vm_t *vm, value_t *frame);
+static int clock_call(vm_t *vm, value_t *args);
+static int system_call(vm_t *vm, value_t *args);
+static int getenv_call(vm_t *vm, value_t *args);
 
-static int clock_call(vm_t *vm, value_t *frame)
+static int clock_call(vm_t *vm, value_t *args)
 {
-  (void) frame;
+  (void) args;
   return vm_push_number(vm, (double) clock() / CLOCKS_PER_SEC);
 }
 
-static int system_call(vm_t *vm, value_t *frame)
+static int system_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
@@ -30,9 +30,9 @@ static int system_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, system(AS_STRING(val)->chars));
 }
 
-static int getenv_call(vm_t *vm, value_t *frame)
+static int getenv_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));

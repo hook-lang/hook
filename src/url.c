@@ -19,9 +19,9 @@ typedef struct
 static inline url_t *url_new(CURL *curl);
 static void url_deinit(userdata_t *udata);
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data);
-static int new_call(vm_t *vm, value_t *frame);
-static int cleanup_call(vm_t *vm, value_t *frame);
-static int perform_call(vm_t *vm, value_t *frame);
+static int new_call(vm_t *vm, value_t *args);
+static int cleanup_call(vm_t *vm, value_t *args);
+static int perform_call(vm_t *vm, value_t *args);
 
 static inline url_t *url_new(CURL *curl)
 {
@@ -44,9 +44,9 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size;
 }
 
-static int new_call(vm_t *vm, value_t *frame)
+static int new_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_STRING(val))
   {
     runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
@@ -61,9 +61,9 @@ static int new_call(vm_t *vm, value_t *frame)
   return vm_push_userdata(vm, (userdata_t *) url_new(curl));
 }
 
-static int cleanup_call(vm_t *vm, value_t *frame)
+static int cleanup_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
@@ -73,9 +73,9 @@ static int cleanup_call(vm_t *vm, value_t *frame)
   return vm_push_null(vm);
 }
 
-static int perform_call(vm_t *vm, value_t *frame)
+static int perform_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_USERDATA(val))
   {
     runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));

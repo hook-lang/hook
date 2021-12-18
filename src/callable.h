@@ -47,7 +47,7 @@ typedef struct
   OBJECT_HEADER
   int arity;
   string_t *name;
-  int (*call)(struct vm *vm, value_t *frame);
+  int (*call)(struct vm *, value_t *);
 } native_t;
 
 prototype_t *prototype_new(int arity, string_t *name, string_t *file);

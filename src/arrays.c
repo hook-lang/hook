@@ -9,15 +9,15 @@
 #include "common.h"
 #include "error.h"
 
-static int new_array_call(vm_t *vm, value_t *frame);
-static int index_of_call(vm_t *vm, value_t *frame);
-static int min_call(vm_t *vm, value_t *frame);
-static int max_call(vm_t *vm, value_t *frame);
-static int sum_call(vm_t *vm, value_t *frame);
+static int new_array_call(vm_t *vm, value_t *args);
+static int index_of_call(vm_t *vm, value_t *args);
+static int min_call(vm_t *vm, value_t *args);
+static int max_call(vm_t *vm, value_t *args);
+static int sum_call(vm_t *vm, value_t *args);
 
-static int new_array_call(vm_t *vm, value_t *frame)
+static int new_array_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_INTEGER(val))
   {
     runtime_error("invalid type: expected integer but got `%s`", type_name(val.type));
@@ -39,10 +39,10 @@ static int new_array_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
-static int index_of_call(vm_t *vm, value_t *frame)
+static int index_of_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = frame[1];
-  value_t val2 = frame[2];
+  value_t val1 = args[1];
+  value_t val2 = args[2];
   if (!IS_ARRAY(val1))
   {
     runtime_error("invalid type: expected array but got `%s`", type_name(val1.type));
@@ -51,9 +51,9 @@ static int index_of_call(vm_t *vm, value_t *frame)
   return vm_push_number(vm, array_index_of(AS_ARRAY(val1), val2));
 }
 
-static int min_call(vm_t *vm, value_t *frame)
+static int min_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_ARRAY(val))
   {
     runtime_error("invalid type: expected array but got `%s`", type_name(val.type));
@@ -79,9 +79,9 @@ static int min_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
-static int max_call(vm_t *vm, value_t *frame)
+static int max_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_ARRAY(val))
   {
     runtime_error("invalid type: expected array but got `%s`", type_name(val.type));
@@ -107,9 +107,9 @@ static int max_call(vm_t *vm, value_t *frame)
   return STATUS_OK;
 }
 
-static int sum_call(vm_t *vm, value_t *frame)
+static int sum_call(vm_t *vm, value_t *args)
 {
-  value_t val = frame[1];
+  value_t val = args[1];
   if (!IS_ARRAY(val))
   {
     runtime_error("invalid type: expected array but got `%s`", type_name(val.type));
