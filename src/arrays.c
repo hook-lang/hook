@@ -132,21 +132,32 @@ static int sum_call(vm_t *vm, value_t *args)
 }
 
 #ifdef _WIN32
-void __declspec(dllexport) __stdcall load_arrays(vm_t *vm)
+int __declspec(dllexport) __stdcall load_arrays(vm_t *vm)
 #else
-void load_arrays(vm_t *vm)
+int load_arrays(vm_t *vm)
 #endif
 {
-  vm_push_string_from_chars(vm,-1, "arrays");
-  vm_push_string_from_chars(vm,-1, "new_array");
-  vm_push_new_native(vm, "new_array", 1, &new_array_call);
-  vm_push_string_from_chars(vm,-1, "index_of");
-  vm_push_new_native(vm, "index_of", 2, &index_of_call);
-  vm_push_string_from_chars(vm,-1, "min");
-  vm_push_new_native(vm, "min", 1, &min_call);
-  vm_push_string_from_chars(vm,-1, "max");
-  vm_push_new_native(vm, "max", 1, &max_call);
-  vm_push_string_from_chars(vm,-1, "sum");
-  vm_push_new_native(vm, "sum", 1, &sum_call);
-  ASSERT(vm_construct(vm, 5) == STATUS_OK, "cannot load library `arrays`");
+  if (vm_push_string_from_chars(vm,-1, "arrays") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm,-1, "new_array") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "new_array", 1, &new_array_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm,-1, "index_of") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "index_of", 2, &index_of_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm,-1, "min") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "min", 1, &min_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm,-1, "max") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "max", 1, &max_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm,-1, "sum") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "sum", 1, &sum_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_construct(vm, 5);
 }

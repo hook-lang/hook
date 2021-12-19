@@ -32,7 +32,7 @@
 #ifdef _WIN32
 typedef int (__stdcall *load_library_t)(vm_t *);
 #else
-typedef void (*load_library_t)(vm_t *);
+typedef int (*load_library_t)(vm_t *);
 #endif
 
 int import_library(vm_t *vm)
@@ -62,7 +62,7 @@ int import_library(vm_t *vm)
 #endif
   if (!handle)
   {
-    runtime_error("cannot load library `%.*s`", name->length, name->chars);
+    runtime_error("cannot open library `%.*s`", name->length, name->chars);
     string_free(file);
     return STATUS_ERROR;
   }
@@ -85,6 +85,10 @@ int import_library(vm_t *vm)
   }
   string_free(func);
   --vm->top;
-  load(vm);
+  if (load(vm) == STATUS_ERROR)
+  {
+    runtime_error("cannot load library `%.*s`", name->length, name->chars);
+    return STATUS_ERROR;
+  }
   return STATUS_OK;
 }

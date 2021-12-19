@@ -259,25 +259,40 @@ static int fetch_call(vm_t *vm, value_t *args)
 }
 
 #ifdef _WIN32
-void __declspec(dllexport) __stdcall load_sqlite(vm_t *vm)
+int __declspec(dllexport) __stdcall load_sqlite(vm_t *vm)
 #else
-void load_sqlite(vm_t *vm)
+int load_sqlite(vm_t *vm)
 #endif
 {
-  vm_push_string_from_chars(vm, -1, "sqlite");
-  vm_push_string_from_chars(vm, -1, "open");
-  vm_push_new_native(vm, "open", 1, &open_call);
-  vm_push_string_from_chars(vm, -1, "close");
-  vm_push_new_native(vm, "close", 1, &close_call);
-  vm_push_string_from_chars(vm, -1, "execute");
-  vm_push_new_native(vm, "execute", 2, &execute_call);
-  vm_push_string_from_chars(vm, -1, "prepare");
-  vm_push_new_native(vm, "prepare", 2, &prepare_call);
-  vm_push_string_from_chars(vm, -1, "finalize");
-  vm_push_new_native(vm, "finalize", 1, &finalize_call);
-  vm_push_string_from_chars(vm, -1, "bind");
-  vm_push_new_native(vm, "bind", 3, &bind_call);
-  vm_push_string_from_chars(vm, -1, "fetch");
-  vm_push_new_native(vm, "fetch", 1, &fetch_call);
-  ASSERT(vm_construct(vm, 7) == STATUS_OK, "cannot load library `sqlite`");
+  if (vm_push_string_from_chars(vm, -1, "sqlite") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "open") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "open", 1, &open_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "close") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "close", 1, &close_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "execute") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "execute", 2, &execute_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "prepare") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "prepare", 2, &prepare_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "finalize") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "finalize", 1, &finalize_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "bind") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "bind", 3, &bind_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "fetch") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "fetch", 1, &fetch_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_construct(vm, 7);
 }

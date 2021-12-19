@@ -9,9 +9,9 @@
 #include "vm.h"
 
 #ifdef _WIN32
-void __declspec(dllexport) __stdcall load_os(vm_t *vm);
+int __declspec(dllexport) __stdcall load_os(vm_t *vm);
 #else
-void load_os(vm_t *vm);
+int load_os(vm_t *vm);
 #endif
 
 #endif // OS_H

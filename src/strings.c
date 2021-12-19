@@ -114,23 +114,36 @@ static int ends_with_call(vm_t *vm, value_t *args)
 }
 
 #ifdef _WIN32
-void __declspec(dllexport) __stdcall load_strings(vm_t *vm)
+int __declspec(dllexport) __stdcall load_strings(vm_t *vm)
 #else
-void load_strings(vm_t *vm)
+int load_strings(vm_t *vm)
 #endif
 {
-  vm_push_string_from_chars(vm, -1, "strings");
-  vm_push_string_from_chars(vm, -1, "hash");
-  vm_push_new_native(vm, "hash", 1, &hash_call);
-  vm_push_string_from_chars(vm, -1, "lower");
-  vm_push_new_native(vm, "lower", 1, &lower_call);
-  vm_push_string_from_chars(vm, -1, "upper");
-  vm_push_new_native(vm, "upper", 1, &upper_call);
-  vm_push_string_from_chars(vm, -1, "trim");
-  vm_push_new_native(vm, "trim", 1, &trim_call);
-  vm_push_string_from_chars(vm, -1, "starts_with");
-  vm_push_new_native(vm, "starts_with", 2, &starts_with_call);
-  vm_push_string_from_chars(vm, -1, "ends_with");
-  vm_push_new_native(vm, "ends_with", 2, &ends_with_call);
-  ASSERT(vm_construct(vm, 6) == STATUS_OK, "cannot load library `strings`");
+  if (vm_push_string_from_chars(vm, -1, "strings") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "hash") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "hash", 1, &hash_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "lower") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "lower", 1, &lower_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "upper") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "upper", 1, &upper_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "trim") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "trim", 1, &trim_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "starts_with") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "starts_with", 2, &starts_with_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "ends_with") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "ends_with", 2, &ends_with_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_construct(vm, 6);
 }

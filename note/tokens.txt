@@ -2,6 +2,7 @@
 TOKEN_EOF        EOF
 TOKEN_DOT        '.'
 TOKEN_COMMA      ','
+TOKEN_COLON      ':'
 TOKEN_SEMICOLON  ';'
 TOKEN_LPAREN     '('
 TOKEN_RPAREN     ')'

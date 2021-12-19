@@ -9,9 +9,9 @@
 #include "vm.h"
 
 #ifdef _WIN32
-void __declspec(dllexport) __stdcall load_math(vm_t *vm);
+int __declspec(dllexport) __stdcall load_math(vm_t *vm);
 #else
-void load_math(vm_t *vm);
+int load_math(vm_t *vm);
 #endif
 
 #endif // MATH_H

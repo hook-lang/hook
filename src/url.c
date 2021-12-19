@@ -96,17 +96,24 @@ static int perform_call(vm_t *vm, value_t *args)
 }
 
 #ifdef _WIN32
-void __declspec(dllexport) __stdcall load_url(vm_t *vm)
+int __declspec(dllexport) __stdcall load_url(vm_t *vm)
 #else
-void load_url(vm_t *vm)
+int load_url(vm_t *vm)
 #endif
 {
-  vm_push_string_from_chars(vm, -1, "url");
-  vm_push_string_from_chars(vm, -1, "new");
-  vm_push_new_native(vm, "new", 1, &new_call);
-  vm_push_string_from_chars(vm, -1, "cleanup");
-  vm_push_new_native(vm, "cleanup", 1, &cleanup_call);
-  vm_push_string_from_chars(vm, -1, "perform");
-  vm_push_new_native(vm, "perform", 1, &perform_call);
-  ASSERT(vm_construct(vm, 3) == STATUS_OK, "cannot load library `url`");
+  if (vm_push_string_from_chars(vm, -1, "url") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "new") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "new", 1, &new_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "cleanup") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "cleanup", 1, &cleanup_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "perform") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "perform", 1, &perform_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_construct(vm, 3);
 }

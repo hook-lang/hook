@@ -23,8 +23,6 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | 'return' expr? ';'
               | block
 
-block       ::= '{' stmt* '}'
-
 var_decl    ::= 'let' NAME ( '=' expr )?
               | 'let' '[' NAME ( ',' NAME )* ']' '=' expr
               | 'let' '{' NAME ( ',' NAME )* '}' '=' expr
@@ -38,6 +36,8 @@ assign_call ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
 subscr      ::= '[' expr ']' | '.' NAME 
 
 call        ::= '(' ( expr ( ',' expr )* )? ')'
+
+block       ::= '{' stmt* '}'
 
 expr        ::= and_expr ( '||' and_expr )*
 
