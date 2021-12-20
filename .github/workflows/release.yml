@@ -11,6 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Cleaning
+      run: |
+        rm -fr bin
+        rm -fr build
+        rm -fr lib
+        rm -fr package
     - name: Installing dependencies
       run: |
         sudo apt-get install -y libcurl4-openssl-dev
@@ -34,6 +40,12 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Cleaning
+      run: |
+        @RD /S /Q bin
+        @RD /S /Q build
+        @RD /S /Q lib
+        @RD /S /Q package
     - name: Installing dependencies
       run: |
         git clone https://github.com/microsoft/vcpkg
@@ -62,6 +74,12 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Cleaning
+      run: |
+        rm -fr bin
+        rm -fr build
+        rm -fr lib
+        rm -fr package
     - name: Configure CMake
       run: |
         cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Release
