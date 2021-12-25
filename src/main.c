@@ -187,7 +187,7 @@ static inline void save_bytecode_to_file(function_t *fn, const char *filename)
 
 static inline string_t *load_source_from_file(const char *filename)
 {
-  FILE *stream = fopen(filename, "r");
+  FILE *stream = fopen(filename, "rb");
   if (!stream)
     fatal_error("unable to open file `%s`", filename);
   fseek(stream, 0L, SEEK_END);
