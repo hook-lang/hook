@@ -11,12 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Cleaning
-      run: |
-        rm -fr bin
-        rm -fr build
-        rm -fr lib
-        rm -fr package
     - name: Installing dependencies
       run: |
         sudo apt-get install -y libcurl4-openssl-dev
@@ -35,17 +29,17 @@ jobs:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: ${{ github.workspace }}/package/*.tar.gz
         overwrite: true
+    - name: Cleaning
+      run: |
+        rm -fr bin
+        rm -fr build
+        rm -fr lib
+        rm -fr package
 
   windows-release:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Cleaning
-      run: |
-        @RD /S /Q bin
-        @RD /S /Q build
-        @RD /S /Q lib
-        @RD /S /Q package
     - name: Installing dependencies
       run: |
         git clone https://github.com/microsoft/vcpkg
@@ -69,17 +63,17 @@ jobs:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: ${{ github.workspace }}/package/*.zip
         overwrite: true
+    - name: Cleaning
+      run: |
+        Remove-Item bin -Recurse
+        Remove-Item build -Recurse
+        Remove-Item lib -Recurse
+        Remove-Item package -Recurse
 
   macos-release:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Cleaning
-      run: |
-        rm -fr bin
-        rm -fr build
-        rm -fr lib
-        rm -fr package
     - name: Configure CMake
       run: |
         cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Release
@@ -95,3 +89,9 @@ jobs:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: ${{ github.workspace }}/package/*.tar.gz
         overwrite: true
+    - name: Cleaning
+      run: |
+        rm -fr bin
+        rm -fr build
+        rm -fr lib
+        rm -fr package
