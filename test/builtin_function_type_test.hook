@@ -1,5 +1,5 @@
 
-println(type(null));
+println(type(nil));
 println(type(false));
 println(type(true));
 println(type(123));

@@ -18,7 +18,7 @@ match ("bar") {
   "bar" => println("bar");
   _ => println("_");
 }
-println(match ("foo") { "foo" => 1, _ => null });
-println(match ("bar") { "foo" => 1, _ => null });
-println(match ("bar") { "foo" => 1, "bar" => 2, _ => null });
-println(match ("baz") { "foo" => 1, "bar" => 2, _ => null });
+println(match ("foo") { "foo" => 1, _ => nil });
+println(match ("bar") { "foo" => 1, _ => nil });
+println(match ("bar") { "foo" => 1, "bar" => 2, _ => nil });
+println(match ("baz") { "foo" => 1, "bar" => 2, _ => nil });

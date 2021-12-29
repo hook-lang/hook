@@ -14,7 +14,7 @@
 #define FLAG_FALSEY 0b0010
 #define FLAG_NATIVE 0b0100
 
-#define NULL_VALUE        ((value_t) {.type = TYPE_NULL, .flags = FLAG_FALSEY})
+#define NIL_VALUE         ((value_t) {.type = TYPE_NIL, .flags = FLAG_FALSEY})
 #define FALSE_VALUE       ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_FALSEY, .as.boolean = false})
 #define TRUE_VALUE        ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_NONE, .as.boolean = true})
 #define NUMBER_VALUE(n)   ((value_t) {.type = TYPE_NUMBER, .flags = FLAG_NONE, .as.number = (n)})
@@ -26,7 +26,7 @@
 #define NATIVE_VALUE(n)   ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT | FLAG_NATIVE, .as.pointer = (n)})
 #define USERDATA_VALUE(u) ((value_t) {.type = TYPE_USERDATA, .flags = FLAG_OBJECT, .as.pointer = (u)})
 
-#define IS_NULL(v)     ((v).type == TYPE_NULL)
+#define IS_NIL(v)      ((v).type == TYPE_NIL)
 #define IS_BOOLEAN(v)  ((v).type == TYPE_BOOLEAN)
 #define IS_NUMBER(v)   ((v).type == TYPE_NUMBER)
 #define IS_INTEGER(v)  (IS_NUMBER(v) && (v).as.number == (long) (v).as.number)
@@ -61,7 +61,7 @@
 
 typedef enum
 {
-  TYPE_NULL,
+  TYPE_NIL,
   TYPE_BOOLEAN,
   TYPE_NUMBER,
   TYPE_STRING,

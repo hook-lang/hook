@@ -17,7 +17,7 @@ static inline void value_free(value_t val)
 {
   switch (val.type)
   {
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
     break;
@@ -51,10 +51,10 @@ static inline void value_free(value_t val)
 
 const char *type_name(type_t type)
 {
-  char *name = "null";
+  char *name = "nil";
   switch (type)
   {
-  case TYPE_NULL:
+  case TYPE_NIL:
     break;
   case TYPE_BOOLEAN:
     name = "boolean";
@@ -98,8 +98,8 @@ void value_print(value_t val, bool quoted)
 {
   switch (val.type)
   {
-  case TYPE_NULL:
-    printf("null");
+  case TYPE_NIL:
+    printf("nil");
     break;
   case TYPE_BOOLEAN:
     printf("%s", val.as.boolean ? "true" : "false");
@@ -151,7 +151,7 @@ bool value_equal(value_t val1, value_t val2)
   bool result = true;
   switch (val1.type)
   {
-  case TYPE_NULL:
+  case TYPE_NIL:
     break;
   case TYPE_BOOLEAN:
     result = val1.as.boolean == val2.as.boolean;
@@ -189,7 +189,7 @@ int value_compare(value_t val1, value_t val2, int *result)
   }
   switch (val1.type)
   {
-  case TYPE_NULL:
+  case TYPE_NIL:
     *result = 0;
     return STATUS_OK;
   case TYPE_BOOLEAN:
@@ -237,7 +237,7 @@ void value_serialize(value_t val, FILE *stream)
   case TYPE_STRING:
     string_serialize(AS_STRING(val), stream);
     break;
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
   case TYPE_STRUCT:
@@ -276,7 +276,7 @@ bool value_deserialize(FILE *stream, value_t *result)
       val = STRING_VALUE(str);
     }
     break;
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
   case TYPE_STRUCT:

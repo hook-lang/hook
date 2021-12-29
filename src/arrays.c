@@ -63,7 +63,7 @@ static int min_call(vm_t *vm, value_t *args)
   int length = arr->length;
   if (!length)
   {
-    vm_push_null(vm);
+    vm_push_nil(vm);
     return STATUS_OK;
   }
   value_t min = arr->elements[0];
@@ -91,7 +91,7 @@ static int max_call(vm_t *vm, value_t *args)
   int length = arr->length;
   if (!length)
   {
-    vm_push_null(vm);
+    vm_push_nil(vm);
     return STATUS_OK;
   }
   value_t max = arr->elements[0];

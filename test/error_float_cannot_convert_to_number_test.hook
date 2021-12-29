@@ -1,2 +1,2 @@
 
-const a = float(null);
+const a = float(nil);

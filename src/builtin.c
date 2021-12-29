@@ -127,8 +127,8 @@ static inline string_t *to_string(value_t val) {
   string_t *str = NULL;
   switch (val.type)
   {
-  case TYPE_NULL:
-    str = string_from_chars(-1, "null");
+  case TYPE_NIL:
+    str = string_from_chars(-1, "nil");
     break;
   case TYPE_BOOLEAN:
     str = string_from_chars(-1, val.as.boolean ? "true" : "false");
@@ -187,14 +187,14 @@ static inline int join(array_t *arr, string_t *separator, string_t **result)
 static int print_call(vm_t *vm, value_t *args)
 {
   value_print(args[1], false);
-  return vm_push_null(vm);
+  return vm_push_nil(vm);
 }
 
 static int println_call(vm_t *vm, value_t *args)
 {
   value_print(args[1], false);
   printf("\n");
-  return vm_push_null(vm);
+  return vm_push_nil(vm);
 }
 
 static int type_call(vm_t *vm, value_t *args)
@@ -221,7 +221,7 @@ static int int_call(vm_t *vm, value_t *args)
         return STATUS_ERROR;
       return vm_push_number(vm, (long) result);
     }
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
   case TYPE_STRUCT:
@@ -248,7 +248,7 @@ static int float_call(vm_t *vm, value_t *args)
         return STATUS_ERROR;
       return vm_push_number(vm, result);
     }
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_ARRAY:
   case TYPE_STRUCT:
@@ -327,7 +327,7 @@ static int cap_call(vm_t *vm, value_t *args)
     return vm_push_number(vm, AS_STRING(val)->capacity);
   case TYPE_ARRAY:
     return vm_push_number(vm, AS_ARRAY(val)->capacity);
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
   case TYPE_STRUCT:
@@ -353,7 +353,7 @@ static int len_call(vm_t *vm, value_t *args)
     return vm_push_number(vm, AS_STRUCT(val)->length);
   case TYPE_INSTANCE:
     return vm_push_number(vm, AS_INSTANCE(val)->ztruct->length);
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
   case TYPE_CALLABLE:
@@ -377,7 +377,7 @@ static int is_empty_call(vm_t *vm, value_t *args)
     return vm_push_boolean(vm, !AS_STRUCT(val)->length);
   case TYPE_INSTANCE:
     return vm_push_boolean(vm, !AS_INSTANCE(val)->ztruct->length);
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
   case TYPE_CALLABLE:
@@ -447,7 +447,7 @@ static int slice_call(vm_t *vm, value_t *args)
       }
     }
     return STATUS_OK;
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_NUMBER:
   case TYPE_STRUCT:
@@ -500,7 +500,7 @@ static int sleep_call(vm_t *vm, value_t *args)
 #else
   ASSERT(!usleep((int) ms * 1000), "unexpected error on usleep()");
 #endif
-  return vm_push_null(vm);
+  return vm_push_nil(vm);
 }
 
 static int assert_call(vm_t *vm, value_t *args)
@@ -517,7 +517,7 @@ static int assert_call(vm_t *vm, value_t *args)
     fprintf(stderr, "assertion failed: %.*s\n", str->length, str->chars);
     return STATUS_NO_TRACE;
   }
-  return vm_push_null(vm);
+  return vm_push_nil(vm);
 }
 
 static int panic_call(vm_t *vm, value_t *args)

@@ -24,8 +24,8 @@ void dump(prototype_t *proto)
     ++n;
     switch (op)
     {
-    case OP_NULL:
-      printf("  [%05d] Null\n", j);
+    case OP_NIL:
+      printf("  [%05d] Nil\n", j);
       break;
     case OP_FALSE:
       printf("  [%05d] False\n", j);
@@ -210,8 +210,8 @@ void dump(prototype_t *proto)
     case OP_RETURN:
       printf("  [%05d] Return\n", j);
       break;
-    case OP_RETURN_NULL:
-      printf("  [%05d] ReturnNull\n", j);
+    case OP_RETURN_NIL:
+      printf("  [%05d] ReturnNil\n", j);
       break;
     }
   }

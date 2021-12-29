@@ -1,5 +1,5 @@
 
-println(null);
+println(nil);
 println(false);
 println(true);
 println(123);

@@ -613,7 +613,7 @@ static void compile_variable_declaration(compiler_t *comp)
       compile_expression(comp);
       return;  
     }
-    chunk_emit_opcode(chunk, OP_NULL);
+    chunk_emit_opcode(chunk, OP_NIL);
     prototype_add_line(proto, scan->token.line);
     return;
   }
@@ -870,7 +870,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
   uint8_t index;
   if (is_anonymous)
   {
-    chunk_emit_opcode(chunk, OP_NULL);
+    chunk_emit_opcode(chunk, OP_NIL);
     prototype_add_line(proto, line);
   }
   else
@@ -958,7 +958,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     if (!MATCH(scan, TOKEN_LBRACE))
       fatal_error_unexpected_token(scan);
     compile_block(&child_comp);
-    chunk_emit_opcode(child_chunk, OP_RETURN_NULL);
+    chunk_emit_opcode(child_chunk, OP_RETURN_NIL);
     prototype_add_line(proto, scan->token.line);
     goto end;
   }
@@ -1000,7 +1000,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   if (!MATCH(scan, TOKEN_LBRACE))
     fatal_error_unexpected_token(scan);
   compile_block(&child_comp);
-  chunk_emit_opcode(child_chunk, OP_RETURN_NULL);
+  chunk_emit_opcode(child_chunk, OP_RETURN_NIL);
   prototype_add_line(proto, scan->token.line);
   uint8_t index;
 end:
@@ -1301,7 +1301,7 @@ static void compile_return_statement(compiler_t *comp)
   {
     int line = scan->token.line;
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_RETURN_NULL);
+    chunk_emit_opcode(chunk, OP_RETURN_NIL);
     prototype_add_line(proto, line);
     return;
   }
@@ -1515,10 +1515,10 @@ static void compile_prim_expression(compiler_t *comp)
   prototype_t *proto = comp->proto;
   chunk_t *chunk = &proto->chunk;
   int line = scan->token.line;
-  if (MATCH(scan, TOKEN_NULL))
+  if (MATCH(scan, TOKEN_NIL))
   {
     scanner_next_token(scan);
-    chunk_emit_opcode(chunk, OP_NULL);
+    chunk_emit_opcode(chunk, OP_NIL);
     prototype_add_line(proto, line);
     return;
   }
@@ -1654,7 +1654,7 @@ static void compile_struct_constructor(compiler_t *comp)
   chunk_t *chunk = &proto->chunk;
   int line = scan->token.line;
   scanner_next_token(scan);
-  chunk_emit_opcode(chunk, OP_NULL);
+  chunk_emit_opcode(chunk, OP_NIL);
   prototype_add_line(proto, line);
   if (MATCH(scan, TOKEN_RBRACE))
   {
@@ -1945,7 +1945,7 @@ function_t *compile(string_t *file, string_t *source)
     compile_statement(&comp);
   prototype_t *proto = comp.proto;
   chunk_t *chunk = &proto->chunk;
-  chunk_emit_opcode(chunk, OP_RETURN_NULL);
+  chunk_emit_opcode(chunk, OP_RETURN_NIL);
   prototype_add_line(proto, scan.token.line);
   function_t *fn = function_new(proto);
   scanner_free(&scan);

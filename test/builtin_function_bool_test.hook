@@ -1,5 +1,5 @@
 
-println(bool(null));
+println(bool(nil));
 println(bool(false));
 println(bool(true));
 println(bool(0));

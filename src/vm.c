@@ -103,7 +103,7 @@ static inline int ztruct(vm_t *vm, int length)
 {
   value_t *slots = &vm->slots[vm->top - length];
   value_t val = slots[0];
-  string_t *struct_name = IS_NULL(val) ? NULL : AS_STRING(val);
+  string_t *struct_name = IS_NIL(val) ? NULL : AS_STRING(val);
   struct_t *ztruct = struct_new(struct_name);
   for (int i = 1; i <= length; ++i)
   {
@@ -170,7 +170,7 @@ static inline int construct(vm_t *vm, int length)
   int n = length << 1;
   value_t *slots = &vm->slots[vm->top - n];
   value_t val = slots[0];
-  string_t *struct_name = IS_NULL(val) ? NULL : AS_STRING(val);
+  string_t *struct_name = IS_NIL(val) ? NULL : AS_STRING(val);
   struct_t *ztruct = struct_new(struct_name);
   for (int i = 1; i <= n; i += 2)
   {
@@ -232,7 +232,7 @@ static inline int unpack(vm_t *vm, int n)
     VALUE_INCR_REF(elem);
   }
   for (int i = arr->length; i < n; ++i)
-    if ((status = push(vm, NULL_VALUE)) == STATUS_ERROR)
+    if ((status = push(vm, NIL_VALUE)) == STATUS_ERROR)
       break;
 end:
   DECR_REF(arr);
@@ -256,7 +256,7 @@ static inline int destruct(vm_t *vm, int n)
   {
     string_t *name = AS_STRING(slots[i]);
     int index = struct_index_of(ztruct, name);
-    value_t value = index == -1 ? NULL_VALUE : inst->values[index];
+    value_t value = index == -1 ? NIL_VALUE : inst->values[index];
     VALUE_INCR_REF(value);
     DECR_REF(name);
     slots[i] = value;
@@ -875,7 +875,7 @@ static inline int add(vm_t *vm)
         array_free(arr2);
     }
     return STATUS_OK;
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
@@ -944,7 +944,7 @@ static inline int subtract(vm_t *vm)
         array_free(arr2);
     }
     return STATUS_OK;
-  case TYPE_NULL:
+  case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_STRING:
   case TYPE_STRUCT:
@@ -1142,8 +1142,8 @@ static inline int call_function(vm_t *vm, value_t *locals, function_t *fn, int *
     opcode_t op = (opcode_t) read_byte(&pc);
     switch (op)
     {
-    case OP_NULL:
-      if (push(vm, NULL_VALUE) == STATUS_ERROR)
+    case OP_NIL:
+      if (push(vm, NIL_VALUE) == STATUS_ERROR)
         goto error;
       break;
     case OP_FALSE:
@@ -1407,8 +1407,8 @@ static inline int call_function(vm_t *vm, value_t *locals, function_t *fn, int *
       break;
     case OP_RETURN:
       return STATUS_OK;
-    case OP_RETURN_NULL:
-      if (push(vm, NULL_VALUE) == STATUS_ERROR)
+    case OP_RETURN_NIL:
+      if (push(vm, NIL_VALUE) == STATUS_ERROR)
         goto error;
       return STATUS_OK;
     }
@@ -1455,9 +1455,9 @@ int vm_push(vm_t *vm, value_t val)
   return STATUS_OK;
 }
 
-int vm_push_null(vm_t *vm)
+int vm_push_nil(vm_t *vm)
 {
-  return push(vm, NULL_VALUE);
+  return push(vm, NIL_VALUE);
 }
 
 int vm_push_boolean(vm_t *vm, bool data)

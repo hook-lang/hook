@@ -12,7 +12,7 @@
 
 typedef enum
 {
-  OP_NULL,
+  OP_NIL,
   OP_FALSE,
   OP_TRUE,
   OP_INT,
@@ -66,7 +66,7 @@ typedef enum
   OP_CALL,
   OP_IMPORT_LIBRARY,
   OP_RETURN,
-  OP_RETURN_NULL
+  OP_RETURN_NIL
 } opcode_t;
 
 typedef struct

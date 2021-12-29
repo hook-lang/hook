@@ -14,7 +14,7 @@ in
 let
 loop
 match
-null
+nil
 return
 struct
 true

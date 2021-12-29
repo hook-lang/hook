@@ -55,7 +55,7 @@ static int new_call(vm_t *vm, value_t *args)
   string_t *url = AS_STRING(val);
   CURL *curl = curl_easy_init();
   if (!curl)
-    vm_push_null(vm);
+    vm_push_nil(vm);
   curl_easy_setopt(curl, CURLOPT_URL, url->chars);
   curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   return vm_push_userdata(vm, (userdata_t *) url_new(curl));
@@ -70,7 +70,7 @@ static int cleanup_call(vm_t *vm, value_t *args)
     return STATUS_ERROR;
   }
   curl_easy_cleanup(((url_t *) AS_USERDATA(val))->curl);
-  return vm_push_null(vm);
+  return vm_push_nil(vm);
 }
 
 static int perform_call(vm_t *vm, value_t *args)

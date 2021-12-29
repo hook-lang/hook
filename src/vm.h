@@ -22,7 +22,7 @@ typedef struct vm
 void vm_init(vm_t *vm, int min_capacity);
 void vm_free(vm_t *vm);
 int vm_push(vm_t *vm, value_t val);
-int vm_push_null(vm_t *vm);
+int vm_push_nil(vm_t *vm);
 int vm_push_boolean(vm_t *vm, bool data);
 int vm_push_number(vm_t *vm, double data);
 int vm_push_string(vm_t *vm, string_t *str);

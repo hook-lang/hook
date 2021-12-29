@@ -480,9 +480,9 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_MATCH;
     return;
   }
-  if (match_chars(scan, "null"))
+  if (match_chars(scan, "nil"))
   {
-    scan->token.type = TOKEN_NULL;
+    scan->token.type = TOKEN_NIL;
     return;
   }
   if (match_chars(scan, "return"))

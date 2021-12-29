@@ -77,7 +77,7 @@ static int open_call(vm_t *vm, value_t *args)
   string_t *mode = AS_STRING(val2);
   FILE *stream = fopen(filename->chars, mode->chars);
   if (!stream)
-    vm_push_null(vm);
+    vm_push_nil(vm);
   return vm_push_userdata(vm, (userdata_t *) file_new(stream));
 }
 
@@ -111,7 +111,7 @@ static int popen_call(vm_t *vm, value_t *args)
   FILE *stream;
   stream = popen(command->chars, mode->chars);
   if (!stream)
-    vm_push_null(vm);
+    vm_push_nil(vm);
   return vm_push_userdata(vm, (userdata_t *) file_new(stream));
 }
 
@@ -194,7 +194,7 @@ static int rewind_call(vm_t *vm, value_t *args)
   }
   FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
   rewind(stream);
-  return vm_push_null(vm);
+  return vm_push_nil(vm);
 }
 
 static int seek_call(vm_t *vm, value_t *args)
@@ -244,7 +244,7 @@ static int read_call(vm_t *vm, value_t *args)
   if (length < size && !feof(stream))
   {
     string_free(str);
-    return vm_push_null(vm);
+    return vm_push_nil(vm);
   }
   str->length = length;
   return vm_push_string(vm, str);
@@ -268,7 +268,7 @@ static int write_call(vm_t *vm, value_t *args)
   string_t *str = AS_STRING(val2);
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size)
-    return vm_push_null(vm);
+    return vm_push_nil(vm);
   return vm_push_number(vm, size);
 }
 
@@ -302,7 +302,7 @@ static int writeln_call(vm_t *vm, value_t *args)
   string_t *str = AS_STRING(val2);
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size || fwrite("\n", 1, 1, stream) < 1)
-    return vm_push_null(vm);
+    return vm_push_nil(vm);
   return vm_push_number(vm, size + 1);
 }
 

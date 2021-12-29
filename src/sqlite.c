@@ -113,7 +113,7 @@ static int execute_call(vm_t *vm, value_t *args)
     sqlite3_free(err);
     return STATUS_ERROR;
   }
-  return vm_push_null(vm);
+  return vm_push_nil(vm);
 }
 
 static int prepare_call(vm_t *vm, value_t *args)
@@ -173,7 +173,7 @@ static int bind_call(vm_t *vm, value_t *args)
   int rc = SQLITE_OK;
   switch (val3.type)
   {
-  case TYPE_NULL:
+  case TYPE_NIL:
     rc = sqlite3_bind_null(stmt, index);
     break;
   case TYPE_BOOLEAN:
@@ -226,7 +226,7 @@ static int fetch_call(vm_t *vm, value_t *args)
     for (int i = 0; i < num_columns; ++i)
     {
       int type = sqlite3_column_type(stmt, i);
-      value_t elem = NULL_VALUE;
+      value_t elem = NIL_VALUE;
       switch (type)
       {
       case SQLITE_NULL:
@@ -255,7 +255,7 @@ static int fetch_call(vm_t *vm, value_t *args)
       array_inplace_add_element(row, elem);
     }
   }
-  return row ? vm_push_array(vm, row) : vm_push_null(vm);
+  return row ? vm_push_array(vm, row) : vm_push_nil(vm);
 }
 
 #ifdef _WIN32

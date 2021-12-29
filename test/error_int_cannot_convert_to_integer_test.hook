@@ -1,2 +1,2 @@
 
-const a = int(null);
+const a = int(nil);
