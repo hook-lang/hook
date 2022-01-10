@@ -73,7 +73,7 @@ int import_library(vm_t *vm)
   if (IS_UNREACHABLE(name))
     string_free(name);
 #ifdef _WIN32
-  load_library_t load = GetProcAddress(handle, func->chars);
+  load_library_t load = (load_library_t) GetProcAddress(handle, func->chars);
 #else
   load_library_t load = dlsym(handle, func->chars);
 #endif
