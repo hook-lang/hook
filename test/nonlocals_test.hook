@@ -1,17 +1,17 @@
 
-const a = 1;
-fn f (const x) {
-  const b = 2;
-  fn g (const y) {
-    const c = 3;
-    const h = fn (z) {
+let a = 1;
+fn f (x) {
+  let b = 2;
+  fn g (let y) {
+    let c = 3;
+    let h = fn (z) {
       return z + c + y + b * x * x;
     };
     return h;
   }
-  const h = g(a);
+  let h = g(a);
   return h;
 }
-const h = f(4);
-const r = h(5);
+let h = f(4);
+let r = h(5);
 println(r);

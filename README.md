@@ -5,7 +5,7 @@
 
 # The Hook Programming Language
 
-Hook is a simple, small, cross-plataform scripting language with an easy-to-understand implementation. It has been written entirely by hand in C99 using the most simple techniques like recursive descending parsing, stack-based virtual machine, reference counting, etc.
+Hook is a simple, small, cross-platform, dynamically typed scripting language that combines imperative and functional programming. It was written entirely by hand in C using easy-to-understand techniques like recursive descent parsing, stack-based virtual machine, reference counting, etc.
 
 ## What does it look like 
 
@@ -21,11 +21,12 @@ fn factorial(n) {
 
 The main features are:
 
-* Imperative programming
-* C-style
-* Dynamic-type
-* No accidental side effects
-* Single-pass compiler
+* Cross-platform
+* Dynamically typed
+* Imperative and functional programming
+* C-style syntax
+* No side effects
+* Value-captured closure
 * Automatic memory management
 
 Warning: Hook is still in its early stages of development and is obviously not production ready. 

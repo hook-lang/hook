@@ -3,14 +3,14 @@
 //
 
 fn sort(arr) {
-  let n = len(arr);
-  let has_changed;
+  var n = len(arr);
+  var has_changed;
   do {
     has_changed = false;
     n--;
-    for (let i = 0; i < n; i++) {
+    for (var i = 0; i < n; i++) {
       if (arr[i] > arr[i + 1]) {
-        const t = arr[i];
+        let t = arr[i];
         arr[i] = arr[i + 1];
         arr[i + 1] = t;
         has_changed = true;

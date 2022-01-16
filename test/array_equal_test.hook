@@ -5,5 +5,5 @@ println([1] == [1, 2]);
 println([1, 2] == [1]);
 println([1, 2] == [1, 2]);
 println([1, 2] == [2, 1]);
-const a = ["foo"];
+let a = ["foo"];
 println(a == a);

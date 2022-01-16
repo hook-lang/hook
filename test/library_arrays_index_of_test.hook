@@ -1,5 +1,5 @@
 
 use arrays;
-const arr = ["foo", "bar", "baz"]; 
+let arr = ["foo", "bar", "baz"]; 
 println(arrays.index_of(arr, "baz"));
 println(arrays.index_of(arr, "qux"));

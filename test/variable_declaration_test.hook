@@ -1,15 +1,15 @@
 
-const a = 1;
-const [b, c] = [2, 3];
-let d;
-let e = 4;
-const [f, g] = ["foo", "bar"];
-let [h] = ["baz"];
-let [i, j] = ["qux", "quux"];
+let a = 1;
+let [b, c] = [2, 3];
+var d;
+var e = 4;
+let [f, g] = ["foo", "bar"];
+var [h] = ["baz"];
+var [i, j] = ["qux", "quux"];
 
-const {k, l} = {k: "foo", l: "bar"};
-let {m} = {m: "baz"};
-let {n, o, p} = {n: "qux", p: "quux"};
+let {k, l} = {k: "foo", l: "bar"};
+var {m} = {m: "baz"};
+var {n, o, p} = {n: "qux", p: "quux"};
 
 println(a);
 println(b);

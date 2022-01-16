@@ -1,2 +1,2 @@
 
-const a = float(nil);
+let a = float(nil);

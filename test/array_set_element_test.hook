@@ -1,16 +1,16 @@
 
-let arr1 = ["foo"];
+var arr1 = ["foo"];
 arr1[0] = "bar";
 println(arr1);
 
-let arr2 = [["foo"]];
+var arr2 = [["foo"]];
 arr2[0][0] = "bar";
 println(arr2);
 
-let arr3 = [[["foo"]]];
+var arr3 = [[["foo"]]];
 arr3[0][0][0] = "bar";
 println(arr3);
 
-let arr4 = [["foo", "bar", "baz"]];
+var arr4 = [["foo", "bar", "baz"]];
 arr4[0][1] = "qux";
 println(arr4);

@@ -1,2 +1,2 @@
 
-const a = float("");
+let a = float("");

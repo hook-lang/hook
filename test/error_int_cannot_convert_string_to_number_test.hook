@@ -1,2 +1,2 @@
 
-const a = int("123 x");
+let a = int("123 x");

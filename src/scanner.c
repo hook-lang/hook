@@ -415,19 +415,14 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_BREAK;
     return;
   }
-  if (match_chars(scan, "const"))
-  {
-    scan->token.type = TOKEN_CONST;
-    return;
-  }
   if (match_chars(scan, "continue"))
   {
     scan->token.type = TOKEN_CONTINUE;
     return;
   }
-  if (match_chars(scan, "delete"))
+  if (match_chars(scan, "del"))
   {
-    scan->token.type = TOKEN_DELETE;
+    scan->token.type = TOKEN_DEL;
     return;
   }
   if (match_chars(scan, "do"))
@@ -480,6 +475,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_MATCH;
     return;
   }
+  if (match_chars(scan, "mut"))
+  {
+    scan->token.type = TOKEN_MUT;
+    return;
+  }
   if (match_chars(scan, "nil"))
   {
     scan->token.type = TOKEN_NIL;
@@ -503,6 +503,11 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "use"))
   {
     scan->token.type = TOKEN_USE;
+    return;
+  }
+  if (match_chars(scan, "var"))
+  {
+    scan->token.type = TOKEN_VAR;
     return;
   }
   if (match_chars(scan, "while"))

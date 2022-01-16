@@ -3,15 +3,15 @@ chunk       ::= stmt* EOF
 
 stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | 'use' '{' NAME ( ',' NAME )* '}' 'in' NAME ';'
-              | 'const' NAME '=' expr ';'
-              | 'const' '[' NAME ( ',' NAME )* ']' '=' expr ';'
-              | 'const' '{' NAME ( ',' NAME )* '}' '=' expr ';'
+              | 'let' NAME '=' expr ';'
+              | 'let' '[' NAME ( ',' NAME )* ']' '=' expr ';'
+              | 'let' '{' NAME ( ',' NAME )* '}' '=' expr ';'
               | var_decl ';'
               | assign_call ';'
               | 'struct' NAME '{' ( NAME ( ',' NAME )* )? '}'
-              | 'fn' NAME '(' ( 'const'? NAME ( ',' 'const'? NAME )* )? ')'
+              | 'fn' NAME '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
                 ( '=>' expr | block )
-              | 'delete' NAME subscr* '[' expr ']' ';'
+              | 'del' NAME subscr* '[' expr ']' ';'
               | 'if' '(' expr ')' stmt ( 'else' stmt )?
               | 'match' '(' expr ')' '{' ( expr '=>' stmt )+ ( '_' '=>' stmt )? '}'
               | 'loop' stmt
@@ -23,9 +23,9 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | 'return' expr? ';'
               | block
 
-var_decl    ::= 'let' NAME ( '=' expr )?
-              | 'let' '[' NAME ( ',' NAME )* ']' '=' expr
-              | 'let' '{' NAME ( ',' NAME )* '}' '=' expr
+var_decl    ::= 'var' NAME ( '=' expr )?
+              | 'var' '[' NAME ( ',' NAME )* ']' '=' expr
+              | 'var' '{' NAME ( ',' NAME )* '}' '=' expr
 
 assign_call ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME subscr* ( '++' | '--' )
@@ -57,7 +57,7 @@ prim_expr   ::= 'nil' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'
               | '{' ( NAME ':' expr ( ',' NAME ':' expr )* )? '}'
               | 'struct' '{' ( NAME ( ',' NAME )* )? '}'
-              | 'fn' '(' ( 'const'? NAME ( ',' 'const'? NAME )* )? ')'
+              | 'fn' '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
                 ( '=>' expr | block )
               | 'if' '(' expr ')' expr 'else' expr
               | 'match' '(' expr ')' '{' expr '=>' expr ( ',' expr '=>' expr )*

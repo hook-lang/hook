@@ -95,7 +95,7 @@ static void compile_assign_statement(compiler_t *comp, token_t *tk);
 static int compile_assign(compiler_t *comp, int syntax, bool inplace);
 static void compile_struct_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_function_declaration(compiler_t *comp, bool is_anonymous);
-static void compile_delete_statement(compiler_t *comp);
+static void compile_del_statement(compiler_t *comp);
 static void compile_delete(compiler_t *comp, bool inplace);
 static void compile_if_statement(compiler_t *comp);
 static void compile_match_statement(compiler_t *comp);
@@ -351,12 +351,12 @@ static void compile_statement(compiler_t *comp)
     compile_import_library(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_CONST))
+  if (MATCH(scan, TOKEN_LET))
   {
     compile_constant_declaration(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_LET))
+  if (MATCH(scan, TOKEN_VAR))
   {
     compile_variable_declaration(comp);
     EXPECT(scan, TOKEN_SEMICOLON);
@@ -380,9 +380,9 @@ static void compile_statement(compiler_t *comp)
     compile_function_declaration(comp, false);
     return;
   }
-  if (MATCH(scan, TOKEN_DELETE))
+  if (MATCH(scan, TOKEN_DEL))
   {
-    compile_delete_statement(comp);
+    compile_del_statement(comp);
     return;
   }
   if (MATCH(scan, TOKEN_IF))
@@ -962,11 +962,11 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     prototype_add_line(proto, scan->token.line);
     goto end;
   }
-  bool is_mutable = true;
-  if (MATCH(scan, TOKEN_CONST))
+  bool is_mutable = false;
+  if (MATCH(scan, TOKEN_MUT))
   {
     scanner_next_token(scan);
-    is_mutable = false;
+    is_mutable = true;
   }
   if (!MATCH(scan, TOKEN_NAME))
     fatal_error_unexpected_token(scan);
@@ -976,11 +976,11 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   while (MATCH(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
-    bool is_mutable = true;
-    if (MATCH(scan, TOKEN_CONST))
+    bool is_mutable = false;
+    if (MATCH(scan, TOKEN_MUT))
     {
       scanner_next_token(scan);
-      is_mutable = false;
+      is_mutable = true;
     }
     if (!MATCH(scan, TOKEN_NAME))
       fatal_error_unexpected_token(scan);
@@ -1011,7 +1011,7 @@ end:
   prototype_add_line(proto, line);
 }
 
-static void compile_delete_statement(compiler_t *comp)
+static void compile_del_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   prototype_t *proto = comp->proto;
@@ -1208,7 +1208,7 @@ static void compile_for_statement(compiler_t *comp)
     scanner_next_token(scan);
   else
   {
-    if (MATCH(scan, TOKEN_LET))
+    if (MATCH(scan, TOKEN_VAR))
     {
       compile_variable_declaration(comp);
       EXPECT(scan, TOKEN_SEMICOLON);

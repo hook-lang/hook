@@ -1,2 +1,2 @@
 
-const a = int("4.9e-324");
+let a = int("4.9e-324");

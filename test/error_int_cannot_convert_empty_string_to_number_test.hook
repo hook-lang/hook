@@ -1,2 +1,2 @@
 
-const a = int("");
+let a = int("");

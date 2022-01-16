@@ -1,2 +1,2 @@
 
-const a = float("4.9e-324");
+let a = float("4.9e-324");

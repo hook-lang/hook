@@ -3,13 +3,13 @@
 //
 
 fn sort(arr) {
-  const n = len(arr);
+  let n = len(arr);
   if (n <= 1)
     return arr;
-  const pivot = arr[0];
-  let left = []; 
-  let right = [];
-  for (let i = 1; i < n; i++) {
+  let pivot = arr[0];
+  var left = []; 
+  var right = [];
+  for (var i = 1; i < n; i++) {
     if (arr[i] < pivot)
       left[] = arr[i];
     else

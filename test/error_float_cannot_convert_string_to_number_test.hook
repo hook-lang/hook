@@ -1,2 +1,2 @@
 
-const a = float("123 x");
+let a = float("123 x");

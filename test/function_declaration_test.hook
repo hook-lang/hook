@@ -3,13 +3,13 @@ fn f(a, b) {
   return a + b;
 }
 
-const g = fn (a, b) {
+let g = fn (a, b) {
   return a - b;
 };
 
 fn h(a, b) => a + b
 
-const i = fn (a, b) => a - b;
+let i = fn (a, b) => a - b;
 
 fn j() {
   fn f() {}

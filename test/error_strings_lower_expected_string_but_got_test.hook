@@ -1,3 +1,3 @@
 
 use { lower } in strings;
-const a = lower(1);
+let a = lower(1);

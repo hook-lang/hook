@@ -1,2 +1,2 @@
 
-const a = int(nil);
+let a = int(nil);
