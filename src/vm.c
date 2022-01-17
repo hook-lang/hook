@@ -19,7 +19,7 @@ static inline int array(vm_t *vm, int length);
 static inline int ztruct(vm_t *vm, int length);
 static inline int instance(vm_t *vm, int length);
 static inline int construct(vm_t *vm, int length);
-static inline int function(vm_t *vm, prototype_t *proto);
+static inline int closure(vm_t *vm, function_t *fn);
 static inline int unpack(vm_t *vm, int n);
 static inline int destruct(vm_t *vm, int n);
 static inline int add_element(vm_t *vm);
@@ -52,7 +52,7 @@ static inline void not(vm_t *vm);
 static inline int call(vm_t *vm, int num_args);
 static inline int check_arity(int arity, string_t *name, int num_args);
 static inline void print_trace(string_t *name, string_t *file, int line);
-static inline int call_function(vm_t *vm, value_t *locals, function_t *fn, int *line);
+static inline int call_function(vm_t *vm, value_t *locals, closure_t *cl, int *line);
 static inline void discard_frame(vm_t *vm, value_t *slots);
 static inline void move_result(vm_t *vm, value_t *slots);
 
@@ -196,20 +196,20 @@ static inline int construct(vm_t *vm, int length)
   return STATUS_OK;
 }
 
-static inline int function(vm_t *vm, prototype_t *proto)
+static inline int closure(vm_t *vm, function_t *fn)
 {
-  int num_nonlocals = proto->num_nonlocals;
+  int num_nonlocals = fn->num_nonlocals;
   value_t *slots = &vm->slots[vm->top - num_nonlocals + 1];
-  function_t *fn = function_new(proto);
+  closure_t *cl = closure_new(fn);
   for (int i = 0; i < num_nonlocals; ++i)
-    fn->nonlocals[i] = slots[i];
+    cl->nonlocals[i] = slots[i];
   vm->top -= num_nonlocals;
-  if (push(vm, FUNCTION_VALUE(fn)) == STATUS_ERROR)
+  if (push(vm, CLOSURE_VALUE(cl)) == STATUS_ERROR)
   {
-    function_free(fn);
+    closure_free(cl);
     return STATUS_ERROR;
   }
-  INCR_REF(fn);
+  INCR_REF(cl);
   return STATUS_OK;
 }
 
@@ -1085,23 +1085,23 @@ static inline int call(vm_t *vm, int num_args)
     move_result(vm, slots);
     return STATUS_OK;
   }
-  function_t *fn = AS_FUNCTION(val);
-  prototype_t *proto = fn->proto;
-  if (check_arity(proto->arity, proto->name, num_args) == STATUS_ERROR)
+  closure_t *cl = AS_CLOSURE(val);
+  function_t *fn = cl->fn;
+  if (check_arity(fn->arity, fn->name, num_args) == STATUS_ERROR)
   {
     discard_frame(vm, slots);
     return STATUS_ERROR;
   }
   int line;
-  if (call_function(vm, slots, fn, &line) == STATUS_ERROR)
+  if (call_function(vm, slots, cl, &line) == STATUS_ERROR)
   {
-    print_trace(proto->name, proto->file, line);
+    print_trace(fn->name, fn->file, line);
     discard_frame(vm, slots);
     return STATUS_ERROR;
   }
-  DECR_REF(fn);
-  if (IS_UNREACHABLE(fn))
-    function_free(fn);
+  DECR_REF(cl);
+  if (IS_UNREACHABLE(cl))
+    closure_free(cl);
   move_result(vm, slots);
   return STATUS_OK;
 }
@@ -1128,14 +1128,14 @@ static inline void print_trace(string_t *name, string_t *file, int line)
   fprintf(stderr, "  at %s() in <native>\n", name_chars);
 }
 
-static inline int call_function(vm_t *vm, value_t *locals, function_t *fn, int *line)
+static inline int call_function(vm_t *vm, value_t *locals, closure_t *cl, int *line)
 {
   value_t *slots = vm->slots;
-  prototype_t *proto = fn->proto;
-  value_t *nonlocals = fn->nonlocals;
-  uint8_t *code = proto->chunk.bytes;
-  value_t *consts = proto->consts->elements;
-  prototype_t **protos = proto->protos;
+  function_t *fn = cl->fn;
+  value_t *nonlocals = cl->nonlocals;
+  uint8_t *code = fn->chunk.bytes;
+  value_t *consts = fn->consts->elements;
+  function_t **functions = fn->functions;
   uint8_t *pc = code;
   for (;;)
   {
@@ -1182,8 +1182,8 @@ static inline int call_function(vm_t *vm, value_t *locals, function_t *fn, int *
       if (construct(vm, read_byte(&pc)) == STATUS_ERROR)
         goto error;
       break;
-    case OP_FUNCTION:
-      if (function(vm, protos[read_byte(&pc)]) == STATUS_ERROR)
+    case OP_CLOSURE:
+      if (closure(vm, functions[read_byte(&pc)]) == STATUS_ERROR)
         goto error;
       break;
     case OP_UNPACK:
@@ -1414,7 +1414,7 @@ static inline int call_function(vm_t *vm, value_t *locals, function_t *fn, int *
     }
   }
 error:
-  *line = prototype_get_line(proto, (int) (pc - proto->chunk.bytes));
+  *line = function_get_line(fn, (int) (pc - fn->chunk.bytes));
   return STATUS_ERROR;
 }
 
@@ -1524,11 +1524,11 @@ int vm_push_instance(vm_t *vm, instance_t *inst)
   return STATUS_OK;
 }
 
-int vm_push_function(vm_t *vm, function_t *fn)
+int vm_push_closure(vm_t *vm, closure_t *cl)
 {
-  if (push(vm, FUNCTION_VALUE(fn)) == STATUS_ERROR)
+  if (push(vm, CLOSURE_VALUE(cl)) == STATUS_ERROR)
     return STATUS_ERROR;
-  INCR_REF(fn);
+  INCR_REF(cl);
   return STATUS_OK;
 }
 

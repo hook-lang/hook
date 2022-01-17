@@ -10,118 +10,118 @@
 
 #define MIN_CAPACITY (1 << 3)
 
-prototype_t *prototype_allocate(int arity, string_t *name, string_t *file);
-static inline void init_lines(prototype_t *proto);
-static inline void init_protos(prototype_t *proto);
-static inline void free_protos(prototype_t *proto);
-static inline void resize_lines(prototype_t *proto);
-static inline void resize_protos(prototype_t *proto);
+function_t *function_allocate(int arity, string_t *name, string_t *file);
+static inline void init_lines(function_t *fn);
+static inline void init_functions(function_t *fn);
+static inline void free_functions(function_t *fn);
+static inline void resize_lines(function_t *fn);
+static inline void resize_functions(function_t *fn);
 
-prototype_t *prototype_allocate(int arity, string_t *name, string_t *file)
+function_t *function_allocate(int arity, string_t *name, string_t *file)
 {
-  prototype_t *proto = (prototype_t *) allocate(sizeof(*proto));
-  proto->ref_count = 0;
-  proto->arity = arity;
+  function_t *fn = (function_t *) allocate(sizeof(*fn));
+  fn->ref_count = 0;
+  fn->arity = arity;
   if (name)
     INCR_REF(name);
-  proto->name = name;
+  fn->name = name;
   INCR_REF(file);
-  proto->file = file;
-  return proto;
+  fn->file = file;
+  return fn;
 }
 
-static inline void init_lines(prototype_t *proto)
+static inline void init_lines(function_t *fn)
 {
-  proto->lines_capacity = MIN_CAPACITY;
-  proto->num_lines = 0;
-  proto->lines = (line_t *) allocate(sizeof(*proto->lines) * proto->lines_capacity);
+  fn->lines_capacity = MIN_CAPACITY;
+  fn->num_lines = 0;
+  fn->lines = (line_t *) allocate(sizeof(*fn->lines) * fn->lines_capacity);
 }
 
-static inline void init_protos(prototype_t *proto)
+static inline void init_functions(function_t *fn)
 {
-  proto->protos_capacity = MIN_CAPACITY;
-  proto->num_protos = 0;
-  proto->protos = (prototype_t **) allocate(sizeof(*proto->protos) * proto->protos_capacity);
+  fn->functions_capacity = MIN_CAPACITY;
+  fn->num_functions = 0;
+  fn->functions = (function_t **) allocate(sizeof(*fn->functions) * fn->functions_capacity);
 }
 
-static inline void free_protos(prototype_t *proto)
+static inline void free_functions(function_t *fn)
 {
-  for (int i = 0; i < proto->num_protos; ++i)
+  for (int i = 0; i < fn->num_functions; ++i)
   {
-    prototype_t *child = proto->protos[i];
+    function_t *child = fn->functions[i];
     DECR_REF(child);
     if (IS_UNREACHABLE(child))
-      prototype_free(child);
+      function_free(child);
   }
-  free(proto->protos);
+  free(fn->functions);
 }
 
-static inline void resize_lines(prototype_t *proto)
+static inline void resize_lines(function_t *fn)
 {
-  if (proto->num_lines < proto->lines_capacity)
+  if (fn->num_lines < fn->lines_capacity)
     return;
-  int capacity = proto->lines_capacity << 1;
-  proto->lines_capacity = capacity;
-  proto->lines = (line_t *) reallocate(proto->lines,
-    sizeof(*proto->lines) * capacity);
+  int capacity = fn->lines_capacity << 1;
+  fn->lines_capacity = capacity;
+  fn->lines = (line_t *) reallocate(fn->lines,
+    sizeof(*fn->lines) * capacity);
 }
 
-static inline void resize_protos(prototype_t *proto)
+static inline void resize_functions(function_t *fn)
 {
-  if (proto->num_protos < proto->protos_capacity)
+  if (fn->num_functions < fn->functions_capacity)
     return;
-  uint8_t capacity = proto->protos_capacity << 1;
-  proto->protos_capacity = capacity;
-  proto->protos = (prototype_t **) reallocate(proto->protos,
-    sizeof(*proto->protos) * capacity);
+  uint8_t capacity = fn->functions_capacity << 1;
+  fn->functions_capacity = capacity;
+  fn->functions = (function_t **) reallocate(fn->functions,
+    sizeof(*fn->functions) * capacity);
 }
 
-prototype_t *prototype_new(int arity, string_t *name, string_t *file)
+function_t *function_new(int arity, string_t *name, string_t *file)
 {
-  prototype_t *proto = prototype_allocate(arity, name, file);
-  init_lines(proto);
-  chunk_init(&proto->chunk);
-  proto->consts = array_allocate(0);
-  proto->consts->length = 0;
-  init_protos(proto);
-  proto->num_nonlocals = 0;
-  return proto;
+  function_t *fn = function_allocate(arity, name, file);
+  init_lines(fn);
+  chunk_init(&fn->chunk);
+  fn->consts = array_allocate(0);
+  fn->consts->length = 0;
+  init_functions(fn);
+  fn->num_nonlocals = 0;
+  return fn;
 }
 
-void prototype_free(prototype_t *proto)
+void function_free(function_t *fn)
 {
-  string_t *name = proto->name;
+  string_t *name = fn->name;
   if (name)
   {
     DECR_REF(name);
     if (IS_UNREACHABLE(name))
       string_free(name);
   }
-  string_t *file = proto->file;
+  string_t *file = fn->file;
   DECR_REF(file);
   if (IS_UNREACHABLE(file))
     string_free(file);
-  free(proto->lines);
-  chunk_free(&proto->chunk);
-  array_free(proto->consts);
-  free_protos(proto);
-  free(proto);
+  free(fn->lines);
+  chunk_free(&fn->chunk);
+  array_free(fn->consts);
+  free_functions(fn);
+  free(fn);
 }
 
-void prototype_add_line(prototype_t *proto, int line_no)
+void function_add_line(function_t *fn, int line_no)
 {
-  resize_lines(proto);
-  line_t *line = &proto->lines[proto->num_lines];
+  resize_lines(fn);
+  line_t *line = &fn->lines[fn->num_lines];
   line->no = line_no;
-  line->offset = proto->chunk.length;
-  ++proto->num_lines;
+  line->offset = fn->chunk.length;
+  ++fn->num_lines;
 }
 
-int prototype_get_line(prototype_t *proto, int offset)
+int function_get_line(function_t *fn, int offset)
 {
   int line_no = -1;
-  line_t *lines = proto->lines;
-  for (int i = 0; i < proto->num_lines; ++i)
+  line_t *lines = fn->lines;
+  for (int i = 0; i < fn->num_lines; ++i)
   {
     line_t *line = &lines[i];
     if (line->offset == offset)
@@ -130,41 +130,41 @@ int prototype_get_line(prototype_t *proto, int offset)
       break;
     }
   }
-  ASSERT(line_no != -1, "prototype must contain the line number");
+  ASSERT(line_no != -1, "function must contain the line number");
   return line_no;
 }
 
-void prototype_add_child(prototype_t *proto, prototype_t *child)
+void function_add_child(function_t *fn, function_t *child)
 {
-  resize_protos(proto);
+  resize_functions(fn);
   INCR_REF(child);
-  proto->protos[proto->num_protos] = child;
-  ++proto->num_protos;
+  fn->functions[fn->num_functions] = child;
+  ++fn->num_functions;
 }
 
-void prototype_serialize(prototype_t *proto, FILE *stream)
+void function_serialize(function_t *fn, FILE *stream)
 {
-  fwrite(&proto->arity, sizeof(proto->arity), 1, stream);
-  string_serialize(proto->name, stream);
-  string_serialize(proto->file, stream);
-  fwrite(&proto->lines_capacity, sizeof(proto->lines_capacity), 1, stream);
-  fwrite(&proto->num_lines, sizeof(proto->num_lines), 1, stream);
-  for (int i = 0; i < proto->num_lines; ++i)
+  fwrite(&fn->arity, sizeof(fn->arity), 1, stream);
+  string_serialize(fn->name, stream);
+  string_serialize(fn->file, stream);
+  fwrite(&fn->lines_capacity, sizeof(fn->lines_capacity), 1, stream);
+  fwrite(&fn->num_lines, sizeof(fn->num_lines), 1, stream);
+  for (int i = 0; i < fn->num_lines; ++i)
   {
-    line_t *line = &proto->lines[i];
+    line_t *line = &fn->lines[i];
     fwrite(line, sizeof(*line), 1, stream);
   }
-  chunk_serialize(&proto->chunk, stream);
-  array_serialize(proto->consts, stream);
-  fwrite(&proto->protos_capacity, sizeof(proto->protos_capacity), 1, stream);
-  fwrite(&proto->num_protos, sizeof(proto->num_protos), 1, stream);
-  prototype_t **protos = proto->protos;
-  for (int i = 0; i < proto->num_protos; ++i)
-    prototype_serialize(protos[i], stream);
-  fwrite(&proto->num_nonlocals, sizeof(proto->num_nonlocals), 1, stream);
+  chunk_serialize(&fn->chunk, stream);
+  array_serialize(fn->consts, stream);
+  fwrite(&fn->functions_capacity, sizeof(fn->functions_capacity), 1, stream);
+  fwrite(&fn->num_functions, sizeof(fn->num_functions), 1, stream);
+  function_t **functions = fn->functions;
+  for (int i = 0; i < fn->num_functions; ++i)
+    function_serialize(functions[i], stream);
+  fwrite(&fn->num_nonlocals, sizeof(fn->num_nonlocals), 1, stream);
 }
 
-prototype_t *prototype_deserialize(FILE *stream)
+function_t *function_deserialize(FILE *stream)
 {
   int arity;
   if (fread(&arity, sizeof(arity), 1, stream) != 1)
@@ -175,63 +175,63 @@ prototype_t *prototype_deserialize(FILE *stream)
   string_t *file = string_deserialize(stream);
   if (!file)
     return NULL;
-  prototype_t *proto = prototype_allocate(arity, name, file);
-  if (fread(&proto->lines_capacity, sizeof(proto->lines_capacity), 1, stream) != 1)
+  function_t *fn = function_allocate(arity, name, file);
+  if (fread(&fn->lines_capacity, sizeof(fn->lines_capacity), 1, stream) != 1)
     return NULL;
-  if (fread(&proto->num_lines, sizeof(proto->num_lines), 1, stream) != 1)
+  if (fread(&fn->num_lines, sizeof(fn->num_lines), 1, stream) != 1)
     return NULL;
-  proto->lines = (line_t *) allocate(sizeof(*proto->lines) * proto->lines_capacity);
-  for (int i = 0; i < proto->num_lines; ++i)
+  fn->lines = (line_t *) allocate(sizeof(*fn->lines) * fn->lines_capacity);
+  for (int i = 0; i < fn->num_lines; ++i)
   {
-    line_t *line = &proto->lines[i];
+    line_t *line = &fn->lines[i];
     if (fread(line, sizeof(*line), 1, stream) != 1)
       return NULL;
   }
-  if (!chunk_deserialize(&proto->chunk, stream))
+  if (!chunk_deserialize(&fn->chunk, stream))
     return NULL;
-  proto->consts = array_deserialize(stream);
-  if (!proto->consts)
+  fn->consts = array_deserialize(stream);
+  if (!fn->consts)
     return NULL;
-  INCR_REF(proto->consts);
-  if (fread(&proto->protos_capacity, sizeof(proto->protos_capacity), 1, stream) != 1)
+  INCR_REF(fn->consts);
+  if (fread(&fn->functions_capacity, sizeof(fn->functions_capacity), 1, stream) != 1)
     return NULL;
-  if (fread(&proto->num_protos, sizeof(proto->num_protos), 1, stream) != 1)
+  if (fread(&fn->num_functions, sizeof(fn->num_functions), 1, stream) != 1)
     return NULL;
-  prototype_t **protos = (prototype_t **) allocate(sizeof(*protos) * proto->protos_capacity);
-  for (int i = 0; i < proto->num_protos; ++i)
+  function_t **functions = (function_t **) allocate(sizeof(*functions) * fn->functions_capacity);
+  for (int i = 0; i < fn->num_functions; ++i)
   {
-    prototype_t *proto = prototype_deserialize(stream);
-    if (!proto)
+    function_t *fn = function_deserialize(stream);
+    if (!fn)
       return NULL;
-    INCR_REF(proto);
-    protos[i] = proto;
+    INCR_REF(fn);
+    functions[i] = fn;
   }
-  proto->protos = protos;
-  if (fread(&proto->num_nonlocals, sizeof(proto->num_nonlocals), 1, stream) != 1)
+  fn->functions = functions;
+  if (fread(&fn->num_nonlocals, sizeof(fn->num_nonlocals), 1, stream) != 1)
     return NULL;
-  return proto;
-}
-
-function_t *function_new(prototype_t *proto)
-{
-  int size = sizeof(function_t) + sizeof(value_t) * proto->num_nonlocals;
-  function_t *fn = (function_t *) allocate(size);
-  fn->ref_count = 0;
-  INCR_REF(proto);
-  fn->proto = proto;
   return fn;
 }
 
-void function_free(function_t *fn)
+closure_t *closure_new(function_t *fn)
 {
-  prototype_t *proto = fn->proto;
-  int num_nonlocals = proto->num_nonlocals;
-  DECR_REF(proto);
-  if (IS_UNREACHABLE(proto))
-    prototype_free(proto);
+  int size = sizeof(closure_t) + sizeof(value_t) * fn->num_nonlocals;
+  closure_t *cl = (closure_t *) allocate(size);
+  cl->ref_count = 0;
+  INCR_REF(fn);
+  cl->fn = fn;
+  return cl;
+}
+
+void closure_free(closure_t *cl)
+{
+  function_t *fn = cl->fn;
+  int num_nonlocals = fn->num_nonlocals;
+  DECR_REF(fn);
+  if (IS_UNREACHABLE(fn))
+    function_free(fn);
   for (int i = 0; i < num_nonlocals; ++i)
-    value_release(fn->nonlocals[i]);
-  free(fn);
+    value_release(cl->nonlocals[i]);
+  free(cl);
 }
 
 native_t *native_new(string_t *name, int arity, int (*call)(struct vm *, value_t *))

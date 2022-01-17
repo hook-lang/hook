@@ -5,19 +5,19 @@
 
 #include "dump.h"
 
-void dump(prototype_t *proto)
+void dump(function_t *fn)
 {
-  string_t *name = proto->name;
-  string_t *file = proto->file;
+  string_t *name = fn->name;
+  string_t *file = fn->file;
   char *name_chars = name ? name->chars : "<anonymous>";
   char *file_chars = file ? file->chars : "<srdin>";
-  printf("%s in %s at %p\n", name_chars, file_chars, proto);
-  printf("%d parameter(s), %d non-local(s), %d constant(s), %d function(s)\n", proto->arity,
-    proto->num_nonlocals, proto->consts->length, proto->num_protos);
-  uint8_t *bytes = proto->chunk.bytes;
+  printf("%s in %s at %p\n", name_chars, file_chars, fn);
+  printf("%d parameter(s), %d non-local(s), %d constant(s), %d function(s)\n", fn->arity,
+    fn->num_nonlocals, fn->consts->length, fn->num_functions);
+  uint8_t *bytes = fn->chunk.bytes;
   int i = 0;
   int n = 0;
-  while (i < proto->chunk.length)
+  while (i < fn->chunk.length)
   {
     opcode_t op = (opcode_t) bytes[i];
     int j = i++;
@@ -55,8 +55,8 @@ void dump(prototype_t *proto)
     case OP_CONSTRUCT:
       printf("  [%05d] Construct             %d\n", j, bytes[i++]);
       break;
-    case OP_FUNCTION:
-      printf("  [%05d] Function              %d\n", j, bytes[i++]);
+    case OP_CLOSURE:
+      printf("  [%05d] Closure               %d\n", j, bytes[i++]);
       break;
     case OP_UNPACK:
       printf("  [%05d] Unpack                %d\n", j, bytes[i++]);
@@ -216,6 +216,6 @@ void dump(prototype_t *proto)
     }
   }
   printf("%d instruction(s)\n\n", n);
-  for (int i = 0; i < proto->num_protos; ++i)
-    dump(proto->protos[i]);  
+  for (int i = 0; i < fn->num_functions; ++i)
+    dump(fn->functions[i]);  
 }

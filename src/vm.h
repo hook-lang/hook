@@ -31,7 +31,7 @@ int vm_push_string_from_stream(vm_t *vm, FILE *stream, const char terminal);
 int vm_push_array(vm_t *vm, array_t *arr);
 int vm_push_struct(vm_t *vm, struct_t *ztruct);
 int vm_push_instance(vm_t *vm, instance_t *inst);
-int vm_push_function(vm_t *vm, function_t *fn);
+int vm_push_closure(vm_t *vm, closure_t *cl);
 int vm_push_native(vm_t *vm, native_t *native);
 int vm_push_new_native(vm_t *vm, const char *name, int arity, int (*call)(vm_t *, value_t *));
 int vm_push_userdata(vm_t *vm, userdata_t *udata);

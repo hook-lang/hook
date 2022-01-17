@@ -16,7 +16,7 @@ typedef struct
   int offset;
 } line_t;
 
-typedef struct prototype
+typedef struct function
 {
   OBJECT_HEADER
   int arity;
@@ -27,18 +27,18 @@ typedef struct prototype
   line_t *lines;
   chunk_t chunk;
   array_t *consts;
-  uint8_t protos_capacity;
-  uint8_t num_protos;
-  struct prototype **protos;
+  uint8_t functions_capacity;
+  uint8_t num_functions;
+  struct function **functions;
   uint8_t num_nonlocals;
-} prototype_t;
+} function_t;
 
 typedef struct
 {
   OBJECT_HEADER
-  prototype_t *proto;
+  function_t *fn;
   value_t nonlocals[0];
-} function_t;
+} closure_t;
 
 struct vm;
 
@@ -50,15 +50,15 @@ typedef struct
   int (*call)(struct vm *, value_t *);
 } native_t;
 
-prototype_t *prototype_new(int arity, string_t *name, string_t *file);
-void prototype_free(prototype_t *proto);
-void prototype_add_line(prototype_t *proto, int line_no);
-int prototype_get_line(prototype_t *proto, int offset);
-void prototype_add_child(prototype_t *proto, prototype_t *child);
-void prototype_serialize(prototype_t *proto, FILE *stream);
-prototype_t *prototype_deserialize(FILE *stream);
-function_t *function_new(prototype_t *proto);
+function_t *function_new(int arity, string_t *name, string_t *file);
 void function_free(function_t *fn);
+void function_add_line(function_t *fn, int line_no);
+int function_get_line(function_t *fn, int offset);
+void function_add_child(function_t *fn, function_t *child);
+void function_serialize(function_t *fn, FILE *stream);
+function_t *function_deserialize(FILE *stream);
+closure_t *closure_new(function_t *fn);
+void closure_free(closure_t *cl);
 native_t *native_new(string_t *name, int arity, int (*call)(struct vm *, value_t *));
 void native_free(native_t *native);
 

@@ -8,6 +8,6 @@
 
 #include "callable.h"
 
-void dump(prototype_t *proto);
+void dump(function_t *fn);
 
 #endif // DUMP_H

@@ -36,12 +36,12 @@ static inline const char *option(const char *arg, const char *opt);
 static inline array_t *args_array(parsed_args_t *parsed_args);
 static inline void print_help(const char *cmd);
 static inline void print_version(void);
-static inline function_t *load_bytecode_from_file(const char *filename);
-static inline function_t *load_bytecode_from_stream(FILE *stream);
-static inline void save_bytecode_to_file(function_t *fn, const char *filename);
+static inline closure_t *load_bytecode_from_file(const char *filename);
+static inline closure_t *load_bytecode_from_stream(FILE *stream);
+static inline void save_bytecode_to_file(closure_t *cl, const char *filename);
 static inline string_t *load_source_from_file(const char *filename);
-static inline function_t *compile_source(const char *input);
-static inline int run_bytecode(function_t *fn, parsed_args_t *parsed_args);
+static inline closure_t *compile_source(const char *input);
+static inline int run_bytecode(closure_t *cl, parsed_args_t *parsed_args);
 
 static inline void parse_args(parsed_args_t *parsed_args, int argc, const char **argv)
 {
@@ -154,34 +154,34 @@ static inline void print_version(void)
   printf("hook version %s\n", VERSION);
 }
 
-static inline function_t *load_bytecode_from_file(const char *filename)
+static inline closure_t *load_bytecode_from_file(const char *filename)
 {
   FILE *stream = fopen(filename, "rb");
   if (!stream)
     fatal_error("unable to open file `%s`", filename);
-  function_t *fn = load_bytecode_from_stream(stream);
-  if (!fn)
+  closure_t *cl = load_bytecode_from_stream(stream);
+  if (!cl)
     fatal_error("unable to load file `%s`", filename);
   fclose(stream);
-  return fn;
+  return cl;
 }
 
-static inline function_t *load_bytecode_from_stream(FILE *stream)
+static inline closure_t *load_bytecode_from_stream(FILE *stream)
 {
-  prototype_t *proto = prototype_deserialize(stream);
-  if (!proto)
+  function_t *fn = function_deserialize(stream);
+  if (!fn)
     return NULL;
-  return function_new(proto);
+  return closure_new(fn);
 }
 
-static inline void save_bytecode_to_file(function_t *fn, const char *filename)
+static inline void save_bytecode_to_file(closure_t *cl, const char *filename)
 {
   filename = filename ? filename : "a.out";
   ensure_path(filename);
   FILE *stream = fopen(filename, "wb");
   if (!stream)
     fatal_error("unable to open file `%s`", filename);
-  prototype_serialize(fn->proto, stream);
+  function_serialize(cl->fn, stream);
   fclose(stream);
 }
 
@@ -201,19 +201,19 @@ static inline string_t *load_source_from_file(const char *filename)
   return str;
 }
 
-static inline function_t *compile_source(const char *input)
+static inline closure_t *compile_source(const char *input)
 {
   string_t *file = string_from_chars(-1, input ? input : "<stdin>");
   string_t *source = input ? load_source_from_file(input) : string_from_stream(stdin, '\0');
   return compile(file, source);
 }
 
-static inline int run_bytecode(function_t *fn, parsed_args_t *parsed_args)
+static inline int run_bytecode(closure_t *cl, parsed_args_t *parsed_args)
 {
   vm_t vm;
   vm_init(&vm, parsed_args->stack_size);
   load_globals(&vm);
-  vm_push_function(&vm, fn);
+  vm_push_closure(&vm, cl);
   vm_push_array(&vm, args_array(parsed_args));
   if (vm_call(&vm, 1) == STATUS_ERROR)
   {
@@ -247,26 +247,26 @@ int main(int argc, const char **argv)
     const char *input = parsed_args.input;
     if (input)
     {
-      function_t *fn = load_bytecode_from_file(input);
-      return run_bytecode(fn, &parsed_args);
+      closure_t *cl = load_bytecode_from_file(input);
+      return run_bytecode(cl, &parsed_args);
     }
-    function_t *fn = load_bytecode_from_stream(stdin);
-    if (!fn)
+    closure_t *cl = load_bytecode_from_stream(stdin);
+    if (!cl)
       fatal_error("unable to load bytecode");
-    return run_bytecode(fn, &parsed_args);
+    return run_bytecode(cl, &parsed_args);
   }
-  function_t *fn = compile_source(parsed_args.input);
+  closure_t *cl = compile_source(parsed_args.input);
   if (parsed_args.opt_dump)
   {
-    dump(fn->proto);
-    function_free(fn);
+    dump(cl->fn);
+    closure_free(cl);
     return EXIT_SUCCESS;
   }
   if (parsed_args.opt_compile)
   {
-    save_bytecode_to_file(fn, parsed_args.output);
-    function_free(fn);
+    save_bytecode_to_file(cl, parsed_args.output);
+    closure_free(cl);
     return EXIT_SUCCESS;
   }
-  return run_bytecode(fn, &parsed_args);
+  return run_bytecode(cl, &parsed_args);
 }

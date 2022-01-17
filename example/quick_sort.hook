@@ -2,7 +2,7 @@
 // quick_sort.hook
 //
 
-fn sort(arr) {
+fn sort(mut arr) {
   let n = len(arr);
   if (n <= 1)
     return arr;

@@ -2,7 +2,7 @@
 // bubble_sort.hook
 //
 
-fn sort(arr) {
+fn sort(mut arr) {
   var n = len(arr);
   var has_changed;
   do {

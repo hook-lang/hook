@@ -40,7 +40,7 @@ static inline void value_free(value_t val)
         native_free(AS_NATIVE(val));
         break;
       }
-      function_free(AS_FUNCTION(val));
+      closure_free(AS_CLOSURE(val));
     }
     break;
   case TYPE_USERDATA:
@@ -129,7 +129,7 @@ void value_print(value_t val, bool quoted)
     break;
   case TYPE_CALLABLE:
     {
-      string_t *name = IS_NATIVE(val) ? AS_NATIVE(val)->name : AS_FUNCTION(val)->proto->name;
+      string_t *name = IS_NATIVE(val) ? AS_NATIVE(val)->name : AS_CLOSURE(val)->fn->name;
       if (name)
       {
         printf("<callable %.*s at %p>", name->length, name->chars, val.as.pointer);

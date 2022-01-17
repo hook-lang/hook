@@ -22,7 +22,7 @@
 #define ARRAY_VALUE(a)    ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as.pointer = (a)})
 #define STRUCT_VALUE(s)   ((value_t) {.type = TYPE_STRUCT, .flags = FLAG_OBJECT, .as.pointer = (s)})
 #define INSTANCE_VALUE(i) ((value_t) {.type = TYPE_INSTANCE, .flags = FLAG_OBJECT, .as.pointer = (i)})
-#define FUNCTION_VALUE(f) ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT, .as.pointer = (f)})
+#define CLOSURE_VALUE(c)  ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT, .as.pointer = (c)})
 #define NATIVE_VALUE(n)   ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT | FLAG_NATIVE, .as.pointer = (n)})
 #define USERDATA_VALUE(u) ((value_t) {.type = TYPE_USERDATA, .flags = FLAG_OBJECT, .as.pointer = (u)})
 
@@ -45,7 +45,7 @@
 #define AS_ARRAY(v)    ((array_t *) (v).as.pointer)
 #define AS_STRUCT(v)   ((struct_t *) (v).as.pointer)
 #define AS_INSTANCE(v) ((instance_t *) (v).as.pointer)
-#define AS_FUNCTION(v) ((function_t *) (v).as.pointer)
+#define AS_CLOSURE(v)  ((closure_t *) (v).as.pointer)
 #define AS_NATIVE(v)   ((native_t *) (v).as.pointer)
 #define AS_USERDATA(v) ((userdata_t *) (v).as.pointer)
 #define AS_OBJECT(v)   ((object_t *) (v).as.pointer)
