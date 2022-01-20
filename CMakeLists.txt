@@ -193,9 +193,6 @@ set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 
 set(fmt TGZ)
-if(WIN32)
-  set(fmt ZIP)
-endif()
 set(CPACK_GENERATOR ${fmt})
 set(CPACK_SOURCE_GENERATOR ${fmt})
 
