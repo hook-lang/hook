@@ -1,30 +1,38 @@
 #!/bin/bash
 
-#
+#------------------------------------------------------------------------------
 # Installation script for Hook
-#
+#------------------------------------------------------------------------------
 
 base_url="https://github.com/fabiosvm/hook-lang/releases/download"
 version="0.1.0"
 
-#
+#------------------------------------------------------------------------------
 # Utility functions
-#
+#------------------------------------------------------------------------------
 
 info() {
   echo "$@"
 }
 
-warn() {
+warning() {
   echo "$@" >&2
 }
 
-stop() {
-  warn $@
+error() {
+  warning $@
   exit 1
 }
 
-detect_osarch() {
+has_command() {
+  command -v "$1" > /dev/null 2>&1
+}
+
+#------------------------------------------------------------------------------
+# Detect the platform
+#------------------------------------------------------------------------------
+
+detect_platform() {
   arch="$(uname -m)"
   case "$arch" in
     x86_64*|amd64*)
@@ -38,33 +46,28 @@ detect_osarch() {
     parisc*)
       arch="hppa";;          
   esac
-
-  osarch="unix-$arch"
+  platform="unix-$arch"
   case "$(uname)" in
     [Ll]inux)
-      osarch="linux-$arch";;
+      platform="linux-$arch";;
     [Dd]arwin)
-      osarch="macos-$arch";;
+      platform="macos-$arch";;
     [Ff]ree[Bb][Ss][Dd])
-      osarch="unix-freebsd-$arch";;
+      platform="unix-freebsd-$arch";;
     *)
-      info "Warning: unable to detect OS, assuming generic unix ($osarch)"
+      info "Warning: unable to detect OS, assuming generic unix ($platform)"
   esac
 }
 
-has_command() {
-  command -v "$1" > /dev/null 2>&1
-}
-
-make_temp_dir() {
-  temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t hook)"
-}
+#------------------------------------------------------------------------------
+# Download the binary
+#------------------------------------------------------------------------------
 
 download_failed() {
-  warn "Unable to download: $1"
-  warn "It may be that there is no binary installer available for this platform: $osarch"
-  warn "It's possible to build Hook from source: <https://github.com/fabiosvm/hook-lang>"
-  stop ""
+  warning "Unable to download: $1"
+  warning "It may be that there is no binary installer available for this platform: $platform"
+  warning "It's possible to build Hook from source: <https://github.com/fabiosvm/hook-lang>"
+  exit 1
 }
 
 download() {
@@ -77,34 +80,37 @@ download() {
       download_failed $1
     fi
   else
-    stop "Neither 'curl' nor 'wget' is available; install one to continue."
+    error "Neither 'curl' nor 'wget' is available; install one to continue."
   fi
 }
 
-#
-# Main process
-#
+#------------------------------------------------------------------------------
+# Download and install
+#------------------------------------------------------------------------------
 
-detect_osarch
-base_name="hook-$version-$osarch"
+detect_platform
+base_name="hook-$version-$platform"
 dist_source="$base_url/$version/$base_name.tar.gz"
 
-make_temp_dir
-
+temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t hook)"
 temp_path="$temp_dir/hook-dist.tar.gz"
 
 info "Downloading: $dist_source"
 
 download "$dist_source" "$temp_path"
 
-dist_dir="/opt/hook"
- 
-info "Unpacking and installing to: $dist_dir"
+info "Unpacking.."
 
 if ! tar -xzf "$temp_path"; then
-  stop "Extraction failed."
+  error "Extraction failed."
 fi
 
+dist_dir="/opt/hook"
+
+info "Installing.."
+info "Need to use 'sudo' for install at: $dist_dir"
+
+sudo -k
 sudo mv "$base_name" "$dist_dir"
 
 info "Cleaning up temporary directory.."
@@ -117,5 +123,8 @@ echo "export HOOK_HOME=$dist_dir" >> ~/.bashrc
 echo "export PATH=\$HOOK_HOME/bin:\$PATH" >> ~/.bashrc
 
 sudo chmod +x "$dist_dir/bin/hook"
+
+info "Install successful."
+info "To start using Hook, run: 'hook --help'"
 
 exec bash
