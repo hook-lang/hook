@@ -37,19 +37,9 @@ To install Hook on Linux, Windows, and macOS, download a prebuilt version from t
 
 ```
 cd ~
-wget https://github.com/fabiosvm/hook-lang/releases/download/0.1.0-pre/hook-0.1.0-linux-x64.tar.gz
+wget https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/hook-0.1.0-linux-x64.tar.gz
 tar -xvf hook-0.1.0-linux-x64.tar.gz
 mv hook-0.1.0-linux-x64 hook
-```
-
-### Setting environment variable 
-
-The interpreter needs the environment variable `HOOK_HOME` in order to import libraries. Furthermore,
-you might want to run scripts from anywhere in the terminal. 
-
-```
-echo "export HOOK_HOME=$HOME/hook" >> ~/.bashrc
-echo "export PATH=\$HOOK_HOME/bin:\$PATH" >> ~/.bashrc
 ```
 
 ### Building from source code
@@ -62,6 +52,20 @@ git clone https://github.com/fabiosvm/hook-lang.git
 mv hook-lang hook && cd hook
 cmake -B build
 cmake --build build
+```
+
+### Setting environment variable 
+
+The interpreter needs the environment variable `HOOK_HOME` in order to import libraries. Furthermore, you might want to run scripts from anywhere in the terminal. 
+
+```
+cd ~
+wget https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/hook-0.1.0-linux-x64.tar.gz
+tar -xvf hook-0.1.0-linux-x64.tar.gz
+mv hook-0.1.0-linux-x64 hook
+
+echo "export HOOK_HOME=$HOME/hook" >> ~/.bashrc
+echo "export PATH=\$HOOK_HOME/bin:\$PATH" >> ~/.bashrc
 ```
 
 ## Running an example
