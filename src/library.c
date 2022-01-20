@@ -13,7 +13,7 @@
 #include "common.h"
 #include "error.h"
 
-#define HOME "HOOK_HOME"
+#define HOME_VAR "HOOK_HOME"
 
 #ifdef _WIN32
 #define FILE_INFIX "\\lib\\"
@@ -35,23 +35,34 @@ typedef int (__stdcall *load_library_t)(vm_t *);
 typedef int (*load_library_t)(vm_t *);
 #endif
 
+static inline const char *get_home_dir(void);
+
+static inline const char *get_home_dir(void)
+{
+  const char *home_dir = getenv(HOME_VAR);
+  if (!home_dir)
+  {
+#ifdef _WIN32
+    const char *drive = getenv("SystemDrive");
+    ASSERT(drive, "environment variable 'SystemDrive' not set");
+    char *path[MAX_PATH + 1];
+    snprintf(path, MAX_PATH, "%s\\hook", drive);
+    strncpy(path, drive, MAX_PATH);
+    home_dir = (const char *) path;
+#else
+    home_dir = "/opt/hook";
+#endif
+  }
+  return home_dir;
+}
+
 int import_library(vm_t *vm)
 {
   value_t *slots = &vm->slots[vm->top];
   value_t val = slots[0];
-  if (!IS_STRING(val))
-  {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
-    return STATUS_ERROR;
-  }
+  ASSERT(IS_STRING(val), "library name must be a string");
   string_t *name = AS_STRING(val);
-  char *home = getenv(HOME);
-  if (!home)
-  {
-    runtime_error("environment variable `%s` not defined", HOME);
-    return STATUS_ERROR;
-  }
-  string_t *file = string_from_chars(-1, home);
+  string_t *file = string_from_chars(-1, get_home_dir());
   string_inplace_concat_chars(file, -1, FILE_INFIX);
   string_inplace_concat(file, name);
   string_inplace_concat_chars(file, -1, FILE_EXT);
