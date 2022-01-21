@@ -31,11 +31,11 @@ The main features are:
 * Value-captured closure
 * Automatic memory management
 
-Warning: Hook is still in its early stages of development and is obviously not production ready. 
+**Warning**: Hook is still in its early stages of development and is not production ready.
 
 ## Installing
 
-For Linux (x64, arm64), and macOS (x64), use the following command to install Hook: 
+For Linux (x64, arm64), and macOS (x64), use the following command to install Hook:
 
 ```
 curl -sSL https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.sh | sh
@@ -44,18 +44,20 @@ curl -sSL https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.
 For Windows (x64), open a cmd prompt and use: 
 
 ```
-curl -sSL -o %tmp%\install.bat https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.bat && %tmp%\install.bat
+cd %tmp%
+curl -sSLO https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.bat
+install
 ```
 
 ## Hello, world!
 
-Save the chunk of code below to a file named `hello.hook`.
+Save the snippet below to a file named `hello.hook`;
 
 ```rust
 println("Hello, world!");
 ```
 
-To run it, type in the terminal:
+And to run it, type in the terminal:
 
 ```
 hook hello.hook
