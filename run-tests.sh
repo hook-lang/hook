@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "Running tests..."
+echo "Running tests.."
 
 n=0
 for f in test/*.hook ; do

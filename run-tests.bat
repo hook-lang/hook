@@ -1,6 +1,6 @@
 @echo off
 
-echo Running tests...
+echo "Running tests.."
 
 set /a n=0
 for %%f in (test\*.hook) do (

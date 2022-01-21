@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-printf "Running benchmark...\n\n"
+printf "Running benchmark..\n\n"
 
 prefix="benchmark/fib"
 n=5

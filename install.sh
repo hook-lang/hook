@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/bin/sh -e
 
 #------------------------------------------------------------------------------
 # Installation script for Hook
 #------------------------------------------------------------------------------
 
-base_url="https://github.com/fabiosvm/hook-lang/releases/download"
-version="0.1.0"
+BASE_URL="https://github.com/fabiosvm/hook-lang/releases/download"
+VERSION="0.1.0"
 
 #------------------------------------------------------------------------------
 # Utility functions
@@ -89,40 +89,48 @@ download() {
 #------------------------------------------------------------------------------
 
 detect_platform
-base_name="hook-$version-$platform"
-dist_source="$base_url/$version/$base_name.tar.gz"
+base_name="hook-$VERSION-$platform"
+dist_url="$BASE_URL/$VERSION/$base_name.tar.gz"
 
 temp_dir="$(mktemp -d 2>/dev/null || mktemp -d -t hook)"
-temp_path="$temp_dir/hook-dist.tar.gz"
+temp_file="$temp_dir/hook-dist.tar.gz"
 
-info "Downloading: $dist_source"
+info "Downloading: $dist_url"
 
-download "$dist_source" "$temp_path"
+download "$dist_url" "$temp_file"
 
 info "Unpacking.."
 
-if ! tar -xzf "$temp_path"; then
+if ! tar -xzf "$temp_file"; then
   error "Extraction failed."
 fi
 
-dist_dir="/opt/hook"
+home_dir="/opt/hook"
 
-info "Installing.."
-info "Need to use 'sudo' for install at: $dist_dir"
+info "Installing to: $home_dir"
+info "Need to use 'sudo' for install"
 
 sudo -k
-sudo mv "$base_name" "$dist_dir"
+sudo mv "$base_name" "$home_dir"
 
-info "Cleaning up temporary directory.."
+info "Cleaning up.."
 
 rm -rf "$temp_dir"
 
+#------------------------------------------------------------------------------
+# Setup the environment variable
+#------------------------------------------------------------------------------
+
 info "Setting the environment variable: HOOK_HOME"
 
-echo "export HOOK_HOME=$dist_dir" >> ~/.bashrc
+echo "export HOOK_HOME=$home_dir" >> ~/.bashrc
 echo "export PATH=\$HOOK_HOME/bin:\$PATH" >> ~/.bashrc
 
-sudo chmod +x "$dist_dir/bin/hook"
+#------------------------------------------------------------------------------
+# End
+#------------------------------------------------------------------------------
+
+sudo chmod +x "$home_dir/bin/hook"
 
 info "Install successful."
 info "To start using Hook, run: 'hook --help'"

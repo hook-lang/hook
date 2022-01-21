@@ -7,7 +7,9 @@
 
 Hook is a simple, small, cross-platform, dynamically typed scripting language that combines imperative and functional programming. It was written entirely by hand in C using easy-to-understand techniques like recursive descent parsing, stack-based virtual machine, reference counting, etc.
 
-## What does it look like 
+## What does it look like
+
+Hook has a modern C-like syntax. See:
 
 ```rust
 fn factorial(n) {
@@ -24,7 +26,7 @@ The main features are:
 * Cross-platform
 * Dynamically typed
 * Imperative and functional programming
-* C-style syntax
+* C-like syntax
 * No side effects
 * Value-captured closure
 * Automatic memory management
@@ -36,36 +38,27 @@ Warning: Hook is still in its early stages of development and is obviously not p
 For Linux (x64, arm64), and macOS (x64), use the following command to install Hook: 
 
 ```
-curl -sSL https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.sh | bash
+curl -sSL https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.sh | sh
 ```
 
-### Building from source code
-
-This project uses the CMake build tool. Use the following commands to build the interpreter.
+For Windows (x64), open a cmd prompt and use: 
 
 ```
-cd ~
-git clone https://github.com/fabiosvm/hook-lang.git
-mv hook-lang hook && cd hook
-cmake -B build
-cmake --build build
+curl -sSL -o %tmp%\install.bat https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.bat && %tmp%\install.bat
 ```
 
-### Setting environment variable 
+## Hello, world!
 
-The interpreter needs the environment variable `HOOK_HOME` in order to import libraries. Furthermore, you might want to run scripts from anywhere in the terminal. 
+Save the chunk of code below to a file named `hello.hook`.
+
+```rust
+println("Hello, world!");
+```
+
+To run it, type in the terminal:
 
 ```
-echo "export HOOK_HOME=$HOME/hook" >> ~/.bashrc
-echo "export PATH=\$HOOK_HOME/bin:\$PATH" >> ~/.bashrc
-```
-
-## Running an example
-
-In the `example` folder you will find some code samples.
-
-```
-hook /opt/hook/example/hello.hook
+hook hello.hook
 ```
 
 ## License
