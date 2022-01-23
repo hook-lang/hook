@@ -51,16 +51,10 @@ install
 
 ## Hello, world!
 
-Save the snippet below to a file named `hello.hook`;
-
-```rust
-println("Hello, world!");
-```
-
-And to run it, type in the terminal:
+It's possible to run our `Hello, world!` directly from the command-line interface:
 
 ```
-hook hello.hook
+hook -e 'println("Hello, world!");'
 ```
 
 ## License

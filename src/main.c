@@ -20,6 +20,7 @@ typedef struct
   const char *cmd;
   bool opt_help;
   bool opt_version;
+  bool opt_eval;
   bool opt_dump;
   bool opt_compile;
   bool opt_run;
@@ -40,7 +41,6 @@ static inline closure_t *load_bytecode_from_file(const char *filename);
 static inline closure_t *load_bytecode_from_stream(FILE *stream);
 static inline void save_bytecode_to_file(closure_t *cl, const char *filename);
 static inline string_t *load_source_from_file(const char *filename);
-static inline closure_t *compile_source(const char *input);
 static inline int run_bytecode(closure_t *cl, parsed_args_t *parsed_args);
 
 static inline void parse_args(parsed_args_t *parsed_args, int argc, const char **argv)
@@ -48,6 +48,7 @@ static inline void parse_args(parsed_args_t *parsed_args, int argc, const char *
   parsed_args->cmd = argv[0];
   parsed_args->opt_help = false;
   parsed_args->opt_version = false;
+  parsed_args->opt_eval = false;
   parsed_args->opt_dump = false;
   parsed_args->opt_compile = false;
   parsed_args->opt_run = false;
@@ -83,6 +84,11 @@ static inline void parse_option(parsed_args_t *parsed_args, const char *arg)
   if (option(arg, "-v") || option(arg, "--version"))
   {
     parsed_args->opt_version = true;
+    return;
+  }
+  if (option(arg, "-e") || option(arg, "--eval"))
+  {
+    parsed_args->opt_eval = true;
     return;
   }
   if (option(arg, "-d") || option(arg, "--dump"))
@@ -141,9 +147,10 @@ static inline void print_help(const char *cmd)
     "options:\n"
     "  -h, --help     prints this message\n"
     "  -v, --version  shows version information\n"
+    "  -e, --eval     evaluates a string from the terminal\n"
     "  -d, --dump     shows the bytecode\n"
     "  -c, --compile  compiles source code\n"
-    "  -r, --run      Runs directly from bytecode\n"
+    "  -r, --run      runs directly from bytecode\n"
     "  -s=<size>      sets the stack size\n"
     "\n",
   cmd);
@@ -201,13 +208,6 @@ static inline string_t *load_source_from_file(const char *filename)
   return str;
 }
 
-static inline closure_t *compile_source(const char *input)
-{
-  string_t *file = string_from_chars(-1, input ? input : "<stdin>");
-  string_t *source = input ? load_source_from_file(input) : string_from_stream(stdin, '\0');
-  return compile(file, source);
-}
-
 static inline int run_bytecode(closure_t *cl, parsed_args_t *parsed_args)
 {
   vm_t vm;
@@ -242,9 +242,18 @@ int main(int argc, const char **argv)
     print_version();
     return EXIT_SUCCESS;
   }
+  const char *input = parsed_args.input;
+  if (parsed_args.opt_eval)
+  {
+    if (!input)
+      fatal_error("no input string");
+    string_t *file = string_from_chars(-1, "<terminal>");
+    string_t *source = string_from_chars(-1, input);
+    closure_t *cl = compile(file, source);
+    return run_bytecode(cl, &parsed_args);
+  }
   if (parsed_args.opt_run)
   {
-    const char *input = parsed_args.input;
     if (input)
     {
       closure_t *cl = load_bytecode_from_file(input);
@@ -255,7 +264,9 @@ int main(int argc, const char **argv)
       fatal_error("unable to load bytecode");
     return run_bytecode(cl, &parsed_args);
   }
-  closure_t *cl = compile_source(parsed_args.input);
+  string_t *file = string_from_chars(-1, input ? input : "<stdin>");
+  string_t *source = input ? load_source_from_file(input) : string_from_stream(stdin, '\0');
+  closure_t *cl = compile(file, source);
   if (parsed_args.opt_dump)
   {
     dump(cl->fn);
