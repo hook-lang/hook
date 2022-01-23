@@ -20,7 +20,7 @@ static int hash_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, string_hash(AS_STRING(val)));
@@ -31,7 +31,7 @@ static int lower_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *str = string_lower(AS_STRING(val));
@@ -48,7 +48,7 @@ static int upper_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *str = string_upper(AS_STRING(val));
@@ -65,7 +65,7 @@ static int trim_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *str;
@@ -85,12 +85,12 @@ static int starts_with_call(vm_t *vm, value_t *args)
   value_t val2 = args[2];
   if (!IS_STRING(val1))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val1.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_STRING(val2))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val2.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   return vm_push_boolean(vm, string_starts_with(AS_STRING(val1), AS_STRING(val2)));
@@ -102,12 +102,12 @@ static int ends_with_call(vm_t *vm, value_t *args)
   value_t val2 = args[2];
   if (!IS_STRING(val1))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val1.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_STRING(val2))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val2.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   return vm_push_boolean(vm, string_ends_with(AS_STRING(val1), AS_STRING(val2)));

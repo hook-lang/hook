@@ -102,7 +102,7 @@ static inline int string_to_double(string_t *str, double *result)
 {
   if (!str->length)
   {
-    runtime_error("invalid type: cannot convert empty string to 'number'");
+    runtime_error("type error: cannot convert empty string to 'number'");
     return STATUS_ERROR;
   }
   errno = 0;
@@ -110,14 +110,14 @@ static inline int string_to_double(string_t *str, double *result)
   *result = strtod(str->chars, &ptr);
   if (errno == ERANGE)
   {
-    runtime_error("invalid type: number literal is too large");
+    runtime_error("type error: number literal is too large");
     return STATUS_ERROR;
   }
   while (*ptr != 0 && isspace(*ptr))
     ++ptr;
   if (ptr < &str->chars[str->length])
   {
-    runtime_error("invalid type: cannot convert 'string' to 'number'");
+    runtime_error("type error: cannot convert 'string' to 'number'");
     return STATUS_ERROR;
   }
   return STATUS_OK;
@@ -230,7 +230,7 @@ static int int_call(vm_t *vm, value_t *args)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: cannot convert `%s` to 'integer'", type_name(val.type));
+  runtime_error("type error: cannot convert `%s` to 'integer'", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -257,7 +257,7 @@ static int float_call(vm_t *vm, value_t *args)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: cannot convert `%s` to 'number'", type_name(val.type));
+  runtime_error("type error: cannot convert `%s` to 'number'", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -269,7 +269,7 @@ static int str_call(vm_t *vm, value_t *args)
   string_t *str = to_string(val);
   if (!str)
   {
-    runtime_error("invalid type: cannot convert `%s` to 'string'", type_name(val.type));
+    runtime_error("type error: cannot convert `%s` to 'string'", type_name(val.type));
     return STATUS_ERROR;
   }
   if (vm_push_string(vm, str) == STATUS_ERROR)
@@ -285,7 +285,7 @@ static int ord_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *str = AS_STRING(val);
@@ -302,7 +302,7 @@ static int chr_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_INTEGER(val))
   {
-    runtime_error("invalid type: expected integer but got `%s`", type_name(val.type));
+    runtime_error("type error: expected integer but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   long data = (long) val.as.number;
@@ -336,7 +336,7 @@ static int cap_call(vm_t *vm, value_t *args)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: `%s` has no capacity property", type_name(val.type));
+  runtime_error("type error: `%s` has no capacity property", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -360,7 +360,7 @@ static int len_call(vm_t *vm, value_t *args)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: `%s` has no length property", type_name(val.type));
+  runtime_error("type error: `%s` has no length property", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -384,7 +384,7 @@ static int is_empty_call(vm_t *vm, value_t *args)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: `%s` has no length property", type_name(val.type));
+  runtime_error("type error: `%s` has no length property", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -456,7 +456,7 @@ static int slice_call(vm_t *vm, value_t *args)
   case TYPE_USERDATA:
     break;
   }
-  runtime_error("invalid type: cannot slice value of type `%s`", type_name(val.type));
+  runtime_error("type error: cannot slice value of type `%s`", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -486,7 +486,7 @@ static int sleep_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_INTEGER(val))
   {
-    runtime_error("invalid type: expected integer but got `%s`", type_name(val.type));
+    runtime_error("type error: expected integer but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   long ms = (long) val.as.number;
@@ -508,7 +508,7 @@ static int assert_call(vm_t *vm, value_t *args)
   value_t val = args[2];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   if (IS_FALSEY(args[1]))
@@ -526,7 +526,7 @@ static int panic_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *str = AS_STRING(val);

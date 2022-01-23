@@ -12,6 +12,11 @@ if(NOT MSVC)
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -fsanitize=address -fprofile-arcs -ftest-coverage")
 endif()
 
+if(APPLE)
+  include_directories(/usr/local/include)
+  link_directories(/usr/local/lib)
+endif()
+
 set(BINARY_DIR ${CMAKE_BINARY_DIR}/../bin)
 set(LIBRARY_DIR ${CMAKE_BINARY_DIR}/../lib)
 set(PACKAGE_DIR ${CMAKE_BINARY_DIR}/../package)
@@ -147,6 +152,7 @@ add_library(arrays SHARED
 if(MSVC)
   find_package(unofficial-sqlite3 CONFIG REQUIRED)
   find_package(CURL CONFIG REQUIRED)
+  find_package(hiredis CONFIG REQUIRED)
 endif()
 
 add_library(sqlite SHARED
@@ -170,11 +176,27 @@ add_library(url SHARED
   src/callable.c
   src/chunk.c
   src/common.c
-  src/url.c
   src/error.c
   src/hash.c
   src/library.c
   src/memory.c
+  src/string.c
+  src/struct.c
+  src/url.c
+  src/userdata.c
+  src/value.c
+  src/vm.c)
+
+add_library(redis SHARED
+  src/array.c
+  src/callable.c
+  src/chunk.c
+  src/common.c
+  src/error.c
+  src/hash.c
+  src/library.c
+  src/memory.c
+  src/redis.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -184,9 +206,11 @@ add_library(url SHARED
 if(MSVC)
   target_link_libraries(sqlite PRIVATE unofficial::sqlite3::sqlite3)
   target_link_libraries(url PRIVATE CURL::libcurl)
+  target_link_libraries(redis PRIVATE hiredis::hiredis)
 else()
   target_link_libraries(sqlite sqlite3)
   target_link_libraries(url curl)
+  target_link_libraries(redis hiredis)
 endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

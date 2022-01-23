@@ -66,13 +66,13 @@ static int open_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   string_t *filename = AS_STRING(val);
   sqlite3 *db;
   if (sqlite3_open(filename->chars, &db) != SQLITE_OK) {
-    runtime_error("invalid type: cannot open database `%.*s`", filename->length, filename->chars);
+    runtime_error("type error: cannot open database `%.*s`", filename->length, filename->chars);
     sqlite3_close(db);
     return STATUS_ERROR;
   }
@@ -84,7 +84,7 @@ static int close_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
+    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, sqlite3_close(((sqlite_t *) AS_USERDATA(val))->db));
@@ -96,12 +96,12 @@ static int execute_call(vm_t *vm, value_t *args)
   value_t val2 = args[2];
   if (!IS_USERDATA(val1))
   {
-    runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
+    runtime_error("type error: expected userdata but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_STRING(val2))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val2.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   sqlite3 *db = ((sqlite_t *) AS_USERDATA(val1))->db;
@@ -122,12 +122,12 @@ static int prepare_call(vm_t *vm, value_t *args)
   value_t val2 = args[2];
   if (!IS_USERDATA(val1))
   {
-    runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
+    runtime_error("type error: expected userdata but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_STRING(val2))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val2.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   sqlite3 *db = ((sqlite_t *) AS_USERDATA(val1))->db;
@@ -146,7 +146,7 @@ static int finalize_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
+    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   sqlite3_stmt *stmt = ((sqlite_stmt_t *) AS_USERDATA(val))->stmt;
@@ -160,12 +160,12 @@ static int bind_call(vm_t *vm, value_t *args)
   value_t val3 = args[3];
   if (!IS_USERDATA(val1))
   {
-    runtime_error("invalid type: expected userdata but got `%s`", type_name(val1.type));
+    runtime_error("type error: expected userdata but got `%s`", type_name(val1.type));
     return STATUS_ERROR;
   }
   if (!IS_INTEGER(val2))
   {
-    runtime_error("invalid type: expected integer but got `%s`", type_name(val2.type));
+    runtime_error("type error: expected integer but got `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   sqlite3_stmt *stmt = ((sqlite_stmt_t *) AS_USERDATA(val1))->stmt;
@@ -214,7 +214,7 @@ static int fetch_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_USERDATA(val))
   {
-    runtime_error("invalid type: expected userdata but got `%s`", type_name(val.type));
+    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   sqlite3_stmt *stmt = ((sqlite_stmt_t *) AS_USERDATA(val))->stmt;

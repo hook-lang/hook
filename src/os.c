@@ -24,7 +24,7 @@ static int system_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   return vm_push_number(vm, system(AS_STRING(val)->chars));
@@ -35,7 +35,7 @@ static int getenv_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   if (!IS_STRING(val))
   {
-    runtime_error("invalid type: expected string but got `%s`", type_name(val.type));
+    runtime_error("type error: expected string but got `%s`", type_name(val.type));
     return STATUS_ERROR;
   }
   const char *chars = getenv(AS_STRING(val)->chars);
