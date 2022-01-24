@@ -32,7 +32,7 @@ has_command() {
 # Detect the platform
 #------------------------------------------------------------------------------
 
-detect_platform() {
+detect_arch() {
   arch="$(uname -m)"
   case "$arch" in
     x86_64*|amd64*)
@@ -46,17 +46,26 @@ detect_platform() {
     parisc*)
       arch="hppa";;          
   esac
-  platform="unix-$arch"
+}
+
+detect_os() {
+  os="unix"
   case "$(uname)" in
     [Ll]inux)
-      platform="linux-$arch";;
+      os="linux";;
     [Dd]arwin)
-      platform="macos-$arch";;
+      os="macos";;
     [Ff]ree[Bb][Ss][Dd])
-      platform="unix-freebsd-$arch";;
+      os="freebsd";;
     *)
-      info "Warning: unable to detect OS, assuming generic unix ($platform)"
+      info "Warning: unable to detect OS, assuming generic unix ($os)"
   esac
+}
+
+detect_platform() {
+  detect_arch
+  detect_os
+  platform="$os-$arch"
 }
 
 #------------------------------------------------------------------------------
@@ -105,7 +114,7 @@ if ! tar -xzf "$temp_file"; then
   error "Extraction failed."
 fi
 
-home_dir="/opt/hook"
+home_dir="/usr/local/hook"
 
 info "Installing to: $home_dir"
 info "Need to use 'sudo' for install"
@@ -123,8 +132,25 @@ rm -rf "$temp_dir"
 
 info "Setting the environment variable: HOOK_HOME"
 
-echo "export HOOK_HOME=$home_dir" >> ~/.bashrc
-echo "export PATH=\$HOOK_HOME/bin:\$PATH" >> ~/.bashrc
+if [ "$os" = "linux" ]; then
+  rc=".bashrc"
+else
+  if [ "$os" = "macos" ]; then
+    sh="$(env sh -c 'basename $(ps -o comm= -p $(ps -o ppid= -p $$))')"
+    if [ "$sh" = "bash" ]; then
+      rc=".bash_profile"
+    else
+      rc=".zshrc"
+    fi
+  fi
+fi
+
+if [ -z ${rc+x} ]; then
+  warning "Please add $home_dir/bin to your PATH environment variable."
+else
+  echo "export HOOK_HOME=$home_dir" >> ~/$rc
+  echo "export PATH=\$HOOK_HOME/bin:\$PATH" >> ~/$rc
+fi
 
 #------------------------------------------------------------------------------
 # End
