@@ -12,10 +12,8 @@ if(NOT MSVC)
   set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -fsanitize=address -fprofile-arcs -ftest-coverage")
 endif()
 
-if(APPLE)
-  include_directories(/usr/local/include)
-  link_directories(/usr/local/lib)
-endif()
+include_directories(/usr/local/include)
+link_directories(/usr/local/lib)
 
 set(BINARY_DIR ${CMAKE_BINARY_DIR}/../bin)
 set(LIBRARY_DIR ${CMAKE_BINARY_DIR}/../lib)
