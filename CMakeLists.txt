@@ -38,7 +38,7 @@ add_executable(${PROJECT_NAME}
   src/error.c
   src/fs.c
   src/hash.c
-  src/library.c
+  src/module.c
   src/main.c
   src/memory.c
   src/scanner.c
@@ -67,7 +67,7 @@ add_library(math SHARED
   src/compiler.c
   src/error.c
   src/hash.c
-  src/library.c
+  src/module.c
   src/math.c
   src/memory.c
   src/scanner.c
@@ -86,7 +86,7 @@ add_library(os SHARED
   src/compiler.c
   src/error.c
   src/hash.c
-  src/library.c
+  src/module.c
   src/memory.c
   src/os.c
   src/scanner.c
@@ -106,7 +106,7 @@ add_library(io SHARED
   src/error.c
   src/hash.c
   src/io.c
-  src/library.c
+  src/module.c
   src/memory.c
   src/scanner.c
   src/string.c
@@ -122,7 +122,7 @@ add_library(strings SHARED
   src/common.c
   src/error.c
   src/hash.c
-  src/library.c
+  src/module.c
   src/memory.c
   src/string.c
   src/strings.c
@@ -139,7 +139,7 @@ add_library(arrays SHARED
   src/common.c
   src/error.c
   src/hash.c
-  src/library.c
+  src/module.c
   src/memory.c
   src/string.c
   src/struct.c
@@ -160,7 +160,7 @@ add_library(sqlite SHARED
   src/common.c
   src/error.c
   src/hash.c
-  src/library.c
+  src/module.c
   src/memory.c
   src/sqlite.c
   src/string.c
@@ -176,7 +176,7 @@ add_library(url SHARED
   src/common.c
   src/error.c
   src/hash.c
-  src/library.c
+  src/module.c
   src/memory.c
   src/string.c
   src/struct.c
@@ -192,7 +192,7 @@ add_library(redis SHARED
   src/common.c
   src/error.c
   src/hash.c
-  src/library.c
+  src/module.c
   src/memory.c
   src/redis.c
   src/string.c

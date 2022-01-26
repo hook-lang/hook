@@ -204,8 +204,8 @@ void dump(function_t *fn)
     case OP_CALL:
       printf("  [%05d] Call                  %d\n", j, bytes[i++]);
       break;
-    case OP_IMPORT_LIBRARY:
-      printf("  [%05d] ImportLibrary\n", j);
+    case OP_LOAD_MODULE:
+      printf("  [%05d] LoadModule\n", j);
       break;
     case OP_RETURN:
       printf("  [%05d] Return\n", j);

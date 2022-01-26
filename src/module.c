@@ -1,9 +1,9 @@
 //
 // Hook Programming Language
-// library.c
+// module.c
 //
 
-#include "library.h"
+#include "module.h"
 #include <stdlib.h>
 #ifdef _WIN32
 #include <Windows.h>
@@ -30,9 +30,9 @@
 #define FUNC_PREFIX "load_"
 
 #ifdef _WIN32
-typedef int (__stdcall *load_library_t)(vm_t *);
+typedef int (__stdcall *load_module_t)(vm_t *);
 #else
-typedef int (*load_library_t)(vm_t *);
+typedef int (*load_module_t)(vm_t *);
 #endif
 
 static inline const char *get_home_dir(void);
@@ -56,11 +56,11 @@ static inline const char *get_home_dir(void)
   return home_dir;
 }
 
-int import_library(vm_t *vm)
+int load_module(vm_t *vm)
 {
   value_t *slots = &vm->slots[vm->top];
   value_t val = slots[0];
-  ASSERT(IS_STRING(val), "library name must be a string");
+  ASSERT(IS_STRING(val), "module name must be a string");
   string_t *name = AS_STRING(val);
   string_t *file = string_from_chars(-1, get_home_dir());
   string_inplace_concat_chars(file, -1, FILE_INFIX);
@@ -73,7 +73,7 @@ int import_library(vm_t *vm)
 #endif
   if (!handle)
   {
-    runtime_error("cannot open library `%.*s`", name->length, name->chars);
+    runtime_error("cannot open module `%.*s`", name->length, name->chars);
     string_free(file);
     return STATUS_ERROR;
   }
@@ -84,9 +84,9 @@ int import_library(vm_t *vm)
   if (IS_UNREACHABLE(name))
     string_free(name);
 #ifdef _WIN32
-  load_library_t load = (load_library_t) GetProcAddress(handle, func->chars);
+  load_module_t load = (load_module_t) GetProcAddress(handle, func->chars);
 #else
-  load_library_t load = dlsym(handle, func->chars);
+  load_module_t load = dlsym(handle, func->chars);
 #endif
   if (!load)
   {
@@ -98,7 +98,7 @@ int import_library(vm_t *vm)
   --vm->top;
   if (load(vm) == STATUS_ERROR)
   {
-    runtime_error("cannot load library `%.*s`", name->length, name->chars);
+    runtime_error("cannot load module `%.*s`", name->length, name->chars);
     return STATUS_ERROR;
   }
   return STATUS_OK;
