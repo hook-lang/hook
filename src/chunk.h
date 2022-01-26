@@ -64,7 +64,7 @@ typedef enum
   OP_INCR,
   OP_DECR,
   OP_CALL,
-  OP_IMPORT_LIBRARY,
+  OP_LOAD_MODULE,
   OP_RETURN,
   OP_RETURN_NIL
 } opcode_t;

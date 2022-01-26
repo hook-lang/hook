@@ -88,7 +88,7 @@ static inline void end_loop(compiler_t *comp);
 static inline void compiler_init(compiler_t *comp, compiler_t *parent, scanner_t *scan,
   string_t *name);
 static void compile_statement(compiler_t *comp);
-static void compile_import_library(compiler_t *comp);
+static void compile_load_module(compiler_t *comp);
 static void compile_constant_declaration(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assign_statement(compiler_t *comp, token_t *tk);
@@ -348,7 +348,7 @@ static void compile_statement(compiler_t *comp)
   scanner_t *scan = comp->scan;
   if (MATCH(scan, TOKEN_USE))
   {
-    compile_import_library(comp);
+    compile_load_module(comp);
     return;
   }
   if (MATCH(scan, TOKEN_LET))
@@ -438,7 +438,7 @@ static void compile_statement(compiler_t *comp)
   fatal_error_unexpected_token(scan);
 }
 
-static void compile_import_library(compiler_t *comp)
+static void compile_load_module(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   function_t *fn = comp->fn;
@@ -462,7 +462,7 @@ static void compile_import_library(compiler_t *comp)
     }
     define_local(comp, &tk, false);
     EXPECT(scan, TOKEN_SEMICOLON);
-    chunk_emit_opcode(chunk, OP_IMPORT_LIBRARY);
+    chunk_emit_opcode(chunk, OP_LOAD_MODULE);
     function_add_line(fn, tk.line);
     return;
   }
@@ -505,7 +505,7 @@ static void compile_import_library(compiler_t *comp)
     chunk_emit_opcode(chunk, OP_CONSTANT);
     chunk_emit_byte(chunk, index);
     function_add_line(fn, tk.line);
-    chunk_emit_opcode(chunk, OP_IMPORT_LIBRARY);
+    chunk_emit_opcode(chunk, OP_LOAD_MODULE);
     function_add_line(fn, tk.line);
     chunk_emit_opcode(chunk, OP_DESTRUCT);
     chunk_emit_byte(chunk, n);
