@@ -59,4 +59,5 @@ hook -e 'println("Hello, world!");'
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+Hook is released under [MIT](https://choosealicense.com/licenses/mit/) license.
+See [LICENSE](https://github.com/fabiosvm/hook/blob/main/LICENSE) for more details.
