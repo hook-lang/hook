@@ -3,9 +3,6 @@ chunk       ::= stmt* EOF
 
 stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | 'use' '{' NAME ( ',' NAME )* '}' 'in' NAME ';'
-              | 'let' NAME '=' expr ';'
-              | 'let' '[' NAME ( ',' NAME )* ']' '=' expr ';'
-              | 'let' '{' NAME ( ',' NAME )* '}' '=' expr ';'
               | var_decl ';'
               | assign_call ';'
               | 'struct' NAME '{' ( NAME ( ',' NAME )* )? '}'
@@ -23,9 +20,10 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | 'return' expr? ';'
               | block
 
-var_decl    ::= 'var' NAME ( '=' expr )?
-              | 'var' '[' NAME ( ',' NAME )* ']' '=' expr
-              | 'var' '{' NAME ( ',' NAME )* '}' '=' expr
+var_decl    ::= 'mut' NAME ( ':=' expr )?
+              | NAME ':=' expr
+              | 'mut'? '[' NAME ( ',' NAME )* ']' ':=' expr
+              | 'mut'? '{' NAME ( ',' NAME )* '}' ':=' expr
 
 assign_call ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '%=' ) expr
               | NAME subscr* ( '++' | '--' )

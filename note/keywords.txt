@@ -10,7 +10,6 @@ fn
 for
 if
 in
-let
 loop
 match
 mut
@@ -19,5 +18,4 @@ return
 struct
 true
 use
-var
 while
