@@ -57,6 +57,5 @@ TOKEN_RETURN     'return'
 TOKEN_STRUCT     'struct'
 TOKEN_TRUE       'true'
 TOKEN_USE        'use'
-TOKEN_VAR        'var'
 TOKEN_WHILE      'while'
 TOKEN_NAME       NAME

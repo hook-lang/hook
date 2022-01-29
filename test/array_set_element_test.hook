@@ -1,16 +1,16 @@
 
-var arr1 = ["foo"];
+mut arr1 = ["foo"];
 arr1[0] = "bar";
 println(arr1);
 
-var arr2 = [["foo"]];
+mut arr2 = [["foo"]];
 arr2[0][0] = "bar";
 println(arr2);
 
-var arr3 = [[["foo"]]];
+mut arr3 = [[["foo"]]];
 arr3[0][0][0] = "bar";
 println(arr3);
 
-var arr4 = [["foo", "bar", "baz"]];
+mut arr4 = [["foo", "bar", "baz"]];
 arr4[0][1] = "qux";
 println(arr4);

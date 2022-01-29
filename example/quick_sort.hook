@@ -7,9 +7,9 @@ fn sort(mut arr) {
   if (n <= 1)
     return arr;
   let pivot = arr[0];
-  var left = []; 
-  var right = [];
-  for (var i = 1; i < n; i++) {
+  mut left = []; 
+  mut right = [];
+  for (mut i = 1; i < n; i++) {
     if (arr[i] < pivot)
       left[] = arr[i];
     else

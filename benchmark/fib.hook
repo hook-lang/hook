@@ -4,5 +4,5 @@ fn fib(n) =>
 
 let n = int(args[0]);
 let m = int(args[1]);
-for (var i = 0; i < n; i++)
+for (mut i = 0; i < n; i++)
   println(fib(m));

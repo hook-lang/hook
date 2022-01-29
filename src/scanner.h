@@ -68,7 +68,6 @@ typedef enum
   TOKEN_STRUCT,
   TOKEN_TRUE,
   TOKEN_USE,
-  TOKEN_VAR,
   TOKEN_WHILE,
   TOKEN_NAME
 } token_type_t;

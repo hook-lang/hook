@@ -19,5 +19,4 @@ return
 struct
 true
 use
-var
 while

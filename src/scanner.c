@@ -505,11 +505,6 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_USE;
     return;
   }
-  if (match_chars(scan, "var"))
-  {
-    scan->token.type = TOKEN_VAR;
-    return;
-  }
   if (match_chars(scan, "while"))
   {
     scan->token.type = TOKEN_WHILE;

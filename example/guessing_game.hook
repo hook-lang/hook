@@ -13,7 +13,7 @@ let secret_number = int(1 + math.random() * 99);
 loop {
   io.writeln(io.StdOut, "Please input your guess.");
 
-  var guess = io.readln(io.StdIn);
+  mut guess = io.readln(io.StdIn);
 
   guess = strings.trim(guess);
 

@@ -351,17 +351,21 @@ static void compile_statement(compiler_t *comp)
     compile_load_module(comp);
     return;
   }
+
+  // TODO
   if (MATCH(scan, TOKEN_LET))
   {
     compile_constant_declaration(comp);
+    EXPECT(scan, TOKEN_SEMICOLON);
     return;
   }
-  if (MATCH(scan, TOKEN_VAR))
+  if (MATCH(scan, TOKEN_MUT))
   {
     compile_variable_declaration(comp);
     EXPECT(scan, TOKEN_SEMICOLON);
     return;
   }
+
   if (MATCH(scan, TOKEN_NAME))
   {
     token_t tk = scan->token;
@@ -527,7 +531,8 @@ static void compile_constant_declaration(compiler_t *comp)
     scanner_next_token(scan);
     EXPECT(scan, TOKEN_EQ);
     compile_expression(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
+    // TODO
+    //EXPECT(scan, TOKEN_SEMICOLON);
     return;
   }
   if (MATCH(scan, TOKEN_LBRACKET))
@@ -551,7 +556,8 @@ static void compile_constant_declaration(compiler_t *comp)
     EXPECT(scan, TOKEN_EQ);
     int line = scan->token.line;
     compile_expression(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
+    // TODO
+    //EXPECT(scan, TOKEN_SEMICOLON);
     chunk_emit_opcode(chunk, OP_UNPACK);
     chunk_emit_byte(chunk, n);
     function_add_line(fn, line);
@@ -588,7 +594,8 @@ static void compile_constant_declaration(compiler_t *comp)
     EXPECT(scan, TOKEN_EQ);
     int line = scan->token.line;
     compile_expression(comp);
-    EXPECT(scan, TOKEN_SEMICOLON);
+    // TODO
+    //EXPECT(scan, TOKEN_SEMICOLON);
     chunk_emit_opcode(chunk, OP_DESTRUCT);
     chunk_emit_byte(chunk, n);
     function_add_line(fn, line);
@@ -1208,7 +1215,13 @@ static void compile_for_statement(compiler_t *comp)
     scanner_next_token(scan);
   else
   {
-    if (MATCH(scan, TOKEN_VAR))
+    // TODO
+    if (MATCH(scan, TOKEN_LET))
+    {
+      compile_constant_declaration(comp);
+      EXPECT(scan, TOKEN_SEMICOLON);
+    }
+    else if (MATCH(scan, TOKEN_MUT))
     {
       compile_variable_declaration(comp);
       EXPECT(scan, TOKEN_SEMICOLON);
