@@ -1,5 +1,5 @@
 
-let sum = fn (a, b) {
+val sum = fn (a, b) {
   return a + b;
 };
 

@@ -1,2 +1,2 @@
 
-let a = int("123 x");
+val a = int("123 x");

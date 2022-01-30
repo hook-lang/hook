@@ -2,5 +2,5 @@
 println([] + ["foo"]);
 println(["foo"] + []);
 println(["foo", "bar"] + ["baz"]);
-let arr = ["foo", "bar"];
+val arr = ["foo", "bar"];
 println(arr + ["baz", "qux"]);

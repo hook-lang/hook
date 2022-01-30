@@ -11,6 +11,6 @@ println([1, 2] > [1, 2]);
 println([1, 2] < [1, 2]);
 println([1, 2] > [2, 1]);
 println([1, 2] < [2, 1]);
-let a = ["foo"];
+val a = ["foo"];
 println(a > a);
 println(a < a);

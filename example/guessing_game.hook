@@ -8,7 +8,7 @@ use strings;
 
 io.writeln(io.StdOut, "Guess the number!");
 
-let secret_number = int(1 + math.random() * 99);
+val secret_number = int(1 + math.random() * 99);
 
 loop {
   io.writeln(io.StdOut, "Please input your guess.");
@@ -24,7 +24,7 @@ loop {
 
   io.writeln(io.StdOut, "You guessed: " + str(guess));
 
-  let cmp = compare(guess, secret_number);
+  val cmp = compare(guess, secret_number);
   
   if (cmp < 0)
     io.writeln(io.StdOut, "Too small!");

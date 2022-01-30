@@ -1,5 +1,5 @@
 
 use arrays;
-let arr = ["foo", "bar", "baz"]; 
+val arr = ["foo", "bar", "baz"]; 
 println(arrays.index_of(arr, "baz"));
 println(arrays.index_of(arr, "qux"));

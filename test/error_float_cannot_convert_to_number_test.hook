@@ -1,2 +1,2 @@
 
-let a = float(nil);
+val a = float(nil);

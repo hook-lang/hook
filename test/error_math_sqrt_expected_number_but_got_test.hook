@@ -1,3 +1,3 @@
 
 use math;
-let a = math.sqrt("foo");
+val a = math.sqrt("foo");

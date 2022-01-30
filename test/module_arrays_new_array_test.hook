@@ -1,4 +1,4 @@
 
 use arrays;
-let arr = arrays.new_array(100);
+val arr = arrays.new_array(100);
 println(arr);

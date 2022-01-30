@@ -59,7 +59,6 @@ typedef enum
   TOKEN_FOR,
   TOKEN_IF,
   TOKEN_IN,
-  TOKEN_LET,
   TOKEN_LOOP,
   TOKEN_MATCH,
   TOKEN_MUT,
@@ -68,6 +67,7 @@ typedef enum
   TOKEN_STRUCT,
   TOKEN_TRUE,
   TOKEN_USE,
+  TOKEN_VAL,
   TOKEN_WHILE,
   TOKEN_NAME
 } token_type_t;

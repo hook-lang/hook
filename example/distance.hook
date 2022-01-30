@@ -9,15 +9,15 @@ struct Point {
 }
 
 fn distance(p1, p2) {
-  let dx = math.abs(p1.x - p2.x);
-  let dy = math.abs(p1.y - p2.y);
-  let x = math.pow(dx, 2);
-  let y = math.pow(dy, 2);
+  val dx = math.abs(p1.x - p2.x);
+  val dy = math.abs(p1.y - p2.y);
+  val x = math.pow(dx, 2);
+  val y = math.pow(dy, 2);
   return math.sqrt(x + y);
 }
 
-let p1 = Point { 7, 10 };
-let p2 = Point { 11, 13 };
-let result = distance(p1, p2);
+val p1 = Point { 7, 10 };
+val p2 = Point { 11, 13 };
+val result = distance(p1, p2);
 
 println("the distance between p1 and p2 is: " + str(result));

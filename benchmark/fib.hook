@@ -2,7 +2,7 @@ fn fib(n) =>
   if (n < 2) n
   else fib(n - 1) + fib(n - 2)
 
-let n = int(args[0]);
-let m = int(args[1]);
+val n = int(args[0]);
+val m = int(args[1]);
 for (mut i = 0; i < n; i++)
   println(fib(m));

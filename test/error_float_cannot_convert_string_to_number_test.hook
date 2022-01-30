@@ -1,2 +1,2 @@
 
-let a = float("123 x");
+val a = float("123 x");

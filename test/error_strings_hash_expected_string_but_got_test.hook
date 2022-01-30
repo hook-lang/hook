@@ -1,3 +1,3 @@
 
 use { hash } in strings;
-let a = hash(1);
+val a = hash(1);

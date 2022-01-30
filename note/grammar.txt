@@ -20,9 +20,9 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | 'return' expr? ';'
               | block
 
-var_decl    ::= 'let' NAME '=' expr ';'
-              | 'let' '[' NAME ( ',' NAME )* ']' '=' expr ';'
-              | 'let' '{' NAME ( ',' NAME )* '}' '=' expr ';'
+var_decl    ::= 'val' NAME '=' expr ';'
+              | 'val' '[' NAME ( ',' NAME )* ']' '=' expr ';'
+              | 'val' '{' NAME ( ',' NAME )* '}' '=' expr ';'
               | 'mut' NAME ( '=' expr )?
               | 'mut' '[' NAME ( ',' NAME )* ']' '=' expr
               | 'mut' '{' NAME ( ',' NAME )* '}' '=' expr
