@@ -4,16 +4,18 @@
 //
 
 #include "scanner.h"
+#include <stdlib.h>
+#include <stdarg.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
-#include "error.h"
 
 #define MATCH_MAX_LENGTH (1 << 3)
 
 #define CHAR_AT(s, i)   ((s)->pos[(i)])
 #define CURRENT_CHAR(s) CHAR_AT(s, 0)
 
+static inline void lexical_error(scanner_t *scan, const char *fmt, ...);
 static inline void skip_shebang(scanner_t *scan);
 static inline void skip_spaces_comments(scanner_t *scan);
 static inline void next_char(scanner_t *scan);
@@ -23,6 +25,17 @@ static inline bool match_chars(scanner_t *scan, const char *chars);
 static inline bool match_number(scanner_t *scan);
 static inline bool match_string(scanner_t *scan);
 static inline bool match_name(scanner_t *scan);
+
+static inline void lexical_error(scanner_t *scan, const char *fmt, ...)
+{
+  fprintf(stderr, "lexical error: ");
+  va_list args;
+  va_start(args, fmt);
+  vfprintf(stderr, fmt, args);
+  va_end(args);
+  fprintf(stderr, "\n  in %s:%d,%d\n", scan->file->chars, scan->line, scan->col);
+  exit(EXIT_FAILURE);
+}
 
 static inline void skip_shebang(scanner_t *scan)
 {
@@ -168,7 +181,7 @@ static inline bool match_string(scanner_t *scan)
         break;
       }
       if (CHAR_AT(scan, n) == '\0')
-        fatal_error("unclosed string at %d:%d", scan->line, scan->col);
+        lexical_error(scan, "unterminated string");
       ++n;
     }
     scan->token.type = TOKEN_STRING;
@@ -512,5 +525,5 @@ void scanner_next_token(scanner_t *scan)
   }
   if (match_name(scan))
     return;
-  fatal_error("unable to recognize token at %d:%d", scan->line, scan->col);
+  lexical_error(scan, "unexpected character");
 }
