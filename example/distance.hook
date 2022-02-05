@@ -2,22 +2,42 @@
 // distance.hook
 //
 
-use math;
+use { Pi, abs, pow, sqrt, sin, asin, cos } in math;
+
+val EARTH_RADIUS_KM = 6371.009;
 
 struct Point {
   x, y
 }
 
-fn distance(p1, p2) {
-  val dx = math.abs(p1.x - p2.x);
-  val dy = math.abs(p1.y - p2.y);
-  val x = math.pow(dx, 2);
-  val y = math.pow(dy, 2);
-  return math.sqrt(x + y);
+fn deg_to_rad(deg) => deg * Pi / 180.0
+
+fn euclidean_distance(p1, p2) {
+  val dx = abs(p1.x - p2.x);
+  val dy = abs(p1.y - p2.y);
+  val x = pow(dx, 2);
+  val y = pow(dy, 2);
+  return sqrt(x + y);
+}
+
+fn haversine_distance(p1, p2) {
+  val lat1 = deg_to_rad(p1.y);
+  val lng1 = deg_to_rad(p1.x);
+  val lat2 = deg_to_rad(p2.y);
+  val lng2 = deg_to_rad(p2.x);
+  val u = sin((lat2 - lat1) / 2);
+  val v = sin((lng2 - lng1) / 2);
+  return 2 * EARTH_RADIUS_KM * asin(sqrt(u * u + cos(lat1) * cos(lat2) * v * v));
 }
 
 val p1 = Point { 7, 10 };
 val p2 = Point { 11, 13 };
-val result = distance(p1, p2);
+val result1 = euclidean_distance(p1, p2);
 
-println("the distance between p1 and p2 is: " + str(result));
+println("the euclidean distance between p1 and p2 is: " + str(result1));
+
+val p3 = Point { -43.917214, -19.925845 };
+val p4 = Point { -47.879983, -15.793476 };
+val result2 = haversine_distance(p3, p4);
+
+println("the haversine distance between p3 and p4 is: " + str(result2) + " km");
