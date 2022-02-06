@@ -61,20 +61,12 @@ static void file_deinit(userdata_t *udata)
 
 static int open_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  if (!IS_STRING(val1))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val1.type));
+  if (vm_check_string(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_STRING(val2))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val2.type));
+  if (vm_check_string(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  string_t *filename = AS_STRING(val1);
-  string_t *mode = AS_STRING(val2);
+  string_t *filename = AS_STRING(args[1]);
+  string_t *mode = AS_STRING(args[2]);
   FILE *stream = fopen(filename->chars, mode->chars);
   if (!stream)
     return vm_push_nil(vm);
@@ -83,31 +75,19 @@ static int open_call(vm_t *vm, value_t *args)
 
 static int close_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, fclose(((file_t *) AS_USERDATA(val))->stream));
+  return vm_push_number(vm, fclose(((file_t *) AS_USERDATA(args[1]))->stream));
 }
 
 static int popen_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  if (!IS_STRING(val1))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val1.type));
+  if (vm_check_string(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_STRING(val2))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val2.type));
+  if (vm_check_string(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  string_t *command = AS_STRING(val1);
-  string_t *mode = AS_STRING(val2);
+  string_t *command = AS_STRING(args[1]);
+  string_t *mode = AS_STRING(args[2]);
   FILE *stream;
   stream = popen(command->chars, mode->chars);
   if (!stream)
@@ -117,13 +97,9 @@ static int popen_call(vm_t *vm, value_t *args)
 
 static int pclose_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
   int status;
   status = pclose(stream);
   return vm_push_number(vm, status);
@@ -131,37 +107,25 @@ static int pclose_call(vm_t *vm, value_t *args)
 
 static int eof_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
   return vm_push_boolean(vm, (bool) feof(stream));
 }
 
 static int flush_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
   return vm_push_number(vm, fflush(stream));
 }
 
 static int sync_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
   int fd = fileno(stream);
   bool result;
 #ifdef _WIN32
@@ -174,71 +138,43 @@ static int sync_call(vm_t *vm, value_t *args)
 
 static int tell_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
   return vm_push_number(vm, ftell(stream));
 }
 
 static int rewind_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
   rewind(stream);
   return vm_push_nil(vm);
 }
 
 static int seek_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  value_t val3 = args[3];
-  if (!IS_USERDATA(val1))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val1.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_INTEGER(val2))
-  {
-    runtime_error("type error: expected integer but got `%s`", type_name(val2.type));
+  if (vm_check_integer(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_INTEGER(val3))
-  {
-    runtime_error("type error: expected integer but got `%s`", type_name(val3.type));
+  if (vm_check_int(args, 3) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
-  long offset = (long) val2.as.number;
-  int whence = (int) val3.as.number;
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
+  long offset = (long) args[2].as.number;
+  int whence = (int) args[3].as.number;
   return vm_push_number(vm, fseek(stream, offset, whence));
 }
 
 static int read_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  if (!IS_USERDATA(val1))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val1.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_INTEGER(val2))
-  {
-    runtime_error("type error: expected integer but got `%s`", type_name(val2.type));
+  if (vm_check_integer(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
-  long size = (long) val2.as.number;
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
+  long size = (long) args[2].as.number;
   string_t *str = string_allocate(size);
   int length = (int) fread(str->chars, 1, size, stream);
   if (length < size && !feof(stream))
@@ -252,20 +188,12 @@ static int read_call(vm_t *vm, value_t *args)
 
 static int write_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  if (!IS_USERDATA(val1))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val1.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_STRING(val2))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val2.type));
+  if (vm_check_string(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
-  string_t *str = AS_STRING(val2);
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
+  string_t *str = AS_STRING(args[2]);
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size)
     return vm_push_nil(vm);
@@ -274,32 +202,20 @@ static int write_call(vm_t *vm, value_t *args)
 
 static int readln_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val))->stream;
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
   return vm_push_string_from_stream(vm, stream, '\n');
 }
 
 static int writeln_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  if (!IS_USERDATA(val1))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val1.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_STRING(val2))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val2.type));
+  if (vm_check_string(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  FILE *stream = ((file_t *) AS_USERDATA(val1))->stream;
-  string_t *str = AS_STRING(val2);
+  FILE *stream = ((file_t *) AS_USERDATA(args[1]))->stream;
+  string_t *str = AS_STRING(args[2]);
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size || fwrite("\n", 1, 1, stream) < 1)
     return vm_push_nil(vm);

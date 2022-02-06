@@ -41,5 +41,16 @@ int vm_instance(vm_t *vm, int length);
 int vm_construct(vm_t *vm, int length);
 void vm_pop(vm_t *vm);
 int vm_call(vm_t *vm, int num_args);
+int vm_check_type(value_t *args, int index, type_t type);
+int vm_check_boolean(value_t *args, int index);
+int vm_check_number(value_t *args, int index);
+int vm_check_integer(value_t *args, int index);
+int vm_check_int(value_t *args, int index);
+int vm_check_string(value_t *args, int index);
+int vm_check_array(value_t *args, int index);
+int vm_check_struct(value_t *args, int index);
+int vm_check_instance(value_t *args, int index);
+int vm_check_callable(value_t *args, int index);
+int vm_check_userdata(value_t *args, int index);
 
 #endif // VM_H

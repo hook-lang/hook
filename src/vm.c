@@ -300,13 +300,13 @@ static inline int get_element(vm_t *vm)
     runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
-  if (!IS_INTEGER(val2))
+  if (!IS_INT(val2))
   {
     runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as.number;
+  int index = (int) val2.as.number;
   if (index < 0 || index >= arr->length)
   {
     runtime_error("index out of bounds: the length is %d but the index is %d",
@@ -333,13 +333,13 @@ static inline int fetch_element(vm_t *vm)
     runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
-  if (!IS_INTEGER(val2))
+  if (!IS_INT(val2))
   {
     runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as.number;
+  int index = (int) val2.as.number;
   if (index < 0 || index >= arr->length)
   {
     runtime_error("index out of bounds: the length is %d but the index is %d",
@@ -360,7 +360,7 @@ static inline void set_element(vm_t *vm)
   value_t val2 = slots[1];
   value_t val3 = slots[2];
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as.number;
+  int index = (int) val2.as.number;
   array_t *result = array_set_element(arr, index, val3);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
@@ -382,13 +382,13 @@ static inline int put_element(vm_t *vm)
     runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
-  if (!IS_INTEGER(val2))
+  if (!IS_INT(val2))
   {
     runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as.number;
+  int index = (int) val2.as.number;
   if (index < 0 || index >= arr->length)
   {
     runtime_error("index out of bounds: the length is %d but the index is %d",
@@ -416,13 +416,13 @@ static inline int delete_element(vm_t *vm)
     runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
-  if (!IS_INTEGER(val2))
+  if (!IS_INT(val2))
   {
     runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as.number;
+  int index = (int) val2.as.number;
   if (index < 0 || index >= arr->length)
   {
     runtime_error("index out of bounds: the length is %d but the index is %d",
@@ -479,13 +479,13 @@ static inline int inplace_put_element(vm_t *vm)
     runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
-  if (!IS_INTEGER(val2))
+  if (!IS_INT(val2))
   {
     runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as.number;
+  int index = (int) val2.as.number;
   if (index < 0 || index >= arr->length)
   {
     runtime_error("index out of bounds: the length is %d but the index is %d",
@@ -520,13 +520,13 @@ static inline int inplace_delete_element(vm_t *vm)
     runtime_error("cannot use `%s` as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
-  if (!IS_INTEGER(val2))
+  if (!IS_INT(val2))
   {
     runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
-  long index = (long) val2.as.number;
+  int index = (int) val2.as.number;
   if (index < 0 || index >= arr->length)
   {
     runtime_error("index out of bounds: the length is %d but the index is %d",
@@ -1590,4 +1590,80 @@ void vm_pop(vm_t *vm)
 int vm_call(vm_t *vm, int num_args)
 {
   return call(vm, num_args);
+}
+
+int vm_check_type(value_t *args, int index, type_t type)
+{
+  type_t val_type = args[index].type;
+  if (val_type != type)
+  {
+    runtime_error("type error: argument %d must be of the type %s, %s given", index,
+      type_name(type), type_name(val_type));
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
+
+int vm_check_boolean(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_BOOLEAN);
+}
+
+int vm_check_number(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_NUMBER);
+}
+
+int vm_check_integer(value_t *args, int index)
+{
+  value_t val = args[index];
+  if (!IS_INTEGER(val))
+  {
+    runtime_error("type error: argument %d must be of the type integer, %s given",
+      index, type_name(val.type));
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
+
+int vm_check_int(value_t *args, int index)
+{
+  value_t val = args[index];
+  if (!IS_INT(val))
+  {
+    runtime_error("type error: argument %d must be of the type int, %s given",
+      index, type_name(val.type));
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
+
+int vm_check_string(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_STRING);
+}
+
+int vm_check_array(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_ARRAY);
+}
+
+int vm_check_struct(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_STRUCT);
+}
+
+int vm_check_instance(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_INSTANCE);
+}
+
+int vm_check_callable(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_CALLABLE);
+}
+
+int vm_check_userdata(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_USERDATA);
 }

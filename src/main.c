@@ -221,7 +221,7 @@ static inline int run_bytecode(closure_t *cl, parsed_args_t *parsed_args)
     return EXIT_FAILURE;
   }
   value_t result = vm.slots[vm.top];
-  int status = IS_INTEGER(result) ? (int) result.as.number : 0;
+  int status = IS_INT(result) ? (int) result.as.number : 0;
   --vm.top;
   ASSERT(vm.top == num_globals() - 1, "stack must contain the globals");
   vm_free(&vm);

@@ -5,7 +5,6 @@
 
 #include "arrays.h"
 #include <stdlib.h>
-#include <limits.h>
 #include "common.h"
 #include "error.h"
 
@@ -17,19 +16,10 @@ static int sum_call(vm_t *vm, value_t *args);
 
 static int new_array_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_INTEGER(val))
-  {
-    runtime_error("type error: expected integer but got `%s`", type_name(val.type));
+  if (vm_check_int(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  long capacity = (long) val.as.number;
-  if (capacity < 0 || capacity > INT_MAX)
-  {
-    runtime_error("invalid range: capacity must be between 0 and %d", INT_MAX);
-    return STATUS_ERROR;
-  }
-  array_t *arr = array_allocate((int) capacity);
+  int capacity = (int) args[1].as.number;
+  array_t *arr = array_allocate(capacity);
   arr->length = 0;
   if (vm_push_array(vm, arr) == STATUS_ERROR)
   {
@@ -41,25 +31,16 @@ static int new_array_call(vm_t *vm, value_t *args)
 
 static int index_of_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  if (!IS_ARRAY(val1))
-  {
-    runtime_error("type error: expected array but got `%s`", type_name(val1.type));
+  if (vm_check_array(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, array_index_of(AS_ARRAY(val1), val2));
+  return vm_push_number(vm, array_index_of(AS_ARRAY(args[1]), args[2]));
 }
 
 static int min_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_ARRAY(val))
-  {
-    runtime_error("type error: expected array but got `%s`", type_name(val.type));
+  if (vm_check_array(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  array_t *arr = AS_ARRAY(val);
+  array_t *arr = AS_ARRAY(args[1]);
   int length = arr->length;
   if (!length)
     return vm_push_nil(vm);
@@ -77,13 +58,9 @@ static int min_call(vm_t *vm, value_t *args)
 
 static int max_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_ARRAY(val))
-  {
-    runtime_error("type error: expected array but got `%s`", type_name(val.type));
+  if (vm_check_array(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  array_t *arr = AS_ARRAY(val);
+  array_t *arr = AS_ARRAY(args[1]);
   int length = arr->length;
   if (!length)
     return vm_push_nil(vm);
@@ -101,21 +78,17 @@ static int max_call(vm_t *vm, value_t *args)
 
 static int sum_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_ARRAY(val))
-  {
-    runtime_error("type error: expected array but got `%s`", type_name(val.type));
+  if (vm_check_array(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  array_t *arr = AS_ARRAY(val);
+  array_t *arr = AS_ARRAY(args[1]);
   double sum = 0;
   for (int i = 0; i < arr->length; ++i)
   {
     value_t elem = arr->elements[i];
     if (!IS_NUMBER(elem))
     {
-      runtime_error("type error: expected array of numbers, found `%s` in array", type_name(elem.type));
-      return STATUS_ERROR;
+      sum = 0;
+      break;
     }
     sum += elem.as.number;
   }

@@ -30,6 +30,7 @@
 #define IS_BOOLEAN(v)  ((v).type == TYPE_BOOLEAN)
 #define IS_NUMBER(v)   ((v).type == TYPE_NUMBER)
 #define IS_INTEGER(v)  (IS_NUMBER(v) && (v).as.number == (long) (v).as.number)
+#define IS_INT(v)      (IS_NUMBER(v) && (v).as.number == (int) (v).as.number)
 #define IS_STRING(v)   ((v).type == TYPE_STRING)
 #define IS_ARRAY(v)    ((v).type == TYPE_ARRAY)
 #define IS_STRUCT(v)   ((v).type == TYPE_STRUCT)

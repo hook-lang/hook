@@ -28,6 +28,7 @@ static const char *globals[] = {
   "println",
   "type",
   "bool",
+  "integer",
   "int",
   "float",
   "str",
@@ -45,8 +46,6 @@ static const char *globals[] = {
   "panic"
 };
 
-static inline int check_argument(value_t *args, int index, type_t type);
-static inline int check_argument_integer(value_t *args, int index);
 static inline int string_to_double(string_t *str, double *result);
 static inline string_t *to_string(value_t val);
 static inline array_t *split(string_t *str, string_t *separator);
@@ -55,6 +54,7 @@ static int print_call(vm_t *vm, value_t *args);
 static int println_call(vm_t *vm, value_t *args);
 static int type_call(vm_t *vm, value_t *args);
 static int bool_call(vm_t *vm, value_t *args);
+static int integer_call(vm_t *vm, value_t *args);
 static int int_call(vm_t *vm, value_t *args);
 static int float_call(vm_t *vm, value_t *args);
 static int str_call(vm_t *vm, value_t *args);
@@ -70,33 +70,6 @@ static int join_call(vm_t *vm, value_t *args);
 static int sleep_call(vm_t *vm, value_t *args);
 static int assert_call(vm_t *vm, value_t *args);
 static int panic_call(vm_t *vm, value_t *args);
-
-static inline int check_argument(value_t *args, int index, type_t type)
-{
-  if (args[index].type != type)
-  {
-    runtime_error("argument %d must be `%s`", index, type_name(type));
-    return STATUS_ERROR;
-  }
-  return STATUS_OK;
-}
-
-static inline int check_argument_integer(value_t *args, int index)
-{
-  value_t val = args[index];
-  if (!IS_INTEGER(val))
-  {
-    runtime_error("argument %d must be integer", index);
-    return STATUS_ERROR;
-  }
-  long data = (long) val.as.number;
-  if (data < INT_MIN || data > INT_MAX)
-  {
-    runtime_error("argument %d must be between %d and %d", index, INT_MIN, INT_MAX);
-    return STATUS_ERROR;
-  }
-  return STATUS_OK;
-}
 
 static inline int string_to_double(string_t *str, double *result)
 {
@@ -172,10 +145,7 @@ static inline int join(array_t *arr, string_t *separator, string_t **result)
   {
     value_t elem = arr->elements[i];
     if (!IS_STRING(elem))
-    {
-      runtime_error("array contains non-string value");
-      return STATUS_ERROR;
-    }
+      continue;
     if (i)
       string_inplace_concat(str, separator);
     string_inplace_concat(str, AS_STRING(elem));
@@ -207,7 +177,7 @@ static int bool_call(vm_t *vm, value_t *args)
   return vm_push_boolean(vm, IS_TRUTHY(args[1]));
 }
 
-static int int_call(vm_t *vm, value_t *args)
+static int integer_call(vm_t *vm, value_t *args)
 {
   value_t val = args[1];
   switch (val.type)
@@ -231,6 +201,33 @@ static int int_call(vm_t *vm, value_t *args)
     break;
   }
   runtime_error("type error: cannot convert `%s` to 'integer'", type_name(val.type));
+  return STATUS_ERROR;
+}
+
+static int int_call(vm_t *vm, value_t *args)
+{
+  value_t val = args[1];
+  switch (val.type)
+  {
+  case TYPE_NUMBER:
+    return vm_push_number(vm, (int) val.as.number);
+  case TYPE_STRING:
+    {
+      double result;
+      if (string_to_double(AS_STRING(args[1]), &result) == STATUS_ERROR)
+        return STATUS_ERROR;
+      return vm_push_number(vm, (int) result);
+    }
+  case TYPE_NIL:
+  case TYPE_BOOLEAN:
+  case TYPE_ARRAY:
+  case TYPE_STRUCT:
+  case TYPE_INSTANCE:
+  case TYPE_CALLABLE:
+  case TYPE_USERDATA:
+    break;
+  }
+  runtime_error("type error: cannot convert `%s` to 'int'", type_name(val.type));
   return STATUS_ERROR;
 }
 
@@ -282,12 +279,9 @@ static int str_call(vm_t *vm, value_t *args)
 
 static int ord_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val.type));
+  if (vm_check_string(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
+  value_t val = args[1];
   string_t *str = AS_STRING(val);
   if (!str->length)
   {
@@ -300,15 +294,12 @@ static int ord_call(vm_t *vm, value_t *args)
 static int chr_call(vm_t *vm, value_t *args)
 {
   value_t val = args[1];
-  if (!IS_INTEGER(val))
-  {
-    runtime_error("type error: expected integer but got `%s`", type_name(val.type));
+  if (vm_check_int(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  long data = (long) val.as.number;
+  int data = (int) val.as.number;
   if (data < 0 || data > UCHAR_MAX)
   {
-    runtime_error("invalid range: integer must be between 0 and %d", UCHAR_MAX);
+    runtime_error("type error: argument #1 must be between 0 and %d", UCHAR_MAX);
     return STATUS_ERROR;
   }
   string_t *str = string_allocate(1);
@@ -405,8 +396,8 @@ static int slice_call(vm_t *vm, value_t *args)
   {
   case TYPE_STRING:
     {
-      if (check_argument_integer(args, 2) == STATUS_ERROR
-       || check_argument_integer(args, 3) == STATUS_ERROR)
+      if (vm_check_int(args, 2) == STATUS_ERROR
+       || vm_check_int(args, 3) == STATUS_ERROR)
         return STATUS_ERROR;
       string_t *str = AS_STRING(val);
       int start = (int) args[2].as.number;
@@ -427,8 +418,8 @@ static int slice_call(vm_t *vm, value_t *args)
     return STATUS_OK;
   case TYPE_ARRAY:
     {
-      if (check_argument_integer(args, 2) == STATUS_ERROR
-       || check_argument_integer(args, 3) == STATUS_ERROR)
+      if (vm_check_int(args, 2) == STATUS_ERROR
+       || vm_check_int(args, 3) == STATUS_ERROR)
         return STATUS_ERROR;
       array_t *arr = AS_ARRAY(val);
       int start = (int) args[2].as.number;
@@ -462,18 +453,18 @@ static int slice_call(vm_t *vm, value_t *args)
 
 static int split_call(vm_t *vm, value_t *args)
 {
-  if (check_argument(args, 1, TYPE_STRING) == STATUS_ERROR)
+  if (vm_check_type(args, 1, TYPE_STRING) == STATUS_ERROR)
     return STATUS_ERROR;
-  if (check_argument(args, 2, TYPE_STRING) == STATUS_ERROR)
+  if (vm_check_type(args, 2, TYPE_STRING) == STATUS_ERROR)
     return STATUS_ERROR;
   return vm_push_array(vm, split(AS_STRING(args[1]), AS_STRING(args[2])));
 }
 
 static int join_call(vm_t *vm, value_t *args)
 {
-  if (check_argument(args, 1, TYPE_ARRAY) == STATUS_ERROR)
+  if (vm_check_type(args, 1, TYPE_ARRAY) == STATUS_ERROR)
     return STATUS_ERROR;
-  if (check_argument(args, 2, TYPE_STRING) == STATUS_ERROR)
+  if (vm_check_type(args, 2, TYPE_STRING) == STATUS_ERROR)
     return STATUS_ERROR;
   string_t *str;
   if (join(AS_ARRAY(args[1]), AS_STRING(args[2]), &str) == STATUS_ERROR)
@@ -483,37 +474,24 @@ static int join_call(vm_t *vm, value_t *args)
 
 static int sleep_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_INTEGER(val))
-  {
-    runtime_error("type error: expected integer but got `%s`", type_name(val.type));
+  if (vm_check_int(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  long ms = (long) val.as.number;
-  if (ms < 0 || ms > INT_MAX)
-  {
-    runtime_error("invalid range: argument must be between 0 and %d", INT_MAX);
-    return STATUS_ERROR;
-  }
+  int ms = (int) args[1].as.number;
 #ifdef _WIN32
-  Sleep((int) ms);
+  Sleep(ms);
 #else
-  ASSERT(!usleep((int) ms * 1000), "unexpected error on usleep()");
+  ASSERT(!usleep(ms * 1000), "unexpected error on usleep()");
 #endif
   return vm_push_nil(vm);
 }
 
 static int assert_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[2];
-  if (!IS_STRING(val))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val.type));
+  if (vm_check_string(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
   if (IS_FALSEY(args[1]))
   {
-    string_t *str = AS_STRING(val);
+    string_t *str = AS_STRING(args[2]);
     fprintf(stderr, "assertion failed: %.*s\n", str->length, str->chars);
     return STATUS_NO_TRACE;
   }
@@ -523,13 +501,9 @@ static int assert_call(vm_t *vm, value_t *args)
 static int panic_call(vm_t *vm, value_t *args)
 {
   (void) vm;
-  value_t val = args[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val.type));
+  if (vm_check_string(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  string_t *str = AS_STRING(val);
+  string_t *str = AS_STRING(args[1]);
   fprintf(stderr, "panic: %.*s\n", str->length, str->chars);
   return STATUS_NO_TRACE;
 }
@@ -540,21 +514,22 @@ void load_globals(vm_t *vm)
   vm_push_new_native(vm, globals[1], 1, &println_call);
   vm_push_new_native(vm, globals[2], 1, &type_call);
   vm_push_new_native(vm, globals[3], 1, &bool_call);
-  vm_push_new_native(vm, globals[4], 1, &int_call);
-  vm_push_new_native(vm, globals[5], 1, &float_call);
-  vm_push_new_native(vm, globals[6], 1, &str_call);
-  vm_push_new_native(vm, globals[7], 1, &ord_call);
-  vm_push_new_native(vm, globals[8], 1, &chr_call);
-  vm_push_new_native(vm, globals[9], 1, &cap_call);
-  vm_push_new_native(vm, globals[10], 1, &len_call);
-  vm_push_new_native(vm, globals[11], 1, &is_empty_call);
-  vm_push_new_native(vm, globals[12], 2, &compare_call);
-  vm_push_new_native(vm, globals[13], 3, &slice_call);
-  vm_push_new_native(vm, globals[14], 2, &split_call);
-  vm_push_new_native(vm, globals[15], 2, &join_call);
-  vm_push_new_native(vm, globals[16], 1, &sleep_call);
-  vm_push_new_native(vm, globals[17], 2, &assert_call);
-  vm_push_new_native(vm, globals[18], 1, &panic_call);
+  vm_push_new_native(vm, globals[4], 1, &integer_call);
+  vm_push_new_native(vm, globals[5], 1, &int_call);
+  vm_push_new_native(vm, globals[6], 1, &float_call);
+  vm_push_new_native(vm, globals[7], 1, &str_call);
+  vm_push_new_native(vm, globals[8], 1, &ord_call);
+  vm_push_new_native(vm, globals[9], 1, &chr_call);
+  vm_push_new_native(vm, globals[10], 1, &cap_call);
+  vm_push_new_native(vm, globals[11], 1, &len_call);
+  vm_push_new_native(vm, globals[12], 1, &is_empty_call);
+  vm_push_new_native(vm, globals[13], 2, &compare_call);
+  vm_push_new_native(vm, globals[14], 3, &slice_call);
+  vm_push_new_native(vm, globals[15], 2, &split_call);
+  vm_push_new_native(vm, globals[16], 2, &join_call);
+  vm_push_new_native(vm, globals[17], 1, &sleep_call);
+  vm_push_new_native(vm, globals[18], 2, &assert_call);
+  vm_push_new_native(vm, globals[19], 1, &panic_call);
 }
 
 int num_globals(void)

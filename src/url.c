@@ -46,13 +46,9 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data)
 
 static int new_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val.type));
+  if (vm_check_string(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  string_t *url = AS_STRING(val);
+  string_t *url = AS_STRING(args[1]);
   CURL *curl = curl_easy_init();
   if (!curl)
     return vm_push_nil(vm);
@@ -63,25 +59,17 @@ static int new_call(vm_t *vm, value_t *args)
 
 static int cleanup_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  curl_easy_cleanup(((url_t *) AS_USERDATA(val))->curl);
+  curl_easy_cleanup(((url_t *) AS_USERDATA(args[1]))->curl);
   return vm_push_nil(vm);
 }
 
 static int perform_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_USERDATA(val))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  CURL *curl = ((url_t *) AS_USERDATA(val))->curl;
+  CURL *curl = ((url_t *) AS_USERDATA(args[1]))->curl;
   string_t *str = string_new(0);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) str);

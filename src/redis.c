@@ -75,20 +75,12 @@ static value_t redis_reply_to_value(redisReply *reply)
 
 static int connect_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  if (!IS_STRING(val1))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val1.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_INTEGER(val2))
-  {
-    runtime_error("type error: expected integer but got `%s`", type_name(val2.type));
+  if (vm_check_int(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  string_t *hostname = AS_STRING(val1);
-  int port = (int) val2.as.number;
+  string_t *hostname = AS_STRING(args[1]);
+  int port = (int) args[2].as.number;
   redisContext *ctx = redisConnect(hostname->chars, port);
   if (!ctx || ctx->err)
     return vm_push_nil(vm);
@@ -97,20 +89,12 @@ static int connect_call(vm_t *vm, value_t *args)
 
 static int command_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  if (!IS_USERDATA(val1))
-  {
-    runtime_error("type error: expected userdata but got `%s`", type_name(val1.type));
+  if (vm_check_userdata(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_STRING(val2))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val2.type));
+  if (vm_check_string(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  redisContext *ctx = ((redis_context_t *) AS_USERDATA(val1))->ctx;
-  string_t *command = AS_STRING(val2);
+  redisContext *ctx = ((redis_context_t *) AS_USERDATA(args[1]))->ctx;
+  string_t *command = AS_STRING(args[2]);
   redisReply *reply = redisCommand(ctx, command->chars);
   ASSERT(reply, "redisCommand returned NULL");
   value_t result = redis_reply_to_value(reply);

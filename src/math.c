@@ -29,129 +29,81 @@ static int random_call(vm_t *vm, value_t *args);
 
 static int abs_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, fabs(val.as.number));
+  return vm_push_number(vm, fabs(args[1].as.number));
 }
 
 static int sin_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, sin(val.as.number));
+  return vm_push_number(vm, sin(args[1].as.number));
 }
 
 static int cos_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, cos(val.as.number));
+  return vm_push_number(vm, cos(args[1].as.number));
 }
 
 static int tan_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, tan(val.as.number));
+  return vm_push_number(vm, tan(args[1].as.number));
 }
 
 static int asin_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, asin(val.as.number));
+  return vm_push_number(vm, asin(args[1].as.number));
 }
 
 static int acos_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, acos(val.as.number));
+  return vm_push_number(vm, acos(args[1].as.number));
 }
 
 static int atan_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, atan(val.as.number));
+  return vm_push_number(vm, atan(args[1].as.number));
 }
 
 static int floor_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, floor(val.as.number));
+  return vm_push_number(vm, floor(args[1].as.number));
 }
 
 static int ceil_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, ceil(val.as.number));
+  return vm_push_number(vm, ceil(args[1].as.number));
 }
 
 static int pow_call(vm_t *vm, value_t *args)
 {
-  value_t val1 = args[1];
-  value_t val2 = args[2];
-  if (!IS_NUMBER(val1))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val1.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  if (!IS_NUMBER(val2))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val2.type));
+  if (vm_check_number(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, pow(val1.as.number, val2.as.number));
+  return vm_push_number(vm, pow(args[1].as.number, args[2].as.number));
 }
 
 static int sqrt_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_NUMBER(val))
-  {
-    runtime_error("type error: expected number but got `%s`", type_name(val.type));
+  if (vm_check_number(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, sqrt(val.as.number));
+  return vm_push_number(vm, sqrt(args[1].as.number));
 }
 
 static int random_call(vm_t *vm, value_t *args)

@@ -21,24 +21,16 @@ static int clock_call(vm_t *vm, value_t *args)
 
 static int system_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val.type));
+  if (vm_check_string(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  return vm_push_number(vm, system(AS_STRING(val)->chars));
+  return vm_push_number(vm, system(AS_STRING(args[1])->chars));
 }
 
 static int getenv_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (!IS_STRING(val))
-  {
-    runtime_error("type error: expected string but got `%s`", type_name(val.type));
+  if (vm_check_string(args, 1) == STATUS_ERROR)
     return STATUS_ERROR;
-  }
-  const char *chars = getenv(AS_STRING(val)->chars);
+  const char *chars = getenv(AS_STRING(args[1])->chars);
   chars = chars ? chars : "";
   return vm_push_string_from_chars(vm, -1, chars);
 }
