@@ -25,6 +25,8 @@ static int floor_call(vm_t *vm, value_t *args);
 static int ceil_call(vm_t *vm, value_t *args);
 static int pow_call(vm_t *vm, value_t *args);
 static int sqrt_call(vm_t *vm, value_t *args);
+static int log_call(vm_t *vm, value_t *args);
+static int exp_call(vm_t *vm, value_t *args);
 static int random_call(vm_t *vm, value_t *args);
 
 static int abs_call(vm_t *vm, value_t *args)
@@ -106,6 +108,20 @@ static int sqrt_call(vm_t *vm, value_t *args)
   return vm_push_number(vm, sqrt(args[1].as.number));
 }
 
+static int log_call(vm_t *vm, value_t *args)
+{
+  if (vm_check_number(args, 1) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_push_number(vm, log(args[1].as.number));
+}
+
+static int exp_call(vm_t *vm, value_t *args)
+{
+  if (vm_check_number(args, 1) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_push_number(vm, exp(args[1].as.number));
+}
+
 static int random_call(vm_t *vm, value_t *args)
 {
   (void) args;
@@ -170,9 +186,17 @@ int load_math(vm_t *vm)
     return STATUS_ERROR;
   if (vm_push_new_native(vm, "sqrt", 1, &sqrt_call) == STATUS_ERROR)
     return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "log") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "log", 0, &log_call) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_string_from_chars(vm, -1, "exp") == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_push_new_native(vm, "exp", 0, &exp_call) == STATUS_ERROR)
+    return STATUS_ERROR;
   if (vm_push_string_from_chars(vm, -1, "random") == STATUS_ERROR)
     return STATUS_ERROR;
   if (vm_push_new_native(vm, "random", 0, &random_call) == STATUS_ERROR)
     return STATUS_ERROR;
-  return vm_construct(vm, 13);
+  return vm_construct(vm, 15);
 }
