@@ -12,6 +12,8 @@
 #include "memory.h"
 #include "error.h"
 
+static inline void type_error(int index, int num_types, type_t types[],
+  type_t val_type);
 static inline int push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
@@ -55,6 +57,17 @@ static inline void print_trace(string_t *name, string_t *file, int line);
 static inline int call_function(vm_t *vm, value_t *locals, closure_t *cl, int *line);
 static inline void discard_frame(vm_t *vm, value_t *slots);
 static inline void move_result(vm_t *vm, value_t *slots);
+
+static inline void type_error(int index, int num_types, type_t types[],
+  type_t val_type)
+{
+  ASSERT(num_types > 0, "num_types must be greater than 0");
+  fprintf(stderr, "runtime error: type error: argument #%d must be of the type %s",
+    index, type_name(types[0]));
+  for (int i = 1; i < num_types; ++i)
+    fprintf(stderr, "|%s", type_name(types[i]));
+  fprintf(stderr, ", %s given\n", type_name(val_type));
+}
 
 static inline int push(vm_t *vm, value_t val)
 {
@@ -1110,7 +1123,7 @@ static inline int check_arity(int arity, string_t *name, int num_args)
 {
   if (num_args >= arity)
     return STATUS_OK;
-  const char *fmt = arity == 1 ? "%s() expects %d argument but got %d" :
+  const char *fmt = arity < 2 ? "%s() expects %d argument but got %d" :
     "%s() expects %d arguments but got %d";
   char *name_chars = name ? name->chars : "<anonymous>";
   runtime_error(fmt, name_chars, arity, num_args);
@@ -1597,8 +1610,21 @@ int vm_check_type(value_t *args, int index, type_t type)
   type_t val_type = args[index].type;
   if (val_type != type)
   {
-    runtime_error("type error: argument %d must be of the type %s, %s given", index,
+    runtime_error("type error: argument #%d must be of the type %s, %s given", index,
       type_name(type), type_name(val_type));
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
+
+int vm_check_types(value_t *args, int index, int num_types, type_t types[])
+{
+  type_t val_type = args[index].type;
+  for (int i = 0; i < num_types; ++i)
+  {
+    if (val_type == types[i])
+      continue;
+    type_error(index, num_types, types, val_type);
     return STATUS_ERROR;
   }
   return STATUS_OK;
@@ -1619,7 +1645,7 @@ int vm_check_integer(value_t *args, int index)
   value_t val = args[index];
   if (!IS_INTEGER(val))
   {
-    runtime_error("type error: argument %d must be of the type integer, %s given",
+    runtime_error("type error: argument #%d must be of the type integer, %s given",
       index, type_name(val.type));
     return STATUS_ERROR;
   }
@@ -1631,7 +1657,7 @@ int vm_check_int(value_t *args, int index)
   value_t val = args[index];
   if (!IS_INT(val))
   {
-    runtime_error("type error: argument %d must be of the type int, %s given",
+    runtime_error("type error: argument #%d must be of the type int, %s given",
       index, type_name(val.type));
     return STATUS_ERROR;
   }

@@ -42,6 +42,7 @@ int vm_construct(vm_t *vm, int length);
 void vm_pop(vm_t *vm);
 int vm_call(vm_t *vm, int num_args);
 int vm_check_type(value_t *args, int index, type_t type);
+int vm_check_types(value_t *args, int index, int num_types, type_t types[]);
 int vm_check_boolean(value_t *args, int index);
 int vm_check_number(value_t *args, int index);
 int vm_check_integer(value_t *args, int index);

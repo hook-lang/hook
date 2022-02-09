@@ -68,7 +68,7 @@ static int open_call(vm_t *vm, value_t *args)
   string_t *filename = AS_STRING(args[1]);
   sqlite3 *db;
   if (sqlite3_open(filename->chars, &db) != SQLITE_OK) {
-    runtime_error("type error: cannot open database `%.*s`", filename->length,
+    runtime_error("cannot open database `%.*s`", filename->length,
       filename->chars);
     sqlite3_close(db);
     return STATUS_ERROR;

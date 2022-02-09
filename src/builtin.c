@@ -179,83 +179,44 @@ static int bool_call(vm_t *vm, value_t *args)
 
 static int integer_call(vm_t *vm, value_t *args)
 {
+  type_t types[] = {TYPE_NUMBER, TYPE_STRING};
+  if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
+    return STATUS_ERROR;
   value_t val = args[1];
-  switch (val.type)
-  {
-  case TYPE_NUMBER:
+  if (val.type == TYPE_NUMBER)
     return vm_push_number(vm, (long) val.as.number);
-  case TYPE_STRING:
-    {
-      double result;
-      if (string_to_double(AS_STRING(args[1]), &result) == STATUS_ERROR)
-        return STATUS_ERROR;
-      return vm_push_number(vm, (long) result);
-    }
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_ARRAY:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    break;
-  }
-  runtime_error("type error: cannot convert `%s` to 'integer'", type_name(val.type));
-  return STATUS_ERROR;
+  double result;
+  if (string_to_double(AS_STRING(val), &result) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_push_number(vm, (long) result);
 }
 
 static int int_call(vm_t *vm, value_t *args)
 {
+  type_t types[] = {TYPE_NUMBER, TYPE_STRING};
+  if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
+    return STATUS_ERROR;
   value_t val = args[1];
-  switch (val.type)
-  {
-  case TYPE_NUMBER:
+  if (val.type == TYPE_NUMBER)
     return vm_push_number(vm, (int) val.as.number);
-  case TYPE_STRING:
-    {
-      double result;
-      if (string_to_double(AS_STRING(args[1]), &result) == STATUS_ERROR)
-        return STATUS_ERROR;
-      return vm_push_number(vm, (int) result);
-    }
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_ARRAY:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    break;
-  }
-  runtime_error("type error: cannot convert `%s` to 'int'", type_name(val.type));
-  return STATUS_ERROR;
+  double result;
+  if (string_to_double(AS_STRING(val), &result) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_push_number(vm, (int) result);
 }
 
 static int float_call(vm_t *vm, value_t *args)
 {
+  type_t types[] = {TYPE_NUMBER, TYPE_STRING};
+  if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
+    return STATUS_ERROR;
   value_t val = args[1];
-  switch (val.type)
-  {
-  case TYPE_NUMBER:
+  if (val.type == TYPE_NUMBER)
     return STATUS_OK;
-  case TYPE_STRING:
-    {
-      double result;
-      if (string_to_double(AS_STRING(args[1]), &result) == STATUS_ERROR)
-        return STATUS_ERROR;
-      return vm_push_number(vm, result);
-    }
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_ARRAY:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    break;
-  }
-  runtime_error("type error: cannot convert `%s` to 'number'", type_name(val.type));
-  return STATUS_ERROR;
+  double result;
+  if (string_to_double(AS_STRING(args[1]), &result) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_push_number(vm, result);
 }
 
 static int str_call(vm_t *vm, value_t *args)
@@ -299,7 +260,7 @@ static int chr_call(vm_t *vm, value_t *args)
   int data = (int) val.as.number;
   if (data < 0 || data > UCHAR_MAX)
   {
-    runtime_error("type error: argument #1 must be between 0 and %d", UCHAR_MAX);
+    runtime_error("range error: argument #1 must be between 0 and %d", UCHAR_MAX);
     return STATUS_ERROR;
   }
   string_t *str = string_allocate(1);
@@ -311,72 +272,63 @@ static int chr_call(vm_t *vm, value_t *args)
 
 static int cap_call(vm_t *vm, value_t *args)
 {
+  type_t types[] = {TYPE_STRING, TYPE_ARRAY};
+  if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
+    return STATUS_ERROR;
   value_t val = args[1];
-  switch (val.type)
-  {
-  case TYPE_STRING:
-    return vm_push_number(vm, AS_STRING(val)->capacity);
-  case TYPE_ARRAY:
-    return vm_push_number(vm, AS_ARRAY(val)->capacity);
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_NUMBER:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    break;
-  }
-  runtime_error("type error: `%s` has no capacity property", type_name(val.type));
-  return STATUS_ERROR;
+  int capacity = val.type == TYPE_STRING ? AS_STRING(val)->capacity
+    : AS_ARRAY(val)->capacity;
+  return vm_push_number(vm, capacity);
 }
 
 static int len_call(vm_t *vm, value_t *args)
 {
+  type_t types[] = {TYPE_STRING, TYPE_ARRAY, TYPE_STRUCT, TYPE_INSTANCE};
+  if (vm_check_types(args, 1, 4, types) == STATUS_ERROR)
+    return STATUS_ERROR;
   value_t val = args[1];
+  int result;
   switch (val.type)
   {
   case TYPE_STRING:
-    return vm_push_number(vm, AS_STRING(val)->length);
+    result = AS_STRING(val)->length;
+    break;
   case TYPE_ARRAY:
-    return vm_push_number(vm, AS_ARRAY(val)->length);
+    result = AS_ARRAY(val)->length;
+    break;
   case TYPE_STRUCT:
-    return vm_push_number(vm, AS_STRUCT(val)->length);
-  case TYPE_INSTANCE:
-    return vm_push_number(vm, AS_INSTANCE(val)->ztruct->length);
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_NUMBER:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
+    result = AS_STRUCT(val)->length;
+    break;
+  default:
+    result = AS_INSTANCE(val)->ztruct->length;
     break;
   }
-  runtime_error("type error: `%s` has no length property", type_name(val.type));
-  return STATUS_ERROR;
+  return vm_push_number(vm, result);
 }
 
 static int is_empty_call(vm_t *vm, value_t *args)
 {
+  type_t types[] = {TYPE_STRING, TYPE_ARRAY, TYPE_STRUCT, TYPE_INSTANCE};
+  if (vm_check_types(args, 1, 4, types) == STATUS_ERROR)
+    return STATUS_ERROR;
   value_t val = args[1];
+  bool result;
   switch (val.type)
   {
   case TYPE_STRING:
-    return vm_push_boolean(vm, !AS_STRING(val)->length);
+    result = !AS_STRING(val)->length;
+    break;
   case TYPE_ARRAY:
-    return vm_push_boolean(vm, !AS_ARRAY(val)->length);
+    result = !AS_ARRAY(val)->length;
+    break;
   case TYPE_STRUCT:
-    return vm_push_boolean(vm, !AS_STRUCT(val)->length);
-  case TYPE_INSTANCE:
-    return vm_push_boolean(vm, !AS_INSTANCE(val)->ztruct->length);
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_NUMBER:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
+    result = !AS_STRUCT(val)->length;
+    break;
+  default:
+    result = !AS_INSTANCE(val)->ztruct->length;
     break;
   }
-  runtime_error("type error: `%s` has no length property", type_name(val.type));
-  return STATUS_ERROR;
+  return vm_push_boolean(vm, result);
 }
 
 static int compare_call(vm_t *vm, value_t *args)
@@ -391,64 +343,47 @@ static int compare_call(vm_t *vm, value_t *args)
 
 static int slice_call(vm_t *vm, value_t *args)
 {
+  type_t types[] = {TYPE_STRING, TYPE_ARRAY};
+  if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_check_int(args, 2) == STATUS_ERROR)
+    return STATUS_ERROR;
+  if (vm_check_int(args, 3) == STATUS_ERROR)
+    return STATUS_ERROR;
   value_t val = args[1];
-  switch (val.type)
+  int start = (int) args[2].as.number;
+  int stop = (int) args[3].as.number;
+  if (val.type == TYPE_STRING)
   {
-  case TYPE_STRING:
+    string_t *str = AS_STRING(val);
+    string_t *result;
+    if (!string_slice(str, start, stop, &result))
     {
-      if (vm_check_int(args, 2) == STATUS_ERROR
-       || vm_check_int(args, 3) == STATUS_ERROR)
-        return STATUS_ERROR;
-      string_t *str = AS_STRING(val);
-      int start = (int) args[2].as.number;
-      int stop = (int) args[3].as.number;
-      string_t *result;
-      if (!string_slice(str, start, stop, &result))
-      {
-        vm_pop(vm);
-        vm_pop(vm);
-        return STATUS_OK;
-      }
-      if (vm_push_string(vm, result) == STATUS_ERROR)
-      {
-        string_free(result);
-        return STATUS_ERROR;
-      }
+      vm_pop(vm);
+      vm_pop(vm);
+      return STATUS_OK;
+    }
+    if (vm_push_string(vm, result) == STATUS_ERROR)
+    {
+      string_free(result);
+      return STATUS_ERROR;
     }
     return STATUS_OK;
-  case TYPE_ARRAY:
-    {
-      if (vm_check_int(args, 2) == STATUS_ERROR
-       || vm_check_int(args, 3) == STATUS_ERROR)
-        return STATUS_ERROR;
-      array_t *arr = AS_ARRAY(val);
-      int start = (int) args[2].as.number;
-      int stop = (int) args[3].as.number;
-      array_t *result;
-      if (!array_slice(arr, start, stop, &result))
-      {
-        vm_pop(vm);
-        vm_pop(vm);
-        return STATUS_OK;
-      }
-      if (vm_push_array(vm, result) == STATUS_ERROR)
-      {
-        array_free(result);
-        return STATUS_ERROR;
-      }
-    }
-    return STATUS_OK;
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_NUMBER:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    break;
   }
-  runtime_error("type error: cannot slice value of type `%s`", type_name(val.type));
-  return STATUS_ERROR;
+  array_t *arr = AS_ARRAY(val);
+  array_t *result;
+  if (!array_slice(arr, start, stop, &result))
+  {
+    vm_pop(vm);
+    vm_pop(vm);
+    return STATUS_OK;
+  }
+  if (vm_push_array(vm, result) == STATUS_ERROR)
+  {
+    array_free(result);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
 }
 
 static int split_call(vm_t *vm, value_t *args)
