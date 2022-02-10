@@ -1620,10 +1620,12 @@ int vm_check_type(value_t *args, int index, type_t type)
 int vm_check_types(value_t *args, int index, int num_types, type_t types[])
 {
   type_t val_type = args[index].type;
+  bool match = false;
   for (int i = 0; i < num_types; ++i)
+    if ((match = val_type == types[i]))
+      break;
+  if (!match)
   {
-    if (val_type == types[i])
-      continue;
     type_error(index, num_types, types, val_type);
     return STATUS_ERROR;
   }

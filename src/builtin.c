@@ -23,6 +23,8 @@
 #define strtok_r strtok_s
 #endif
 
+#define HEX_DIGITS "0123456789abcdef"
+
 static const char *globals[] = {
   "print",
   "println",
@@ -34,6 +36,8 @@ static const char *globals[] = {
   "str",
   "ord",
   "chr",
+  "hex",
+  "bin",
   "cap",
   "len",
   "is_empty",
@@ -48,6 +52,7 @@ static const char *globals[] = {
 
 static inline int string_to_double(string_t *str, double *result);
 static inline string_t *to_string(value_t val);
+static inline int hex_to_bin(char hex, char *bin);
 static inline array_t *split(string_t *str, string_t *separator);
 static inline int join(array_t *arr, string_t *separator, string_t **result);
 static int print_call(vm_t *vm, value_t *args);
@@ -60,6 +65,8 @@ static int float_call(vm_t *vm, value_t *args);
 static int str_call(vm_t *vm, value_t *args);
 static int ord_call(vm_t *vm, value_t *args);
 static int chr_call(vm_t *vm, value_t *args);
+static int hex_call(vm_t *vm, value_t *args);
+static int bin_call(vm_t *vm, value_t *args);
 static int cap_call(vm_t *vm, value_t *args);
 static int len_call(vm_t *vm, value_t *args);
 static int is_empty_call(vm_t *vm, value_t *args);
@@ -123,6 +130,26 @@ static inline string_t *to_string(value_t val) {
     break;
   }
   return str;
+}
+
+static inline int hex_to_bin(char hex, char *bin)
+{
+  if (hex >= '0' && hex <= '9')
+  {
+    *bin = hex - '0';
+    return STATUS_OK;
+  }
+  if (hex >= 'a' && hex <= 'f')
+  {
+    *bin = hex - 'a' - 10;
+    return STATUS_OK;
+  }
+  if (hex >= 'A' && hex <= 'F')
+  {
+    *bin = hex - 'A' - 10;
+    return STATUS_OK;
+  }
+  return STATUS_ERROR;
 }
 
 static inline array_t *split(string_t *str, string_t *separator)
@@ -267,7 +294,79 @@ static int chr_call(vm_t *vm, value_t *args)
   str->length = 1;
   str->chars[0] = (char) data;
   str->chars[1] = '\0';
-  return vm_push_string(vm, str);
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
+
+static int hex_call(vm_t *vm, value_t *args)
+{
+  if (vm_check_string(args, 1) == STATUS_ERROR)
+    return STATUS_ERROR;
+  string_t *str = AS_STRING(args[1]);
+  if (!str->length)
+    return vm_push_string(vm, str);
+  int length = str->length << 1;
+  string_t *result = string_allocate(length);
+  result->length = length;
+  result->chars[length] = '\0';
+  for (int i = 0; i < str->length; ++i)
+  {
+    char chr = str->chars[i];
+    result->chars[i << 1] = HEX_DIGITS[chr >> 4];
+    result->chars[(i << 1) + 1] = HEX_DIGITS[chr & 0x0f];
+  }
+  if (vm_push_string(vm, result) == STATUS_ERROR)
+  {
+    string_free(result);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
+
+static int bin_call(vm_t *vm, value_t *args)
+{
+  if (vm_check_string(args, 1) == STATUS_ERROR)
+    return STATUS_ERROR;
+  string_t *str = AS_STRING(args[1]);
+  if (!str->length)
+    return vm_push_string(vm, str);
+  if (str->length % 2)
+  {
+    vm_push_nil(vm);
+    return STATUS_OK;
+  }
+  int length = str->length >> 1;
+  string_t *result = string_allocate(length);
+  result->length = length;
+  result->chars[length] = '\0';
+  for (int i = 0; i < str->length; i += 2)
+  {
+    char bin;
+    if (hex_to_bin(str->chars[i], &bin) == STATUS_ERROR)
+    {
+      string_free(result);
+      vm_push_nil(vm);
+      return STATUS_OK;
+    }
+    result->chars[i >> 1] = bin << 4;
+    if (hex_to_bin(str->chars[i + 1], &bin) == STATUS_ERROR)
+    {
+      string_free(result);
+      vm_push_nil(vm);
+      return STATUS_OK;
+    }
+    result->chars[i >> 1] |= bin;
+  }
+  if (vm_push_string(vm, result) == STATUS_ERROR)
+  {
+    string_free(result);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
 }
 
 static int cap_call(vm_t *vm, value_t *args)
@@ -392,7 +491,13 @@ static int split_call(vm_t *vm, value_t *args)
     return STATUS_ERROR;
   if (vm_check_type(args, 2, TYPE_STRING) == STATUS_ERROR)
     return STATUS_ERROR;
-  return vm_push_array(vm, split(AS_STRING(args[1]), AS_STRING(args[2])));
+  array_t *arr = split(AS_STRING(args[1]), AS_STRING(args[2]));
+  if (vm_push_array(vm, arr) == STATUS_ERROR)
+  {
+    array_free(arr);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
 }
 
 static int join_call(vm_t *vm, value_t *args)
@@ -404,7 +509,12 @@ static int join_call(vm_t *vm, value_t *args)
   string_t *str;
   if (join(AS_ARRAY(args[1]), AS_STRING(args[2]), &str) == STATUS_ERROR)
     return STATUS_ERROR;
-  return vm_push_string(vm, str);
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
 }
 
 static int sleep_call(vm_t *vm, value_t *args)
@@ -455,16 +565,18 @@ void load_globals(vm_t *vm)
   vm_push_new_native(vm, globals[7], 1, &str_call);
   vm_push_new_native(vm, globals[8], 1, &ord_call);
   vm_push_new_native(vm, globals[9], 1, &chr_call);
-  vm_push_new_native(vm, globals[10], 1, &cap_call);
-  vm_push_new_native(vm, globals[11], 1, &len_call);
-  vm_push_new_native(vm, globals[12], 1, &is_empty_call);
-  vm_push_new_native(vm, globals[13], 2, &compare_call);
-  vm_push_new_native(vm, globals[14], 3, &slice_call);
-  vm_push_new_native(vm, globals[15], 2, &split_call);
-  vm_push_new_native(vm, globals[16], 2, &join_call);
-  vm_push_new_native(vm, globals[17], 1, &sleep_call);
-  vm_push_new_native(vm, globals[18], 2, &assert_call);
-  vm_push_new_native(vm, globals[19], 1, &panic_call);
+  vm_push_new_native(vm, globals[10], 1, &hex_call);
+  vm_push_new_native(vm, globals[11], 1, &bin_call);
+  vm_push_new_native(vm, globals[12], 1, &cap_call);
+  vm_push_new_native(vm, globals[13], 1, &len_call);
+  vm_push_new_native(vm, globals[14], 1, &is_empty_call);
+  vm_push_new_native(vm, globals[15], 2, &compare_call);
+  vm_push_new_native(vm, globals[16], 3, &slice_call);
+  vm_push_new_native(vm, globals[17], 2, &split_call);
+  vm_push_new_native(vm, globals[18], 2, &join_call);
+  vm_push_new_native(vm, globals[19], 1, &sleep_call);
+  vm_push_new_native(vm, globals[20], 2, &assert_call);
+  vm_push_new_native(vm, globals[21], 1, &panic_call);
 }
 
 int num_globals(void)
