@@ -1,0 +1,21 @@
+
+use secp256r1;
+use { sha256 } in hashing;
+
+val key_pair = secp256r1.new_key_pair();
+assert(type(key_pair) == "array", "key_pair must be an array");
+assert(len(key_pair) == 2, "length of key_pair must be 2");
+
+val [ pub_key, priv_key ] = key_pair;
+assert(type(pub_key) == "string", "pub_key must be a string");
+assert(type(priv_key) == "string", "priv_key must be a string");
+assert(len(pub_key) == 33, "length of pub_key must be 33");
+assert(len(priv_key) == 32, "length of priv_key must be 32");
+
+val hash = sha256("foo bar baz");
+val signature = secp256r1.sign_hash(priv_key, hash);
+assert(type(signature) == "string", "signature must be a string");
+assert(len(signature) == 64, "length of signature must be 64");
+
+val valid = secp256r1.verify_signature(pub_key, hash, signature);
+assert(valid, "signature must be valid");

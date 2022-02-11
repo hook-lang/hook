@@ -238,6 +238,23 @@ add_library(encoding SHARED
   src/value.c
   src/vm.c)
 
+add_library(secp256r1 SHARED
+  src/array.c
+  src/callable.c
+  src/chunk.c
+  src/common.c
+  src/ecc.c
+  src/error.c
+  src/hash.c
+  src/memory.c
+  src/module.c
+  src/secp256r1.c
+  src/string.c
+  src/struct.c
+  src/userdata.c
+  src/value.c
+  src/vm.c)
+
 if(MSVC)
   target_link_libraries(sqlite PRIVATE unofficial::sqlite3::sqlite3)
   target_link_libraries(url PRIVATE CURL::libcurl)
