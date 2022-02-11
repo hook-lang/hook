@@ -201,7 +201,7 @@ add_library(redis SHARED
   src/value.c
   src/vm.c)
 
-  add_library(hashing SHARED
+add_library(hashing SHARED
   src/array.c
   src/callable.c
   src/chunk.c
@@ -213,6 +213,25 @@ add_library(redis SHARED
   src/module.c
   src/ripemd160.c
   src/sha2.c
+  src/string.c
+  src/struct.c
+  src/userdata.c
+  src/value.c
+  src/vm.c)
+
+add_library(encoding SHARED
+  src/array.c
+  src/base32.c
+  src/base58.c
+  src/base64.c
+  src/callable.c
+  src/chunk.c
+  src/common.c
+  src/encoding.c
+  src/error.c
+  src/hash.c
+  src/memory.c
+  src/module.c
   src/string.c
   src/struct.c
   src/userdata.c
