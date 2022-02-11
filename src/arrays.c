@@ -6,7 +6,6 @@
 #include "arrays.h"
 #include <stdlib.h>
 #include "common.h"
-#include "error.h"
 
 static int new_array_call(vm_t *vm, value_t *args);
 static int index_of_call(vm_t *vm, value_t *args);

@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include "common.h"
-#include "error.h"
 
 static int clock_call(vm_t *vm, value_t *args);
 static int system_call(vm_t *vm, value_t *args);

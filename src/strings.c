@@ -6,7 +6,6 @@
 #include "strings.h"
 #include <stdlib.h>
 #include "common.h"
-#include "error.h"
 
 static int hash_call(vm_t *vm, value_t *args);
 static int lower_call(vm_t *vm, value_t *args);

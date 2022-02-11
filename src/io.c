@@ -13,7 +13,6 @@
 #endif
 #include "common.h"
 #include "memory.h"
-#include "error.h"
 
 #ifdef _WIN32
 #define popen _popen
@@ -183,7 +182,13 @@ static int read_call(vm_t *vm, value_t *args)
     return vm_push_nil(vm);
   }
   str->length = length;
-  return vm_push_string(vm, str);
+  str->chars[length] = '\0';
+  if (vm_push_string(vm, str) == STATUS_ERROR)
+  {
+    string_free(str);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
 }
 
 static int write_call(vm_t *vm, value_t *args)

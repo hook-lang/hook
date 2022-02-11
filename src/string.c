@@ -11,7 +11,6 @@
 #include "hash.h"
 #include "common.h"
 #include "memory.h"
-#include "error.h"
 
 static inline void resize(string_t *str, int min_capacity);
 static inline void add_char(string_t *str, char c);
@@ -240,9 +239,16 @@ string_t *string_deserialize(FILE *stream)
     return NULL;
   string_t *str = string_allocate(capacity);
   str->length = length;
+  str->chars[length] = '\0';
   if (fread(str->chars, length + 1, 1, stream) != 1)
+  {
+    string_free(str);
     return NULL;
+  }
   if (fread(&str->hash, sizeof(str->hash), 1, stream) != 1)
+  {
+    string_free(str);
     return NULL;
+  }
   return str;
 }

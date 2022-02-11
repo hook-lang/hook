@@ -23,8 +23,6 @@
 #define strtok_r strtok_s
 #endif
 
-#define HEX_DIGITS "0123456789abcdef"
-
 static const char *globals[] = {
   "print",
   "println",
@@ -52,7 +50,6 @@ static const char *globals[] = {
 
 static inline int string_to_double(string_t *str, double *result);
 static inline string_t *to_string(value_t val);
-static inline int hex_to_bin(char hex, char *bin);
 static inline array_t *split(string_t *str, string_t *separator);
 static inline int join(array_t *arr, string_t *separator, string_t **result);
 static int print_call(vm_t *vm, value_t *args);
@@ -130,26 +127,6 @@ static inline string_t *to_string(value_t val) {
     break;
   }
   return str;
-}
-
-static inline int hex_to_bin(char hex, char *bin)
-{
-  if (hex >= '0' && hex <= '9')
-  {
-    *bin = hex - '0';
-    return STATUS_OK;
-  }
-  if (hex >= 'a' && hex <= 'f')
-  {
-    *bin = hex - 'a' - 10;
-    return STATUS_OK;
-  }
-  if (hex >= 'A' && hex <= 'F')
-  {
-    *bin = hex - 'A' - 10;
-    return STATUS_OK;
-  }
-  return STATUS_ERROR;
 }
 
 static inline array_t *split(string_t *str, string_t *separator)
@@ -313,11 +290,11 @@ static int hex_call(vm_t *vm, value_t *args)
   string_t *result = string_allocate(length);
   result->length = length;
   result->chars[length] = '\0';
+  char *chars = result->chars;
   for (int i = 0; i < str->length; ++i)
   {
-    char chr = str->chars[i];
-    result->chars[i << 1] = HEX_DIGITS[chr >> 4];
-    result->chars[(i << 1) + 1] = HEX_DIGITS[chr & 0x0f];
+    sprintf(chars, "%.2x", (unsigned char) str->chars[i]);
+    chars += 2;
   }
   if (vm_push_string(vm, result) == STATUS_ERROR)
   {
@@ -343,23 +320,11 @@ static int bin_call(vm_t *vm, value_t *args)
   string_t *result = string_allocate(length);
   result->length = length;
   result->chars[length] = '\0';
-  for (int i = 0; i < str->length; i += 2)
+  char *chars = str->chars;
+  for (int i = 0; i < length; ++i)
   {
-    char bin;
-    if (hex_to_bin(str->chars[i], &bin) == STATUS_ERROR)
-    {
-      string_free(result);
-      vm_push_nil(vm);
-      return STATUS_OK;
-    }
-    result->chars[i >> 1] = bin << 4;
-    if (hex_to_bin(str->chars[i + 1], &bin) == STATUS_ERROR)
-    {
-      string_free(result);
-      vm_push_nil(vm);
-      return STATUS_OK;
-    }
-    result->chars[i >> 1] |= bin;
+    sscanf(chars, "%2hhx", &result->chars[i]);
+    chars += 2;
   }
   if (vm_push_string(vm, result) == STATUS_ERROR)
   {

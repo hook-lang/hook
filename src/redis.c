@@ -8,7 +8,6 @@
 #include <hiredis/hiredis.h>
 #include "common.h"
 #include "memory.h"
-#include "error.h"
 
 typedef struct
 {

@@ -12,7 +12,6 @@
 #include "scanner.h"
 #include "struct.h"
 #include "builtin.h"
-#include "error.h"
 
 #define MAX_CONSTANTS UINT8_MAX
 #define MAX_VARIABLES UINT8_MAX
