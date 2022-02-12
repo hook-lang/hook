@@ -9,7 +9,6 @@
 #include "compiler.h"
 #include "dump.h"
 #include "vm.h"
-#include "builtin.h"
 #include "common.h"
 #include "error.h"
 
@@ -212,7 +211,6 @@ static inline int run_bytecode(closure_t *cl, parsed_args_t *parsed_args)
 {
   vm_t vm;
   vm_init(&vm, parsed_args->stack_size);
-  load_globals(&vm);
   vm_push_closure(&vm, cl);
   vm_push_array(&vm, args_array(parsed_args));
   if (vm_call(&vm, 1) == STATUS_ERROR)
@@ -223,7 +221,6 @@ static inline int run_bytecode(closure_t *cl, parsed_args_t *parsed_args)
   value_t result = vm.slots[vm.top];
   int status = IS_INT(result) ? (int) result.as.number : 0;
   --vm.top;
-  ASSERT(vm.top == num_globals() - 1, "stack must contain the globals");
   vm_free(&vm);
   return status;
 }

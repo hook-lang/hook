@@ -8,8 +8,8 @@
 
 #include "string.h"
 
-#define STRUCT_MIN_CAPACITY (1 << 3)
-#define STRUCT_LOAD_FACTOR  0.75
+#define STRUCT_MIN_CAPACITY    (1 << 3)
+#define STRUCT_MAX_LOAD_FACTOR 0.75
 
 typedef struct
 {

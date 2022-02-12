@@ -4,10 +4,18 @@ math:
   Pi: number
 
   abs(num: number) -> number
+  sin(num: number) -> number
+  cos(num: number) -> number
+  tan(num: number) -> number
+  asin(num: number) -> number
+  acos(num: number) -> number
+  atan(num: number) -> number
   floor(num: number) -> number
   ceil(num: number) -> number
   pow(base: number, power: number) -> number
   sqrt(num: number) -> number
+  log(num: number) -> number
+  exp(num: number) -> number
   random() -> number
 
 os:

@@ -42,6 +42,7 @@ add_executable(${PROJECT_NAME}
   src/memory.c
   src/module.c
   src/scanner.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -71,6 +72,7 @@ add_library(math SHARED
   src/memory.c
   src/module.c
   src/scanner.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -90,6 +92,7 @@ add_library(os SHARED
   src/module.c
   src/os.c
   src/scanner.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -109,6 +112,7 @@ add_library(io SHARED
   src/memory.c
   src/module.c
   src/scanner.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -117,6 +121,7 @@ add_library(io SHARED
 
 add_library(strings SHARED
   src/array.c
+  src/builtin.c
   src/callable.c
   src/chunk.c
   src/common.c
@@ -124,6 +129,7 @@ add_library(strings SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/string_map.c
   src/string.c
   src/strings.c
   src/struct.c
@@ -134,6 +140,7 @@ add_library(strings SHARED
 add_library(arrays SHARED
   src/array.c
   src/arrays.c
+  src/builtin.c
   src/callable.c
   src/chunk.c
   src/common.c
@@ -141,6 +148,7 @@ add_library(arrays SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -155,6 +163,7 @@ endif()
 
 add_library(sqlite SHARED
   src/array.c
+  src/builtin.c
   src/callable.c
   src/chunk.c
   src/common.c
@@ -163,6 +172,7 @@ add_library(sqlite SHARED
   src/memory.c
   src/module.c
   src/sqlite.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -171,6 +181,7 @@ add_library(sqlite SHARED
 
 add_library(url SHARED
   src/array.c
+  src/builtin.c
   src/callable.c
   src/chunk.c
   src/common.c
@@ -178,6 +189,7 @@ add_library(url SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/url.c
@@ -187,6 +199,7 @@ add_library(url SHARED
 
 add_library(redis SHARED
   src/array.c
+  src/builtin.c
   src/callable.c
   src/chunk.c
   src/common.c
@@ -195,6 +208,7 @@ add_library(redis SHARED
   src/memory.c
   src/module.c
   src/redis.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -203,6 +217,7 @@ add_library(redis SHARED
 
 add_library(hashing SHARED
   src/array.c
+  src/builtin.c
   src/callable.c
   src/chunk.c
   src/common.c
@@ -213,6 +228,7 @@ add_library(hashing SHARED
   src/module.c
   src/ripemd160.c
   src/sha2.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -221,6 +237,7 @@ add_library(hashing SHARED
 
 add_library(encoding SHARED
   src/array.c
+  src/builtin.c
   src/base32.c
   src/base58.c
   src/base64.c
@@ -232,6 +249,7 @@ add_library(encoding SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c
@@ -240,6 +258,7 @@ add_library(encoding SHARED
 
 add_library(secp256r1 SHARED
   src/array.c
+  src/builtin.c
   src/callable.c
   src/chunk.c
   src/common.c
@@ -249,6 +268,7 @@ add_library(secp256r1 SHARED
   src/memory.c
   src/module.c
   src/secp256r1.c
+  src/string_map.c
   src/string.c
   src/struct.c
   src/userdata.c

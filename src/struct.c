@@ -35,7 +35,7 @@ static inline field_t *add_field(struct_t *ztruct, string_t *name)
 static inline void resize(struct_t *ztruct)
 {
   int length = ztruct->length;
-  if (length / STRUCT_LOAD_FACTOR <= ztruct->capacity)
+  if (length / STRUCT_MAX_LOAD_FACTOR <= ztruct->capacity)
     return;
   int capacity = ztruct->capacity << 1;
   ztruct->capacity = capacity;

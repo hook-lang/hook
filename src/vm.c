@@ -6,9 +6,10 @@
 #include "vm.h"
 #include <stdlib.h>
 #include <math.h>
-#include "common.h"
+#include "builtin.h"
 #include "struct.h"
 #include "module.h"
+#include "common.h"
 #include "memory.h"
 #include "error.h"
 
@@ -1451,10 +1452,14 @@ void vm_init(vm_t *vm, int min_capacity)
   vm->limit = capacity - 1;
   vm->top = -1;
   vm->slots = (value_t *) allocate(sizeof(*vm->slots) * capacity);
+  load_globals(vm);
+  init_module_cache();
 }
 
 void vm_free(vm_t *vm)
 {
+  free_module_cache();
+  ASSERT(vm->top == num_globals() - 1, "stack must contain the globals");
   while (vm->top > -1)
     value_release(vm->slots[vm->top--]);
   free(vm->slots);

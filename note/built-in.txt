@@ -3,11 +3,14 @@ print(val: value)
 println(val: value)
 type(val: value) -> string
 bool(val: value) -> boolean
+integer(val: number|string) -> integer
 int(val: number|string) -> integer
 float(val: number|string) -> number
 str(val: nil|boolean|number|string) -> string
 ord(val: string) -> integer
 chr(val: integer) -> string
+hex(val: string) -> string
+bin(val: string) -> string
 cap(val: string|array) -> integer
 len(val: string|array) -> integer
 is_empty(val: string|array) -> boolean
