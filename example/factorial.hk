@@ -1,5 +1,5 @@
 //
-// factorial.hook
+// factorial.hk
 //
 
 fn factorial(n) {

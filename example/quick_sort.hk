@@ -1,5 +1,5 @@
 //
-// quick_sort.hook
+// quick_sort.hk
 //
 
 fn sort(mut arr) {

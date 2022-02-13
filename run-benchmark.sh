@@ -9,7 +9,7 @@ m=28
 echo "Hook"
 hook --version
 start=$(date +%s%N)
-hook "$prefix.hook" $n $m
+hook "$prefix.hk" $n $m
 hook_elapsed=$((($(date +%s%N) - $start) / 1000000))
 echo ""
 

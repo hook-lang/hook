@@ -1,5 +1,5 @@
 //
-// bubble_sort.hook
+// bubble_sort.hk
 //
 
 fn sort(mut arr) {

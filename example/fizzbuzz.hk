@@ -1,5 +1,5 @@
 //
-// fizzbuzz.hook
+// fizzbuzz.hk
 //
 
 for (mut i = 1; i <= 100; i++) {

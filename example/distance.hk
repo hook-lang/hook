@@ -1,5 +1,5 @@
 //
-// distance.hook
+// distance.hk
 //
 
 use { Pi, abs, pow, sqrt, sin, asin, cos } in math;

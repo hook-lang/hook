@@ -1,5 +1,5 @@
 //
-// mandelbrot.hook
+// mandelbrot.hk
 //
 
 use { floor } in math;

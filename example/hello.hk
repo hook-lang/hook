@@ -1,5 +1,5 @@
 //
-// hello.hook
+// hello.hk
 //
 
 println("Hello, world!");
