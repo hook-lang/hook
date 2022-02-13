@@ -142,7 +142,7 @@ static inline bool match_number(scanner_t *scan)
     n += 2;
     while (isdigit(CHAR_AT(scan, n)))
       ++n;
-    type = TOKEN_FLOAT;
+    type = TOKEN_NUMBER;
   }
   if (CHAR_AT(scan, n) == 'e' || CHAR_AT(scan, n) == 'E')
   {

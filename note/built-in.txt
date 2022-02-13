@@ -5,7 +5,7 @@ type(val: value) -> string
 bool(val: value) -> boolean
 integer(val: number|string) -> integer
 int(val: number|string) -> integer
-float(val: number|string) -> number
+num(val: number|string) -> number
 str(val: nil|boolean|number|string) -> string
 ord(val: string) -> integer
 chr(val: integer) -> string

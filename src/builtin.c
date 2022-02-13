@@ -30,7 +30,7 @@ static const char *globals[] = {
   "bool",
   "integer",
   "int",
-  "float",
+  "num",
   "str",
   "ord",
   "chr",
@@ -58,7 +58,7 @@ static int type_call(vm_t *vm, value_t *args);
 static int bool_call(vm_t *vm, value_t *args);
 static int integer_call(vm_t *vm, value_t *args);
 static int int_call(vm_t *vm, value_t *args);
-static int float_call(vm_t *vm, value_t *args);
+static int num_call(vm_t *vm, value_t *args);
 static int str_call(vm_t *vm, value_t *args);
 static int ord_call(vm_t *vm, value_t *args);
 static int chr_call(vm_t *vm, value_t *args);
@@ -209,7 +209,7 @@ static int int_call(vm_t *vm, value_t *args)
   return vm_push_number(vm, (int) result);
 }
 
-static int float_call(vm_t *vm, value_t *args)
+static int num_call(vm_t *vm, value_t *args)
 {
   type_t types[] = {TYPE_NUMBER, TYPE_STRING};
   if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
@@ -526,7 +526,7 @@ void load_globals(vm_t *vm)
   vm_push_new_native(vm, globals[3], 1, &bool_call);
   vm_push_new_native(vm, globals[4], 1, &integer_call);
   vm_push_new_native(vm, globals[5], 1, &int_call);
-  vm_push_new_native(vm, globals[6], 1, &float_call);
+  vm_push_new_native(vm, globals[6], 1, &num_call);
   vm_push_new_native(vm, globals[7], 1, &str_call);
   vm_push_new_native(vm, globals[8], 1, &ord_call);
   vm_push_new_native(vm, globals[9], 1, &chr_call);

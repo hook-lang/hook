@@ -53,7 +53,7 @@ mul_expr    ::= unary_expr ( ( '*' | '/' | '%' ) unary_expr )*
 
 unary_expr  ::= ( '-' | '!' ) unary_expr | prim_expr
 
-prim_expr   ::= 'nil' | 'false' | 'true' | INT | FLOAT | STRING
+prim_expr   ::= 'nil' | 'false' | 'true' | INT | NUMBER | STRING
               | '[' ( expr ( ',' expr )* )? ']'
               | '{' ( NAME ':' expr ( ',' NAME ':' expr )* )? '}'
               | 'struct' '{' ( NAME ( ',' NAME )* )? '}'

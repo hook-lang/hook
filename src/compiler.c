@@ -1586,7 +1586,7 @@ static void compile_prim_expression(compiler_t *comp)
     function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_FLOAT))
+  if (MATCH(scan, TOKEN_NUMBER))
   {
     double data = parse_double(comp);
     scanner_next_token(scan);
