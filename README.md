@@ -30,7 +30,7 @@ The main features are:
 * C-like syntax
 * Value-captured closure
 
-**Warning**: Hook is still in its early stages of development and is not production ready.
+**Warning**: Hook is still in its early stages of development and is not production-ready.
 
 ## Installing
 
