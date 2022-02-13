@@ -1,5 +1,5 @@
 //
-// 99_bottles_of_beer.hk
+// 99bottles.hk
 //
 
 mut n = 99;

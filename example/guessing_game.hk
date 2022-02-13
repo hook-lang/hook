@@ -2,36 +2,36 @@
 // guessing_game.hk
 //
 
-use math;
-use io;
-use strings;
+use { random } in math;
+use { StdIn, readln } in io;
+use { trim } in strings;
 
-io.writeln(io.StdOut, "Guess the number!");
+println("Guess the number!");
 
-val secret_number = int(1 + math.random() * 99);
+val secret_number = int(1 + random() * 99);
 
 loop {
-  io.writeln(io.StdOut, "Please input your guess.");
+  println("Please input your guess.");
 
-  mut guess = io.readln(io.StdIn);
+  mut guess = readln(StdIn);
 
-  guess = strings.trim(guess);
+  guess = trim(guess);
 
   if (is_empty(guess))
     continue;
 
   guess = int(guess);
 
-  io.writeln(io.StdOut, "You guessed: " + str(guess));
+  println("You guessed: " + str(guess));
 
   val cmp = compare(guess, secret_number);
   
   if (cmp < 0)
-    io.writeln(io.StdOut, "Too small!");
+    println("Too small!");
   else if (cmp > 0)
-    io.writeln(io.StdOut, "Too big!");
+    println("Too big!");
   else {
-    io.writeln(io.StdOut, "You win!");
+    println("You win!");
     break;
   }
 }
