@@ -160,6 +160,7 @@ static int bind_call(vm_t *vm, value_t *args)
       rc = sqlite3_bind_text(stmt, index, str->chars, str->length, NULL);
     }
     break;
+  case TYPE_RANGE:
   case TYPE_ARRAY:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(hook VERSION 0.1.0 LANGUAGES C)
+project(hook
+  DESCRIPTION "The Hook interpreter"
+  VERSION 0.1.0
+  LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
@@ -41,6 +44,7 @@ add_executable(${PROJECT_NAME}
   src/main.c
   src/memory.c
   src/module.c
+  src/range.c
   src/scanner.c
   src/string_map.c
   src/string.c
@@ -71,6 +75,7 @@ add_library(math SHARED
   src/math.c
   src/memory.c
   src/module.c
+  src/range.c
   src/scanner.c
   src/string_map.c
   src/string.c
@@ -91,6 +96,7 @@ add_library(os SHARED
   src/memory.c
   src/module.c
   src/os.c
+  src/range.c
   src/scanner.c
   src/string_map.c
   src/string.c
@@ -111,6 +117,7 @@ add_library(io SHARED
   src/io.c
   src/memory.c
   src/module.c
+  src/range.c
   src/scanner.c
   src/string_map.c
   src/string.c
@@ -129,6 +136,7 @@ add_library(strings SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/range.c
   src/string_map.c
   src/string.c
   src/strings.c
@@ -148,6 +156,7 @@ add_library(arrays SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/range.c
   src/string_map.c
   src/string.c
   src/struct.c
@@ -171,6 +180,7 @@ add_library(sqlite SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/range.c
   src/sqlite.c
   src/string_map.c
   src/string.c
@@ -189,6 +199,7 @@ add_library(url SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/range.c
   src/string_map.c
   src/string.c
   src/struct.c
@@ -207,6 +218,7 @@ add_library(redis SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/range.c
   src/redis.c
   src/string_map.c
   src/string.c
@@ -226,6 +238,7 @@ add_library(hashing SHARED
   src/hashing.c
   src/memory.c
   src/module.c
+  src/range.c
   src/ripemd160.c
   src/sha2.c
   src/string_map.c
@@ -249,6 +262,7 @@ add_library(encoding SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/range.c
   src/string_map.c
   src/string.c
   src/struct.c
@@ -267,6 +281,7 @@ add_library(secp256r1 SHARED
   src/hash.c
   src/memory.c
   src/module.c
+  src/range.c
   src/secp256r1.c
   src/string_map.c
   src/string.c

@@ -19,6 +19,7 @@
 #define TRUE_VALUE        ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_NONE, .as.boolean = true})
 #define NUMBER_VALUE(n)   ((value_t) {.type = TYPE_NUMBER, .flags = FLAG_NONE, .as.number = (n)})
 #define STRING_VALUE(s)   ((value_t) {.type = TYPE_STRING, .flags = FLAG_OBJECT, .as.pointer = (s)})
+#define RANGE_VALUE(r)    ((value_t) {.type = TYPE_RANGE, .flags = FLAG_OBJECT, .as.pointer = (r)})
 #define ARRAY_VALUE(a)    ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as.pointer = (a)})
 #define STRUCT_VALUE(s)   ((value_t) {.type = TYPE_STRUCT, .flags = FLAG_OBJECT, .as.pointer = (s)})
 #define INSTANCE_VALUE(i) ((value_t) {.type = TYPE_INSTANCE, .flags = FLAG_OBJECT, .as.pointer = (i)})
@@ -32,6 +33,7 @@
 #define IS_INTEGER(v)  (IS_NUMBER(v) && (v).as.number == (long) (v).as.number)
 #define IS_INT(v)      (IS_NUMBER(v) && (v).as.number == (int) (v).as.number)
 #define IS_STRING(v)   ((v).type == TYPE_STRING)
+#define IS_RANGE(v)    ((v).type == TYPE_RANGE)
 #define IS_ARRAY(v)    ((v).type == TYPE_ARRAY)
 #define IS_STRUCT(v)   ((v).type == TYPE_STRUCT)
 #define IS_INSTANCE(v) ((v).type == TYPE_INSTANCE)
@@ -43,6 +45,7 @@
 #define IS_NATIVE(v)   ((v).flags & FLAG_NATIVE)
 
 #define AS_STRING(v)   ((string_t *) (v).as.pointer)
+#define AS_RANGE(v)    ((range_t *) (v).as.pointer)
 #define AS_ARRAY(v)    ((array_t *) (v).as.pointer)
 #define AS_STRUCT(v)   ((struct_t *) (v).as.pointer)
 #define AS_INSTANCE(v) ((instance_t *) (v).as.pointer)
@@ -66,6 +69,7 @@ typedef enum
   TYPE_BOOLEAN,
   TYPE_NUMBER,
   TYPE_STRING,
+  TYPE_RANGE,
   TYPE_ARRAY,
   TYPE_STRUCT,
   TYPE_INSTANCE,

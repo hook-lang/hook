@@ -17,6 +17,7 @@ typedef enum
   OP_TRUE,
   OP_INT,
   OP_CONSTANT,
+  OP_RANGE,
   OP_ARRAY,
   OP_STRUCT,
   OP_INSTANCE,

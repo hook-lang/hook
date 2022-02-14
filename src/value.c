@@ -5,6 +5,7 @@
 
 #include "value.h"
 #include <stdlib.h>
+#include "range.h"
 #include "struct.h"
 #include "callable.h"
 #include "userdata.h"
@@ -23,6 +24,9 @@ static inline void value_free(value_t val)
     break;
   case TYPE_STRING:
     string_free(AS_STRING(val));
+    break;
+  case TYPE_RANGE:
+    range_free(AS_RANGE(val));
     break;
   case TYPE_ARRAY:
     array_free(AS_ARRAY(val));
@@ -64,6 +68,9 @@ const char *type_name(type_t type)
     break;
   case TYPE_STRING:
     name = "string";
+    break;
+  case TYPE_RANGE:
+    name = "range";
     break;
   case TYPE_ARRAY:
     name = "array";
@@ -109,6 +116,9 @@ void value_print(value_t val, bool quoted)
     break;
   case TYPE_STRING:
     string_print(AS_STRING(val), quoted);
+    break;
+  case TYPE_RANGE:
+    range_print(AS_RANGE(val));
     break;
   case TYPE_ARRAY:
     array_print(AS_ARRAY(val));
@@ -162,6 +172,9 @@ bool value_equal(value_t val1, value_t val2)
   case TYPE_STRING:
     result = string_equal(AS_STRING(val1), AS_STRING(val2));
     break;
+  case TYPE_RANGE:
+    result = range_equal(AS_RANGE(val1), AS_RANGE(val2));
+    break;
   case TYPE_ARRAY:
     result = array_equal(AS_ARRAY(val1), AS_ARRAY(val2));
     break;
@@ -211,6 +224,9 @@ int value_compare(value_t val1, value_t val2, int *result)
   case TYPE_STRING:
     *result = string_compare(AS_STRING(val1), AS_STRING(val2));
     return STATUS_OK;
+  case TYPE_RANGE:
+    *result = range_compare(AS_RANGE(val1), AS_RANGE(val2));
+    return STATUS_OK;
   case TYPE_ARRAY:
     return array_compare(AS_ARRAY(val1), AS_ARRAY(val2), result);
   case TYPE_STRUCT:
@@ -239,6 +255,7 @@ void value_serialize(value_t val, FILE *stream)
     break;
   case TYPE_NIL:
   case TYPE_BOOLEAN:
+  case TYPE_RANGE:
   case TYPE_ARRAY:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
@@ -278,6 +295,7 @@ bool value_deserialize(FILE *stream, value_t *result)
     break;
   case TYPE_NIL:
   case TYPE_BOOLEAN:
+  case TYPE_RANGE:
   case TYPE_ARRAY:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:

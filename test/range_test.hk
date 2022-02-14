@@ -1,0 +1,4 @@
+
+println(1 .. 10);
+val range = 1 .. 10;
+println(range);

@@ -116,6 +116,7 @@ static void compile_and_expression(compiler_t *comp);
 static void compile_equal_expression(compiler_t *comp);
 static void compile_comp_expression(compiler_t *comp);
 static void compile_add_expression(compiler_t *comp);
+static void compile_range_expression(compiler_t *comp);
 static void compile_mul_expression(compiler_t *comp);
 static void compile_unary_expression(compiler_t *comp);
 static void compile_prim_expression(compiler_t *comp);
@@ -1457,14 +1458,14 @@ static void compile_add_expression(compiler_t *comp)
   scanner_t *scan = comp->scan;
   function_t *fn = comp->fn;
   chunk_t *chunk = &fn->chunk;
-  compile_mul_expression(comp);
+  compile_range_expression(comp);
   for (;;)
   {
     int line = scan->token.line;
     if (MATCH(scan, TOKEN_PLUS))
     {
       scanner_next_token(scan);
-      compile_mul_expression(comp);
+      compile_range_expression(comp);
       chunk_emit_opcode(chunk, OP_ADD);
       function_add_line(fn, line);
       continue;
@@ -1472,12 +1473,28 @@ static void compile_add_expression(compiler_t *comp)
     if (MATCH(scan, TOKEN_MINUS))
     {
       scanner_next_token(scan);
-      compile_mul_expression(comp);
+      compile_range_expression(comp);
       chunk_emit_opcode(chunk, OP_SUBTRACT);
       function_add_line(fn, line);
       continue;
     }
     break;
+  }
+}
+
+static void compile_range_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  function_t *fn = comp->fn;
+  chunk_t *chunk = &fn->chunk;
+  compile_mul_expression(comp);
+  int line = scan->token.line;
+  if (MATCH(scan, TOKEN_DOTDOT))
+  {
+    scanner_next_token(scan);
+    compile_mul_expression(comp);
+    chunk_emit_opcode(chunk, OP_RANGE);
+    function_add_line(fn, line);
   }
 }
 

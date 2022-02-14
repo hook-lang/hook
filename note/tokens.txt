@@ -1,6 +1,7 @@
 
 TOKEN_EOF        EOF
 TOKEN_DOT        '.'
+TOKEN_DOTDOT     '..'
 TOKEN_COMMA      ','
 TOKEN_COLON      ':'
 TOKEN_SEMICOLON  ';'

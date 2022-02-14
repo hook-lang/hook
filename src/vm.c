@@ -18,6 +18,7 @@ static inline void type_error(int index, int num_types, type_t types[],
 static inline int push(vm_t *vm, value_t val);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
+static inline int range(vm_t *vm);
 static inline int array(vm_t *vm, int length);
 static inline int ztruct(vm_t *vm, int length);
 static inline int instance(vm_t *vm, int length);
@@ -94,6 +95,23 @@ static inline int read_word(uint8_t **pc)
   int word = *((uint16_t *) *pc);
   *pc += 2;
   return word;
+}
+
+static inline int range(vm_t *vm)
+{
+  value_t *slots = &vm->slots[vm->top - 1];
+  value_t val1 = slots[0];
+  value_t val2 = slots[1];
+  if (!IS_NUMBER(val1) || !IS_NUMBER(val2))
+  {
+    runtime_error("cannot create range from non-numbers");
+    return STATUS_ERROR;
+  }
+  range_t *range = range_new(val1.as.number, val2.as.number);
+  INCR_REF(range);
+  slots[0] = RANGE_VALUE(range);
+  --vm->top;
+  return STATUS_OK;
 }
 
 static inline int array(vm_t *vm, int length)
@@ -891,6 +909,7 @@ static inline int add(vm_t *vm)
     return STATUS_OK;
   case TYPE_NIL:
   case TYPE_BOOLEAN:
+  case TYPE_RANGE:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
@@ -961,6 +980,7 @@ static inline int subtract(vm_t *vm)
   case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_STRING:
+  case TYPE_RANGE:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
   case TYPE_CALLABLE:
@@ -1179,6 +1199,10 @@ static inline int call_function(vm_t *vm, value_t *locals, closure_t *cl, int *l
           goto error;
         VALUE_INCR_REF(val);
       }
+      break;
+    case OP_RANGE:
+      if (range(vm) == STATUS_ERROR)
+        goto error;
       break;
     case OP_ARRAY:
       if (array(vm, read_byte(&pc)) == STATUS_ERROR)
@@ -1518,6 +1542,14 @@ int vm_push_string_from_stream(vm_t *vm, FILE *stream, const char terminal)
   return STATUS_OK;
 }
 
+int vm_push_range(vm_t *vm, range_t *range)
+{
+  if (push(vm, RANGE_VALUE(range)) == STATUS_ERROR)
+    return STATUS_ERROR;
+  INCR_REF(range);
+  return STATUS_OK;
+}
+
 int vm_push_array(vm_t *vm, array_t *arr)
 {
   if (push(vm, ARRAY_VALUE(arr)) == STATUS_ERROR)
@@ -1674,6 +1706,11 @@ int vm_check_int(value_t *args, int index)
 int vm_check_string(value_t *args, int index)
 {
   return vm_check_type(args, index, TYPE_STRING);
+}
+
+int vm_check_range(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_RANGE);
 }
 
 int vm_check_array(value_t *args, int index)

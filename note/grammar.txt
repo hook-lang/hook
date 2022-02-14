@@ -47,7 +47,9 @@ equal_expr  ::= comp_expr ( ( '==' | '!=' ) comp_expr )*
 
 comp_expr   ::= add_expr ( ( '>' | '>=' | '<' | '<=' ) add_expr )*
 
-add_expr    ::= mul_expr ( ( '+' | '-' ) mul_expr )*
+add_expr    ::= range_expr ( ( '+' | '-' ) range_expr )*
+
+range_expr  ::= mul_expr ( '..' mul_expr )?
 
 mul_expr    ::= unary_expr ( ( '*' | '/' | '%' ) unary_expr )*
 

@@ -6,6 +6,7 @@
 #ifndef VM_H
 #define VM_H
 
+#include "range.h"
 #include "struct.h"
 #include "callable.h"
 #include "userdata.h"
@@ -28,6 +29,7 @@ int vm_push_number(vm_t *vm, double data);
 int vm_push_string(vm_t *vm, string_t *str);
 int vm_push_string_from_chars(vm_t *vm, int length, const char *chars);
 int vm_push_string_from_stream(vm_t *vm, FILE *stream, const char terminal);
+int vm_push_range(vm_t *vm, range_t *range);
 int vm_push_array(vm_t *vm, array_t *arr);
 int vm_push_struct(vm_t *vm, struct_t *ztruct);
 int vm_push_instance(vm_t *vm, instance_t *inst);
@@ -48,6 +50,7 @@ int vm_check_number(value_t *args, int index);
 int vm_check_integer(value_t *args, int index);
 int vm_check_int(value_t *args, int index);
 int vm_check_string(value_t *args, int index);
+int vm_check_range(value_t *args, int index);
 int vm_check_array(value_t *args, int index);
 int vm_check_struct(value_t *args, int index);
 int vm_check_instance(value_t *args, int index);

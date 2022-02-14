@@ -119,6 +119,7 @@ static inline string_t *to_string(value_t val) {
     break;
   case TYPE_STRING:
     ASSERT(false, "passing string on to_string()");
+  case TYPE_RANGE:
   case TYPE_ARRAY:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
@@ -347,8 +348,9 @@ static int cap_call(vm_t *vm, value_t *args)
 
 static int len_call(vm_t *vm, value_t *args)
 {
-  type_t types[] = {TYPE_STRING, TYPE_ARRAY, TYPE_STRUCT, TYPE_INSTANCE};
-  if (vm_check_types(args, 1, 4, types) == STATUS_ERROR)
+  type_t types[] = {TYPE_STRING, TYPE_RANGE, TYPE_ARRAY,
+    TYPE_STRUCT, TYPE_INSTANCE};
+  if (vm_check_types(args, 1, 5, types) == STATUS_ERROR)
     return STATUS_ERROR;
   value_t val = args[1];
   int result;
@@ -356,6 +358,22 @@ static int len_call(vm_t *vm, value_t *args)
   {
   case TYPE_STRING:
     result = AS_STRING(val)->length;
+    break;
+  case TYPE_RANGE:
+    {
+      range_t *range = AS_RANGE(val);
+      if (range->start < range->end)
+      {
+        result = (int) range->end - range->start + 1;
+        break;
+      }
+      if (range->start > range->end)
+      {
+        result = (int) range->start - range->end + 1;
+        break;
+      }
+      result = 1;
+    }
     break;
   case TYPE_ARRAY:
     result = AS_ARRAY(val)->length;
@@ -372,8 +390,9 @@ static int len_call(vm_t *vm, value_t *args)
 
 static int is_empty_call(vm_t *vm, value_t *args)
 {
-  type_t types[] = {TYPE_STRING, TYPE_ARRAY, TYPE_STRUCT, TYPE_INSTANCE};
-  if (vm_check_types(args, 1, 4, types) == STATUS_ERROR)
+  type_t types[] = {TYPE_STRING, TYPE_RANGE, TYPE_ARRAY,
+    TYPE_STRUCT, TYPE_INSTANCE};
+  if (vm_check_types(args, 1, 5, types) == STATUS_ERROR)
     return STATUS_ERROR;
   value_t val = args[1];
   bool result;
@@ -381,6 +400,9 @@ static int is_empty_call(vm_t *vm, value_t *args)
   {
   case TYPE_STRING:
     result = !AS_STRING(val)->length;
+    break;
+  case TYPE_RANGE:
+    result = false;
     break;
   case TYPE_ARRAY:
     result = !AS_ARRAY(val)->length;
