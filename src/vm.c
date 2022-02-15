@@ -47,7 +47,10 @@ static inline void not_equal(vm_t *vm);
 static inline int not_greater(vm_t *vm);
 static inline int not_less(vm_t *vm);
 static inline int add(vm_t *vm);
+static inline int concat_strings(vm_t *vm, value_t *slots, value_t val1, value_t val2);
+static inline int concat_arrays(vm_t *vm, value_t *slots, value_t val1, value_t val2);
 static inline int subtract(vm_t *vm);
+static inline int diff_arrays(vm_t *vm, value_t *slots, value_t val1, value_t val2);
 static inline int multiply(vm_t *vm);
 static inline int divide(vm_t *vm);
 static inline int modulo(vm_t *vm);
@@ -814,99 +817,19 @@ static inline int add(vm_t *vm)
     }
     return STATUS_OK;
   case TYPE_STRING:
+    if (!IS_STRING(val2))
     {
-      if (!IS_STRING(val2))
-      {
-        runtime_error("cannot concatenate 'string' and `%s`", type_name(val2.type));
-        return STATUS_ERROR;
-      }
-      string_t *str1 = AS_STRING(val1);
-      if (!str1->length)
-      {
-        slots[0] = val2;
-        --vm->top;
-        DECR_REF(str1);
-        if (IS_UNREACHABLE(str1))
-          string_free(str1);
-        return STATUS_OK;
-      }
-      string_t *str2 = AS_STRING(val2);
-      if (!str2->length)
-      {
-        --vm->top;
-        DECR_REF(str2);
-        if (IS_UNREACHABLE(str2))
-          string_free(str2);
-        return STATUS_OK;
-      }
-      if (str1->ref_count == 1)
-      {
-        string_inplace_concat(str1, str2);
-        --vm->top;
-        DECR_REF(str2);
-        if (IS_UNREACHABLE(str2))
-          string_free(str2);
-        return STATUS_OK;
-      }
-      string_t *result = string_concat(str1, str2);
-      INCR_REF(result);
-      slots[0] = STRING_VALUE(result);
-      --vm->top;
-      DECR_REF(str1);
-      if (IS_UNREACHABLE(str1))
-        string_free(str1);
-      DECR_REF(str2);
-      if (IS_UNREACHABLE(str2))
-        string_free(str2);
+      runtime_error("cannot concatenate 'string' and `%s`", type_name(val2.type));
+      return STATUS_ERROR;
     }
-    return STATUS_OK;
+    return concat_strings(vm, slots, val1, val2);
   case TYPE_ARRAY:
+    if (!IS_ARRAY(val2))
     {
-      if (!IS_ARRAY(val2))
-      {
-        runtime_error("cannot concatenate 'array' and `%s`", type_name(val2.type));
-        return STATUS_ERROR;
-      }
-      array_t *arr1 = AS_ARRAY(val1);
-      if (!arr1->length)
-      {
-        slots[0] = val2;
-        --vm->top;
-        DECR_REF(arr1);
-        if (IS_UNREACHABLE(arr1))
-          array_free(arr1);
-        return STATUS_OK;
-      }
-      array_t *arr2 = AS_ARRAY(val2);
-      if (!arr2->length)
-      {
-        --vm->top;
-        DECR_REF(arr2);
-        if (IS_UNREACHABLE(arr2))
-          array_free(arr2);
-        return STATUS_OK;
-      }
-      if (arr1->ref_count == 1)
-      {
-        array_inplace_concat(arr1, arr2);
-        --vm->top;
-        DECR_REF(arr2);
-        if (IS_UNREACHABLE(arr2))
-          array_free(arr2);
-        return STATUS_OK;
-      }
-      array_t *result = array_concat(arr1, arr2);
-      INCR_REF(result);
-      slots[0] = ARRAY_VALUE(result);
-      --vm->top;
-      DECR_REF(arr1);
-      if (IS_UNREACHABLE(arr1))
-        array_free(arr1);
-      DECR_REF(arr2);
-      if (IS_UNREACHABLE(arr2))
-        array_free(arr2);
+      runtime_error("cannot concatenate 'array' and `%s`", type_name(val2.type));
+      return STATUS_ERROR;
     }
-    return STATUS_OK;
+    return concat_arrays(vm, slots, val1, val2);
   case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_RANGE:
@@ -918,6 +841,92 @@ static inline int add(vm_t *vm)
   }
   runtime_error("cannot add `%s` to `%s`", type_name(val2.type), type_name(val1.type));
   return STATUS_ERROR;
+}
+
+static inline int concat_strings(vm_t *vm, value_t *slots, value_t val1, value_t val2)
+{
+  string_t *str1 = AS_STRING(val1);
+  if (!str1->length)
+  {
+    slots[0] = val2;
+    --vm->top;
+    DECR_REF(str1);
+    if (IS_UNREACHABLE(str1))
+      string_free(str1);
+    return STATUS_OK;
+  }
+  string_t *str2 = AS_STRING(val2);
+  if (!str2->length)
+  {
+    --vm->top;
+    DECR_REF(str2);
+    if (IS_UNREACHABLE(str2))
+      string_free(str2);
+    return STATUS_OK;
+  }
+  if (str1->ref_count == 1)
+  {
+    string_inplace_concat(str1, str2);
+    --vm->top;
+    DECR_REF(str2);
+    if (IS_UNREACHABLE(str2))
+      string_free(str2);
+    return STATUS_OK;
+  }
+  string_t *result = string_concat(str1, str2);
+  INCR_REF(result);
+  slots[0] = STRING_VALUE(result);
+  --vm->top;
+  DECR_REF(str1);
+  if (IS_UNREACHABLE(str1))
+    string_free(str1);
+  DECR_REF(str2);
+  if (IS_UNREACHABLE(str2))
+    string_free(str2);
+  return STATUS_OK;
+}
+
+static inline int concat_arrays(vm_t *vm, value_t *slots, value_t val1, value_t val2)
+{
+  array_t *arr1 = AS_ARRAY(val1);
+  if (!arr1->length)
+  {
+    slots[0] = val2;
+    --vm->top;
+    DECR_REF(arr1);
+    if (IS_UNREACHABLE(arr1))
+      array_free(arr1);
+    return STATUS_OK;
+  }
+  array_t *arr2 = AS_ARRAY(val2);
+  if (!arr2->length)
+  {
+    --vm->top;
+    DECR_REF(arr2);
+    if (IS_UNREACHABLE(arr2))
+      array_free(arr2);
+    return STATUS_OK;
+  }
+  if (arr1->ref_count == 1)
+  {
+    array_inplace_concat(arr1, arr2);
+    --vm->top;
+    DECR_REF(arr2);
+    if (IS_UNREACHABLE(arr2))
+      array_free(arr2);
+    return STATUS_OK;
+  }
+  array_t *result = array_concat(arr1, arr2);
+  INCR_REF(result);
+  slots[0] = ARRAY_VALUE(result);
+  --vm->top;
+  DECR_REF(arr1);
+  if (IS_UNREACHABLE(arr1))
+    array_free(arr1);
+  DECR_REF(arr2);
+  if (IS_UNREACHABLE(arr2))
+    array_free(arr2);
+  return STATUS_OK;
 }
 
 static inline int subtract(vm_t *vm)
@@ -940,43 +949,12 @@ static inline int subtract(vm_t *vm)
     }
     return STATUS_OK;
   case TYPE_ARRAY:
+    if (!IS_ARRAY(val2))
     {
-      if (!IS_ARRAY(val2))
-      {
-        runtime_error("cannot diff between 'array' and `%s`", type_name(val2.type));
-        return STATUS_ERROR;
-      }
-      array_t *arr1 = AS_ARRAY(val1);
-      array_t *arr2 = AS_ARRAY(val2);
-      if (!arr1->length || !arr2->length)
-      {
-        --vm->top;
-        DECR_REF(arr2);
-        if (IS_UNREACHABLE(arr2))
-          array_free(arr2);
-        return STATUS_OK;
-      }
-      if (arr1->ref_count == 1)
-      {
-        array_inplace_diff(arr1, arr2);
-        --vm->top;
-        DECR_REF(arr2);
-        if (IS_UNREACHABLE(arr2))
-          array_free(arr2);
-        return STATUS_OK;
-      }
-      array_t *result = array_diff(arr1, arr2);
-      INCR_REF(result);
-      slots[0] = ARRAY_VALUE(result);
-      --vm->top;
-      DECR_REF(arr1);
-      if (IS_UNREACHABLE(arr1))
-        array_free(arr1);
-      DECR_REF(arr2);
-      if (IS_UNREACHABLE(arr2))
-        array_free(arr2);
+      runtime_error("cannot diff between 'array' and `%s`", type_name(val2.type));
+      return STATUS_ERROR;
     }
-    return STATUS_OK;
+    return diff_arrays(vm, slots, val1, val2);
   case TYPE_NIL:
   case TYPE_BOOLEAN:
   case TYPE_STRING:
@@ -989,6 +967,40 @@ static inline int subtract(vm_t *vm)
   }
   runtime_error("cannot subtract `%s` from `%s`", type_name(val2.type), type_name(val1.type));
   return STATUS_ERROR;
+}
+
+static inline int diff_arrays(vm_t *vm, value_t *slots, value_t val1, value_t val2)
+{
+  array_t *arr1 = AS_ARRAY(val1);
+  array_t *arr2 = AS_ARRAY(val2);
+  if (!arr1->length || !arr2->length)
+  {
+    --vm->top;
+    DECR_REF(arr2);
+    if (IS_UNREACHABLE(arr2))
+      array_free(arr2);
+    return STATUS_OK;
+  }
+  if (arr1->ref_count == 1)
+  {
+    array_inplace_diff(arr1, arr2);
+    --vm->top;
+    DECR_REF(arr2);
+    if (IS_UNREACHABLE(arr2))
+      array_free(arr2);
+    return STATUS_OK;
+  }
+  array_t *result = array_diff(arr1, arr2);
+  INCR_REF(result);
+  slots[0] = ARRAY_VALUE(result);
+  --vm->top;
+  DECR_REF(arr1);
+  if (IS_UNREACHABLE(arr1))
+    array_free(arr1);
+  DECR_REF(arr2);
+  if (IS_UNREACHABLE(arr2))
+    array_free(arr2);
+  return STATUS_OK;
 }
 
 static inline int multiply(vm_t *vm)
