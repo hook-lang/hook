@@ -28,6 +28,7 @@ static inline int unpack(vm_t *vm, int n);
 static inline int destruct(vm_t *vm, int n);
 static inline int add_element(vm_t *vm);
 static inline int get_element(vm_t *vm);
+static inline int slice_array(vm_t *vm, value_t *slots, array_t *arr, range_t *range);
 static inline int fetch_element(vm_t *vm);
 static inline void set_element(vm_t *vm);
 static inline int put_element(vm_t *vm);
@@ -332,29 +333,72 @@ static inline int get_element(vm_t *vm)
   value_t val2 = slots[1];
   if (!IS_ARRAY(val1))
   {
-    runtime_error("cannot use `%s` as an array", type_name(val1.type));
-    return STATUS_ERROR;
-  }
-  if (!IS_INT(val2))
-  {
-    runtime_error("array cannot be indexed by `%s`", type_name(val2.type));
+    runtime_error("type error: cannot use %s as an array", type_name(val1.type));
     return STATUS_ERROR;
   }
   array_t *arr = AS_ARRAY(val1);
-  int index = (int) val2.as.number;
-  if (index < 0 || index >= arr->length)
+  if (IS_INT(val2))
   {
-    runtime_error("index out of bounds: the length is %d but the index is %d",
-      arr->length, index);
-    return STATUS_ERROR;
+    int index = (int) val2.as.number;
+    if (index < 0 || index >= arr->length)
+    {
+      runtime_error("range error: index %d is out of bounds for array of length %d",
+        index, arr->length);
+      return STATUS_ERROR;
+    }
+    value_t elem = arr->elements[index];
+    VALUE_INCR_REF(elem);
+    slots[0] = elem;
+    --vm->top;
+    DECR_REF(arr);
+    if (IS_UNREACHABLE(arr))
+      array_free(arr);
+    return STATUS_OK;
   }
-  value_t elem = arr->elements[index];
-  VALUE_INCR_REF(elem);
-  slots[0] = elem;
+  if (IS_RANGE(val2))
+    return slice_array(vm, slots, arr, AS_RANGE(val2));
+  runtime_error("type error: array cannot be indexed by %s", type_name(val2.type));
+  return STATUS_ERROR;
+}
+
+static inline int slice_array(vm_t *vm, value_t *slots, array_t *arr, range_t *range)
+{
+  int arr_end = arr->length - 1;
+  long start = range->start;
+  long end = range->end;
+  array_t *result;
+  if (start > end || start > arr_end || end < 0)
+  {
+    result = array_new(0);
+    goto end;
+  }
+  if (start <= 0 && end >= arr_end)
+  {
+    --vm->top;
+    DECR_REF(range);
+    if (IS_UNREACHABLE(range))
+      range_free(range);
+    return STATUS_OK;
+  }
+  int length = end - start + 1;
+  result = array_allocate(length);
+  result->length = length;
+  for (int i = start, j = 0; i <= end ; ++i, ++j)
+  {
+    value_t elem = arr->elements[i];
+    VALUE_INCR_REF(elem);
+    result->elements[j] = elem;
+  }
+end:
+  INCR_REF(result);
+  slots[0] = ARRAY_VALUE(result);
   --vm->top;
   DECR_REF(arr);
   if (IS_UNREACHABLE(arr))
     array_free(arr);
+  DECR_REF(range);
+  if (IS_UNREACHABLE(range))
+    range_free(range);
   return STATUS_OK;
 }
 

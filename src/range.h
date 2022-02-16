@@ -12,11 +12,11 @@ typedef struct
 {
   OBJECT_HEADER
   int step;
-  double start;
-  double end;
+  long start;
+  long end;
 } range_t;
 
-range_t *range_new(double start, double end);
+range_t *range_new(long start, long end);
 void range_free(range_t *range);
 void range_print(range_t *range);
 bool range_equal(range_t *range1, range_t *range2);

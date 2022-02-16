@@ -1,0 +1,19 @@
+
+val arr = ["foo", "bar", "baz"];
+
+assert(arr[0 .. 0] == ["foo"], "range 0 .. 0");
+assert(arr[1 .. 1] == ["bar"], "range 1 .. 1");
+assert(arr[2 .. 2] == ["baz"], "range 2 .. 2");
+
+assert(arr[0 .. 1] == ["foo", "bar"], "range 0 .. 1");
+assert(arr[0 .. 2] == ["foo", "bar", "baz"], "range 0 .. 2");
+assert(arr[0 .. 3] == ["foo", "bar", "baz"], "range 0 .. 3");
+
+assert(arr[1 .. 0] == [], "range 1 .. 0");
+assert(arr[2 .. 0] == [], "range 2 .. 0");
+assert(arr[3 .. 0] == [], "range 3 .. 0");
+
+assert(arr[-1 .. 3] == ["foo", "bar", "baz"], "range -1 .. 3");
+assert(arr[3 .. -1] == [], "range 3 .. -1");
+assert(arr[-2 .. -1] == [], "range -2 .. -1");
+assert(arr[3 .. 4] == [], "range 3 .. 4");
