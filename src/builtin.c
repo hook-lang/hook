@@ -53,7 +53,6 @@ static const char *globals[] = {
 };
 
 static inline int string_to_double(string_t *str, double *result);
-static inline string_t *to_string(value_t val);
 static inline array_t *split(string_t *str, string_t *separator);
 static inline int join(array_t *arr, string_t *separator, string_t **result);
 static int print_call(vm_t *vm, value_t *args);
@@ -87,7 +86,7 @@ static inline int string_to_double(string_t *str, double *result)
 {
   if (!str->length)
   {
-    runtime_error("type error: cannot convert empty string to 'number'");
+    runtime_error("type error: argument #1 must be a non-empty string");
     return STATUS_ERROR;
   }
   errno = 0;
@@ -95,48 +94,17 @@ static inline int string_to_double(string_t *str, double *result)
   *result = strtod(str->chars, &ptr);
   if (errno == ERANGE)
   {
-    runtime_error("type error: number literal is too large");
+    runtime_error("type error: argument #1 is a too large string");
     return STATUS_ERROR;
   }
   while (*ptr != 0 && isspace(*ptr))
     ++ptr;
   if (ptr < &str->chars[str->length])
   {
-    runtime_error("type error: cannot convert 'string' to 'number'");
+    runtime_error("type error: argument #1 is not a convertible string");
     return STATUS_ERROR;
   }
   return STATUS_OK;
-}
-
-static inline string_t *to_string(value_t val) {
-  string_t *str = NULL;
-  switch (val.type)
-  {
-  case TYPE_NIL:
-    str = string_from_chars(-1, "nil");
-    break;
-  case TYPE_BOOLEAN:
-    str = string_from_chars(-1, val.as.boolean ? "true" : "false");
-    break;
-  case TYPE_NUMBER:
-    {
-      char chars[32];
-      sprintf(chars, "%g", val.as.number);
-      str = string_from_chars(-1, chars);
-    }
-    break;
-  case TYPE_STRING:
-    ASSERT(false, "passing string on to_string()");
-  case TYPE_RANGE:
-  case TYPE_ARRAY:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_ITERATOR:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    break;
-  }
-  return str;
 }
 
 static inline array_t *split(string_t *str, string_t *separator)
@@ -197,7 +165,7 @@ static int integer_call(vm_t *vm, value_t *args)
   if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
     return STATUS_ERROR;
   value_t val = args[1];
-  if (val.type == TYPE_NUMBER)
+  if (IS_NUMBER(val))
     return vm_push_number(vm, (long) val.as.number);
   double result;
   if (string_to_double(AS_STRING(val), &result) == STATUS_ERROR)
@@ -211,7 +179,7 @@ static int int_call(vm_t *vm, value_t *args)
   if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
     return STATUS_ERROR;
   value_t val = args[1];
-  if (val.type == TYPE_NUMBER)
+  if (IS_NUMBER(val))
     return vm_push_number(vm, (int) val.as.number);
   double result;
   if (string_to_double(AS_STRING(val), &result) == STATUS_ERROR)
@@ -225,7 +193,7 @@ static int num_call(vm_t *vm, value_t *args)
   if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
     return STATUS_ERROR;
   value_t val = args[1];
-  if (val.type == TYPE_NUMBER)
+  if (IS_NUMBER(val))
     return STATUS_OK;
   double result;
   if (string_to_double(AS_STRING(args[1]), &result) == STATUS_ERROR)
@@ -235,15 +203,30 @@ static int num_call(vm_t *vm, value_t *args)
 
 static int str_call(vm_t *vm, value_t *args)
 {
-  value_t val = args[1];
-  if (IS_STRING(val))
-    return STATUS_OK;
-  string_t *str = to_string(val);
-  if (!str)
-  {
-    runtime_error("type error: cannot convert `%s` to 'string'", type_name(val.type));
+  type_t types[] = {TYPE_NIL, TYPE_BOOLEAN, TYPE_NUMBER, TYPE_STRING};
+  if (vm_check_types(args, 1, 4, types) == STATUS_ERROR)
     return STATUS_ERROR;
+  value_t val = args[1];
+  string_t *str;
+  if (IS_NIL(val))
+  {
+    str = string_from_chars(-1, "nil");
+    goto end;
   }
+  if (IS_BOOLEAN(val))
+  {
+    str = string_from_chars(-1, val.as.boolean ? "true" : "false");
+    goto end;
+  }
+  if (IS_NUMBER(val))
+  {
+    char chars[32];
+    sprintf(chars, "%g", val.as.number);
+    str = string_from_chars(-1, chars);
+    goto end;
+  }
+  return vm_push(vm, val);
+end:
   if (vm_push_string(vm, str) == STATUS_ERROR)
   {
     string_free(str);
@@ -260,7 +243,7 @@ static int ord_call(vm_t *vm, value_t *args)
   string_t *str = AS_STRING(val);
   if (!str->length)
   {
-    runtime_error("empty 'string'", type_name(val.type));
+    runtime_error("type error: argument #1 must be a non-empty string");
     return STATUS_ERROR;
   }
   return vm_push_number(vm, (unsigned int) str->chars[0]);
@@ -350,7 +333,7 @@ static int cap_call(vm_t *vm, value_t *args)
   if (vm_check_types(args, 1, 2, types) == STATUS_ERROR)
     return STATUS_ERROR;
   value_t val = args[1];
-  int capacity = val.type == TYPE_STRING ? AS_STRING(val)->capacity
+  int capacity = IS_STRING(val) ? AS_STRING(val)->capacity
     : AS_ARRAY(val)->capacity;
   return vm_push_number(vm, capacity);
 }
@@ -448,7 +431,7 @@ static int slice_call(vm_t *vm, value_t *args)
   value_t val = args[1];
   int start = (int) args[2].as.number;
   int stop = (int) args[3].as.number;
-  if (val.type == TYPE_STRING)
+  if (IS_STRING(val))
   {
     string_t *str = AS_STRING(val);
     string_t *result;
@@ -519,14 +502,13 @@ static int iter_call(vm_t *vm, value_t *args)
   if (vm_check_types(args, 1, 3, types) == STATUS_ERROR)
     return STATUS_ERROR;
   value_t val = args[1];
-  type_t type = val.type;
-  if (type == TYPE_ITERATOR)
+  if (IS_ITERATOR(val))
   {
     if (vm_push_iterator(vm, AS_ITERATOR(val)) == STATUS_ERROR)
       return STATUS_ERROR;
     return STATUS_OK;
   }
-  iterator_t *it = type == TYPE_RANGE ? range_new_iterator(AS_RANGE(val))
+  iterator_t *it = IS_RANGE(val) ? range_new_iterator(AS_RANGE(val))
     : array_new_iterator(AS_ARRAY(val));
   if (vm_push_iterator(vm, it) == STATUS_ERROR)
   {

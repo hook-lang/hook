@@ -1300,7 +1300,7 @@ static void compile_continue_statement(compiler_t *comp)
   scanner_next_token(scan);
   if (!comp->loop)
     syntax_error(fn->name->chars, scan->file->chars, tk.line, tk.col,
-      "cannot use `continue` outside of a loop");
+      "cannot use continue outside of a loop");
   EXPECT(comp, TOKEN_SEMICOLON);
   discard_variables(comp, comp->loop->scope_depth + 1);
   chunk_emit_opcode(chunk, OP_JUMP);
@@ -1316,7 +1316,7 @@ static void compile_break_statement(compiler_t *comp)
   scanner_next_token(scan);
   if (!comp->loop)
     syntax_error(function, file, tk.line, tk.col,
-      "cannot use `break` outside of a loop");
+      "cannot use break outside of a loop");
   EXPECT(comp, TOKEN_SEMICOLON);
   discard_variables(comp, comp->loop->scope_depth + 1);
   loop_t *loop = comp->loop;

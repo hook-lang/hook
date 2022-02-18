@@ -67,7 +67,8 @@ static int open_call(vm_t *vm, value_t *args)
     return STATUS_ERROR;
   string_t *filename = AS_STRING(args[1]);
   sqlite3 *db;
-  if (sqlite3_open(filename->chars, &db) != SQLITE_OK) {
+  if (sqlite3_open(filename->chars, &db) != SQLITE_OK)
+  {
     runtime_error("cannot open database `%.*s`", filename->length,
       filename->chars);
     sqlite3_close(db);
@@ -168,7 +169,7 @@ static int bind_call(vm_t *vm, value_t *args)
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
     {
-      runtime_error("cannot bind value of type `%s`", type_name(val.type));
+      runtime_error("cannot bind value of type %s", type_name(val.type));
       return STATUS_ERROR;
     }
     break;
