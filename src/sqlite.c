@@ -164,6 +164,7 @@ static int bind_call(vm_t *vm, value_t *args)
   case TYPE_ARRAY:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
+  case TYPE_ITERATOR:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
     {

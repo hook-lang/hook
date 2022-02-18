@@ -1,0 +1,18 @@
+
+mut it;
+
+val range = 1 .. 3;
+it = iter(range);
+println(it);
+
+for (; valid(it); next(it)) {
+  println(current(it));
+}
+
+val arr = ["foo", "bar", "baz"];
+it = iter(arr);
+println(it);
+
+for (; valid(it); next(it)) {
+  println(current(it));
+}

@@ -7,6 +7,7 @@
 #define RANGE_H
 
 #include "value.h"
+#include "iterator.h"
 
 typedef struct
 {
@@ -21,5 +22,7 @@ void range_free(range_t *range);
 void range_print(range_t *range);
 bool range_equal(range_t *range1, range_t *range2);
 int range_compare(range_t *range1, range_t *range2);
+iterator_t *range_new_iterator(range_t *range);
+
 
 #endif // RANGE_H

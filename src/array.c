@@ -8,7 +8,18 @@
 #include "common.h"
 #include "memory.h"
 
+typedef struct
+{
+  ITERATOR_HEADER
+  array_t *iterable;
+  int current;
+} array_iterator_t;
+
 static inline void resize(array_t *arr, int min_capacity);
+static void array_iterator_deinit(iterator_t *it);
+static bool array_iterator_is_valid(iterator_t *it);
+static value_t array_iterator_get_current(iterator_t *it);
+static void array_iterator_next(iterator_t *it);
 
 static inline void resize(array_t *arr, int min_capacity)
 {
@@ -18,6 +29,34 @@ static inline void resize(array_t *arr, int min_capacity)
   arr->capacity = capacity;
   arr->elements = (value_t *) reallocate(arr->elements,
     sizeof(*arr->elements) * capacity);
+}
+
+static void array_iterator_deinit(iterator_t *it)
+{
+  array_t *arr = ((array_iterator_t *) it)->iterable;
+  DECR_REF(arr);
+  if (IS_UNREACHABLE(arr))
+    array_free(arr);
+}
+
+static bool array_iterator_is_valid(iterator_t *it)
+{
+  array_iterator_t *arr_it = (array_iterator_t *) it;
+  array_t *arr = arr_it->iterable;
+  return arr_it->current < arr->length;
+}
+
+
+static value_t array_iterator_get_current(iterator_t *it)
+{
+  array_iterator_t *arr_it = (array_iterator_t *) it;
+  return arr_it->iterable->elements[arr_it->current];
+}
+
+static void array_iterator_next(iterator_t *it)
+{
+  array_iterator_t *arr_it = (array_iterator_t *) it;
+  ++arr_it->current;
 }
 
 array_t *array_allocate(int min_capacity)
@@ -306,4 +345,16 @@ array_t *array_deserialize(FILE *stream)
     arr->elements[i] = elem;
   }
   return arr;
+}
+
+iterator_t *array_new_iterator(array_t *arr)
+{
+  array_iterator_t *it = (array_iterator_t *) allocate(sizeof(*it));
+  iterator_init((iterator_t *) it, &array_iterator_deinit,
+    &array_iterator_is_valid, &array_iterator_get_current,
+    &array_iterator_next);
+  INCR_REF(arr);
+  it->iterable = arr;
+  it->current = 0;
+  return (iterator_t *) it;
 }

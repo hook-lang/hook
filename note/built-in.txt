@@ -18,6 +18,10 @@ compare(val1: value, val2: value) -> integer
 slice(val: string|array, start: integer, stop: integer) -> string|array
 split(src: string, separator: string) -> array
 join(arr: array, separator: string) -> string
+iter(val: iterator|range|array) -> iterator
+valid(it: iterator) -> boolean
+current(it: iterator) -> value
+next(it: iterator)
 sleep(ms: integer)
 assert(assertion: value, msg: string)
 panic(msg: string)

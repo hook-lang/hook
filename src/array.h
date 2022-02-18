@@ -7,6 +7,7 @@
 #define ARRAY_H
 
 #include "value.h"
+#include "iterator.h"
 
 #define ARRAY_MIN_CAPACITY (1 << 3)
 
@@ -38,5 +39,6 @@ int array_compare(array_t *arr1, array_t *arr2, int *result);
 bool array_slice(array_t *arr, int start, int stop, array_t **result);
 void array_serialize(array_t *arr, FILE *stream);
 array_t *array_deserialize(FILE *stream);
+iterator_t *array_new_iterator(array_t *arr);
 
 #endif // ARRAY_H

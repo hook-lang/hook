@@ -41,6 +41,7 @@ add_executable(${PROJECT_NAME}
   src/error.c
   src/fs.c
   src/hash.c
+  src/iterator.c
   src/main.c
   src/memory.c
   src/module.c
@@ -72,6 +73,7 @@ add_library(math SHARED
   src/compiler.c
   src/error.c
   src/hash.c
+  src/iterator.c
   src/math.c
   src/memory.c
   src/module.c
@@ -93,6 +95,7 @@ add_library(os SHARED
   src/compiler.c
   src/error.c
   src/hash.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/os.c
@@ -115,6 +118,7 @@ add_library(io SHARED
   src/error.c
   src/hash.c
   src/io.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/range.c
@@ -134,6 +138,7 @@ add_library(strings SHARED
   src/common.c
   src/error.c
   src/hash.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/range.c
@@ -154,6 +159,7 @@ add_library(arrays SHARED
   src/common.c
   src/error.c
   src/hash.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/range.c
@@ -178,6 +184,7 @@ add_library(sqlite SHARED
   src/common.c
   src/error.c
   src/hash.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/range.c
@@ -197,6 +204,7 @@ add_library(url SHARED
   src/common.c
   src/error.c
   src/hash.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/range.c
@@ -216,6 +224,7 @@ add_library(redis SHARED
   src/common.c
   src/error.c
   src/hash.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/range.c
@@ -236,6 +245,7 @@ add_library(hashing SHARED
   src/error.c
   src/hash.c
   src/hashing.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/range.c
@@ -260,6 +270,7 @@ add_library(encoding SHARED
   src/encoding.c
   src/error.c
   src/hash.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/range.c
@@ -279,6 +290,7 @@ add_library(secp256r1 SHARED
   src/ecc.c
   src/error.c
   src/hash.c
+  src/iterator.c
   src/memory.c
   src/module.c
   src/range.c

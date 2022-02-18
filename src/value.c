@@ -37,6 +37,9 @@ static inline void value_free(value_t val)
   case TYPE_INSTANCE:
     instance_free(AS_INSTANCE(val));
     break;
+  case TYPE_ITERATOR:
+    iterator_free(AS_ITERATOR(val));
+    break;
   case TYPE_CALLABLE:
     {
       if (IS_NATIVE(val))
@@ -80,6 +83,9 @@ const char *type_name(type_t type)
     break;
   case TYPE_INSTANCE:
     name = "instance";
+    break;
+  case TYPE_ITERATOR:
+    name = "iterator";
     break;
   case TYPE_CALLABLE:
     name = "callable";
@@ -137,6 +143,9 @@ void value_print(value_t val, bool quoted)
   case TYPE_INSTANCE:
     instance_print(AS_INSTANCE(val));
     break;
+  case TYPE_ITERATOR:
+    printf("<iterator at %p>", val.as.pointer);
+    break;
   case TYPE_CALLABLE:
     {
       string_t *name = IS_NATIVE(val) ? AS_NATIVE(val)->name : AS_CLOSURE(val)->fn->name;
@@ -184,6 +193,7 @@ bool value_equal(value_t val1, value_t val2)
   case TYPE_INSTANCE:
     instance_equal(AS_INSTANCE(val1), AS_INSTANCE(val2));
     break;
+  case TYPE_ITERATOR:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
     result = val1.as.pointer == val2.as.pointer;
@@ -231,6 +241,7 @@ int value_compare(value_t val1, value_t val2, int *result)
     return array_compare(AS_ARRAY(val1), AS_ARRAY(val2), result);
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
+  case TYPE_ITERATOR:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
     break;
@@ -259,6 +270,7 @@ void value_serialize(value_t val, FILE *stream)
   case TYPE_ARRAY:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
+  case TYPE_ITERATOR:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
     ASSERT(false, "unimplemented serialization");
@@ -299,6 +311,7 @@ bool value_deserialize(FILE *stream, value_t *result)
   case TYPE_ARRAY:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
+  case TYPE_ITERATOR:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
     ASSERT(false, "unimplemented deserialization");

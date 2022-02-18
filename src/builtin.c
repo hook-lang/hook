@@ -43,6 +43,10 @@ static const char *globals[] = {
   "slice",
   "split",
   "join",
+  "iter",
+  "valid",
+  "current",
+  "next",
   "sleep",
   "assert",
   "panic"
@@ -71,6 +75,10 @@ static int compare_call(vm_t *vm, value_t *args);
 static int slice_call(vm_t *vm, value_t *args);
 static int split_call(vm_t *vm, value_t *args);
 static int join_call(vm_t *vm, value_t *args);
+static int iter_call(vm_t *vm, value_t *args);
+static int valid_call(vm_t *vm, value_t *args);
+static int current_call(vm_t *vm, value_t *args);
+static int next_call(vm_t *vm, value_t *args);
 static int sleep_call(vm_t *vm, value_t *args);
 static int assert_call(vm_t *vm, value_t *args);
 static int panic_call(vm_t *vm, value_t *args);
@@ -123,6 +131,7 @@ static inline string_t *to_string(value_t val) {
   case TYPE_ARRAY:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
+  case TYPE_ITERATOR:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
     break;
@@ -504,6 +513,56 @@ static int join_call(vm_t *vm, value_t *args)
   return STATUS_OK;
 }
 
+static int iter_call(vm_t *vm, value_t *args)
+{
+  type_t types[] = {TYPE_ITERATOR, TYPE_RANGE, TYPE_ARRAY};
+  if (vm_check_types(args, 1, 3, types) == STATUS_ERROR)
+    return STATUS_ERROR;
+  value_t val = args[1];
+  type_t type = val.type;
+  if (type == TYPE_ITERATOR)
+  {
+    if (vm_push_iterator(vm, AS_ITERATOR(val)) == STATUS_ERROR)
+      return STATUS_ERROR;
+    return STATUS_OK;
+  }
+  iterator_t *it = type == TYPE_RANGE ? range_new_iterator(AS_RANGE(val))
+    : array_new_iterator(AS_ARRAY(val));
+  if (vm_push_iterator(vm, it) == STATUS_ERROR)
+  {
+    iterator_free(it);
+    return STATUS_ERROR;
+  }
+  return STATUS_OK;
+}
+
+static int valid_call(vm_t *vm, value_t *args)
+{
+  if (vm_check_type(args, 1, TYPE_ITERATOR) == STATUS_ERROR)
+    return STATUS_ERROR;
+  return vm_push_boolean(vm, iterator_is_valid(AS_ITERATOR(args[1])));
+}
+
+static int current_call(vm_t *vm, value_t *args)
+{
+  if (vm_check_type(args, 1, TYPE_ITERATOR) == STATUS_ERROR)
+    return STATUS_ERROR;
+  iterator_t *it = AS_ITERATOR(args[1]);
+  if (!iterator_is_valid(it))
+    return vm_push_nil(vm);
+  return vm_push(vm, iterator_get_current(it));
+}
+
+static int next_call(vm_t *vm, value_t *args)
+{
+  if (vm_check_type(args, 1, TYPE_ITERATOR) == STATUS_ERROR)
+    return STATUS_ERROR;
+  iterator_t *it = AS_ITERATOR(args[1]);
+  if (iterator_is_valid(it))
+    iterator_next(it);
+  return vm_push_nil(vm);
+}
+
 static int sleep_call(vm_t *vm, value_t *args)
 {
   if (vm_check_int(args, 1) == STATUS_ERROR)
@@ -561,9 +620,13 @@ void load_globals(vm_t *vm)
   vm_push_new_native(vm, globals[16], 3, &slice_call);
   vm_push_new_native(vm, globals[17], 2, &split_call);
   vm_push_new_native(vm, globals[18], 2, &join_call);
-  vm_push_new_native(vm, globals[19], 1, &sleep_call);
-  vm_push_new_native(vm, globals[20], 2, &assert_call);
-  vm_push_new_native(vm, globals[21], 1, &panic_call);
+  vm_push_new_native(vm, globals[19], 1, &iter_call);
+  vm_push_new_native(vm, globals[20], 1, &valid_call);
+  vm_push_new_native(vm, globals[21], 1, &current_call);
+  vm_push_new_native(vm, globals[22], 1, &next_call);
+  vm_push_new_native(vm, globals[23], 1, &sleep_call);
+  vm_push_new_native(vm, globals[24], 2, &assert_call);
+  vm_push_new_native(vm, globals[25], 1, &panic_call);
 }
 
 int num_globals(void)

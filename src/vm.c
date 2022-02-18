@@ -879,6 +879,7 @@ static inline int add(vm_t *vm)
   case TYPE_RANGE:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
+  case TYPE_ITERATOR:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
     break;
@@ -1005,6 +1006,7 @@ static inline int subtract(vm_t *vm)
   case TYPE_RANGE:
   case TYPE_STRUCT:
   case TYPE_INSTANCE:
+  case TYPE_ITERATOR:
   case TYPE_CALLABLE:
   case TYPE_USERDATA:
     break;
@@ -1630,6 +1632,14 @@ int vm_push_instance(vm_t *vm, instance_t *inst)
   return STATUS_OK;
 }
 
+int vm_push_iterator(vm_t *vm, iterator_t *it)
+{
+  if (push(vm, ITERATOR_VALUE(it)) == STATUS_ERROR)
+    return STATUS_ERROR;
+  INCR_REF(it);
+  return STATUS_OK;
+}
+
 int vm_push_closure(vm_t *vm, closure_t *cl)
 {
   if (push(vm, CLOSURE_VALUE(cl)) == STATUS_ERROR)
@@ -1782,6 +1792,11 @@ int vm_check_struct(value_t *args, int index)
 int vm_check_instance(value_t *args, int index)
 {
   return vm_check_type(args, index, TYPE_INSTANCE);
+}
+
+int vm_check_iterator(value_t *args, int index)
+{
+  return vm_check_type(args, index, TYPE_ITERATOR);
 }
 
 int vm_check_callable(value_t *args, int index)

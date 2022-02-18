@@ -23,6 +23,7 @@
 #define ARRAY_VALUE(a)    ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as.pointer = (a)})
 #define STRUCT_VALUE(s)   ((value_t) {.type = TYPE_STRUCT, .flags = FLAG_OBJECT, .as.pointer = (s)})
 #define INSTANCE_VALUE(i) ((value_t) {.type = TYPE_INSTANCE, .flags = FLAG_OBJECT, .as.pointer = (i)})
+#define ITERATOR_VALUE(i) ((value_t) {.type = TYPE_ITERATOR, .flags = FLAG_OBJECT, .as.pointer = (i)})
 #define CLOSURE_VALUE(c)  ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT, .as.pointer = (c)})
 #define NATIVE_VALUE(n)   ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT | FLAG_NATIVE, .as.pointer = (n)})
 #define USERDATA_VALUE(u) ((value_t) {.type = TYPE_USERDATA, .flags = FLAG_OBJECT, .as.pointer = (u)})
@@ -37,6 +38,7 @@
 #define IS_ARRAY(v)    ((v).type == TYPE_ARRAY)
 #define IS_STRUCT(v)   ((v).type == TYPE_STRUCT)
 #define IS_INSTANCE(v) ((v).type == TYPE_INSTANCE)
+#define IS_ITERATOR(v) ((v).type == TYPE_ITERATOR)
 #define IS_CALLABLE(v) ((v).type == TYPE_CALLABLE)
 #define IS_USERDATA(v) ((v).type == TYPE_USERDATA)
 #define IS_OBJECT(v)   ((v).flags & FLAG_OBJECT)
@@ -49,6 +51,7 @@
 #define AS_ARRAY(v)    ((array_t *) (v).as.pointer)
 #define AS_STRUCT(v)   ((struct_t *) (v).as.pointer)
 #define AS_INSTANCE(v) ((instance_t *) (v).as.pointer)
+#define AS_ITERATOR(v) ((iterator_t *) (v).as.pointer)
 #define AS_CLOSURE(v)  ((closure_t *) (v).as.pointer)
 #define AS_NATIVE(v)   ((native_t *) (v).as.pointer)
 #define AS_USERDATA(v) ((userdata_t *) (v).as.pointer)
@@ -73,6 +76,7 @@ typedef enum
   TYPE_ARRAY,
   TYPE_STRUCT,
   TYPE_INSTANCE,
+  TYPE_ITERATOR,
   TYPE_CALLABLE,
   TYPE_USERDATA
 } type_t;

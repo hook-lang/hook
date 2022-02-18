@@ -33,6 +33,7 @@ int vm_push_range(vm_t *vm, range_t *range);
 int vm_push_array(vm_t *vm, array_t *arr);
 int vm_push_struct(vm_t *vm, struct_t *ztruct);
 int vm_push_instance(vm_t *vm, instance_t *inst);
+int vm_push_iterator(vm_t *vm, iterator_t *it);
 int vm_push_closure(vm_t *vm, closure_t *cl);
 int vm_push_native(vm_t *vm, native_t *native);
 int vm_push_new_native(vm_t *vm, const char *name, int arity, int (*call)(vm_t *, value_t *));
@@ -54,6 +55,7 @@ int vm_check_range(value_t *args, int index);
 int vm_check_array(value_t *args, int index);
 int vm_check_struct(value_t *args, int index);
 int vm_check_instance(value_t *args, int index);
+int vm_check_iterator(value_t *args, int index);
 int vm_check_callable(value_t *args, int index);
 int vm_check_userdata(value_t *args, int index);
 
