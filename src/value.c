@@ -193,9 +193,7 @@ bool value_equal(value_t val1, value_t val2)
   case TYPE_INSTANCE:
     instance_equal(AS_INSTANCE(val1), AS_INSTANCE(val2));
     break;
-  case TYPE_ITERATOR:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
+  default:
     result = val1.as.pointer == val2.as.pointer;
     break;
   }
@@ -239,11 +237,7 @@ int value_compare(value_t val1, value_t val2, int *result)
     return STATUS_OK;
   case TYPE_ARRAY:
     return array_compare(AS_ARRAY(val1), AS_ARRAY(val2), result);
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_ITERATOR:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
+  default:
     break;
   }
   runtime_error("type error: value of type %s is not comparable", type_name(val1.type));
@@ -256,26 +250,18 @@ void value_serialize(value_t val, FILE *stream)
   int flags = val.flags;
   fwrite(&type, sizeof(type), 1, stream);
   fwrite(&flags, sizeof(flags), 1, stream);
-  switch ((type_t) type)
+  type_t _type = (type_t) type;
+  if (_type == TYPE_NUMBER)
   {
-  case TYPE_NUMBER:
     fwrite(&val.as.number, sizeof(val.as.number), 1, stream);
-    break;
-  case TYPE_STRING:
-    string_serialize(AS_STRING(val), stream);
-    break;
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_RANGE:
-  case TYPE_ARRAY:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_ITERATOR:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    ASSERT(false, "unimplemented serialization");
-    break;
+    return;
   }
+  if (_type == TYPE_STRING)
+  {
+    string_serialize(AS_STRING(val), stream);
+    return;
+  }
+  ASSERT(false, "unimplemented serialization");
 }
 
 bool value_deserialize(FILE *stream, value_t *result)
@@ -286,37 +272,19 @@ bool value_deserialize(FILE *stream, value_t *result)
     return false;
   if (fread(&flags, sizeof(flags), 1, stream) != 1)
     return false;
-  value_t val;
-  switch ((type_t) type)
+  type_t _type = (type_t) type;
+  ASSERT(_type == TYPE_NUMBER || _type == TYPE_STRING, "unimplemented deserialization");
+  if (_type == TYPE_NUMBER)
   {
-  case TYPE_NUMBER:
-    {
-      double data;
-      if (fread(&data, sizeof(data), 1, stream) != 1)
-        return false;
-      val = NUMBER_VALUE(data);
-    }
-    break;
-  case TYPE_STRING:
-    {
-      string_t *str = string_deserialize(stream);
-      if (!str)
-        return false;
-      val = STRING_VALUE(str);
-    }
-    break;
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_RANGE:
-  case TYPE_ARRAY:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_ITERATOR:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    ASSERT(false, "unimplemented deserialization");
-    break;
+    double data;
+    if (fread(&data, sizeof(data), 1, stream) != 1)
+      return false;
+    *result = NUMBER_VALUE(data);
+    return true;
   }
-  *result = val;
+  string_t *str = string_deserialize(stream);
+  if (!str)
+    return false;
+  *result = STRING_VALUE(str);
   return true;
 }

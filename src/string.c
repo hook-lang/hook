@@ -89,6 +89,13 @@ void string_free(string_t *str)
   free(str);
 }
 
+void string_release(string_t *str)
+{
+  DECR_REF(str);
+  if (IS_UNREACHABLE(str))
+    string_free(str);
+}
+
 string_t *string_concat(string_t *str1, string_t *str2)
 {
   int length = str1->length + str2->length;

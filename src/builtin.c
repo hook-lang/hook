@@ -345,39 +345,28 @@ static int len_call(vm_t *vm, value_t *args)
   if (vm_check_types(args, 1, 5, types) == STATUS_ERROR)
     return STATUS_ERROR;
   value_t val = args[1];
-  int result;
-  switch (val.type)
+  if (IS_STRING(val))
+    return vm_push_number(vm, AS_STRING(val)->length);
+  if (IS_RANGE(val))
   {
-  case TYPE_STRING:
-    result = AS_STRING(val)->length;
-    break;
-  case TYPE_RANGE:
+    range_t *range = AS_RANGE(val);
+    if (range->start < range->end)
     {
-      range_t *range = AS_RANGE(val);
-      if (range->start < range->end)
-      {
-        result = (int) range->end - range->start + 1;
-        break;
-      }
-      if (range->start > range->end)
-      {
-        result = (int) range->start - range->end + 1;
-        break;
-      }
-      result = 1;
+      int result = (int) range->end - range->start + 1;
+      return vm_push_number(vm, result);
     }
-    break;
-  case TYPE_ARRAY:
-    result = AS_ARRAY(val)->length;
-    break;
-  case TYPE_STRUCT:
-    result = AS_STRUCT(val)->length;
-    break;
-  default:
-    result = AS_INSTANCE(val)->ztruct->length;
-    break;
+    if (range->start > range->end)
+    {
+      int result = (int) range->start - range->end + 1;
+      return vm_push_number(vm, result);
+    }
+    return vm_push_number(vm, 1);
   }
-  return vm_push_number(vm, result);
+  if (IS_ARRAY(val))
+    return vm_push_number(vm, AS_ARRAY(val)->length);
+  if (IS_STRUCT(val))
+    return vm_push_number(vm, AS_STRUCT(val)->length);
+  return vm_push_number(vm, AS_INSTANCE(val)->ztruct->length);
 }
 
 static int is_empty_call(vm_t *vm, value_t *args)
@@ -387,26 +376,15 @@ static int is_empty_call(vm_t *vm, value_t *args)
   if (vm_check_types(args, 1, 5, types) == STATUS_ERROR)
     return STATUS_ERROR;
   value_t val = args[1];
-  bool result;
-  switch (val.type)
-  {
-  case TYPE_STRING:
-    result = !AS_STRING(val)->length;
-    break;
-  case TYPE_RANGE:
-    result = false;
-    break;
-  case TYPE_ARRAY:
-    result = !AS_ARRAY(val)->length;
-    break;
-  case TYPE_STRUCT:
-    result = !AS_STRUCT(val)->length;
-    break;
-  default:
-    result = !AS_INSTANCE(val)->ztruct->length;
-    break;
-  }
-  return vm_push_boolean(vm, result);
+  if (IS_STRING(val))
+    return vm_push_boolean(vm, !AS_STRING(val)->length);
+  if (IS_RANGE(val))
+    return vm_push_boolean(vm, false);
+  if (IS_ARRAY(val))
+    return vm_push_boolean(vm, !AS_ARRAY(val)->length);
+  if (IS_STRUCT(val))
+    return vm_push_boolean(vm, !AS_STRUCT(val)->length);
+  return vm_push_boolean(vm, !AS_INSTANCE(val)->ztruct->length);
 }
 
 static int compare_call(vm_t *vm, value_t *args)

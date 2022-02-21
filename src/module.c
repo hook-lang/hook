@@ -138,9 +138,7 @@ int load_module(vm_t *vm)
     VALUE_INCR_REF(result);
     slots[0] = result;
     --vm->top;
-    DECR_REF(name);
-    if (IS_UNREACHABLE(name))
-      string_free(name);
+    string_release(name);
     return STATUS_OK;
   }
   if (load_native_module(vm, name) == STATUS_ERROR)
@@ -148,8 +146,6 @@ int load_module(vm_t *vm)
   put_module_result(name, vm->slots[vm->top]);
   slots[0] = vm->slots[vm->top];
   --vm->top;
-  DECR_REF(name);
-  if (IS_UNREACHABLE(name))
-    string_free(name);
+  string_release(name);
   return STATUS_OK;
 }

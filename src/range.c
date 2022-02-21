@@ -21,10 +21,7 @@ static void range_iterator_next(iterator_t *it);
 
 static void range_iterator_deinit(iterator_t *it)
 {
-  range_t *range = ((range_iterator_t *) it)->iterable;
-  DECR_REF(range);
-  if (IS_UNREACHABLE(range))
-    range_free(range);
+  range_release(((range_iterator_t *) it)->iterable);
 }
 
 static bool range_iterator_is_valid(iterator_t *it)
@@ -62,6 +59,13 @@ range_t *range_new(long start, long end)
 void range_free(range_t *range)
 {
   free(range);
+}
+
+void range_release(range_t *range)
+{
+  DECR_REF(range);
+  if (IS_UNREACHABLE(range))
+    range_free(range);
 }
 
 void range_print(range_t *range)

@@ -25,6 +25,7 @@ string_t *string_new(int min_capacity);
 string_t *string_from_chars(int length, const char *chars);
 string_t *string_from_stream(FILE *stream, const char terminal);
 void string_free(string_t *str);
+void string_release(string_t *str);
 string_t *string_concat(string_t *str1, string_t *str2);
 void string_inplace_concat_chars(string_t *dest, int length, const char *chars);
 void string_inplace_concat(string_t *dest, string_t *src);

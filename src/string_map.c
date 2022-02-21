@@ -60,9 +60,7 @@ void string_map_free(string_map_t *map)
     string_t *key = entry->key;
     if (!key)
       continue;
-    DECR_REF(key);
-    if (IS_UNREACHABLE(key))
-      string_free(key);
+    string_release(key);
     value_release(entry->value);
     ++j;
   }

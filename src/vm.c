@@ -195,9 +195,7 @@ static inline int instance(vm_t *vm, int length)
   vm->top -= length;
   INCR_REF(inst);
   slots[0] = INSTANCE_VALUE(inst);
-  DECR_REF(ztruct);
-  if (IS_UNREACHABLE(ztruct))
-    struct_free(ztruct);
+  struct_release(ztruct);
   return STATUS_OK;
 }
 
@@ -272,9 +270,7 @@ static inline int unpack(vm_t *vm, int n)
     if ((status = push(vm, NIL_VALUE)) == STATUS_ERROR)
       break;
 end:
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
+  array_release(arr);
   return status;
 }
 
@@ -300,9 +296,7 @@ static inline int destruct(vm_t *vm, int n)
     slots[i] = value;
   }
   --vm->top;
-  DECR_REF(inst);
-  if (IS_UNREACHABLE(inst))
-    instance_free(inst);
+  instance_release(inst);
   return STATUS_OK;
 }
 
@@ -321,9 +315,7 @@ static inline int add_element(vm_t *vm)
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   --vm->top;
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
+  array_release(arr);  
   VALUE_DECR_REF(val2);
   return STATUS_OK;
 }
@@ -352,9 +344,7 @@ static inline int get_element(vm_t *vm)
     VALUE_INCR_REF(elem);
     slots[0] = elem;
     --vm->top;
-    DECR_REF(arr);
-    if (IS_UNREACHABLE(arr))
-      array_free(arr);
+    array_release(arr);
     return STATUS_OK;
   }
   if (IS_RANGE(val2))
@@ -377,9 +367,7 @@ static inline int slice_array(vm_t *vm, value_t *slots, array_t *arr, range_t *r
   if (start <= 0 && end >= arr_end)
   {
     --vm->top;
-    DECR_REF(range);
-    if (IS_UNREACHABLE(range))
-      range_free(range);
+    range_release(range);
     return STATUS_OK;
   }
   int length = end - start + 1;
@@ -395,12 +383,8 @@ end:
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   --vm->top;
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
-  DECR_REF(range);
-  if (IS_UNREACHABLE(range))
-    range_free(range);
+  array_release(arr);
+  range_release(range);
   return STATUS_OK;
 }
 
@@ -446,9 +430,7 @@ static inline void set_element(vm_t *vm)
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   vm->top -= 2;
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
+  array_release(arr);
   VALUE_DECR_REF(val3);
 }
 
@@ -480,9 +462,7 @@ static inline int put_element(vm_t *vm)
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   vm->top -= 2;
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
+  array_release(arr);
   VALUE_DECR_REF(val3);
   return STATUS_OK;
 }
@@ -514,9 +494,7 @@ static inline int delete_element(vm_t *vm)
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   --vm->top;
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
+  array_release(arr);
   return STATUS_OK;
 }
 
@@ -542,9 +520,7 @@ static inline int inplace_add_element(vm_t *vm)
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   --vm->top;
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
+  array_release(arr);
   VALUE_DECR_REF(val2);
   return STATUS_OK;
 }
@@ -584,9 +560,7 @@ static inline int inplace_put_element(vm_t *vm)
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   vm->top -= 2;
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
+  array_release(arr);
   VALUE_DECR_REF(val3);
   return STATUS_OK;
 }
@@ -624,9 +598,7 @@ static inline int inplace_delete_element(vm_t *vm)
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   --vm->top;
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
+  array_release(arr);
   return STATUS_OK;
 }
 
@@ -650,9 +622,7 @@ static inline int get_field(vm_t *vm, string_t *name)
   value_t value = inst->values[index];
   VALUE_INCR_REF(value);
   slots[0] = value;
-  DECR_REF(inst);
-  if (IS_UNREACHABLE(inst))
-    instance_free(inst);
+  instance_release(inst);
   return STATUS_OK;
 }
 
@@ -693,9 +663,7 @@ static inline void set_field(vm_t *vm)
   INCR_REF(result);
   slots[0] = INSTANCE_VALUE(result);
   vm->top -= 2;
-  DECR_REF(inst);
-  if (IS_UNREACHABLE(inst))
-    instance_free(inst);
+  instance_release(inst);
   VALUE_DECR_REF(val3);
 }
 
@@ -720,9 +688,7 @@ static inline int put_field(vm_t *vm, string_t *name)
   INCR_REF(result);
   slots[0] = INSTANCE_VALUE(result);
   --vm->top;
-  DECR_REF(inst);
-  if (IS_UNREACHABLE(inst))
-    instance_free(inst);
+  instance_release(inst);
   VALUE_DECR_REF(val2);
   return STATUS_OK;
 }
@@ -755,9 +721,7 @@ static inline int inplace_put_field(vm_t *vm, string_t *name)
   INCR_REF(result);
   slots[0] = INSTANCE_VALUE(result);
   --vm->top;
-  DECR_REF(inst);
-  if (IS_UNREACHABLE(inst))
-    instance_free(inst);
+  instance_release(inst);
   VALUE_DECR_REF(val2);
   return STATUS_OK;
 }
@@ -849,21 +813,20 @@ static inline int add(vm_t *vm)
   value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
-  switch (val1.type)
+  if (IS_NUMBER(val1))
   {
-  case TYPE_NUMBER:
+    if (!IS_NUMBER(val2))
     {
-      if (!IS_NUMBER(val2))
-      {
-        runtime_error("type error: cannot add %s to number", type_name(val2.type));
-        return STATUS_ERROR;
-      }
-      double data = val1.as.number + val2.as.number;
-      slots[0] = NUMBER_VALUE(data);
-      --vm->top;
+      runtime_error("type error: cannot add %s to number", type_name(val2.type));
+      return STATUS_ERROR;
     }
+    double data = val1.as.number + val2.as.number;
+    slots[0] = NUMBER_VALUE(data);
+    --vm->top;
     return STATUS_OK;
-  case TYPE_STRING:
+  }
+  if (IS_STRING(val1))
+  {
     if (!IS_STRING(val2))
     {
       runtime_error("type error: cannot concatenate string and %s",
@@ -871,7 +834,9 @@ static inline int add(vm_t *vm)
       return STATUS_ERROR;
     }
     return concat_strings(vm, slots, val1, val2);
-  case TYPE_ARRAY:
+  }
+  if (IS_ARRAY(val1))
+  {
     if (!IS_ARRAY(val2))
     {
       runtime_error("type error: cannot concatenate array and %s",
@@ -879,15 +844,6 @@ static inline int add(vm_t *vm)
       return STATUS_ERROR;
     }
     return concat_arrays(vm, slots, val1, val2);
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_RANGE:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_ITERATOR:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    break;
   }
   runtime_error("type error: cannot add %s to %s", type_name(val2.type),
     type_name(val1.type));
@@ -901,39 +857,29 @@ static inline int concat_strings(vm_t *vm, value_t *slots, value_t val1, value_t
   {
     slots[0] = val2;
     --vm->top;
-    DECR_REF(str1);
-    if (IS_UNREACHABLE(str1))
-      string_free(str1);
+    string_release(str1);
     return STATUS_OK;
   }
   string_t *str2 = AS_STRING(val2);
   if (!str2->length)
   {
     --vm->top;
-    DECR_REF(str2);
-    if (IS_UNREACHABLE(str2))
-      string_free(str2);
+    string_release(str2);
     return STATUS_OK;
   }
   if (str1->ref_count == 1)
   {
     string_inplace_concat(str1, str2);
     --vm->top;
-    DECR_REF(str2);
-    if (IS_UNREACHABLE(str2))
-      string_free(str2);
+    string_release(str2);
     return STATUS_OK;
   }
   string_t *result = string_concat(str1, str2);
   INCR_REF(result);
   slots[0] = STRING_VALUE(result);
   --vm->top;
-  DECR_REF(str1);
-  if (IS_UNREACHABLE(str1))
-    string_free(str1);
-  DECR_REF(str2);
-  if (IS_UNREACHABLE(str2))
-    string_free(str2);
+  string_release(str1);
+  string_release(str2);
   return STATUS_OK;
 }
 
@@ -944,39 +890,29 @@ static inline int concat_arrays(vm_t *vm, value_t *slots, value_t val1, value_t 
   {
     slots[0] = val2;
     --vm->top;
-    DECR_REF(arr1);
-    if (IS_UNREACHABLE(arr1))
-      array_free(arr1);
+    array_release(arr1);
     return STATUS_OK;
   }
   array_t *arr2 = AS_ARRAY(val2);
   if (!arr2->length)
   {
     --vm->top;
-    DECR_REF(arr2);
-    if (IS_UNREACHABLE(arr2))
-      array_free(arr2);
+    array_release(arr2);
     return STATUS_OK;
   }
   if (arr1->ref_count == 1)
   {
     array_inplace_concat(arr1, arr2);
     --vm->top;
-    DECR_REF(arr2);
-    if (IS_UNREACHABLE(arr2))
-      array_free(arr2);
+    array_release(arr2);
     return STATUS_OK;
   }
   array_t *result = array_concat(arr1, arr2);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   --vm->top;
-  DECR_REF(arr1);
-  if (IS_UNREACHABLE(arr1))
-    array_free(arr1);
-  DECR_REF(arr2);
-  if (IS_UNREACHABLE(arr2))
-    array_free(arr2);
+  array_release(arr1);
+  array_release(arr2);
   return STATUS_OK;
 }
 
@@ -985,22 +921,21 @@ static inline int subtract(vm_t *vm)
   value_t *slots = &vm->slots[vm->top - 1];
   value_t val1 = slots[0];
   value_t val2 = slots[1];
-  switch (val1.type)
+  if (IS_NUMBER(val1))
   {
-  case TYPE_NUMBER:
+    if (!IS_NUMBER(val2))
     {
-      if (!IS_NUMBER(val2))
-      {
-        runtime_error("type error: cannot subtract %s from number",
-          type_name(val2.type));
-        return STATUS_ERROR;
-      }
-      double data = val1.as.number - val2.as.number;
-      slots[0] = NUMBER_VALUE(data);
-      --vm->top;
+      runtime_error("type error: cannot subtract %s from number",
+        type_name(val2.type));
+      return STATUS_ERROR;
     }
+    double data = val1.as.number - val2.as.number;
+    slots[0] = NUMBER_VALUE(data);
+    --vm->top;
     return STATUS_OK;
-  case TYPE_ARRAY:
+  }
+  if (IS_ARRAY(val1))
+  {
     if (!IS_ARRAY(val2))
     {
       runtime_error("type error: cannot diff between array and %s",
@@ -1008,16 +943,6 @@ static inline int subtract(vm_t *vm)
       return STATUS_ERROR;
     }
     return diff_arrays(vm, slots, val1, val2);
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_STRING:
-  case TYPE_RANGE:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_ITERATOR:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    break;
   }
   runtime_error("type error: cannot subtract %s from %s", type_name(val2.type),
     type_name(val1.type));
@@ -1031,30 +956,22 @@ static inline int diff_arrays(vm_t *vm, value_t *slots, value_t val1, value_t va
   if (!arr1->length || !arr2->length)
   {
     --vm->top;
-    DECR_REF(arr2);
-    if (IS_UNREACHABLE(arr2))
-      array_free(arr2);
+    array_release(arr2);
     return STATUS_OK;
   }
   if (arr1->ref_count == 1)
   {
     array_inplace_diff(arr1, arr2);
     --vm->top;
-    DECR_REF(arr2);
-    if (IS_UNREACHABLE(arr2))
-      array_free(arr2);
+    array_release(arr2);
     return STATUS_OK;
   }
   array_t *result = array_diff(arr1, arr2);
   INCR_REF(result);
   slots[0] = ARRAY_VALUE(result);
   --vm->top;
-  DECR_REF(arr1);
-  if (IS_UNREACHABLE(arr1))
-    array_free(arr1);
-  DECR_REF(arr2);
-  if (IS_UNREACHABLE(arr2))
-    array_free(arr2);
+  array_release(arr1);
+  array_release(arr2);
   return STATUS_OK;
 }
 
@@ -1187,9 +1104,7 @@ static inline int call(vm_t *vm, int num_args)
       discard_frame(vm, slots);
       return STATUS_ERROR;
     }
-    DECR_REF(native);
-    if (IS_UNREACHABLE(native))
-      native_free(native);
+    native_release(native);
     move_result(vm, slots);
     return STATUS_OK;
   }
@@ -1207,9 +1122,7 @@ static inline int call(vm_t *vm, int num_args)
     discard_frame(vm, slots);
     return STATUS_ERROR;
   }
-  DECR_REF(cl);
-  if (IS_UNREACHABLE(cl))
-    closure_free(cl);
+  closure_release(cl);
   move_result(vm, slots);
   return STATUS_OK;
 }

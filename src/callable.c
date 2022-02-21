@@ -47,12 +47,7 @@ static inline void init_functions(function_t *fn)
 static inline void free_functions(function_t *fn)
 {
   for (int i = 0; i < fn->num_functions; ++i)
-  {
-    function_t *child = fn->functions[i];
-    DECR_REF(child);
-    if (IS_UNREACHABLE(child))
-      function_free(child);
-  }
+    function_release(fn->functions[i]);
   free(fn->functions);
 }
 
@@ -92,20 +87,20 @@ void function_free(function_t *fn)
 {
   string_t *name = fn->name;
   if (name)
-  {
-    DECR_REF(name);
-    if (IS_UNREACHABLE(name))
-      string_free(name);
-  }
-  string_t *file = fn->file;
-  DECR_REF(file);
-  if (IS_UNREACHABLE(file))
-    string_free(file);
+    string_release(name);
+  string_release(fn->file);
   free(fn->lines);
   chunk_free(&fn->chunk);
   array_free(fn->consts);
   free_functions(fn);
   free(fn);
+}
+
+void function_release(function_t *fn)
+{
+  DECR_REF(fn);
+  if (IS_UNREACHABLE(fn))
+    function_free(fn);
 }
 
 void function_add_line(function_t *fn, int line_no)
@@ -226,12 +221,17 @@ void closure_free(closure_t *cl)
 {
   function_t *fn = cl->fn;
   int num_nonlocals = fn->num_nonlocals;
-  DECR_REF(fn);
-  if (IS_UNREACHABLE(fn))
-    function_free(fn);
+  function_release(fn);
   for (int i = 0; i < num_nonlocals; ++i)
     value_release(cl->nonlocals[i]);
   free(cl);
+}
+
+void closure_release(closure_t *cl)
+{
+  DECR_REF(cl);
+  if (IS_UNREACHABLE(cl))
+    closure_free(cl);
 }
 
 native_t *native_new(string_t *name, int arity, int (*call)(struct vm *, value_t *))
@@ -247,9 +247,13 @@ native_t *native_new(string_t *name, int arity, int (*call)(struct vm *, value_t
 
 void native_free(native_t *native)
 {
-  string_t *name = native->name;
-  DECR_REF(name);
-  if (IS_UNREACHABLE(name))
-    string_free(name);
+  string_release(native->name);
   free(native);
+}
+
+void native_release(native_t *native)
+{
+  DECR_REF(native);
+  if (IS_UNREACHABLE(native))
+    native_free(native);
 }

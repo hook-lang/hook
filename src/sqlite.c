@@ -133,48 +133,26 @@ static int bind_call(vm_t *vm, value_t *args)
     return STATUS_ERROR;
   if (vm_check_int(args, 2) == STATUS_ERROR)
     return STATUS_ERROR;
-  value_t val = args[3];
+  type_t types[] = {TYPE_NIL, TYPE_BOOLEAN, TYPE_NUMBER, TYPE_STRING};
+  if (vm_check_types(args, 3, 4, types) == STATUS_ERROR)
+    return STATUS_ERROR;
   sqlite3_stmt *stmt = ((sqlite_stmt_t *) AS_USERDATA(args[1]))->stmt;
   int index = (int) args[2].as.number;
-  int rc = SQLITE_OK;
-  switch (val.type)
+  value_t val = args[3];
+  if (IS_NIL(val))
+    return vm_push_number(vm, sqlite3_bind_null(stmt, index));
+  if (IS_BOOLEAN(val))
+    return vm_push_number(vm, sqlite3_bind_int(stmt, index, (int) val.as.boolean));
+  if (IS_NUMBER(val))
   {
-  case TYPE_NIL:
-    rc = sqlite3_bind_null(stmt, index);
-    break;
-  case TYPE_BOOLEAN:
-    rc = sqlite3_bind_int(stmt, index, (int) val.as.boolean);
-    break;
-  case TYPE_NUMBER:
-    {
-      if (IS_INT(val))
-      {
-        rc = sqlite3_bind_int(stmt, index, (int) val.as.number);
-        break;
-      }
-      rc = sqlite3_bind_double(stmt, index, val.as.number);
-    }
-    break;
-  case TYPE_STRING:
-    {
-      string_t *str = AS_STRING(val);
-      rc = sqlite3_bind_text(stmt, index, str->chars, str->length, NULL);
-    }
-    break;
-  case TYPE_RANGE:
-  case TYPE_ARRAY:
-  case TYPE_STRUCT:
-  case TYPE_INSTANCE:
-  case TYPE_ITERATOR:
-  case TYPE_CALLABLE:
-  case TYPE_USERDATA:
-    {
-      runtime_error("cannot bind value of type %s", type_name(val.type));
-      return STATUS_ERROR;
-    }
-    break;
+    double data = val.as.number;
+    if (IS_INT(val))
+      return vm_push_number(vm, sqlite3_bind_int(stmt, index, (int) data));
+    return vm_push_number(vm, sqlite3_bind_double(stmt, index, data));
   }
-  return vm_push_number(vm, rc);
+  string_t *str = AS_STRING(val);
+  return vm_push_number(vm, sqlite3_bind_text(stmt, index, str->chars, str->length,
+    NULL));
 }
 
 static int fetch_call(vm_t *vm, value_t *args)

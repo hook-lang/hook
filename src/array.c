@@ -33,10 +33,7 @@ static inline void resize(array_t *arr, int min_capacity)
 
 static void array_iterator_deinit(iterator_t *it)
 {
-  array_t *arr = ((array_iterator_t *) it)->iterable;
-  DECR_REF(arr);
-  if (IS_UNREACHABLE(arr))
-    array_free(arr);
+  array_release(((array_iterator_t *) it)->iterable);
 }
 
 static bool array_iterator_is_valid(iterator_t *it)
@@ -82,6 +79,13 @@ void array_free(array_t *arr)
     value_release(arr->elements[i]);
   free(arr->elements);
   free(arr);
+}
+
+void array_release(array_t *arr)
+{
+  DECR_REF(arr);
+  if (IS_UNREACHABLE(arr))
+    array_free(arr);
 }
 
 int array_index_of(array_t *arr, value_t elem)

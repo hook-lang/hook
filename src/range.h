@@ -19,6 +19,7 @@ typedef struct
 
 range_t *range_new(long start, long end);
 void range_free(range_t *range);
+void range_release(range_t *range);
 void range_print(range_t *range);
 bool range_equal(range_t *range1, range_t *range2);
 int range_compare(range_t *range1, range_t *range2);

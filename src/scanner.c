@@ -226,14 +226,8 @@ void scanner_init(scanner_t *scan, string_t *file, string_t *source)
 
 void scanner_free(scanner_t *scan)
 {
-  string_t *file = scan->file;
-  DECR_REF(file);
-  if (IS_UNREACHABLE(file))
-    string_free(file);
-  string_t *source = scan->source;
-  DECR_REF(source);
-  if (IS_UNREACHABLE(source))
-    string_free(source);
+  string_release(scan->file);
+  string_release(scan->source);
 }
 
 void scanner_next_token(scanner_t *scan)

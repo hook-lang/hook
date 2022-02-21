@@ -77,22 +77,20 @@ void struct_free(struct_t *ztruct)
 {
   string_t *name = ztruct->name;
   if (name)
-  {
-    DECR_REF(name);
-    if (IS_UNREACHABLE(name))
-      string_free(name);
-  }
+    string_release(name);
   field_t *fields = ztruct->fields;
   for (int i = 0; i < ztruct->length; ++i)
-  {
-    string_t *name = fields[i].name;
-    DECR_REF(name);
-    if (IS_UNREACHABLE(name))
-      string_free(name);
-  }
+    string_release(fields[i].name);
   free(ztruct->fields);
   free(ztruct->table);
   free(ztruct);
+}
+
+void struct_release(struct_t *ztruct)
+{
+  DECR_REF(ztruct);
+  if (IS_UNREACHABLE(ztruct))
+    struct_free(ztruct);
 }
 
 int struct_index_of(struct_t *ztruct, string_t *name)
@@ -160,12 +158,17 @@ void instance_free(instance_t *inst)
 {
   struct_t *ztruct = inst->ztruct;
   int length = ztruct->length;
-  DECR_REF(ztruct);
-  if (IS_UNREACHABLE(ztruct))
-    struct_free(ztruct);
+  struct_release(ztruct);
   for (int i = 0; i < length; ++i)
     value_release(inst->values[i]);
   free(inst);
+}
+
+void instance_release(instance_t *inst)
+{
+  DECR_REF(inst);
+  if (IS_UNREACHABLE(inst))
+    instance_free(inst);
 }
 
 instance_t *instance_set_field(instance_t *inst, int index, value_t value)
