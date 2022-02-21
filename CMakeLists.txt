@@ -16,6 +16,7 @@ if(NOT MSVC)
 endif()
 
 include_directories(/usr/local/include)
+include_directories(include)
 link_directories(/usr/local/lib)
 
 set(BINARY_DIR ${CMAKE_BINARY_DIR}/../bin)
@@ -31,286 +32,35 @@ else()
 endif()
 
 add_executable(${PROJECT_NAME}
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/compiler.c
-  src/dump.c
-  src/error.c
-  src/fs.c
-  src/hash.c
-  src/iterator.c
+  src/h_array.c
+  src/h_builtin.c
+  src/h_callable.c
+  src/h_chunk.c
+  src/h_common.c
+  src/h_compiler.c
+  src/h_dump.c
+  src/h_error.c
+  src/h_fs.c
+  src/h_hash.c
+  src/h_iterator.c
   src/main.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/scanner.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
+  src/h_memory.c
+  src/h_module.c
+  src/h_range.c
+  src/h_scanner.c
+  src/h_string_map.c
+  src/h_string.c
+  src/h_struct.c
+  src/h_userdata.c
+  src/h_value.c
+  src/h_vm.c)
 
 if(NOT MSVC)
   target_link_libraries(${PROJECT_NAME} m)
   target_link_libraries(${PROJECT_NAME} dl)
 endif()
 
-if(MSVC)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${LIBRARY_DIR})
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${LIBRARY_DIR})
-endif()
-
-add_library(math SHARED
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/compiler.c
-  src/error.c
-  src/hash.c
-  src/iterator.c
-  src/math.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/scanner.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-add_library(os SHARED
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/compiler.c
-  src/error.c
-  src/hash.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/os.c
-  src/range.c
-  src/scanner.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-add_library(io SHARED
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/compiler.c
-  src/error.c
-  src/hash.c
-  src/io.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/scanner.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-add_library(strings SHARED
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/error.c
-  src/hash.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/string_map.c
-  src/string.c
-  src/strings.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-add_library(arrays SHARED
-  src/array.c
-  src/arrays.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/error.c
-  src/hash.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-if(MSVC)
-  find_package(unofficial-sqlite3 CONFIG REQUIRED)
-  find_package(CURL CONFIG REQUIRED)
-  find_package(hiredis CONFIG REQUIRED)
-endif()
-
-add_library(sqlite SHARED
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/error.c
-  src/hash.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/sqlite.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-add_library(url SHARED
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/error.c
-  src/hash.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/url.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-add_library(redis SHARED
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/error.c
-  src/hash.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/redis.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-add_library(hashing SHARED
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/error.c
-  src/hash.c
-  src/hashing.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/ripemd160.c
-  src/sha2.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-add_library(encoding SHARED
-  src/array.c
-  src/builtin.c
-  src/base32.c
-  src/base58.c
-  src/base64.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/encoding.c
-  src/error.c
-  src/hash.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-add_library(secp256r1 SHARED
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/common.c
-  src/ecc.c
-  src/error.c
-  src/hash.c
-  src/iterator.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/secp256r1.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c
-  src/vm.c)
-
-if(MSVC)
-  target_link_libraries(sqlite PRIVATE unofficial::sqlite3::sqlite3)
-  target_link_libraries(url PRIVATE CURL::libcurl)
-  target_link_libraries(redis PRIVATE hiredis::hiredis)
-else()
-  target_link_libraries(sqlite sqlite3)
-  target_link_libraries(url curl)
-  target_link_libraries(redis hiredis)
-endif()
+add_subdirectory(modules)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
@@ -349,7 +99,7 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 
 install(DIRECTORY bin/ DESTINATION bin)
-install(DIRECTORY example/ DESTINATION example)
+install(DIRECTORY examples/ DESTINATION examples)
 install(DIRECTORY lib/ DESTINATION lib)
 install(FILES ${CPACK_RESOURCE_FILE_README} ${CPACK_RESOURCE_FILE_LICENSE}
   DESTINATION docs)

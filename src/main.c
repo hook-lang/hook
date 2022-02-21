@@ -5,12 +5,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "fs.h"
-#include "compiler.h"
-#include "dump.h"
-#include "vm.h"
-#include "common.h"
-#include "error.h"
+#include "h_fs.h"
+#include "h_compiler.h"
+#include "h_dump.h"
+#include "h_vm.h"
+#include "h_common.h"
+#include "h_error.h"
 
 #define VERSION "0.1.0"
 

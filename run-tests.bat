@@ -3,7 +3,7 @@
 echo "Running tests.."
 
 set /a n=0
-for %%f in (test\*.hk) do (
+for %%f in (tests\*.hk) do (
   bin\hook %%f
   set /a n=n+1
 )
