@@ -6,7 +6,7 @@
 #ifndef SECP256R1_H
 #define SECP256R1_H
 
-#include "h_vm.h"
+#include "hook.h"
 
 #ifdef _WIN32
 int __declspec(dllexport) __stdcall load_secp256r1(vm_t *vm);

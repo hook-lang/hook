@@ -7,9 +7,6 @@
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <assert.h>
-#include "h_common.h"
-#include "h_memory.h"
-#include "h_error.h"
 
 typedef struct
 {

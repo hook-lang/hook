@@ -6,7 +6,7 @@
 #ifndef HASHING_H
 #define HASHING_H
 
-#include "h_vm.h"
+#include "hook.h"
 
 #ifdef _WIN32
 int __declspec(dllexport) __stdcall load_hashing(vm_t *vm);

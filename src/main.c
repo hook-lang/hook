@@ -5,12 +5,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "h_fs.h"
-#include "h_compiler.h"
-#include "h_dump.h"
-#include "h_vm.h"
-#include "h_common.h"
-#include "h_error.h"
+#include "hook_fs.h"
+#include "hook_compiler.h"
+#include "hook_dump.h"
+#include "hook_vm.h"
+#include "hook_common.h"
+#include "hook_error.h"
 
 #define VERSION "0.1.0"
 

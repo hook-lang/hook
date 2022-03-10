@@ -5,7 +5,6 @@
 
 #include "secp256r1.h"
 #include "ecc.h"
-#include "h_common.h"
 
 static int new_key_pair_call(vm_t *vm, value_t *args);
 static int sign_hash_call(vm_t *vm, value_t *args);

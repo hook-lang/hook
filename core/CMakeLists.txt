@@ -4,13 +4,73 @@ if(MSVC)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${LIBRARY_DIR})
 endif()
 
-if(MSVC)
-  find_package(unofficial-sqlite3 CONFIG REQUIRED)
-  find_package(CURL CONFIG REQUIRED)
-  find_package(hiredis CONFIG REQUIRED)
-endif()
+add_library(math SHARED
+  ../src/hook_array.c
+  ../src/hook_builtin.c
+  ../src/hook_callable.c
+  ../src/hook_chunk.c
+  ../src/hook_common.c
+  ../src/hook_compiler.c
+  ../src/hook_error.c
+  ../src/hook_hash.c
+  ../src/hook_iterator.c
+  hook_math.c
+  ../src/hook_memory.c
+  ../src/hook_module.c
+  ../src/hook_range.c
+  ../src/hook_scanner.c
+  ../src/hook_string_map.c
+  ../src/hook_string.c
+  ../src/hook_struct.c
+  ../src/hook_userdata.c
+  ../src/hook_value.c
+  ../src/hook_vm.c)
 
-add_library(sqlite SHARED
+add_library(os SHARED
+  ../src/hook_array.c
+  ../src/hook_builtin.c
+  ../src/hook_callable.c
+  ../src/hook_chunk.c
+  ../src/hook_common.c
+  ../src/hook_compiler.c
+  ../src/hook_error.c
+  ../src/hook_hash.c
+  ../src/hook_iterator.c
+  ../src/hook_memory.c
+  ../src/hook_module.c
+  hook_os.c
+  ../src/hook_range.c
+  ../src/hook_scanner.c
+  ../src/hook_string_map.c
+  ../src/hook_string.c
+  ../src/hook_struct.c
+  ../src/hook_userdata.c
+  ../src/hook_value.c
+  ../src/hook_vm.c)
+
+add_library(io SHARED
+  ../src/hook_array.c
+  ../src/hook_builtin.c
+  ../src/hook_callable.c
+  ../src/hook_chunk.c
+  ../src/hook_common.c
+  ../src/hook_compiler.c
+  ../src/hook_error.c
+  ../src/hook_hash.c
+  hook_io.c
+  ../src/hook_iterator.c
+  ../src/hook_memory.c
+  ../src/hook_module.c
+  ../src/hook_range.c
+  ../src/hook_scanner.c
+  ../src/hook_string_map.c
+  ../src/hook_string.c
+  ../src/hook_struct.c
+  ../src/hook_userdata.c
+  ../src/hook_value.c
+  ../src/hook_vm.c)
+
+add_library(strings SHARED
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
@@ -22,16 +82,17 @@ add_library(sqlite SHARED
   ../src/hook_memory.c
   ../src/hook_module.c
   ../src/hook_range.c
-  sqlite.c
   ../src/hook_string_map.c
   ../src/hook_string.c
+  hook_strings.c
   ../src/hook_struct.c
   ../src/hook_userdata.c
   ../src/hook_value.c
   ../src/hook_vm.c)
 
-add_library(url SHARED
+add_library(arrays SHARED
   ../src/hook_array.c
+  hook_arrays.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
@@ -45,103 +106,6 @@ add_library(url SHARED
   ../src/hook_string_map.c
   ../src/hook_string.c
   ../src/hook_struct.c
-  url.c
   ../src/hook_userdata.c
   ../src/hook_value.c
   ../src/hook_vm.c)
-
-add_library(redis SHARED
-  ../src/hook_array.c
-  ../src/hook_builtin.c
-  ../src/hook_callable.c
-  ../src/hook_chunk.c
-  ../src/hook_common.c
-  ../src/hook_error.c
-  ../src/hook_hash.c
-  ../src/hook_iterator.c
-  ../src/hook_memory.c
-  ../src/hook_module.c
-  ../src/hook_range.c
-  redis.c
-  ../src/hook_string_map.c
-  ../src/hook_string.c
-  ../src/hook_struct.c
-  ../src/hook_userdata.c
-  ../src/hook_value.c
-  ../src/hook_vm.c)
-
-add_library(hashing SHARED
-  ../src/hook_array.c
-  ../src/hook_builtin.c
-  ../src/hook_callable.c
-  ../src/hook_chunk.c
-  ../src/hook_common.c
-  ../src/hook_error.c
-  ../src/hook_hash.c
-  hashing.c
-  ../src/hook_iterator.c
-  ../src/hook_memory.c
-  ../src/hook_module.c
-  ../src/hook_range.c
-  ripemd160.c
-  sha2.c
-  ../src/hook_string_map.c
-  ../src/hook_string.c
-  ../src/hook_struct.c
-  ../src/hook_userdata.c
-  ../src/hook_value.c
-  ../src/hook_vm.c)
-
-add_library(encoding SHARED
-  ../src/hook_array.c
-  ../src/hook_builtin.c
-  base32.c
-  base58.c
-  base64.c
-  ../src/hook_callable.c
-  ../src/hook_chunk.c
-  ../src/hook_common.c
-  encoding.c
-  ../src/hook_error.c
-  ../src/hook_hash.c
-  ../src/hook_iterator.c
-  ../src/hook_memory.c
-  ../src/hook_module.c
-  ../src/hook_range.c
-  ../src/hook_string_map.c
-  ../src/hook_string.c
-  ../src/hook_struct.c
-  ../src/hook_userdata.c
-  ../src/hook_value.c
-  ../src/hook_vm.c)
-
-add_library(secp256r1 SHARED
-  ../src/hook_array.c
-  ../src/hook_builtin.c
-  ../src/hook_callable.c
-  ../src/hook_chunk.c
-  ../src/hook_common.c
-  ecc.c
-  ../src/hook_error.c
-  ../src/hook_hash.c
-  ../src/hook_iterator.c
-  ../src/hook_memory.c
-  ../src/hook_module.c
-  ../src/hook_range.c
-  secp256r1.c
-  ../src/hook_string_map.c
-  ../src/hook_string.c
-  ../src/hook_struct.c
-  ../src/hook_userdata.c
-  ../src/hook_value.c
-  ../src/hook_vm.c)
-
-if(MSVC)
-  target_link_libraries(sqlite PRIVATE unofficial::sqlite3::sqlite3)
-  target_link_libraries(url PRIVATE CURL::libcurl)
-  target_link_libraries(redis PRIVATE hiredis::hiredis)
-else()
-  target_link_libraries(sqlite sqlite3)
-  target_link_libraries(url curl)
-  target_link_libraries(redis hiredis)
-endif()

@@ -6,9 +6,6 @@
 #include "url.h"
 #include <stdlib.h>
 #include <curl/curl.h>
-#include "h_memory.h"
-#include "h_common.h"
-#include "h_error.h"
 
 typedef struct
 {

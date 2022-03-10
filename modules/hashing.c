@@ -6,7 +6,6 @@
 #include "hashing.h"
 #include "sha2.h"
 #include "ripemd160.h"
-#include "h_common.h"
 
 #define RIPEMD160_DIGEST_SIZE 20
 

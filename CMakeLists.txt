@@ -8,7 +8,7 @@ project(hook
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
-set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 if(NOT MSVC)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
@@ -32,34 +32,35 @@ else()
 endif()
 
 add_executable(${PROJECT_NAME}
-  src/h_array.c
-  src/h_builtin.c
-  src/h_callable.c
-  src/h_chunk.c
-  src/h_common.c
-  src/h_compiler.c
-  src/h_dump.c
-  src/h_error.c
-  src/h_fs.c
-  src/h_hash.c
-  src/h_iterator.c
+  src/hook_array.c
+  src/hook_builtin.c
+  src/hook_callable.c
+  src/hook_chunk.c
+  src/hook_common.c
+  src/hook_compiler.c
+  src/hook_dump.c
+  src/hook_error.c
+  src/hook_fs.c
+  src/hook_hash.c
+  src/hook_iterator.c
   src/main.c
-  src/h_memory.c
-  src/h_module.c
-  src/h_range.c
-  src/h_scanner.c
-  src/h_string_map.c
-  src/h_string.c
-  src/h_struct.c
-  src/h_userdata.c
-  src/h_value.c
-  src/h_vm.c)
+  src/hook_memory.c
+  src/hook_module.c
+  src/hook_range.c
+  src/hook_scanner.c
+  src/hook_string_map.c
+  src/hook_string.c
+  src/hook_struct.c
+  src/hook_userdata.c
+  src/hook_value.c
+  src/hook_vm.c)
 
 if(NOT MSVC)
   target_link_libraries(${PROJECT_NAME} m)
   target_link_libraries(${PROJECT_NAME} dl)
 endif()
 
+add_subdirectory(core)
 add_subdirectory(modules)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

@@ -6,7 +6,7 @@
 #ifndef REDIS_H
 #define REDIS_H
 
-#include "h_vm.h"
+#include "hook.h"
 
 #ifdef _WIN32
 int __declspec(dllexport) __stdcall load_redis(vm_t *vm);

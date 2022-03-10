@@ -5,7 +5,7 @@
 
 # The Hook Programming Language
 
-Hook is an imperative, cross-platform, dynamically typed scripting language with mutable value semantics. It was written entirely by hand in C using easy-to-understand techniques like recursive descent parsing, stack-based virtual machine, reference counting, etc.
+Hook is an imperative, cross-platform, dynamically typed scripting language based on the mutable value semantic approach. It was written entirely by hand in C using easy-to-understand techniques like recursive descent parsing, stack-based virtual machine, reference counting, etc.
 
 ## What does it look like
 

@@ -6,7 +6,7 @@
 #ifndef SQLITE_H
 #define SQLITE_H
 
-#include "h_vm.h"
+#include "hook.h"
 
 #ifdef _WIN32
 int __declspec(dllexport) __stdcall load_sqlite(vm_t *vm);

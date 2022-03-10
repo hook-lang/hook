@@ -6,7 +6,7 @@
 #ifndef ENCODING_H
 #define ENCODING_H
 
-#include "h_vm.h"
+#include "hook.h"
 
 #ifdef _WIN32
 int __declspec(dllexport) __stdcall load_encoding(vm_t *vm);

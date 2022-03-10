@@ -6,8 +6,6 @@
 #include "redis.h"
 #include <stdlib.h>
 #include <hiredis/hiredis.h>
-#include "h_common.h"
-#include "h_memory.h"
 
 typedef struct
 {
