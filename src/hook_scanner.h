@@ -84,15 +84,15 @@ typedef struct
 
 typedef struct
 {
-  string_t *file;
-  string_t *source;
+  hk_string_t *file;
+  hk_string_t *source;
   char *pos;
   int line;
   int col;
   token_t token;
 } scanner_t;
 
-void scanner_init(scanner_t *scan, string_t *file, string_t *source);
+void scanner_init(scanner_t *scan, hk_string_t *file, hk_string_t *source);
 void scanner_free(scanner_t *scan);
 void scanner_next_token(scanner_t *scan);
 

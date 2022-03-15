@@ -8,6 +8,6 @@
 
 #include "hook_callable.h"
 
-closure_t *compile(string_t *file, string_t *source);
+hk_closure_t *hk_compile(hk_string_t *file, hk_string_t *source);
 
 #endif // HOOK_COMPILER_H

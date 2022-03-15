@@ -13,8 +13,8 @@
 
 typedef struct
 {
-  string_t *key;
-  value_t value;
+  hk_string_t *key;
+  hk_value_t value;
 } string_map_entry_t;
 
 typedef struct
@@ -27,7 +27,7 @@ typedef struct
 
 void string_map_init(string_map_t *map, int min_capacity);
 void string_map_free(string_map_t *map);
-string_map_entry_t *string_map_get_entry(string_map_t *map, string_t *key);
-void string_map_inplace_put(string_map_t *map, string_t *key, value_t value);
+string_map_entry_t *string_map_get_entry(string_map_t *map, hk_string_t *key);
+void string_map_inplace_put(string_map_t *map, hk_string_t *key, hk_value_t value);
 
 #endif // HOOK_STRING_MAP_H

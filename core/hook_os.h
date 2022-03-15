@@ -9,9 +9,9 @@
 #include "hook.h"
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_os(vm_t *vm);
+int __declspec(dllexport) __stdcall load_os(hk_vm_t *vm);
 #else
-int load_os(vm_t *vm);
+int load_os(hk_vm_t *vm);
 #endif
 
 #endif // HOOK_OS_H

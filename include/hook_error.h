@@ -6,7 +6,7 @@
 #ifndef HOOK_ERROR_H
 #define HOOK_ERROR_H
 
-void fatal_error(const char *fmt, ...);
-void runtime_error(const char *fmt, ...);
+void hk_fatal_error(const char *fmt, ...);
+void hk_runtime_error(const char *fmt, ...);
 
 #endif // HOOK_ERROR_H

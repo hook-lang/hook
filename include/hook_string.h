@@ -9,37 +9,37 @@
 #include <stdint.h>
 #include "hook_value.h"
 
-#define STRING_MIN_CAPACITY (1 << 3)
+#define HK_STRING_MIN_CAPACITY (1 << 3)
 
 typedef struct
 {
-  OBJECT_HEADER
+  HK_OBJECT_HEADER
   int capacity;
   int length;
   char *chars;
   int64_t hash;
-} string_t;
+} hk_string_t;
 
-string_t *string_allocate(int min_capacity);
-string_t *string_new(int min_capacity);
-string_t *string_from_chars(int length, const char *chars);
-string_t *string_from_stream(FILE *stream, const char terminal);
-void string_free(string_t *str);
-void string_release(string_t *str);
-string_t *string_concat(string_t *str1, string_t *str2);
-void string_inplace_concat_chars(string_t *dest, int length, const char *chars);
-void string_inplace_concat(string_t *dest, string_t *src);
-void string_print(string_t *str, bool quoted);
-uint32_t string_hash(string_t *str);
-bool string_equal(string_t *str1, string_t *str2);
-int string_compare(string_t *str1, string_t *str2);
-string_t *string_lower(string_t *str);
-string_t *string_upper(string_t *str);
-bool string_trim(string_t *str, string_t **result);
-bool string_starts_with(string_t *str1, string_t *str2);
-bool string_ends_with(string_t *str1, string_t *str2);
-bool string_slice(string_t *str, int start, int stop, string_t **result);
-void string_serialize(string_t *str, FILE *stream);
-string_t *string_deserialize(FILE *stream);
+hk_string_t *hk_string_allocate(int min_capacity);
+hk_string_t *hk_string_new(int min_capacity);
+hk_string_t *hk_string_from_chars(int length, const char *chars);
+hk_string_t *hk_string_from_stream(FILE *stream, const char terminal);
+void hk_string_free(hk_string_t *str);
+void hk_string_release(hk_string_t *str);
+hk_string_t *hk_string_concat(hk_string_t *str1, hk_string_t *str2);
+void hk_string_inplace_concat_chars(hk_string_t *dest, int length, const char *chars);
+void hk_string_inplace_concat(hk_string_t *dest, hk_string_t *src);
+void hk_string_print(hk_string_t *str, bool quoted);
+uint32_t hk_string_hash(hk_string_t *str);
+bool hk_string_equal(hk_string_t *str1, hk_string_t *str2);
+int hk_string_compare(hk_string_t *str1, hk_string_t *str2);
+hk_string_t *hk_string_lower(hk_string_t *str);
+hk_string_t *hk_string_upper(hk_string_t *str);
+bool hk_string_trim(hk_string_t *str, hk_string_t **result);
+bool hk_string_starts_with(hk_string_t *str1, hk_string_t *str2);
+bool hk_string_ends_with(hk_string_t *str1, hk_string_t *str2);
+bool hk_string_slice(hk_string_t *str, int start, int stop, hk_string_t **result);
+void hk_string_serialize(hk_string_t *str, FILE *stream);
+hk_string_t *hk_string_deserialize(FILE *stream);
 
 #endif // HOOK_STRING_H

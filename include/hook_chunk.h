@@ -10,79 +10,76 @@
 #include <stdint.h>
 #include <stdio.h>
 
-typedef enum
-{
-  OP_NIL,
-  OP_FALSE,
-  OP_TRUE,
-  OP_INT,
-  OP_CONSTANT,
-  OP_RANGE,
-  OP_ARRAY,
-  OP_STRUCT,
-  OP_INSTANCE,
-  OP_CONSTRUCT,
-  OP_CLOSURE,
-  OP_UNPACK,
-  OP_DESTRUCT,
-  OP_POP,
-  OP_GLOBAL,
-  OP_NONLOCAL,
-  OP_GET_LOCAL,
-  OP_SET_LOCAL,
-  OP_ADD_ELEMENT,
-  OP_GET_ELEMENT,
-  OP_FETCH_ELEMENT,
-  OP_SET_ELEMENT,
-  OP_PUT_ELEMENT,
-  OP_DELETE_ELEMENT,
-  OP_INPLACE_ADD_ELEMENT,
-  OP_INPLACE_PUT_ELEMENT,
-  OP_INPLACE_DELETE_ELEMENT,
-  OP_GET_FIELD,
-  OP_FETCH_FIELD,
-  OP_SET_FIELD,
-  OP_PUT_FIELD,
-  OP_INPLACE_PUT_FIELD,
-  OP_JUMP,
-  OP_JUMP_IF_FALSE,
-  OP_OR,
-  OP_AND,
-  OP_MATCH,
-  OP_EQUAL,
-  OP_GREATER,
-  OP_LESS,
-  OP_NOT_EQUAL,
-  OP_NOT_GREATER,
-  OP_NOT_LESS,
-  OP_ADD,
-  OP_SUBTRACT,
-  OP_MULTIPLY,
-  OP_DIVIDE,
-  OP_MODULO,
-  OP_NEGATE,
-  OP_NOT,
-  OP_INCR,
-  OP_DECR,
-  OP_CALL,
-  OP_LOAD_MODULE,
-  OP_RETURN,
-  OP_RETURN_NIL
-} opcode_t;
+#define HK_OP_NIL                    0x00
+#define HK_OP_FALSE                  0x01
+#define HK_OP_TRUE                   0x02
+#define HK_OP_INT                    0x03
+#define HK_OP_CONSTANT               0x04
+#define HK_OP_RANGE                  0x05
+#define HK_OP_ARRAY                  0x06
+#define HK_OP_STRUCT                 0x07
+#define HK_OP_INSTANCE               0x08
+#define HK_OP_CONSTRUCT              0x09
+#define HK_OP_CLOSURE                0x0a
+#define HK_OP_UNPACK                 0x0b
+#define HK_OP_DESTRUCT               0x0c
+#define HK_OP_POP                    0x0d
+#define HK_OP_GLOBAL                 0x0e
+#define HK_OP_NONLOCAL               0x0f
+#define HK_OP_GET_LOCAL              0x10
+#define HK_OP_SET_LOCAL              0x11
+#define HK_OP_ADD_ELEMENT            0x12
+#define HK_OP_GET_ELEMENT            0x13
+#define HK_OP_FETCH_ELEMENT          0x14
+#define HK_OP_SET_ELEMENT            0x15
+#define HK_OP_PUT_ELEMENT            0x16
+#define HK_OP_DELETE_ELEMENT         0x17
+#define HK_OP_INPLACE_ADD_ELEMENT    0x18
+#define HK_OP_INPLACE_PUT_ELEMENT    0x19
+#define HK_OP_INPLACE_DELETE_ELEMENT 0x1a
+#define HK_OP_GET_FIELD              0x1b
+#define HK_OP_FETCH_FIELD            0x1c
+#define HK_OP_SET_FIELD              0x1d
+#define HK_OP_PUT_FIELD              0x1e
+#define HK_OP_INPLACE_PUT_FIELD      0x1f
+#define HK_OP_JUMP                   0x20
+#define HK_OP_JUMP_IF_FALSE          0x21
+#define HK_OP_OR                     0x22
+#define HK_OP_AND                    0x23
+#define HK_OP_MATCH                  0x24
+#define HK_OP_EQUAL                  0x25
+#define HK_OP_GREATER                0x26
+#define HK_OP_LESS                   0x27
+#define HK_OP_NOT_EQUAL              0x28
+#define HK_OP_NOT_GREATER            0x29
+#define HK_OP_NOT_LESS               0x2a
+#define HK_OP_ADD                    0x2b
+#define HK_OP_SUBTRACT               0x2c
+#define HK_OP_MULTIPLY               0x2d
+#define HK_OP_DIVIDE                 0x2e
+#define HK_OP_MODULO                 0x2f
+#define HK_OP_NEGATE                 0x30
+#define HK_OP_NOT                    0x31
+#define HK_OP_INCR                   0x32
+#define HK_OP_DECR                   0x33
+#define HK_OP_CALL                   0x34
+#define HK_OP_LOAD_MODULE            0x35
+#define HK_OP_RETURN                 0x36
+#define HK_OP_RETURN_NIL             0X37
 
 typedef struct
 {
   int capacity;
   int length;
   uint8_t *bytes;
-} chunk_t;
+} hk_chunk_t;
 
-void chunk_init(chunk_t *chunk);
-void chunk_free(chunk_t *chunk);
-void chunk_emit_byte(chunk_t *chunk, uint8_t byte);
-void chunk_emit_word(chunk_t *chunk, uint16_t word);
-void chunk_emit_opcode(chunk_t *chunk, opcode_t op);
-void chunk_serialize(chunk_t *chunk, FILE *stream);
-bool chunk_deserialize(chunk_t *chunk, FILE *stream);
+void hk_chunk_init(hk_chunk_t *chunk);
+void hk_chunk_free(hk_chunk_t *chunk);
+void hk_chunk_emit_byte(hk_chunk_t *chunk, uint8_t byte);
+void hk_chunk_emit_word(hk_chunk_t *chunk, uint16_t word);
+void hk_chunk_emit_opcode(hk_chunk_t *chunk, int op);
+void hk_chunk_serialize(hk_chunk_t *chunk, FILE *stream);
+bool hk_chunk_deserialize(hk_chunk_t *chunk, FILE *stream);
 
 #endif // HOOK_CHUNK_H

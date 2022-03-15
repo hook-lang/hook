@@ -9,129 +9,130 @@
 #include "hook_struct.h"
 #include "hook_callable.h"
 #include "hook_userdata.h"
-#include "hook_common.h"
+#include "hook_utils.h"
+#include "hook_status.h"
 #include "hook_error.h"
 
-static inline void value_free(value_t val);
+static inline void value_free(hk_value_t val);
 
-static inline void value_free(value_t val)
+static inline void value_free(hk_value_t val)
 {
   switch (val.type)
   {
-  case TYPE_NIL:
-  case TYPE_BOOLEAN:
-  case TYPE_NUMBER:
+  case HK_TYPE_NIL:
+  case HK_TYPE_BOOLEAN:
+  case HK_TYPE_NUMBER:
     break;
-  case TYPE_STRING:
-    string_free(AS_STRING(val));
+  case HK_TYPE_STRING:
+    hk_string_free(hk_as_string(val));
     break;
-  case TYPE_RANGE:
-    range_free(AS_RANGE(val));
+  case HK_TYPE_RANGE:
+    hk_range_free(hk_as_range(val));
     break;
-  case TYPE_ARRAY:
-    array_free(AS_ARRAY(val));
+  case HK_TYPE_ARRAY:
+    hk_array_free(hk_as_array(val));
     break;
-  case TYPE_STRUCT:
-    struct_free(AS_STRUCT(val));
+  case HK_TYPE_STRUCT:
+    hk_struct_free(hk_as_struct(val));
     break;
-  case TYPE_INSTANCE:
-    instance_free(AS_INSTANCE(val));
+  case HK_TYPE_INSTANCE:
+    hk_instance_free(hk_as_instance(val));
     break;
-  case TYPE_ITERATOR:
-    iterator_free(AS_ITERATOR(val));
+  case HK_TYPE_ITERATOR:
+    hk_iterator_free(hk_as_iterator(val));
     break;
-  case TYPE_CALLABLE:
+  case HK_TYPE_CALLABLE:
     {
-      if (IS_NATIVE(val))
+      if (hk_is_native(val))
       {
-        native_free(AS_NATIVE(val));
+        hk_native_free(hk_as_native(val));
         break;
       }
-      closure_free(AS_CLOSURE(val));
+      hk_closure_free(hk_as_closure(val));
     }
     break;
-  case TYPE_USERDATA:
-    userdata_free(AS_USERDATA(val));
+  case HK_TYPE_USERDATA:
+    hk_userdata_free(hk_as_userdata(val));
     break;
   }
 }
 
-const char *type_name(type_t type)
+const char *hk_type_name(int type)
 {
   char *name = "nil";
   switch (type)
   {
-  case TYPE_NIL:
+  case HK_TYPE_NIL:
     break;
-  case TYPE_BOOLEAN:
+  case HK_TYPE_BOOLEAN:
     name = "boolean";
     break;
-  case TYPE_NUMBER:
+  case HK_TYPE_NUMBER:
     name = "number";
     break;
-  case TYPE_STRING:
+  case HK_TYPE_STRING:
     name = "string";
     break;
-  case TYPE_RANGE:
+  case HK_TYPE_RANGE:
     name = "range";
     break;
-  case TYPE_ARRAY:
+  case HK_TYPE_ARRAY:
     name = "array";
     break;
-  case TYPE_STRUCT:
+  case HK_TYPE_STRUCT:
     name = "struct";
     break;
-  case TYPE_INSTANCE:
+  case HK_TYPE_INSTANCE:
     name = "instance";
     break;
-  case TYPE_ITERATOR:
+  case HK_TYPE_ITERATOR:
     name = "iterator";
     break;
-  case TYPE_CALLABLE:
+  case HK_TYPE_CALLABLE:
     name = "callable";
     break;
-  case TYPE_USERDATA:
+  case HK_TYPE_USERDATA:
     name = "userdata";
     break;
   }
   return name;
 }
 
-void value_release(value_t val)
+void hk_value_release(hk_value_t val)
 {
-  if (!IS_OBJECT(val))
+  if (!hk_is_object(val))
     return;
-  object_t *obj = AS_OBJECT(val);
-  DECR_REF(obj);
-  if (IS_UNREACHABLE(obj))
+  hk_object_t *obj = hk_as_object(val);
+  hk_decr_ref(obj);
+  if (hk_is_unreachable(obj))
     value_free(val);
 }
 
-void value_print(value_t val, bool quoted)
+void hk_value_print(hk_value_t val, bool quoted)
 {
   switch (val.type)
   {
-  case TYPE_NIL:
+  case HK_TYPE_NIL:
     printf("nil");
     break;
-  case TYPE_BOOLEAN:
+  case HK_TYPE_BOOLEAN:
     printf("%s", val.as.boolean ? "true" : "false");
     break;
-  case TYPE_NUMBER:
+  case HK_TYPE_NUMBER:
     printf("%g", val.as.number);
     break;
-  case TYPE_STRING:
-    string_print(AS_STRING(val), quoted);
+  case HK_TYPE_STRING:
+    hk_string_print(hk_as_string(val), quoted);
     break;
-  case TYPE_RANGE:
-    range_print(AS_RANGE(val));
+  case HK_TYPE_RANGE:
+    hk_range_print(hk_as_range(val));
     break;
-  case TYPE_ARRAY:
-    array_print(AS_ARRAY(val));
+  case HK_TYPE_ARRAY:
+    hk_array_print(hk_as_array(val));
     break;
-  case TYPE_STRUCT:
+  case HK_TYPE_STRUCT:
     {
-      string_t *name = AS_STRUCT(val)->name;
+      hk_string_t *name = hk_as_struct(val)->name;
       if (name)
       {
         printf("<struct %.*s at %p>", name->length, name->chars, val.as.pointer);
@@ -140,15 +141,15 @@ void value_print(value_t val, bool quoted)
       printf("<struct at %p>", val.as.pointer);
     }
     break;
-  case TYPE_INSTANCE:
-    instance_print(AS_INSTANCE(val));
+  case HK_TYPE_INSTANCE:
+    hk_instance_print(hk_as_instance(val));
     break;
-  case TYPE_ITERATOR:
+  case HK_TYPE_ITERATOR:
     printf("<iterator at %p>", val.as.pointer);
     break;
-  case TYPE_CALLABLE:
+  case HK_TYPE_CALLABLE:
     {
-      string_t *name = IS_NATIVE(val) ? AS_NATIVE(val)->name : AS_CLOSURE(val)->fn->name;
+      hk_string_t *name = hk_is_native(val) ? hk_as_native(val)->name : hk_as_closure(val)->fn->name;
       if (name)
       {
         printf("<callable %.*s at %p>", name->length, name->chars, val.as.pointer);
@@ -157,41 +158,41 @@ void value_print(value_t val, bool quoted)
       printf("<callable at %p>", val.as.pointer);
     }
     break;
-  case TYPE_USERDATA:
+  case HK_TYPE_USERDATA:
     printf("<userdata at %p>", val.as.pointer);
     break;
   }
 }
 
-bool value_equal(value_t val1, value_t val2)
+bool hk_value_equal(hk_value_t val1, hk_value_t val2)
 {
   if (val1.type != val2.type)
     return false;
   bool result = true;
   switch (val1.type)
   {
-  case TYPE_NIL:
+  case HK_TYPE_NIL:
     break;
-  case TYPE_BOOLEAN:
+  case HK_TYPE_BOOLEAN:
     result = val1.as.boolean == val2.as.boolean;
     break;
-  case TYPE_NUMBER:
+  case HK_TYPE_NUMBER:
     result = val1.as.number == val2.as.number;
     break;
-  case TYPE_STRING:
-    result = string_equal(AS_STRING(val1), AS_STRING(val2));
+  case HK_TYPE_STRING:
+    result = hk_string_equal(hk_as_string(val1), hk_as_string(val2));
     break;
-  case TYPE_RANGE:
-    result = range_equal(AS_RANGE(val1), AS_RANGE(val2));
+  case HK_TYPE_RANGE:
+    result = hk_range_equal(hk_as_range(val1), hk_as_range(val2));
     break;
-  case TYPE_ARRAY:
-    result = array_equal(AS_ARRAY(val1), AS_ARRAY(val2));
+  case HK_TYPE_ARRAY:
+    result = hk_array_equal(hk_as_array(val1), hk_as_array(val2));
     break;
-  case TYPE_STRUCT:
-    result = struct_equal(AS_STRUCT(val1), AS_STRUCT(val2));
+  case HK_TYPE_STRUCT:
+    result = hk_struct_equal(hk_as_struct(val1), hk_as_struct(val2));
     break;
-  case TYPE_INSTANCE:
-    instance_equal(AS_INSTANCE(val1), AS_INSTANCE(val2));
+  case HK_TYPE_INSTANCE:
+    result = hk_instance_equal(hk_as_instance(val1), hk_as_instance(val2));
     break;
   default:
     result = val1.as.pointer == val2.as.pointer;
@@ -200,71 +201,70 @@ bool value_equal(value_t val1, value_t val2)
   return result;
 }
 
-int value_compare(value_t val1, value_t val2, int *result)
+int hk_value_compare(hk_value_t val1, hk_value_t val2, int *result)
 {
   if (val1.type != val2.type)
   {
-    runtime_error("type error: cannot compare %s and %s", type_name(val1.type),
-      type_name(val2.type));
-    return STATUS_ERROR;
+    hk_runtime_error("type error: cannot compare %s and %s", hk_type_name(val1.type),
+      hk_type_name(val2.type));
+    return HK_STATUS_ERROR;
   }
   switch (val1.type)
   {
-  case TYPE_NIL:
+  case HK_TYPE_NIL:
     *result = 0;
-    return STATUS_OK;
-  case TYPE_BOOLEAN:
+    return HK_STATUS_OK;
+  case HK_TYPE_BOOLEAN:
     *result = val1.as.boolean - val2.as.boolean;
-    return STATUS_OK;
-  case TYPE_NUMBER:
+    return HK_STATUS_OK;
+  case HK_TYPE_NUMBER:
     if (val1.as.number > val2.as.number)
     {
       *result = 1;
-      return STATUS_OK;
+      return HK_STATUS_OK;
     }
     if (val1.as.number < val2.as.number)
     {
       *result = -1;
-      return STATUS_OK;
+      return HK_STATUS_OK;
     }
     *result = 0;
-    return STATUS_OK;
-  case TYPE_STRING:
-    *result = string_compare(AS_STRING(val1), AS_STRING(val2));
-    return STATUS_OK;
-  case TYPE_RANGE:
-    *result = range_compare(AS_RANGE(val1), AS_RANGE(val2));
-    return STATUS_OK;
-  case TYPE_ARRAY:
-    return array_compare(AS_ARRAY(val1), AS_ARRAY(val2), result);
+    return HK_STATUS_OK;
+  case HK_TYPE_STRING:
+    *result = hk_string_compare(hk_as_string(val1), hk_as_string(val2));
+    return HK_STATUS_OK;
+  case HK_TYPE_RANGE:
+    *result = hk_range_compare(hk_as_range(val1), hk_as_range(val2));
+    return HK_STATUS_OK;
+  case HK_TYPE_ARRAY:
+    return hk_array_compare(hk_as_array(val1), hk_as_array(val2), result);
   default:
     break;
   }
-  runtime_error("type error: value of type %s is not comparable", type_name(val1.type));
-  return STATUS_ERROR;
+  hk_runtime_error("type error: value of type %s is not comparable", hk_type_name(val1.type));
+  return HK_STATUS_ERROR;
 }
 
-void value_serialize(value_t val, FILE *stream)
+void hk_value_serialize(hk_value_t val, FILE *stream)
 {
   int type = val.type;
   int flags = val.flags;
   fwrite(&type, sizeof(type), 1, stream);
   fwrite(&flags, sizeof(flags), 1, stream);
-  type_t _type = (type_t) type;
-  if (_type == TYPE_NUMBER)
+  if (type == HK_TYPE_NUMBER)
   {
     fwrite(&val.as.number, sizeof(val.as.number), 1, stream);
     return;
   }
-  if (_type == TYPE_STRING)
+  if (type == HK_TYPE_STRING)
   {
-    string_serialize(AS_STRING(val), stream);
+    hk_string_serialize(hk_as_string(val), stream);
     return;
   }
-  ASSERT(false, "unimplemented serialization");
+  hk_assert(false, "unimplemented serialization");
 }
 
-bool value_deserialize(FILE *stream, value_t *result)
+bool hk_value_deserialize(FILE *stream, hk_value_t *result)
 {
   int type;
   int flags;
@@ -272,19 +272,18 @@ bool value_deserialize(FILE *stream, value_t *result)
     return false;
   if (fread(&flags, sizeof(flags), 1, stream) != 1)
     return false;
-  type_t _type = (type_t) type;
-  ASSERT(_type == TYPE_NUMBER || _type == TYPE_STRING, "unimplemented deserialization");
-  if (_type == TYPE_NUMBER)
+  hk_assert(type == HK_TYPE_NUMBER || type == HK_TYPE_STRING, "unimplemented deserialization");
+  if (type == HK_TYPE_NUMBER)
   {
     double data;
     if (fread(&data, sizeof(data), 1, stream) != 1)
       return false;
-    *result = NUMBER_VALUE(data);
+    *result = hk_number_value(data);
     return true;
   }
-  string_t *str = string_deserialize(stream);
+  hk_string_t *str = hk_string_deserialize(stream);
   if (!str)
     return false;
-  *result = STRING_VALUE(str);
+  *result = hk_string_value(str);
   return true;
 }

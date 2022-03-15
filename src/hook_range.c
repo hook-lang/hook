@@ -9,46 +9,46 @@
 
 typedef struct
 {
-  ITERATOR_HEADER
-  range_t *iterable;
+  HK_ITERATOR_HEADER
+  hk_range_t *iterable;
   long current;
 } range_iterator_t;
 
-static void range_iterator_deinit(iterator_t *it);
-static bool range_iterator_is_valid(iterator_t *it);
-static value_t range_iterator_get_current(iterator_t *it);
-static void range_iterator_next(iterator_t *it);
+static void range_iterator_deinit(hk_iterator_t *it);
+static bool range_iterator_is_valid(hk_iterator_t *it);
+static hk_value_t range_iterator_get_current(hk_iterator_t *it);
+static void range_iterator_next(hk_iterator_t *it);
 
-static void range_iterator_deinit(iterator_t *it)
+static void range_iterator_deinit(hk_iterator_t *it)
 {
-  range_release(((range_iterator_t *) it)->iterable);
+  hk_range_release(((range_iterator_t *) it)->iterable);
 }
 
-static bool range_iterator_is_valid(iterator_t *it)
+static bool range_iterator_is_valid(hk_iterator_t *it)
 {
   range_iterator_t *range_it = (range_iterator_t *) it;
-  range_t *range = range_it->iterable;
+  hk_range_t *range = range_it->iterable;
   if (range->step == 1)
     return range_it->current <= range->end;
   return range_it->current >= range->end;
 }
 
-static value_t range_iterator_get_current(iterator_t *it)
+static hk_value_t range_iterator_get_current(hk_iterator_t *it)
 {
   range_iterator_t *range_it = (range_iterator_t *) it;
-  return NUMBER_VALUE((double) range_it->current);
+  return hk_number_value((double) range_it->current);
 }
 
-static void range_iterator_next(iterator_t *it)
+static void range_iterator_next(hk_iterator_t *it)
 {
   range_iterator_t *range_it = (range_iterator_t *) it;
-  range_t *range = range_it->iterable;
+  hk_range_t *range = range_it->iterable;
   range_it->current += range->step;
 }
 
-range_t *range_new(long start, long end)
+hk_range_t *hk_range_new(long start, long end)
 {
-  range_t *range = (range_t *) allocate(sizeof(*range));
+  hk_range_t *range = (hk_range_t *) hk_allocate(sizeof(*range));
   range->ref_count = 0;
   range->step = start < end ? 1 : -1;
   range->start = start;
@@ -56,30 +56,30 @@ range_t *range_new(long start, long end)
   return range;
 }
 
-void range_free(range_t *range)
+void hk_range_free(hk_range_t *range)
 {
   free(range);
 }
 
-void range_release(range_t *range)
+void hk_range_release(hk_range_t *range)
 {
-  DECR_REF(range);
-  if (IS_UNREACHABLE(range))
-    range_free(range);
+  hk_decr_ref(range);
+  if (hk_is_unreachable(range))
+    hk_range_free(range);
 }
 
-void range_print(range_t *range)
+void hk_range_print(hk_range_t *range)
 {
   printf("%ld..%ld", range->start, range->end);
 }
 
-bool range_equal(range_t *range1, range_t *range2)
+bool hk_range_equal(hk_range_t *range1, hk_range_t *range2)
 {
   return range1->start == range2->start
     && range1->end == range2->end;
 }
 
-int range_compare(range_t *range1, range_t *range2)
+int hk_range_compare(hk_range_t *range1, hk_range_t *range2)
 {
   if (range1->start < range2->start)
     return -1;
@@ -92,14 +92,14 @@ int range_compare(range_t *range1, range_t *range2)
   return 0;
 }
 
-iterator_t *range_new_iterator(range_t *range)
+hk_iterator_t *hk_range_new_iterator(hk_range_t *range)
 {
-  range_iterator_t *it = (range_iterator_t *) allocate(sizeof(*it));
-  iterator_init((iterator_t *) it, &range_iterator_deinit,
+  range_iterator_t *it = (range_iterator_t *) hk_allocate(sizeof(*it));
+  hk_iterator_init((hk_iterator_t *) it, &range_iterator_deinit,
     &range_iterator_is_valid, &range_iterator_get_current,
     &range_iterator_next);
-  INCR_REF(range);
+  hk_incr_ref(range);
   it->iterable = range;
   it->current = range->start;
-  return (iterator_t *) it;
+  return (hk_iterator_t *) it;
 }

@@ -11,52 +11,52 @@
 #include "hook_callable.h"
 #include "hook_userdata.h"
 
-#define VM_MIN_CAPACITY (1 << 8)
+#define HK_VM_MIN_CAPACITY (1 << 8)
 
-typedef struct vm
+typedef struct hk_vm
 {
   int limit;
   int top;
-  value_t *slots;
-} vm_t;
+  hk_value_t *slots;
+} hk_vm_t;
 
-void vm_init(vm_t *vm, int min_capacity);
-void vm_free(vm_t *vm);
-int vm_push(vm_t *vm, value_t val);
-int vm_push_nil(vm_t *vm);
-int vm_push_boolean(vm_t *vm, bool data);
-int vm_push_number(vm_t *vm, double data);
-int vm_push_string(vm_t *vm, string_t *str);
-int vm_push_string_from_chars(vm_t *vm, int length, const char *chars);
-int vm_push_string_from_stream(vm_t *vm, FILE *stream, const char terminal);
-int vm_push_range(vm_t *vm, range_t *range);
-int vm_push_array(vm_t *vm, array_t *arr);
-int vm_push_struct(vm_t *vm, struct_t *ztruct);
-int vm_push_instance(vm_t *vm, instance_t *inst);
-int vm_push_iterator(vm_t *vm, iterator_t *it);
-int vm_push_closure(vm_t *vm, closure_t *cl);
-int vm_push_native(vm_t *vm, native_t *native);
-int vm_push_new_native(vm_t *vm, const char *name, int arity, int (*call)(vm_t *, value_t *));
-int vm_push_userdata(vm_t *vm, userdata_t *udata);
-int vm_array(vm_t *vm, int length);
-int vm_struct(vm_t *vm, int length);
-int vm_instance(vm_t *vm, int length);
-int vm_construct(vm_t *vm, int length);
-void vm_pop(vm_t *vm);
-int vm_call(vm_t *vm, int num_args);
-int vm_check_type(value_t *args, int index, type_t type);
-int vm_check_types(value_t *args, int index, int num_types, type_t types[]);
-int vm_check_boolean(value_t *args, int index);
-int vm_check_number(value_t *args, int index);
-int vm_check_integer(value_t *args, int index);
-int vm_check_int(value_t *args, int index);
-int vm_check_string(value_t *args, int index);
-int vm_check_range(value_t *args, int index);
-int vm_check_array(value_t *args, int index);
-int vm_check_struct(value_t *args, int index);
-int vm_check_instance(value_t *args, int index);
-int vm_check_iterator(value_t *args, int index);
-int vm_check_callable(value_t *args, int index);
-int vm_check_userdata(value_t *args, int index);
+void hk_vm_init(hk_vm_t *vm, int min_capacity);
+void hk_vm_free(hk_vm_t *vm);
+int hk_vm_push(hk_vm_t *vm, hk_value_t val);
+int hk_vm_push_nil(hk_vm_t *vm);
+int hk_vm_push_boolean(hk_vm_t *vm, bool data);
+int hk_vm_push_number(hk_vm_t *vm, double data);
+int hk_vm_push_string(hk_vm_t *vm, hk_string_t *str);
+int hk_vm_push_string_from_chars(hk_vm_t *vm, int length, const char *chars);
+int hk_vm_push_string_from_stream(hk_vm_t *vm, FILE *stream, const char terminal);
+int hk_vm_push_range(hk_vm_t *vm, hk_range_t *range);
+int hk_vm_push_array(hk_vm_t *vm, hk_array_t *arr);
+int hk_vm_push_struct(hk_vm_t *vm, hk_struct_t *ztruct);
+int hk_vm_push_instance(hk_vm_t *vm, hk_instance_t *inst);
+int hk_vm_push_iterator(hk_vm_t *vm, hk_iterator_t *it);
+int hk_vm_push_closure(hk_vm_t *vm, hk_closure_t *cl);
+int hk_vm_push_native(hk_vm_t *vm, hk_native_t *native);
+int hk_vm_push_new_native(hk_vm_t *vm, const char *name, int arity, int (*call)(hk_vm_t *, hk_value_t *));
+int hk_vm_push_userdata(hk_vm_t *vm, hk_userdata_t *udata);
+int hk_vm_array(hk_vm_t *vm, int length);
+int hk_vm_struct(hk_vm_t *vm, int length);
+int hk_vm_instance(hk_vm_t *vm, int length);
+int hk_vm_construct(hk_vm_t *vm, int length);
+void hk_vm_pop(hk_vm_t *vm);
+int hk_vm_call(hk_vm_t *vm, int num_args);
+int hk_vm_check_type(hk_value_t *args, int index, int type);
+int hk_vm_check_types(hk_value_t *args, int index, int num_types, int types[]);
+int hk_vm_check_boolean(hk_value_t *args, int index);
+int hk_vm_check_number(hk_value_t *args, int index);
+int hk_vm_check_integer(hk_value_t *args, int index);
+int hk_vm_check_int(hk_value_t *args, int index);
+int hk_vm_check_string(hk_value_t *args, int index);
+int hk_vm_check_range(hk_value_t *args, int index);
+int hk_vm_check_array(hk_value_t *args, int index);
+int hk_vm_check_struct(hk_value_t *args, int index);
+int hk_vm_check_instance(hk_value_t *args, int index);
+int hk_vm_check_iterator(hk_value_t *args, int index);
+int hk_vm_check_callable(hk_value_t *args, int index);
+int hk_vm_check_userdata(hk_value_t *args, int index);
 
 #endif // HOOK_VM_H

@@ -15,7 +15,7 @@ add_library(sqlite SHARED
   ../src/hook_builtin.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
-  ../src/hook_common.c
+  ../src/hook_utils.c
   ../src/hook_error.c
   ../src/hook_hash.c
   ../src/hook_iterator.c
@@ -35,7 +35,7 @@ add_library(url SHARED
   ../src/hook_builtin.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
-  ../src/hook_common.c
+  ../src/hook_utils.c
   ../src/hook_error.c
   ../src/hook_hash.c
   ../src/hook_iterator.c
@@ -55,7 +55,7 @@ add_library(redis SHARED
   ../src/hook_builtin.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
-  ../src/hook_common.c
+  ../src/hook_utils.c
   ../src/hook_error.c
   ../src/hook_hash.c
   ../src/hook_iterator.c
@@ -75,7 +75,7 @@ add_library(hashing SHARED
   ../src/hook_builtin.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
-  ../src/hook_common.c
+  ../src/hook_utils.c
   ../src/hook_error.c
   ../src/hook_hash.c
   hashing.c
@@ -100,7 +100,7 @@ add_library(encoding SHARED
   base64.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
-  ../src/hook_common.c
+  ../src/hook_utils.c
   encoding.c
   ../src/hook_error.c
   ../src/hook_hash.c
@@ -120,7 +120,7 @@ add_library(secp256r1 SHARED
   ../src/hook_builtin.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
-  ../src/hook_common.c
+  ../src/hook_utils.c
   ecc.c
   ../src/hook_error.c
   ../src/hook_hash.c

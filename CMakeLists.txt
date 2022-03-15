@@ -36,11 +36,10 @@ add_executable(${PROJECT_NAME}
   src/hook_builtin.c
   src/hook_callable.c
   src/hook_chunk.c
-  src/hook_common.c
+  src/hook_utils.c
   src/hook_compiler.c
   src/hook_dump.c
   src/hook_error.c
-  src/hook_fs.c
   src/hook_hash.c
   src/hook_iterator.c
   src/main.c

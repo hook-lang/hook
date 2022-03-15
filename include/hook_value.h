@@ -9,81 +9,78 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define FLAG_NONE   0b0000
-#define FLAG_OBJECT 0b0001
-#define FLAG_FALSEY 0b0010
-#define FLAG_NATIVE 0b0100
+#define HK_TYPE_NIL      0x00
+#define HK_TYPE_BOOLEAN  0x01
+#define HK_TYPE_NUMBER   0x02
+#define HK_TYPE_STRING   0x03
+#define HK_TYPE_RANGE    0x04
+#define HK_TYPE_ARRAY    0x05
+#define HK_TYPE_STRUCT   0x06
+#define HK_TYPE_INSTANCE 0x07
+#define HK_TYPE_ITERATOR 0x08
+#define HK_TYPE_CALLABLE 0x09
+#define HK_TYPE_USERDATA 0x0a
 
-#define NIL_VALUE         ((value_t) {.type = TYPE_NIL, .flags = FLAG_FALSEY})
-#define FALSE_VALUE       ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_FALSEY, .as.boolean = false})
-#define TRUE_VALUE        ((value_t) {.type = TYPE_BOOLEAN, .flags = FLAG_NONE, .as.boolean = true})
-#define NUMBER_VALUE(n)   ((value_t) {.type = TYPE_NUMBER, .flags = FLAG_NONE, .as.number = (n)})
-#define STRING_VALUE(s)   ((value_t) {.type = TYPE_STRING, .flags = FLAG_OBJECT, .as.pointer = (s)})
-#define RANGE_VALUE(r)    ((value_t) {.type = TYPE_RANGE, .flags = FLAG_OBJECT, .as.pointer = (r)})
-#define ARRAY_VALUE(a)    ((value_t) {.type = TYPE_ARRAY, .flags = FLAG_OBJECT, .as.pointer = (a)})
-#define STRUCT_VALUE(s)   ((value_t) {.type = TYPE_STRUCT, .flags = FLAG_OBJECT, .as.pointer = (s)})
-#define INSTANCE_VALUE(i) ((value_t) {.type = TYPE_INSTANCE, .flags = FLAG_OBJECT, .as.pointer = (i)})
-#define ITERATOR_VALUE(i) ((value_t) {.type = TYPE_ITERATOR, .flags = FLAG_OBJECT, .as.pointer = (i)})
-#define CLOSURE_VALUE(c)  ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT, .as.pointer = (c)})
-#define NATIVE_VALUE(n)   ((value_t) {.type = TYPE_CALLABLE, .flags = FLAG_OBJECT | FLAG_NATIVE, .as.pointer = (n)})
-#define USERDATA_VALUE(u) ((value_t) {.type = TYPE_USERDATA, .flags = FLAG_OBJECT, .as.pointer = (u)})
+#define HK_FLAG_NONE   0b0000
+#define HK_FLAG_OBJECT 0b0001
+#define HK_FLAG_FALSEY 0b0010
+#define HK_FLAG_NATIVE 0b0100
 
-#define IS_NIL(v)      ((v).type == TYPE_NIL)
-#define IS_BOOLEAN(v)  ((v).type == TYPE_BOOLEAN)
-#define IS_NUMBER(v)   ((v).type == TYPE_NUMBER)
-#define IS_INTEGER(v)  (IS_NUMBER(v) && (v).as.number == (long) (v).as.number)
-#define IS_INT(v)      (IS_NUMBER(v) && (v).as.number == (int) (v).as.number)
-#define IS_STRING(v)   ((v).type == TYPE_STRING)
-#define IS_RANGE(v)    ((v).type == TYPE_RANGE)
-#define IS_ARRAY(v)    ((v).type == TYPE_ARRAY)
-#define IS_STRUCT(v)   ((v).type == TYPE_STRUCT)
-#define IS_INSTANCE(v) ((v).type == TYPE_INSTANCE)
-#define IS_ITERATOR(v) ((v).type == TYPE_ITERATOR)
-#define IS_CALLABLE(v) ((v).type == TYPE_CALLABLE)
-#define IS_USERDATA(v) ((v).type == TYPE_USERDATA)
-#define IS_OBJECT(v)   ((v).flags & FLAG_OBJECT)
-#define IS_FALSEY(v)   ((v).flags & FLAG_FALSEY)
-#define IS_TRUTHY(v)   (!IS_FALSEY(v))
-#define IS_NATIVE(v)   ((v).flags & FLAG_NATIVE)
+#define HK_NIL_VALUE         ((hk_value_t) {.type = HK_TYPE_NIL, .flags = HK_FLAG_FALSEY})
+#define HK_FALSE_VALUE       ((hk_value_t) {.type = HK_TYPE_BOOLEAN, .flags = HK_FLAG_FALSEY, .as.boolean = false})
+#define HK_TRUE_VALUE        ((hk_value_t) {.type = HK_TYPE_BOOLEAN, .flags = HK_FLAG_NONE, .as.boolean = true})
+#define hk_number_value(n)   ((hk_value_t) {.type = HK_TYPE_NUMBER, .flags = HK_FLAG_NONE, .as.number = (n)})
+#define hk_string_value(s)   ((hk_value_t) {.type = HK_TYPE_STRING, .flags = HK_FLAG_OBJECT, .as.pointer = (s)})
+#define hk_range_value(r)    ((hk_value_t) {.type = HK_TYPE_RANGE, .flags = HK_FLAG_OBJECT, .as.pointer = (r)})
+#define hk_array_value(a)    ((hk_value_t) {.type = HK_TYPE_ARRAY, .flags = HK_FLAG_OBJECT, .as.pointer = (a)})
+#define hk_struct_value(s)   ((hk_value_t) {.type = HK_TYPE_STRUCT, .flags = HK_FLAG_OBJECT, .as.pointer = (s)})
+#define hk_instance_value(i) ((hk_value_t) {.type = HK_TYPE_INSTANCE, .flags = HK_FLAG_OBJECT, .as.pointer = (i)})
+#define hk_iterator_value(i) ((hk_value_t) {.type = HK_TYPE_ITERATOR, .flags = HK_FLAG_OBJECT, .as.pointer = (i)})
+#define hk_closure_value(c)  ((hk_value_t) {.type = HK_TYPE_CALLABLE, .flags = HK_FLAG_OBJECT, .as.pointer = (c)})
+#define hk_native_value(n)   ((hk_value_t) {.type = HK_TYPE_CALLABLE, .flags = HK_FLAG_OBJECT | HK_FLAG_NATIVE, .as.pointer = (n)})
+#define hk_userdata_value(u) ((hk_value_t) {.type = HK_TYPE_USERDATA, .flags = HK_FLAG_OBJECT, .as.pointer = (u)})
 
-#define AS_STRING(v)   ((string_t *) (v).as.pointer)
-#define AS_RANGE(v)    ((range_t *) (v).as.pointer)
-#define AS_ARRAY(v)    ((array_t *) (v).as.pointer)
-#define AS_STRUCT(v)   ((struct_t *) (v).as.pointer)
-#define AS_INSTANCE(v) ((instance_t *) (v).as.pointer)
-#define AS_ITERATOR(v) ((iterator_t *) (v).as.pointer)
-#define AS_CLOSURE(v)  ((closure_t *) (v).as.pointer)
-#define AS_NATIVE(v)   ((native_t *) (v).as.pointer)
-#define AS_USERDATA(v) ((userdata_t *) (v).as.pointer)
-#define AS_OBJECT(v)   ((object_t *) (v).as.pointer)
+#define hk_is_nil(v)      ((v).type == HK_TYPE_NIL)
+#define hk_is_boolean(v)  ((v).type == HK_TYPE_BOOLEAN)
+#define hk_is_number(v)   ((v).type == HK_TYPE_NUMBER)
+#define hk_is_integer(v)  (hk_is_number(v) && (v).as.number == (long) (v).as.number)
+#define hk_is_int(v)      (hk_is_number(v) && (v).as.number == (int) (v).as.number)
+#define hk_is_string(v)   ((v).type == HK_TYPE_STRING)
+#define hk_is_range(v)    ((v).type == HK_TYPE_RANGE)
+#define hk_is_array(v)    ((v).type == HK_TYPE_ARRAY)
+#define hk_is_struct(v)   ((v).type == HK_TYPE_STRUCT)
+#define hk_is_instance(v) ((v).type == HK_TYPE_INSTANCE)
+#define hk_is_iterator(v) ((v).type == HK_TYPE_ITERATOR)
+#define hk_is_callable(v) ((v).type == HK_TYPE_CALLABLE)
+#define hk_is_userdata(v) ((v).type == HK_TYPE_USERDATA)
+#define hk_is_object(v)   ((v).flags & HK_FLAG_OBJECT)
+#define hk_is_falsey(v)   ((v).flags & HK_FLAG_FALSEY)
+#define hk_is_truthy(v)   (!hk_is_falsey(v))
+#define hk_is_native(v)   ((v).flags & HK_FLAG_NATIVE)
 
-#define OBJECT_HEADER int ref_count;
+#define hk_as_string(v)   ((hk_string_t *) (v).as.pointer)
+#define hk_as_range(v)    ((hk_range_t *) (v).as.pointer)
+#define hk_as_array(v)    ((hk_array_t *) (v).as.pointer)
+#define hk_as_struct(v)   ((hk_struct_t *) (v).as.pointer)
+#define hk_as_instance(v) ((hk_instance_t *) (v).as.pointer)
+#define hk_as_iterator(v) ((hk_iterator_t *) (v).as.pointer)
+#define hk_as_closure(v)  ((hk_closure_t *) (v).as.pointer)
+#define hk_as_native(v)   ((hk_native_t *) (v).as.pointer)
+#define hk_as_userdata(v) ((hk_userdata_t *) (v).as.pointer)
+#define hk_as_object(v)   ((hk_object_t *) (v).as.pointer)
 
-#define INCR_REF(o)       ++(o)->ref_count
-#define DECR_REF(o)       --(o)->ref_count
-#define IS_UNREACHABLE(o) (!(o)->ref_count)
+#define HK_OBJECT_HEADER int ref_count;
 
-#define VALUE_INCR_REF(v) if (IS_OBJECT(v)) INCR_REF(AS_OBJECT(v))
-#define VALUE_DECR_REF(v) if (IS_OBJECT(v)) DECR_REF(AS_OBJECT(v))
+#define hk_incr_ref(o)       ++(o)->ref_count
+#define hk_decr_ref(o)       --(o)->ref_count
+#define hk_is_unreachable(o) (!(o)->ref_count)
 
-typedef enum
-{
-  TYPE_NIL,
-  TYPE_BOOLEAN,
-  TYPE_NUMBER,
-  TYPE_STRING,
-  TYPE_RANGE,
-  TYPE_ARRAY,
-  TYPE_STRUCT,
-  TYPE_INSTANCE,
-  TYPE_ITERATOR,
-  TYPE_CALLABLE,
-  TYPE_USERDATA
-} type_t;
+#define hk_value_incr_ref(v) if (hk_is_object(v)) hk_incr_ref(hk_as_object(v))
+#define hk_value_decr_ref(v) if (hk_is_object(v)) hk_decr_ref(hk_as_object(v))
 
 typedef struct
 {
-  type_t type;
+  int type;
   int flags;
   union
   {
@@ -91,19 +88,19 @@ typedef struct
     double number;
     void *pointer;
   } as;
-} value_t;
+} hk_value_t;
 
 typedef struct
 {
-  OBJECT_HEADER
-} object_t;
+  HK_OBJECT_HEADER
+} hk_object_t;
 
-const char *type_name(type_t type);
-void value_release(value_t val);
-void value_print(value_t val, bool quoted);
-bool value_equal(value_t val1, value_t val2);
-int value_compare(value_t val1, value_t val2, int *result);
-void value_serialize(value_t val, FILE *stream);
-bool value_deserialize(FILE *stream, value_t *result);
+const char *hk_type_name(int type);
+void hk_value_release(hk_value_t val);
+void hk_value_print(hk_value_t val, bool quoted);
+bool hk_value_equal(hk_value_t val1, hk_value_t val2);
+int hk_value_compare(hk_value_t val1, hk_value_t val2, int *result);
+void hk_value_serialize(hk_value_t val, FILE *stream);
+bool hk_value_deserialize(FILE *stream, hk_value_t *result);
 
 #endif // HOOK_VALUE_H

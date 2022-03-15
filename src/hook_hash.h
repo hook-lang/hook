@@ -8,6 +8,6 @@
 
 #include <stdint.h>
 
-uint32_t hash(int length, char *chars);
+uint32_t hash_fnv1a(int length, char *chars);
 
 #endif // HOOK_HASH_H

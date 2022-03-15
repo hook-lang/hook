@@ -10,29 +10,29 @@
 #include "hook_string.h"
 #include "hook_memory.h"
 
-static inline field_t **allocate_table(int capacity);
-static inline field_t *add_field(struct_t *ztruct, string_t *name);
-static inline void resize(struct_t *ztruct);
+static inline hk_field_t **allocate_table(int capacity);
+static inline hk_field_t *add_field(hk_struct_t *ztruct, hk_string_t *name);
+static inline void resize(hk_struct_t *ztruct);
 
-static inline field_t **allocate_table(int capacity)
+static inline hk_field_t **allocate_table(int capacity)
 {
-  field_t **table = (field_t **) allocate(sizeof(*table) * capacity);
+  hk_field_t **table = (hk_field_t **) hk_allocate(sizeof(*table) * capacity);
   for (int i = 0; i < capacity; ++i)
     table[i] = NULL;
   return table;
 }
 
-static inline field_t *add_field(struct_t *ztruct, string_t *name)
+static inline hk_field_t *add_field(hk_struct_t *ztruct, hk_string_t *name)
 {
-  field_t *field = &ztruct->fields[ztruct->length];
-  INCR_REF(name);
+  hk_field_t *field = &ztruct->fields[ztruct->length];
+  hk_incr_ref(name);
   field->name = name;
   field->index = ztruct->length;
   ++ztruct->length;
   return field;
 }
 
-static inline void resize(struct_t *ztruct)
+static inline void resize(hk_struct_t *ztruct)
 {
   int length = ztruct->length;
   if (length / STRUCT_MAX_LOAD_FACTOR <= ztruct->capacity)
@@ -41,15 +41,15 @@ static inline void resize(struct_t *ztruct)
   ztruct->capacity = capacity;
   int mask = capacity - 1;
   ztruct->mask = mask;
-  ztruct->fields = (field_t *) reallocate(ztruct->fields,
+  ztruct->fields = (hk_field_t *) hk_reallocate(ztruct->fields,
     sizeof(*ztruct->fields) * capacity);
-  field_t **table = allocate_table(capacity);
+  hk_field_t **table = allocate_table(capacity);
   free(ztruct->table);
   ztruct->table = table;
-  field_t *fields = ztruct->fields;
+  hk_field_t *fields = ztruct->fields;
   for (int i = 0; i < length; i++)
   {
-    field_t *field = &fields[i];
+    hk_field_t *field = &fields[i];
     int j = field->name->hash & mask;
     while (table[j])
       j = (j + 1) & mask;
@@ -57,149 +57,149 @@ static inline void resize(struct_t *ztruct)
   }
 }
 
-struct_t *struct_new(string_t *name)
+hk_struct_t *hk_struct_new(hk_string_t *name)
 {
   int capacity = STRUCT_MIN_CAPACITY;
-  struct_t *ztruct = (struct_t *) allocate(sizeof(*ztruct));
+  hk_struct_t *ztruct = (hk_struct_t *) hk_allocate(sizeof(*ztruct));
   ztruct->ref_count = 0;
   ztruct->capacity = capacity;
   ztruct->mask = capacity - 1;
   ztruct->length = 0;
   if (name)
-    INCR_REF(name);
+    hk_incr_ref(name);
   ztruct->name = name;
-  ztruct->fields = (field_t *) allocate(sizeof(*ztruct->fields) * capacity);
+  ztruct->fields = (hk_field_t *) hk_allocate(sizeof(*ztruct->fields) * capacity);
   ztruct->table = allocate_table(capacity);
   return ztruct;
 }
 
-void struct_free(struct_t *ztruct)
+void hk_struct_free(hk_struct_t *ztruct)
 {
-  string_t *name = ztruct->name;
+  hk_string_t *name = ztruct->name;
   if (name)
-    string_release(name);
-  field_t *fields = ztruct->fields;
+    hk_string_release(name);
+  hk_field_t *fields = ztruct->fields;
   for (int i = 0; i < ztruct->length; ++i)
-    string_release(fields[i].name);
+    hk_string_release(fields[i].name);
   free(ztruct->fields);
   free(ztruct->table);
   free(ztruct);
 }
 
-void struct_release(struct_t *ztruct)
+void hk_struct_release(hk_struct_t *ztruct)
 {
-  DECR_REF(ztruct);
-  if (IS_UNREACHABLE(ztruct))
-    struct_free(ztruct);
+  hk_decr_ref(ztruct);
+  if (hk_is_unreachable(ztruct))
+    hk_struct_free(ztruct);
 }
 
-int struct_index_of(struct_t *ztruct, string_t *name)
+int hk_struct_index_of(hk_struct_t *ztruct, hk_string_t *name)
 {
   int mask = ztruct->mask;
-  field_t **table = ztruct->table;
-  int i = string_hash(name) & mask;
+  hk_field_t **table = ztruct->table;
+  int i = hk_string_hash(name) & mask;
   for (;;)
   {
-    field_t *field = table[i];
+    hk_field_t *field = table[i];
     if (!field)
       break;
-    if (string_equal(name, field->name))
+    if (hk_string_equal(name, field->name))
       return field->index;
     i = (i + 1) & mask;
   }
   return -1;
 }
 
-bool struct_define_field(struct_t *ztruct, string_t *name)
+bool hk_struct_define_field(hk_struct_t *ztruct, hk_string_t *name)
 {
   int mask = ztruct->mask;
-  field_t **table = ztruct->table;
-  uint32_t h = string_hash(name);
+  hk_field_t **table = ztruct->table;
+  uint32_t h = hk_string_hash(name);
   int i = h & mask;
   for (;;)
   {
-    field_t *field = table[i];
+    hk_field_t *field = table[i];
     if (!field)
     {
       table[i] = add_field(ztruct, name);
       resize(ztruct);
       return true;
     }
-    if (string_equal(name, field->name))
+    if (hk_string_equal(name, field->name))
       break;
     i = (i + 1) & mask;
   }
   return false;
 }
 
-bool struct_equal(struct_t *ztruct1, struct_t *ztruct2)
+bool hk_struct_equal(hk_struct_t *ztruct1, hk_struct_t *ztruct2)
 {
   if (ztruct1 == ztruct2)
     return true;
   if (ztruct1->length != ztruct2->length)
     return false;
   for (int i = 0; i < ztruct1->length; ++i)
-    if (!string_equal(ztruct1->fields[i].name, ztruct2->fields[i].name))
+    if (!hk_string_equal(ztruct1->fields[i].name, ztruct2->fields[i].name))
       return false;
   return true;
 }
 
-instance_t *instance_allocate(struct_t *ztruct)
+hk_instance_t *hk_instance_allocate(hk_struct_t *ztruct)
 {
-  int size = sizeof(instance_t) + sizeof(value_t) * ztruct->length;
-  instance_t *inst = (instance_t *) allocate(size);
+  int size = sizeof(hk_instance_t) + sizeof(hk_value_t) * ztruct->length;
+  hk_instance_t *inst = (hk_instance_t *) hk_allocate(size);
   inst->ref_count = 0;
-  INCR_REF(ztruct);
+  hk_incr_ref(ztruct);
   inst->ztruct = ztruct;
   return inst;
 }
 
-void instance_free(instance_t *inst)
+void hk_instance_free(hk_instance_t *inst)
 {
-  struct_t *ztruct = inst->ztruct;
+  hk_struct_t *ztruct = inst->ztruct;
   int length = ztruct->length;
-  struct_release(ztruct);
+  hk_struct_release(ztruct);
   for (int i = 0; i < length; ++i)
-    value_release(inst->values[i]);
+    hk_value_release(inst->values[i]);
   free(inst);
 }
 
-void instance_release(instance_t *inst)
+void hk_instance_release(hk_instance_t *inst)
 {
-  DECR_REF(inst);
-  if (IS_UNREACHABLE(inst))
-    instance_free(inst);
+  hk_decr_ref(inst);
+  if (hk_is_unreachable(inst))
+    hk_instance_free(inst);
 }
 
-instance_t *instance_set_field(instance_t *inst, int index, value_t value)
+hk_instance_t *hk_instance_set_field(hk_instance_t *inst, int index, hk_value_t value)
 {
-  struct_t *ztruct = inst->ztruct;
-  instance_t *result = instance_allocate(ztruct);
+  hk_struct_t *ztruct = inst->ztruct;
+  hk_instance_t *result = hk_instance_allocate(ztruct);
   for (int i = 0; i < index; ++i)
   {
-    value_t val = inst->values[i];
-    VALUE_INCR_REF(val);
+    hk_value_t val = inst->values[i];
+    hk_value_incr_ref(val);
     result->values[i] = val;
   }
-  VALUE_INCR_REF(value);
+  hk_value_incr_ref(value);
   result->values[index] = value;
   for (int i = index + 1; i < ztruct->length; ++i)
   {
-    value_t val = inst->values[i];
-    VALUE_INCR_REF(val);
+    hk_value_t val = inst->values[i];
+    hk_value_incr_ref(val);
     result->values[i] = val;
   }
   return result;
 }
 
-void instance_inplace_set_field(instance_t *inst, int index, value_t value)
+void hk_instance_inplace_set_field(hk_instance_t *inst, int index, hk_value_t value)
 {
-  VALUE_INCR_REF(value);
-  value_release(inst->values[index]);
+  hk_value_incr_ref(value);
+  hk_value_release(inst->values[index]);
   inst->values[index] = value;
 }
 
-void instance_print(instance_t *inst)
+void hk_instance_print(hk_instance_t *inst)
 {
   printf("{");
   int length = inst->ztruct->length;
@@ -208,34 +208,34 @@ void instance_print(instance_t *inst)
     printf("}");
     return;
   }
-  field_t *fields = inst->ztruct->fields;
-  value_t *values = inst->values;
-  field_t *field = &fields[0];
-  string_t *name = field->name;
-  string_print(name, false);
+  hk_field_t *fields = inst->ztruct->fields;
+  hk_value_t *values = inst->values;
+  hk_field_t *field = &fields[0];
+  hk_string_t *name = field->name;
+  hk_string_print(name, false);
   printf(": ");
-  value_print(values[field->index], true);
+  hk_value_print(values[field->index], true);
   for (int i = 1; i < length; ++i)
   {
     field = &fields[i];
     name = field->name;
     printf(", ");
-    string_print(name, false);
+    hk_string_print(name, false);
     printf(": ");
-    value_print(values[field->index], true);
+    hk_value_print(values[field->index], true);
   }
   printf("}");
 }
 
-bool instance_equal(instance_t *inst1, instance_t *inst2)
+bool hk_instance_equal(hk_instance_t *inst1, hk_instance_t *inst2)
 {
   if (inst1 == inst2)
     return true;
-  if (!struct_equal(inst1->ztruct, inst2->ztruct))
+  if (!hk_struct_equal(inst1->ztruct, inst2->ztruct))
     return false;
   int length = inst1->ztruct->length;
   for (int i = 0; i < length; ++i)
-    if (!value_equal(inst1->values[i], inst2->values[i]))
+    if (!hk_value_equal(inst1->values[i], inst2->values[i]))
       return false;  
   return true;
 }

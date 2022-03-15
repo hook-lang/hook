@@ -8,6 +8,6 @@
 
 #include "hook_callable.h"
 
-void dump(function_t *fn);
+void hk_dump(hk_function_t *fn);
 
 #endif // HOOK_DUMP_H

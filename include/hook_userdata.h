@@ -8,15 +8,15 @@
 
 #include "hook_value.h"
 
-#define USERDATA_HEADER OBJECT_HEADER \
-                        void (*deinit)(struct userdata *);
+#define HK_USERDATA_HEADER HK_OBJECT_HEADER \
+                             void (*deinit)(struct hk_userdata *);
 
-typedef struct userdata
+typedef struct hk_userdata
 {
-  USERDATA_HEADER
-} userdata_t;
+  HK_USERDATA_HEADER
+} hk_userdata_t;
 
-void userdata_init(userdata_t *udata, void (*deinit)(struct userdata *));
-void userdata_free(userdata_t *udata);
+void hk_userdata_init(hk_userdata_t *udata, void (*deinit)(struct hk_userdata *));
+void hk_userdata_free(hk_userdata_t *udata);
 
 #endif // HOOK_USERDATA_H

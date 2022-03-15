@@ -9,9 +9,9 @@
 #include "hook.h"
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_url(vm_t *vm);
+int __declspec(dllexport) __stdcall load_url(hk_vm_t *vm);
 #else
-int load_url(vm_t *vm);
+int load_url(hk_vm_t *vm);
 #endif
 
 #endif // URL_H

@@ -14,55 +14,55 @@ typedef struct
 {
   int no;
   int offset;
-} line_t;
+} hk_line_t;
 
-typedef struct function
+typedef struct hk_function
 {
-  OBJECT_HEADER
+  HK_OBJECT_HEADER
   int arity;
-  string_t *name;
-  string_t *file;
+  hk_string_t *name;
+  hk_string_t *file;
   int lines_capacity;
   int num_lines;
-  line_t *lines;
-  chunk_t chunk;
-  array_t *consts;
+  hk_line_t *lines;
+  hk_chunk_t chunk;
+  hk_array_t *consts;
   uint8_t functions_capacity;
   uint8_t num_functions;
-  struct function **functions;
+  struct hk_function **functions;
   uint8_t num_nonlocals;
-} function_t;
+} hk_function_t;
 
 typedef struct
 {
-  OBJECT_HEADER
-  function_t *fn;
-  value_t nonlocals[0];
-} closure_t;
+  HK_OBJECT_HEADER
+  hk_function_t *fn;
+  hk_value_t nonlocals[0];
+} hk_closure_t;
 
-struct vm;
+struct hk_vm;
 
 typedef struct
 {
-  OBJECT_HEADER
+  HK_OBJECT_HEADER
   int arity;
-  string_t *name;
-  int (*call)(struct vm *, value_t *);
-} native_t;
+  hk_string_t *name;
+  int (*call)(struct hk_vm *, hk_value_t *);
+} hk_native_t;
 
-function_t *function_new(int arity, string_t *name, string_t *file);
-void function_free(function_t *fn);
-void function_release(function_t *fn);
-void function_add_line(function_t *fn, int line_no);
-int function_get_line(function_t *fn, int offset);
-void function_add_child(function_t *fn, function_t *child);
-void function_serialize(function_t *fn, FILE *stream);
-function_t *function_deserialize(FILE *stream);
-closure_t *closure_new(function_t *fn);
-void closure_free(closure_t *cl);
-void closure_release(closure_t *cl);
-native_t *native_new(string_t *name, int arity, int (*call)(struct vm *, value_t *));
-void native_free(native_t *native);
-void native_release(native_t *native);
+hk_function_t *hk_function_new(int arity, hk_string_t *name, hk_string_t *file);
+void hk_function_free(hk_function_t *fn);
+void hk_function_release(hk_function_t *fn);
+void hk_function_add_line(hk_function_t *fn, int line_no);
+int hk_function_get_line(hk_function_t *fn, int offset);
+void hk_function_add_child(hk_function_t *fn, hk_function_t *child);
+void hk_function_serialize(hk_function_t *fn, FILE *stream);
+hk_function_t *hk_function_deserialize(FILE *stream);
+hk_closure_t *hk_closure_new(hk_function_t *fn);
+void hk_closure_free(hk_closure_t *cl);
+void hk_closure_release(hk_closure_t *cl);
+hk_native_t *hk_native_new(hk_string_t *name, int arity, int (*call)(struct hk_vm *, hk_value_t *));
+void hk_native_free(hk_native_t *native);
+void hk_native_release(hk_native_t *native);
 
 #endif // HOOK_CALLABLE_H

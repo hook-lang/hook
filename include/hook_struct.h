@@ -13,40 +13,40 @@
 
 typedef struct
 {
-  string_t *name;
+  hk_string_t *name;
   int index;
-} field_t;
+} hk_field_t;
 
 typedef struct
 {
-  OBJECT_HEADER
+  HK_OBJECT_HEADER
   int capacity;
   int mask;
   int length;
-  string_t *name;
-  field_t *fields;
-  field_t **table;
-} struct_t;
+  hk_string_t *name;
+  hk_field_t *fields;
+  hk_field_t **table;
+} hk_struct_t;
 
 typedef struct
 {
-  OBJECT_HEADER
-  struct_t *ztruct;
-  value_t values[0];
-} instance_t;
+  HK_OBJECT_HEADER
+  hk_struct_t *ztruct;
+  hk_value_t values[0];
+} hk_instance_t;
 
-struct_t *struct_new(string_t *name);
-void struct_free(struct_t *ztruct);
-void struct_release(struct_t *ztruct);
-int struct_index_of(struct_t *ztruct, string_t *name);
-bool struct_define_field(struct_t *ztruct, string_t *name);
-bool struct_equal(struct_t *ztruct1, struct_t *ztruct2);
-instance_t *instance_allocate(struct_t *ztruct);
-void instance_free(instance_t *inst);
-void instance_release(instance_t *inst);
-instance_t *instance_set_field(instance_t *inst, int index, value_t value);
-void instance_inplace_set_field(instance_t *inst, int index, value_t value);
-void instance_print(instance_t *inst);
-bool instance_equal(instance_t *inst1, instance_t *inst2);
+hk_struct_t *hk_struct_new(hk_string_t *name);
+void hk_struct_free(hk_struct_t *ztruct);
+void hk_struct_release(hk_struct_t *ztruct);
+int hk_struct_index_of(hk_struct_t *ztruct, hk_string_t *name);
+bool hk_struct_define_field(hk_struct_t *ztruct, hk_string_t *name);
+bool hk_struct_equal(hk_struct_t *ztruct1, hk_struct_t *ztruct2);
+hk_instance_t *hk_instance_allocate(hk_struct_t *ztruct);
+void hk_instance_free(hk_instance_t *inst);
+void hk_instance_release(hk_instance_t *inst);
+hk_instance_t *hk_instance_set_field(hk_instance_t *inst, int index, hk_value_t value);
+void hk_instance_inplace_set_field(hk_instance_t *inst, int index, hk_value_t value);
+void hk_instance_print(hk_instance_t *inst);
+bool hk_instance_equal(hk_instance_t *inst1, hk_instance_t *inst2);
 
 #endif // HOOK_STRUCT_H

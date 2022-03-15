@@ -8,23 +8,23 @@
 
 #include "hook_value.h"
 
-#define ITERATOR_HEADER OBJECT_HEADER \
-                        void (*deinit)(struct iterator *); \
-                        bool (*is_valid)(struct iterator *); \
-                        value_t (*get_current)(struct iterator *); \
-                        void (*next)(struct iterator *);
+#define HK_ITERATOR_HEADER HK_OBJECT_HEADER \
+                           void (*deinit)(struct hk_iterator *); \
+                           bool (*is_valid)(struct hk_iterator *); \
+                           hk_value_t (*get_current)(struct hk_iterator *); \
+                           void (*next)(struct hk_iterator *);
 
-typedef struct iterator
+typedef struct hk_iterator
 {
-  ITERATOR_HEADER
-} iterator_t;
+  HK_ITERATOR_HEADER
+} hk_iterator_t;
 
-void iterator_init(iterator_t *it, void (*deinit)(struct iterator *),
-  bool (*is_valid)(struct iterator *), value_t (*get_current)(struct iterator *),
-  void (*next)(struct iterator *));
-void iterator_free(iterator_t *it);
-bool iterator_is_valid(iterator_t *it);
-value_t iterator_get_current(iterator_t *it);
-void iterator_next(iterator_t *it);
+void hk_iterator_init(hk_iterator_t *it, void (*deinit)(struct hk_iterator *),
+  bool (*is_valid)(struct hk_iterator *), hk_value_t (*get_current)(struct hk_iterator *),
+  void (*next)(struct hk_iterator *));
+void hk_iterator_free(hk_iterator_t *it);
+bool hk_iterator_is_valid(hk_iterator_t *it);
+hk_value_t hk_iterator_get_current(hk_iterator_t *it);
+void hk_iterator_next(hk_iterator_t *it);
 
 #endif // HOOK_ITERATOR_H

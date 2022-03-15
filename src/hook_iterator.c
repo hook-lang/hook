@@ -6,9 +6,9 @@
 #include "hook_iterator.h"
 #include <stdlib.h>
 
-void iterator_init(iterator_t *it, void (*deinit)(struct iterator *),
-  bool (*is_valid)(struct iterator *), value_t (*get_current)(struct iterator *),
-  void (*next)(struct iterator *))
+void hk_iterator_init(hk_iterator_t *it, void (*deinit)(struct hk_iterator *),
+  bool (*is_valid)(struct hk_iterator *), hk_value_t (*get_current)(struct hk_iterator *),
+  void (*next)(struct hk_iterator *))
 {
   it->ref_count = 0;
   it->deinit = deinit;
@@ -17,24 +17,24 @@ void iterator_init(iterator_t *it, void (*deinit)(struct iterator *),
   it->next = next;
 }
 
-void iterator_free(iterator_t *it)
+void hk_iterator_free(hk_iterator_t *it)
 {
   if (it->deinit)
     it->deinit(it);
   free(it);
 }
 
-bool iterator_is_valid(iterator_t *it)
+bool hk_iterator_is_valid(hk_iterator_t *it)
 {
   return it->is_valid(it);
 }
 
-value_t iterator_get_current(iterator_t *it)
+hk_value_t hk_iterator_get_current(hk_iterator_t *it)
 {
   return it->get_current(it);
 }
 
-void iterator_next(iterator_t *it)
+void hk_iterator_next(hk_iterator_t *it)
 {
   it->next(it);
 }

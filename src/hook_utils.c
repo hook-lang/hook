@@ -1,9 +1,9 @@
 //
 // Hook Programming Language
-// hook_fs.c
+// hook_utils.c
 //
 
-#include "hook_fs.h"
+#include "hook_utils.h"
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -36,7 +36,14 @@ static void make_directory(char *path)
   mkdir(path, 0777); 
 }
 
-void ensure_path(const char *filename)
+int hk_nearest_power_of_two(int m, int n)
+{
+  int result = m;
+  for (; result < n; result <<= 1);
+  return result;
+}
+
+void hk_ensure_path(const char *filename)
 {
   char *sep = strrchr(filename, '/');
   if (sep)

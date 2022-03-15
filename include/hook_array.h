@@ -9,37 +9,37 @@
 #include "hook_value.h"
 #include "hook_iterator.h"
 
-#define ARRAY_MIN_CAPACITY (1 << 3)
+#define HK_ARRAY_MIN_CAPACITY (1 << 3)
 
 typedef struct
 {
-  OBJECT_HEADER
+  HK_OBJECT_HEADER
   int capacity;
   int length;
-  value_t *elements;
-} array_t;
+  hk_value_t *elements;
+} hk_array_t;
 
-array_t *array_allocate(int min_capacity);
-array_t *array_new(int min_capacity);
-void array_free(array_t *arr);
-void array_release(array_t *arr);
-int array_index_of(array_t *arr, value_t elem);
-array_t *array_add_element(array_t *arr, value_t elem);
-array_t *array_set_element(array_t *arr, int index, value_t elem);
-array_t *array_delete_element(array_t *arr, int index);
-array_t *array_concat(array_t *arr1, array_t *arr2);
-array_t *array_diff(array_t *arr1, array_t *arr2);
-void array_inplace_add_element(array_t *arr, value_t elem);
-void array_inplace_set_element(array_t *arr, int index, value_t elem);
-void array_inplace_delete_element(array_t *arr, int index);
-void array_inplace_concat(array_t *dest, array_t *src);
-void array_inplace_diff(array_t *dest, array_t *src);
-void array_print(array_t *arr);
-bool array_equal(array_t *arr1, array_t *arr2);
-int array_compare(array_t *arr1, array_t *arr2, int *result);
-bool array_slice(array_t *arr, int start, int stop, array_t **result);
-void array_serialize(array_t *arr, FILE *stream);
-array_t *array_deserialize(FILE *stream);
-iterator_t *array_new_iterator(array_t *arr);
+hk_array_t *hk_array_allocate(int min_capacity);
+hk_array_t *hk_array_new(int min_capacity);
+void hk_array_free(hk_array_t *arr);
+void hk_array_release(hk_array_t *arr);
+int hk_array_index_of(hk_array_t *arr, hk_value_t elem);
+hk_array_t *hk_array_add_element(hk_array_t *arr, hk_value_t elem);
+hk_array_t *hk_array_set_element(hk_array_t *arr, int index, hk_value_t elem);
+hk_array_t *hk_array_delete_element(hk_array_t *arr, int index);
+hk_array_t *hk_array_concat(hk_array_t *arr1, hk_array_t *arr2);
+hk_array_t *hk_array_diff(hk_array_t *arr1, hk_array_t *arr2);
+void hk_array_inplace_add_element(hk_array_t *arr, hk_value_t elem);
+void hk_array_inplace_set_element(hk_array_t *arr, int index, hk_value_t elem);
+void hk_array_inplace_delete_element(hk_array_t *arr, int index);
+void hk_array_inplace_concat(hk_array_t *dest, hk_array_t *src);
+void hk_array_inplace_diff(hk_array_t *dest, hk_array_t *src);
+void hk_array_print(hk_array_t *arr);
+bool hk_array_equal(hk_array_t *arr1, hk_array_t *arr2);
+int hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int *result);
+bool hk_array_slice(hk_array_t *arr, int start, int stop, hk_array_t **result);
+void hk_array_serialize(hk_array_t *arr, FILE *stream);
+hk_array_t *hk_array_deserialize(FILE *stream);
+hk_iterator_t *hk_array_new_iterator(hk_array_t *arr);
 
 #endif // HOOK_ARRAY_H

@@ -211,11 +211,11 @@ static inline bool match_name(scanner_t *scan)
   return true;
 }
 
-void scanner_init(scanner_t *scan, string_t *file, string_t *source)
+void scanner_init(scanner_t *scan, hk_string_t *file, hk_string_t *source)
 {
-  INCR_REF(file);
+  hk_incr_ref(file);
   scan->file = file;
-  INCR_REF(source);
+  hk_incr_ref(source);
   scan->source = source;
   scan->pos = source->chars;
   scan->line = 1;
@@ -226,8 +226,8 @@ void scanner_init(scanner_t *scan, string_t *file, string_t *source)
 
 void scanner_free(scanner_t *scan)
 {
-  string_release(scan->file);
-  string_release(scan->source);
+  hk_string_release(scan->file);
+  hk_string_release(scan->source);
 }
 
 void scanner_next_token(scanner_t *scan)
