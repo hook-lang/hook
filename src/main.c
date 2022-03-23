@@ -122,7 +122,7 @@ static inline const char *option(const char *arg, const char *opt)
 static inline hk_array_t *args_array(parsed_args_t *parsed_args)
 {
   int length = parsed_args->num_args;
-  hk_array_t *args = hk_array_allocate(length);
+  hk_array_t *args = hk_array_new_with_capacity(length);
   args->length = length;
   for (int i = 0; i < length; ++i)
   {
@@ -194,7 +194,7 @@ static inline hk_string_t *load_source_from_file(const char *filename)
   fseek(stream, 0L, SEEK_END);
   int length = ftell(stream);
   rewind(stream);
-  hk_string_t *str = hk_string_allocate(length);
+  hk_string_t *str = hk_string_new_with_capacity(length);
   str->length = length;
   hk_assert(fread(str->chars, length, 1, stream) == 1, "unexpected error on fread()");
   str->chars[length] = '\0';

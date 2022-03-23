@@ -12,7 +12,7 @@
 
 static inline hk_field_t **allocate_table(int capacity);
 static inline hk_field_t *add_field(hk_struct_t *ztruct, hk_string_t *name);
-static inline void resize(hk_struct_t *ztruct);
+static inline void grow(hk_struct_t *ztruct);
 
 static inline hk_field_t **allocate_table(int capacity)
 {
@@ -32,7 +32,7 @@ static inline hk_field_t *add_field(hk_struct_t *ztruct, hk_string_t *name)
   return field;
 }
 
-static inline void resize(hk_struct_t *ztruct)
+static inline void grow(hk_struct_t *ztruct)
 {
   int length = ztruct->length;
   if (length / STRUCT_MAX_LOAD_FACTOR <= ztruct->capacity)
@@ -122,7 +122,7 @@ bool hk_struct_define_field(hk_struct_t *ztruct, hk_string_t *name)
     if (!field)
     {
       table[i] = add_field(ztruct, name);
-      resize(ztruct);
+      grow(ztruct);
       return true;
     }
     if (hk_string_equal(name, field->name))
@@ -144,7 +144,7 @@ bool hk_struct_equal(hk_struct_t *ztruct1, hk_struct_t *ztruct2)
   return true;
 }
 
-hk_instance_t *hk_instance_allocate(hk_struct_t *ztruct)
+hk_instance_t *hk_instance_new(hk_struct_t *ztruct)
 {
   int size = sizeof(hk_instance_t) + sizeof(hk_value_t) * ztruct->length;
   hk_instance_t *inst = (hk_instance_t *) hk_allocate(size);
@@ -174,7 +174,7 @@ void hk_instance_release(hk_instance_t *inst)
 hk_instance_t *hk_instance_set_field(hk_instance_t *inst, int index, hk_value_t value)
 {
   hk_struct_t *ztruct = inst->ztruct;
-  hk_instance_t *result = hk_instance_allocate(ztruct);
+  hk_instance_t *result = hk_instance_new(ztruct);
   for (int i = 0; i < index; ++i)
   {
     hk_value_t val = inst->values[i];

@@ -172,7 +172,7 @@ static int read_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
   long size = (long) args[2].as.number;
-  hk_string_t *str = hk_string_allocate(size);
+  hk_string_t *str = hk_string_new_with_capacity(size);
   int length = (int) fread(str->chars, 1, size, stream);
   if (length < size && !feof(stream))
   {

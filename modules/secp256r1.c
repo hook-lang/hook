@@ -14,15 +14,15 @@ static int new_key_pair_call(hk_vm_t *vm, hk_value_t *args)
 {
   (void) args;
   int pub_key_len = ECC_BYTES + 1;
-  hk_string_t *pub_key = hk_string_allocate(pub_key_len);
+  hk_string_t *pub_key = hk_string_new_with_capacity(pub_key_len);
   pub_key->length = pub_key_len;
   pub_key->chars[pub_key_len] = '\0';
   int priv_key_len = ECC_BYTES;
-  hk_string_t *priv_key = hk_string_allocate(priv_key_len);
+  hk_string_t *priv_key = hk_string_new_with_capacity(priv_key_len);
   priv_key->length = priv_key_len;
   priv_key->chars[priv_key_len] = '\0';
   (void) ecc_make_key((uint8_t *) pub_key->chars, (uint8_t *) priv_key->chars);
-  hk_array_t *arr = hk_array_allocate(2);
+  hk_array_t *arr = hk_array_new_with_capacity(2);
   arr->length = 2;
   hk_incr_ref(pub_key);
   hk_incr_ref(priv_key);
@@ -45,7 +45,7 @@ static int sign_hash_call(hk_vm_t *vm, hk_value_t *args)
   hk_string_t *priv_key = hk_as_string(args[1]);
   hk_string_t *hash = hk_as_string(args[2]);
   int length = ECC_BYTES << 1;
-  hk_string_t *signature = hk_string_allocate(length);
+  hk_string_t *signature = hk_string_new_with_capacity(length);
   signature->length = length;
   signature->chars[length] = '\0';
   (void) ecdsa_sign((uint8_t *) priv_key->chars, (uint8_t *) hash->chars,

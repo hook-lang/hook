@@ -11,6 +11,8 @@
 
 #define HK_ARRAY_MIN_CAPACITY (1 << 3)
 
+#define hk_array_get_element(a, i) ((a)->elements[(i)])
+
 typedef struct
 {
   HK_OBJECT_HEADER
@@ -19,8 +21,9 @@ typedef struct
   hk_value_t *elements;
 } hk_array_t;
 
-hk_array_t *hk_array_allocate(int min_capacity);
-hk_array_t *hk_array_new(int min_capacity);
+hk_array_t *hk_array_new(void);
+hk_array_t *hk_array_new_with_capacity(int min_capacity);
+void hk_array_ensure_capacity(hk_array_t *arr, int min_capacity);
 void hk_array_free(hk_array_t *arr);
 void hk_array_release(hk_array_t *arr);
 int hk_array_index_of(hk_array_t *arr, hk_value_t elem);

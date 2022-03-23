@@ -120,7 +120,7 @@ static inline int range(hk_vm_t *vm)
 static inline int array(hk_vm_t *vm, int length)
 {
   hk_value_t *slots = &vm->slots[vm->top - length + 1];
-  hk_array_t *arr = hk_array_allocate(length);
+  hk_array_t *arr = hk_array_new_with_capacity(length);
   arr->length = length;
   for (int i = 0; i < length; ++i)
     arr->elements[i] = slots[i];
@@ -188,7 +188,7 @@ static inline int instance(hk_vm_t *vm, int length)
     hk_runtime_error(fmt, name ? name->chars : "<anonymous>");
     return HK_STATUS_ERROR;
   }
-  hk_instance_t *inst = hk_instance_allocate(ztruct);
+  hk_instance_t *inst = hk_instance_new(ztruct);
   for (int i = 0; i < length; ++i)
     inst->values[i] = slots[i + 1];
   vm->top -= length;
@@ -218,7 +218,7 @@ static inline int construct(hk_vm_t *vm, int length)
   }
   for (int i = 1; i <= n; i += 2)
     hk_decr_ref(hk_as_object(slots[i]));
-  hk_instance_t *inst = hk_instance_allocate(ztruct);
+  hk_instance_t *inst = hk_instance_new(ztruct);
   for (int i = 2, j = 0; i <= n + 1; i += 2, ++j)
     inst->values[j] = slots[i];
   vm->top -= n;
@@ -260,7 +260,7 @@ static inline int unpack(hk_vm_t *vm, int n)
   int status = HK_STATUS_OK;
   for (int i = 0; i < n && i < arr->length; ++i)
   {
-    hk_value_t elem = arr->elements[i];
+    hk_value_t elem = hk_array_get_element(arr, i);
     if ((status = push(vm, elem)) == HK_STATUS_ERROR)
       goto end;
     hk_value_incr_ref(elem);
@@ -289,7 +289,8 @@ static inline int destruct(hk_vm_t *vm, int n)
   {
     hk_string_t *name = hk_as_string(slots[i]);
     int index = hk_struct_index_of(ztruct, name);
-    hk_value_t value = index == -1 ? HK_NIL_VALUE : inst->values[index];
+    hk_value_t value = index == -1 ? HK_NIL_VALUE :
+      hk_instance_get_field(inst, index);
     hk_value_incr_ref(value);
     hk_decr_ref(name);
     slots[i] = value;
@@ -339,7 +340,7 @@ static inline int get_element(hk_vm_t *vm)
         index, arr->length);
       return HK_STATUS_ERROR;
     }
-    hk_value_t elem = arr->elements[index];
+    hk_value_t elem = hk_array_get_element(arr, index);
     hk_value_incr_ref(elem);
     slots[0] = elem;
     --vm->top;
@@ -360,7 +361,7 @@ static inline int slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, h
   hk_array_t *result;
   if (start > end || start > arr_end || end < 0)
   {
-    result = hk_array_new(0);
+    result = hk_array_new();
     goto end;
   }
   if (start <= 0 && end >= arr_end)
@@ -370,11 +371,11 @@ static inline int slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, h
     return HK_STATUS_OK;
   }
   int length = end - start + 1;
-  result = hk_array_allocate(length);
+  result = hk_array_new_with_capacity(length);
   result->length = length;
   for (int i = start, j = 0; i <= end ; ++i, ++j)
   {
-    hk_value_t elem = arr->elements[i];
+    hk_value_t elem = hk_array_get_element(arr, i);
     hk_value_incr_ref(elem);
     result->elements[j] = elem;
   }
@@ -410,7 +411,7 @@ static inline int fetch_element(hk_vm_t *vm)
       index, arr->length);
     return HK_STATUS_ERROR;
   }
-  hk_value_t elem = arr->elements[index];
+  hk_value_t elem = hk_array_get_element(arr, index);
   if (push(vm, elem) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_incr_ref(elem);
@@ -618,7 +619,7 @@ static inline int get_field(hk_vm_t *vm, hk_string_t *name)
     hk_runtime_error("no field %.*s on struct", name->length, name->chars);
     return HK_STATUS_ERROR;
   }
-  hk_value_t value = inst->values[index];
+  hk_value_t value = hk_instance_get_field(inst, index);
   hk_value_incr_ref(value);
   slots[0] = value;
   hk_instance_release(inst);
@@ -643,7 +644,7 @@ static inline int fetch_field(hk_vm_t *vm, hk_string_t *name)
   }
   if (push(vm, hk_number_value(index)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t value = inst->values[index];
+  hk_value_t value = hk_instance_get_field(inst, index);
   if (push(vm, value) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_incr_ref(value);

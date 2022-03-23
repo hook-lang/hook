@@ -161,7 +161,7 @@ static int fetch_call(hk_vm_t *vm, hk_value_t *args)
   hk_array_t *row = NULL;
   if (sqlite3_step(stmt) == SQLITE_ROW)
   {
-    row = hk_array_new(num_columns);
+    row = hk_array_new_with_capacity(num_columns);
     for (int i = 0; i < num_columns; ++i)
     {
       int type = sqlite3_column_type(stmt, i);

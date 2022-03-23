@@ -110,7 +110,7 @@ static inline int string_to_double(hk_string_t *str, double *result)
 
 static inline hk_array_t *split(hk_string_t *str, hk_string_t *separator)
 {
-  hk_array_t *arr = hk_array_new(0);
+  hk_array_t *arr = hk_array_new();
   char *cur = str->chars;
   char *tk;
   while ((tk = strtok_r(cur, separator->chars, &cur)))
@@ -123,10 +123,10 @@ static inline hk_array_t *split(hk_string_t *str, hk_string_t *separator)
 
 static inline int join(hk_array_t *arr, hk_string_t *separator, hk_string_t **result)
 {
-  hk_string_t *str = hk_string_new(0);
+  hk_string_t *str = hk_string_new();
   for (int i = 0; i < arr->length; ++i)
   {
-    hk_value_t elem = arr->elements[i];
+    hk_value_t elem = hk_array_get_element(arr, i);
     if (!hk_is_string(elem))
       continue;
     if (i)
@@ -261,7 +261,7 @@ static int chr_call(hk_vm_t *vm, hk_value_t *args)
     hk_runtime_error("range error: argument #1 must be between 0 and %d", UCHAR_MAX);
     return HK_STATUS_ERROR;
   }
-  hk_string_t *str = hk_string_allocate(1);
+  hk_string_t *str = hk_string_new_with_capacity(1);
   str->length = 1;
   str->chars[0] = (char) data;
   str->chars[1] = '\0';
@@ -281,7 +281,7 @@ static int hex_call(hk_vm_t *vm, hk_value_t *args)
   if (!str->length)
     return hk_vm_push_string(vm, str);
   int length = str->length << 1;
-  hk_string_t *result = hk_string_allocate(length);
+  hk_string_t *result = hk_string_new_with_capacity(length);
   result->length = length;
   result->chars[length] = '\0';
   char *chars = result->chars;
@@ -311,7 +311,7 @@ static int bin_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_OK;
   }
   int length = str->length >> 1;
-  hk_string_t *result = hk_string_allocate(length);
+  hk_string_t *result = hk_string_new_with_capacity(length);
   result->length = length;
   result->chars[length] = '\0';
   char *chars = str->chars;

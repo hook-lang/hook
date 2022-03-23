@@ -21,7 +21,7 @@ static int sha224_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
   int length = SHA224_DIGEST_SIZE;
-  hk_string_t *digest = hk_string_allocate(length);
+  hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
   sha224((unsigned char *) str->chars, str->length, (unsigned char *) digest->chars);
@@ -39,7 +39,7 @@ static int sha256_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
   int length = SHA256_DIGEST_SIZE;
-  hk_string_t *digest = hk_string_allocate(length);
+  hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
   sha256((unsigned char *) str->chars, str->length, (unsigned char *) digest->chars);
@@ -57,7 +57,7 @@ static int sha384_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
   int length = SHA384_DIGEST_SIZE;
-  hk_string_t *digest = hk_string_allocate(length);
+  hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
   sha384((unsigned char *) str->chars, str->length, (unsigned char *) digest->chars);
@@ -75,7 +75,7 @@ static int sha512_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
   int length = SHA512_DIGEST_SIZE;
-  hk_string_t *digest = hk_string_allocate(length);
+  hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
   sha512((unsigned char *) str->chars, str->length, (unsigned char *) digest->chars);
@@ -93,7 +93,7 @@ static int ripemd160_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
   int length = RIPEMD160_DIGEST_SIZE;
-  hk_string_t *digest = hk_string_allocate(length);
+  hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
   ripemd160((uint8_t *) str->chars, str->length, (uint8_t *) digest->chars);

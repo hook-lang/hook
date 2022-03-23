@@ -9,7 +9,7 @@
 #include "hook_memory.h"
 
 static inline string_map_entry_t *allocate_entries(int capacity);
-static inline void resize(string_map_t *map);
+static inline void grow(string_map_t *map);
 
 static inline string_map_entry_t *allocate_entries(int capacity)
 {
@@ -19,7 +19,7 @@ static inline string_map_entry_t *allocate_entries(int capacity)
   return entries;
 }
 
-static inline void resize(string_map_t *map)
+static inline void grow(string_map_t *map)
 {
   int length = map->length;
   if (length / STRING_MAP_MAX_LOAD_FACTOR <= map->capacity)
@@ -99,7 +99,7 @@ void string_map_inplace_put(string_map_t *map, hk_string_t *key, hk_value_t valu
       entry->key = key;
       entry->value = value;
       ++map->length;
-      resize(map);
+      grow(map);
       return;
     }
     if (hk_string_equal(key, entry->key))

@@ -45,7 +45,7 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
     case REDIS_REPLY_ARRAY:
       {
         int length = reply->elements;
-        hk_array_t *arr = hk_array_allocate(length);
+        hk_array_t *arr = hk_array_new_with_capacity(length);
         arr->length = length;
         for (int i = 0; i < length; ++i)
         {

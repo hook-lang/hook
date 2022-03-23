@@ -10,9 +10,9 @@
 
 #define CHUNK_MIN_CAPACITY (1 << 3)
 
-static inline void resize(hk_chunk_t *chunk, int min_capacity);
+static inline void ensure_capacity(hk_chunk_t *chunk, int min_capacity);
 
-static inline void resize(hk_chunk_t *chunk, int min_capacity)
+static inline void ensure_capacity(hk_chunk_t *chunk, int min_capacity)
 {
   if (min_capacity <= chunk->capacity)
     return;
@@ -35,14 +35,14 @@ void hk_chunk_free(hk_chunk_t *chunk)
 
 void hk_chunk_emit_byte(hk_chunk_t *chunk, uint8_t byte)
 {
-  resize(chunk, chunk->length + 1);
+  ensure_capacity(chunk, chunk->length + 1);
   chunk->bytes[chunk->length] = byte;
   ++chunk->length;
 }
 
 void hk_chunk_emit_word(hk_chunk_t *chunk, uint16_t word)
 {
-  resize(chunk, chunk->length + 2);
+  ensure_capacity(chunk, chunk->length + 2);
   *((uint16_t *) &chunk->bytes[chunk->length]) = word;
   chunk->length += 2;
 }

@@ -17,8 +17,7 @@ static int new_array_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   int capacity = (int) args[1].as.number;
-  hk_array_t *arr = hk_array_allocate(capacity);
-  arr->length = 0;
+  hk_array_t *arr = hk_array_new_with_capacity(capacity);
   if (hk_vm_push_array(vm, arr) == HK_STATUS_ERROR)
   {
     hk_array_free(arr);
@@ -42,10 +41,10 @@ static int min_call(hk_vm_t *vm, hk_value_t *args)
   int length = arr->length;
   if (!length)
     return hk_vm_push_nil(vm);
-  hk_value_t min = arr->elements[0];
+  hk_value_t min = hk_array_get_element(arr, 0);
   for (int i = 1; i < length; ++i)
   {
-    hk_value_t elem = arr->elements[i];
+    hk_value_t elem = hk_array_get_element(arr, i);
     int result;
     if (hk_value_compare(elem, min, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
@@ -62,10 +61,10 @@ static int max_call(hk_vm_t *vm, hk_value_t *args)
   int length = arr->length;
   if (!length)
     return hk_vm_push_nil(vm);
-  hk_value_t max = arr->elements[0];
+  hk_value_t max = hk_array_get_element(arr, 0);
   for (int i = 1; i < length; ++i)
   {
-    hk_value_t elem = arr->elements[i];
+    hk_value_t elem = hk_array_get_element(arr, i);
     int result;
     if (hk_value_compare(elem, max, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
@@ -82,7 +81,7 @@ static int sum_call(hk_vm_t *vm, hk_value_t *args)
   double sum = 0;
   for (int i = 0; i < arr->length; ++i)
   {
-    hk_value_t elem = arr->elements[i];
+    hk_value_t elem = hk_array_get_element(arr, i);
     if (!hk_is_number(elem))
     {
       sum = 0;

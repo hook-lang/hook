@@ -14,8 +14,8 @@ hk_function_t *function_allocate(int arity, hk_string_t *name, hk_string_t *file
 static inline void init_lines(hk_function_t *fn);
 static inline void init_functions(hk_function_t *fn);
 static inline void free_functions(hk_function_t *fn);
-static inline void resize_lines(hk_function_t *fn);
-static inline void resize_functions(hk_function_t *fn);
+static inline void grow_lines(hk_function_t *fn);
+static inline void grow_functions(hk_function_t *fn);
 
 hk_function_t *function_allocate(int arity, hk_string_t *name, hk_string_t *file)
 {
@@ -51,7 +51,7 @@ static inline void free_functions(hk_function_t *fn)
   free(fn->functions);
 }
 
-static inline void resize_lines(hk_function_t *fn)
+static inline void grow_lines(hk_function_t *fn)
 {
   if (fn->num_lines < fn->lines_capacity)
     return;
@@ -61,7 +61,7 @@ static inline void resize_lines(hk_function_t *fn)
     sizeof(*fn->lines) * capacity);
 }
 
-static inline void resize_functions(hk_function_t *fn)
+static inline void grow_functions(hk_function_t *fn)
 {
   if (fn->num_functions < fn->functions_capacity)
     return;
@@ -76,8 +76,7 @@ hk_function_t *hk_function_new(int arity, hk_string_t *name, hk_string_t *file)
   hk_function_t *fn = function_allocate(arity, name, file);
   init_lines(fn);
   hk_chunk_init(&fn->chunk);
-  fn->consts = hk_array_allocate(0);
-  fn->consts->length = 0;
+  fn->consts = hk_array_new();
   init_functions(fn);
   fn->num_nonlocals = 0;
   return fn;
@@ -105,7 +104,7 @@ void hk_function_release(hk_function_t *fn)
 
 void hk_function_add_line(hk_function_t *fn, int line_no)
 {
-  resize_lines(fn);
+  grow_lines(fn);
   hk_line_t *line = &fn->lines[fn->num_lines];
   line->no = line_no;
   line->offset = fn->chunk.length;
@@ -131,7 +130,7 @@ int hk_function_get_line(hk_function_t *fn, int offset)
 
 void hk_function_add_child(hk_function_t *fn, hk_function_t *child)
 {
-  resize_functions(fn);
+  grow_functions(fn);
   hk_incr_ref(child);
   fn->functions[fn->num_functions] = child;
   ++fn->num_functions;

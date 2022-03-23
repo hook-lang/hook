@@ -67,7 +67,7 @@ static int perform_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   CURL *curl = ((url_t *) hk_as_userdata(args[1]))->curl;
-  hk_string_t *str = hk_string_new(0);
+  hk_string_t *str = hk_string_new();
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) str);
   CURLcode res = curl_easy_perform(curl);

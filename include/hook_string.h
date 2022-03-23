@@ -20,10 +20,11 @@ typedef struct
   int64_t hash;
 } hk_string_t;
 
-hk_string_t *hk_string_allocate(int min_capacity);
-hk_string_t *hk_string_new(int min_capacity);
+hk_string_t *hk_string_new(void);
+hk_string_t *hk_string_new_with_capacity(int min_capacity);
 hk_string_t *hk_string_from_chars(int length, const char *chars);
 hk_string_t *hk_string_from_stream(FILE *stream, const char terminal);
+void hk_string_ensure_capacity(hk_string_t *str, int min_capacity);
 void hk_string_free(hk_string_t *str);
 void hk_string_release(hk_string_t *str);
 hk_string_t *hk_string_concat(hk_string_t *str1, hk_string_t *str2);
