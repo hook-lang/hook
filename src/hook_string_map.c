@@ -44,7 +44,8 @@ static inline void grow(string_map_t *map)
 
 void string_map_init(string_map_t *map, int min_capacity)
 {
-  int capacity = hk_nearest_power_of_two(STRING_MAP_MIN_CAPACITY, min_capacity);
+  int capacity = min_capacity < STRING_MAP_MIN_CAPACITY ? STRING_MAP_MIN_CAPACITY : min_capacity;
+  capacity = hk_power_of_two_ceil(capacity);
   map->capacity = capacity;
   map->mask = capacity - 1;
   map->length = 0;

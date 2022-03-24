@@ -1459,7 +1459,8 @@ static inline void move_result(hk_vm_t *vm, hk_value_t *slots)
 
 void hk_vm_init(hk_vm_t *vm, int min_capacity)
 {
-  int capacity = hk_nearest_power_of_two(HK_VM_MIN_CAPACITY, min_capacity);
+  int capacity = min_capacity < HK_VM_MIN_CAPACITY ? HK_VM_MIN_CAPACITY : min_capacity;
+  capacity = hk_power_of_two_ceil(capacity);
   vm->limit = capacity - 1;
   vm->top = -1;
   vm->slots = (hk_value_t *) hk_allocate(sizeof(*vm->slots) * capacity);

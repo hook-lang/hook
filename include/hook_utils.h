@@ -16,7 +16,7 @@
     } \
   } while(0)
 
-int hk_nearest_power_of_two(int m, int n);
+int hk_power_of_two_ceil(int n);
 void hk_ensure_path(const char *filename);
 
 #endif // HOOK_UTILS_H

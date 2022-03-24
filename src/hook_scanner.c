@@ -12,8 +12,8 @@
 
 #define MATCH_MAX_LENGTH (1 << 3)
 
-#define CHAR_AT(s, i)   ((s)->pos[(i)])
-#define CURRENT_CHAR(s) CHAR_AT(s, 0)
+#define char_at(s, i)   ((s)->pos[(i)])
+#define current_char(s) char_at(s, 0)
 
 static inline void lexical_error(scanner_t *scan, const char *fmt, ...);
 static inline void skip_shebang(scanner_t *scan);
@@ -39,12 +39,12 @@ static inline void lexical_error(scanner_t *scan, const char *fmt, ...)
 
 static inline void skip_shebang(scanner_t *scan)
 {
-  if (CHAR_AT(scan, 0) != '#' || CHAR_AT(scan, 1) != '!')
+  if (char_at(scan, 0) != '#' || char_at(scan, 1) != '!')
     return;
   next_chars(scan, 2);
-  while (CURRENT_CHAR(scan) != '\0')
+  while (current_char(scan) != '\0')
   {
-    if (CURRENT_CHAR(scan) == '\n')
+    if (current_char(scan) == '\n')
     {
       next_char(scan);
       break;
@@ -56,16 +56,16 @@ static inline void skip_shebang(scanner_t *scan)
 static inline void skip_spaces_comments(scanner_t *scan)
 {
 begin:
-  while (isspace(CURRENT_CHAR(scan)))
+  while (isspace(current_char(scan)))
     next_char(scan);
-  if ((CHAR_AT(scan, 0) == '/' && CHAR_AT(scan, 1) == '/'))
+  if ((char_at(scan, 0) == '/' && char_at(scan, 1) == '/'))
   {
     next_chars(scan, 2);
     for (;;)
     {
-      if (CURRENT_CHAR(scan) == '\0')
+      if (current_char(scan) == '\0')
         return;
-      if (CURRENT_CHAR(scan) == '\n')
+      if (current_char(scan) == '\n')
       {
         next_char(scan);
         goto begin;
@@ -77,7 +77,7 @@ begin:
 
 static inline void next_char(scanner_t *scan)
 {
-  if (CURRENT_CHAR(scan) == '\n')
+  if (current_char(scan) == '\n')
   {
     ++scan->line;
     scan->col = 1;
@@ -96,7 +96,7 @@ static inline void next_chars(scanner_t *scan, int n)
 
 static inline bool match_char(scanner_t *scan, const char c)
 {
-  if (CURRENT_CHAR(scan) != c)
+  if (current_char(scan) != c)
     return false;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
@@ -110,8 +110,8 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
 {
   int n = (int) strnlen(chars, MATCH_MAX_LENGTH);
   if (strncmp(scan->pos, chars, n)
-   || (isalnum(CHAR_AT(scan, n)))
-   || (CHAR_AT(scan, n) == '_'))
+   || (isalnum(char_at(scan, n)))
+   || (char_at(scan, n) == '_'))
     return false;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
@@ -124,38 +124,38 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
 static inline bool match_number(scanner_t *scan)
 {
   int n = 0;
-  if (CHAR_AT(scan, n) == '0')
+  if (char_at(scan, n) == '0')
     ++n;
   else
   {
-    if (CHAR_AT(scan, n) < '1' || CHAR_AT(scan, n) > '9')
+    if (char_at(scan, n) < '1' || char_at(scan, n) > '9')
       return false;
     ++n;
-    while (isdigit(CHAR_AT(scan, n)))
+    while (isdigit(char_at(scan, n)))
       ++n;
   }
-  token_type_t type = TOKEN_INT;
-  if (CHAR_AT(scan, n) == '.')
+  int type = TOKEN_INT;
+  if (char_at(scan, n) == '.')
   {
-    if (!isdigit(CHAR_AT(scan, n + 1)))
+    if (!isdigit(char_at(scan, n + 1)))
       goto end;
     n += 2;
-    while (isdigit(CHAR_AT(scan, n)))
+    while (isdigit(char_at(scan, n)))
       ++n;
     type = TOKEN_NUMBER;
   }
-  if (CHAR_AT(scan, n) == 'e' || CHAR_AT(scan, n) == 'E')
+  if (char_at(scan, n) == 'e' || char_at(scan, n) == 'E')
   {
     ++n;
-    if (CHAR_AT(scan, n) == '+' || CHAR_AT(scan, n) == '-')
+    if (char_at(scan, n) == '+' || char_at(scan, n) == '-')
       ++n;
-    if (!isdigit(CHAR_AT(scan, n)))
+    if (!isdigit(char_at(scan, n)))
       return false;
     ++n;
-    while (isdigit(CHAR_AT(scan, n)))
+    while (isdigit(char_at(scan, n)))
       ++n;
   }
-  if (isalnum(CHAR_AT(scan, n)) || CHAR_AT(scan, n) == '_')
+  if (isalnum(char_at(scan, n)) || char_at(scan, n) == '_')
     return false;
 end:
   scan->token.type = type;
@@ -169,18 +169,18 @@ end:
 
 static inline bool match_string(scanner_t *scan)
 {
-  char chr = CURRENT_CHAR(scan);
+  char chr = current_char(scan);
   if (chr == '\'' || chr == '\"')
   {
     int n = 1;
     for (;;)
     {
-      if (CHAR_AT(scan, n) == chr)
+      if (char_at(scan, n) == chr)
       {
         ++n;
         break;
       }
-      if (CHAR_AT(scan, n) == '\0')
+      if (char_at(scan, n) == '\0')
         lexical_error(scan, "unterminated string");
       ++n;
     }
@@ -197,10 +197,10 @@ static inline bool match_string(scanner_t *scan)
 
 static inline bool match_name(scanner_t *scan)
 {
-  if (CURRENT_CHAR(scan) != '_' && !isalpha(CURRENT_CHAR(scan)))
+  if (current_char(scan) != '_' && !isalpha(current_char(scan)))
     return false;
   int n = 1;
-  while (CHAR_AT(scan, n) == '_' || isalnum(CHAR_AT(scan, n)))
+  while (char_at(scan, n) == '_' || isalnum(char_at(scan, n)))
     ++n;
   scan->token.type = TOKEN_NAME;
   scan->token.line = scan->line;

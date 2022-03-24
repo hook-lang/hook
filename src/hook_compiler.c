@@ -17,12 +17,12 @@
 #define MAX_VARIABLES UINT8_MAX
 #define MAX_BREAKS    UINT8_MAX
 
-#define MATCH(s, t) ((s)->token.type == (t))
+#define match(s, t) ((s)->token.type == (t))
 
-#define EXPECT(c, t) do \
+#define consume(c, t) do \
   { \
     scanner_t *scan = (c)->scan; \
-    if (!MATCH(scan, t)) \
+    if (!match(scan, t)) \
       syntax_error_unexpected(c); \
     scanner_next_token(scan); \
   } while(0)
@@ -373,92 +373,92 @@ static inline void compiler_init(compiler_t *comp, compiler_t *parent, scanner_t
 static void compile_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  if (MATCH(scan, TOKEN_USE))
+  if (match(scan, TOKEN_USE))
   {
     compile_load_module(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_VAL))
+  if (match(scan, TOKEN_VAL))
   {
     compile_constant_declaration(comp);
-    EXPECT(comp, TOKEN_SEMICOLON);
+    consume(comp, TOKEN_SEMICOLON);
     return;
   }
-  if (MATCH(scan, TOKEN_MUT))
+  if (match(scan, TOKEN_MUT))
   {
     compile_variable_declaration(comp);
-    EXPECT(comp, TOKEN_SEMICOLON);
+    consume(comp, TOKEN_SEMICOLON);
     return;
   }
-  if (MATCH(scan, TOKEN_NAME))
+  if (match(scan, TOKEN_NAME))
   {
     token_t tk = scan->token;
     scanner_next_token(scan);
     compile_assign_statement(comp, &tk);
-    EXPECT(comp, TOKEN_SEMICOLON);
+    consume(comp, TOKEN_SEMICOLON);
     return;
   }
-  if (MATCH(scan, TOKEN_STRUCT))
+  if (match(scan, TOKEN_STRUCT))
   {
     compile_struct_declaration(comp, false);
     return;
   }
-  if (MATCH(scan, TOKEN_FN))
+  if (match(scan, TOKEN_FN))
   {
     compile_function_declaration(comp, false);
     return;
   }
-  if (MATCH(scan, TOKEN_DEL))
+  if (match(scan, TOKEN_DEL))
   {
     compile_del_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_IF))
+  if (match(scan, TOKEN_IF))
   {
     compile_if_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_MATCH))
+  if (match(scan, TOKEN_MATCH))
   {
     compile_match_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_LOOP))
+  if (match(scan, TOKEN_LOOP))
   {
     compile_loop_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_WHILE))
+  if (match(scan, TOKEN_WHILE))
   {
     compile_while_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_DO))
+  if (match(scan, TOKEN_DO))
   {
     compile_do_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_FOR))
+  if (match(scan, TOKEN_FOR))
   {
     compile_for_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_CONTINUE))
+  if (match(scan, TOKEN_CONTINUE))
   {
     compile_continue_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_BREAK))
+  if (match(scan, TOKEN_BREAK))
   {
     compile_break_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_RETURN))
+  if (match(scan, TOKEN_RETURN))
   {
     compile_return_statement(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACE))
+  if (match(scan, TOKEN_LBRACE))
   {
     compile_block(comp);
     return;
@@ -472,7 +472,7 @@ static void compile_load_module(compiler_t *comp)
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   scanner_next_token(scan);
-  if (MATCH(scan, TOKEN_NAME))
+  if (match(scan, TOKEN_NAME))
   {
     token_t tk = scan->token;
     scanner_next_token(scan);
@@ -480,24 +480,24 @@ static void compile_load_module(compiler_t *comp)
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     hk_function_add_line(fn, tk.line);
-    if (MATCH(scan, TOKEN_AS))
+    if (match(scan, TOKEN_AS))
     {
       scanner_next_token(scan);
-      if (!MATCH(scan, TOKEN_NAME))
+      if (!match(scan, TOKEN_NAME))
         syntax_error_unexpected(comp);
       tk = scan->token;
       scanner_next_token(scan);
     }
     define_local(comp, &tk, false);
-    EXPECT(comp, TOKEN_SEMICOLON);
+    consume(comp, TOKEN_SEMICOLON);
     hk_chunk_emit_opcode(chunk, HK_OP_LOAD_MODULE);
     hk_function_add_line(fn, tk.line);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACE))
+  if (match(scan, TOKEN_LBRACE))
   {
     scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
@@ -507,10 +507,10 @@ static void compile_load_module(compiler_t *comp)
     hk_chunk_emit_byte(chunk, index);
     hk_function_add_line(fn, tk.line);
     uint8_t n = 1;
-    while (MATCH(scan, TOKEN_COMMA))
+    while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
-      if (!MATCH(scan, TOKEN_NAME))
+      if (!match(scan, TOKEN_NAME))
         syntax_error_unexpected(comp);
       token_t tk = scan->token;
       scanner_next_token(scan);
@@ -521,14 +521,14 @@ static void compile_load_module(compiler_t *comp)
       hk_function_add_line(fn, tk.line);
       ++n;
     }
-    EXPECT(comp, TOKEN_RBRACE);
-    EXPECT(comp, TOKEN_IN);
+    consume(comp, TOKEN_RBRACE);
+    consume(comp, TOKEN_IN);
     int line = scan->token.line;
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     tk = scan->token;
     scanner_next_token(scan);
-    EXPECT(comp, TOKEN_SEMICOLON);
+    consume(comp, TOKEN_SEMICOLON);
     index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
@@ -549,33 +549,33 @@ static void compile_constant_declaration(compiler_t *comp)
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   scanner_next_token(scan);
-  if (MATCH(scan, TOKEN_NAME))
+  if (match(scan, TOKEN_NAME))
   {
     define_local(comp, &scan->token, false);
     scanner_next_token(scan);
-    EXPECT(comp, TOKEN_EQ);
+    consume(comp, TOKEN_EQ);
     compile_expression(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACKET))
+  if (match(scan, TOKEN_LBRACKET))
   {
     scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     define_local(comp, &scan->token, false);
     scanner_next_token(scan);
     uint8_t n = 1;
-    while (MATCH(scan, TOKEN_COMMA))
+    while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
-      if (!MATCH(scan, TOKEN_NAME))
+      if (!match(scan, TOKEN_NAME))
         syntax_error_unexpected(comp);
       define_local(comp, &scan->token, false);
       scanner_next_token(scan);
       ++n;
     }
-    EXPECT(comp, TOKEN_RBRACKET);
-    EXPECT(comp, TOKEN_EQ);
+    consume(comp, TOKEN_RBRACKET);
+    consume(comp, TOKEN_EQ);
     int line = scan->token.line;
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_UNPACK);
@@ -583,10 +583,10 @@ static void compile_constant_declaration(compiler_t *comp)
     hk_function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACE))
+  if (match(scan, TOKEN_LBRACE))
   {
     scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
@@ -596,10 +596,10 @@ static void compile_constant_declaration(compiler_t *comp)
     hk_chunk_emit_byte(chunk, index);
     hk_function_add_line(fn, tk.line);
     uint8_t n = 1;
-    while (MATCH(scan, TOKEN_COMMA))
+    while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
-      if (!MATCH(scan, TOKEN_NAME))
+      if (!match(scan, TOKEN_NAME))
         syntax_error_unexpected(comp);
       token_t tk = scan->token;
       scanner_next_token(scan);
@@ -610,8 +610,8 @@ static void compile_constant_declaration(compiler_t *comp)
       hk_function_add_line(fn, tk.line);
       ++n;
     }
-    EXPECT(comp, TOKEN_RBRACE);
-    EXPECT(comp, TOKEN_EQ);
+    consume(comp, TOKEN_RBRACE);
+    consume(comp, TOKEN_EQ);
     int line = scan->token.line;
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_DESTRUCT);
@@ -628,11 +628,11 @@ static void compile_variable_declaration(compiler_t *comp)
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   scanner_next_token(scan);
-  if (MATCH(scan, TOKEN_NAME))
+  if (match(scan, TOKEN_NAME))
   {
     define_local(comp, &scan->token, true);
     scanner_next_token(scan);
-    if (MATCH(scan, TOKEN_EQ))
+    if (match(scan, TOKEN_EQ))
     {
       scanner_next_token(scan);
       compile_expression(comp);
@@ -642,25 +642,25 @@ static void compile_variable_declaration(compiler_t *comp)
     hk_function_add_line(fn, scan->token.line);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACKET))
+  if (match(scan, TOKEN_LBRACKET))
   {
     scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     define_local(comp, &scan->token, true);
     scanner_next_token(scan);
     uint8_t n = 1;
-    while (MATCH(scan, TOKEN_COMMA))
+    while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
-      if (!MATCH(scan, TOKEN_NAME))
+      if (!match(scan, TOKEN_NAME))
         syntax_error_unexpected(comp);
       define_local(comp, &scan->token, true);
       scanner_next_token(scan);
       ++n;
     }
-    EXPECT(comp, TOKEN_RBRACKET);
-    EXPECT(comp, TOKEN_EQ);
+    consume(comp, TOKEN_RBRACKET);
+    consume(comp, TOKEN_EQ);
     int line = scan->token.line;
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_UNPACK);
@@ -668,10 +668,10 @@ static void compile_variable_declaration(compiler_t *comp)
     hk_function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACE))
+  if (match(scan, TOKEN_LBRACE))
   {
     scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
@@ -681,10 +681,10 @@ static void compile_variable_declaration(compiler_t *comp)
     hk_chunk_emit_byte(chunk, index);
     hk_function_add_line(fn, tk.line);
     uint8_t n = 1;
-    while (MATCH(scan, TOKEN_COMMA))
+    while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
-      if (!MATCH(scan, TOKEN_NAME))
+      if (!match(scan, TOKEN_NAME))
         syntax_error_unexpected(comp);
       token_t tk = scan->token;
       scanner_next_token(scan);
@@ -695,8 +695,8 @@ static void compile_variable_declaration(compiler_t *comp)
       hk_function_add_line(fn, tk.line);
       ++n;
     }
-    EXPECT(comp, TOKEN_RBRACE);
-    EXPECT(comp, TOKEN_EQ);
+    consume(comp, TOKEN_RBRACE);
+    consume(comp, TOKEN_EQ);
     int line = scan->token.line;
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_DESTRUCT);
@@ -713,7 +713,7 @@ static void compile_assign_statement(compiler_t *comp, token_t *tk)
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   variable_t var;
-  if (MATCH(scan, TOKEN_EQ))
+  if (match(scan, TOKEN_EQ))
   {
     var = compile_variable(comp, tk, false);
     scanner_next_token(scan);
@@ -740,7 +740,7 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   int line = scan->token.line;
-  if (MATCH(scan, TOKEN_PLUSEQ))
+  if (match(scan, TOKEN_PLUSEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
@@ -748,7 +748,7 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     hk_function_add_line(fn, line);
     return SYN_ASSIGN;
   }
-  if (MATCH(scan, TOKEN_MINUSEQ))
+  if (match(scan, TOKEN_MINUSEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
@@ -756,7 +756,7 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     hk_function_add_line(fn, line);
     return SYN_ASSIGN;
   }
-  if (MATCH(scan, TOKEN_STAREQ))
+  if (match(scan, TOKEN_STAREQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
@@ -764,7 +764,7 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     hk_function_add_line(fn, line);
     return SYN_ASSIGN;
   }
-  if (MATCH(scan, TOKEN_SLASHEQ))
+  if (match(scan, TOKEN_SLASHEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
@@ -772,7 +772,7 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     hk_function_add_line(fn, line);
     return SYN_ASSIGN;
   }
-  if (MATCH(scan, TOKEN_PERCENTEQ))
+  if (match(scan, TOKEN_PERCENTEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
@@ -780,33 +780,33 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     hk_function_add_line(fn, line);
     return SYN_ASSIGN;
   }
-  if (MATCH(scan, TOKEN_PLUSPLUS))
+  if (match(scan, TOKEN_PLUSPLUS))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_INCR);
     return SYN_ASSIGN;
   }
-  if (MATCH(scan, TOKEN_MINUSMINUS))
+  if (match(scan, TOKEN_MINUSMINUS))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_DECR);
     return SYN_ASSIGN;
   }
-  if (MATCH(scan, TOKEN_LBRACKET))
+  if (match(scan, TOKEN_LBRACKET))
   {
     scanner_next_token(scan);
-    if (MATCH(scan, TOKEN_RBRACKET))
+    if (match(scan, TOKEN_RBRACKET))
     {
       scanner_next_token(scan);
-      EXPECT(comp, TOKEN_EQ);
+      consume(comp, TOKEN_EQ);
       compile_expression(comp);
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_ADD_ELEMENT : HK_OP_ADD_ELEMENT);
       hk_function_add_line(fn, line);
       return SYN_ASSIGN;
     }
     compile_expression(comp);
-    EXPECT(comp, TOKEN_RBRACKET);
-    if (MATCH(scan, TOKEN_EQ))
+    consume(comp, TOKEN_RBRACKET);
+    if (match(scan, TOKEN_EQ))
     {
       scanner_next_token(scan);
       compile_expression(comp);
@@ -825,15 +825,15 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     }
     return syn;
   }
-  if (MATCH(scan, TOKEN_DOT))
+  if (match(scan, TOKEN_DOT))
   {
     scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
     uint8_t index = add_string_constant(comp, &tk);
-    if (MATCH(scan, TOKEN_EQ))
+    if (match(scan, TOKEN_EQ))
     {
       scanner_next_token(scan);
       compile_expression(comp);
@@ -854,10 +854,10 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     }
     return syn;
   }
-  if (MATCH(scan, TOKEN_LPAREN))
+  if (match(scan, TOKEN_LPAREN))
   {
     scanner_next_token(scan);
-    if (MATCH(scan, TOKEN_RPAREN))
+    if (match(scan, TOKEN_RPAREN))
     {
       scanner_next_token(scan);
       hk_chunk_emit_opcode(chunk, HK_OP_CALL);
@@ -867,13 +867,13 @@ static int compile_assign(compiler_t *comp, int syntax, bool inplace)
     }
     compile_expression(comp);
     uint8_t num_args = 1;
-    while (MATCH(scan, TOKEN_COMMA))
+    while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
       compile_expression(comp);
       ++num_args;
     }
-    EXPECT(comp, TOKEN_RPAREN);
+    consume(comp, TOKEN_RPAREN);
     hk_chunk_emit_opcode(chunk, HK_OP_CALL);
     hk_chunk_emit_byte(chunk, num_args);
     hk_function_add_line(fn, line);
@@ -900,7 +900,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
   }
   else
   {
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     tk = scan->token;
     scanner_next_token(scan);
@@ -910,8 +910,8 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
     hk_chunk_emit_byte(chunk, index);
     hk_function_add_line(fn, tk.line);
   }
-  EXPECT(comp, TOKEN_LBRACE);
-  if (MATCH(scan, TOKEN_RBRACE))
+  consume(comp, TOKEN_LBRACE);
+  if (match(scan, TOKEN_RBRACE))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_STRUCT);
@@ -919,7 +919,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
     hk_function_add_line(fn, line);
     return;
   }
-  if (!MATCH(scan, TOKEN_NAME))
+  if (!match(scan, TOKEN_NAME))
     syntax_error_unexpected(comp);
   tk = scan->token;
   scanner_next_token(scan);
@@ -928,10 +928,10 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
   hk_chunk_emit_byte(chunk, index);
   hk_function_add_line(fn, tk.line);
   uint8_t length = 1;
-  while (MATCH(scan, TOKEN_COMMA))
+  while (match(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     tk = scan->token;
     scanner_next_token(scan);
@@ -941,7 +941,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
     hk_function_add_line(fn, tk.line);
     ++length;
   }
-  EXPECT(comp, TOKEN_RBRACE);
+  consume(comp, TOKEN_RBRACE);
   hk_chunk_emit_opcode(chunk, HK_OP_STRUCT);
   hk_chunk_emit_byte(chunk, length);
   hk_function_add_line(fn, line);
@@ -957,7 +957,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   compiler_t child_comp;
   if (!is_anonymous)
   {
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
@@ -969,18 +969,18 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   else
     compiler_init(&child_comp, comp, scan, NULL);
   hk_chunk_t *child_chunk = &child_comp.fn->chunk;
-  EXPECT(comp, TOKEN_LPAREN);
-  if (MATCH(scan, TOKEN_RPAREN))
+  consume(comp, TOKEN_LPAREN);
+  if (match(scan, TOKEN_RPAREN))
   {
     scanner_next_token(scan);
-    if (MATCH(scan, TOKEN_ARROW))
+    if (match(scan, TOKEN_ARROW))
     {
       scanner_next_token(scan);
       compile_expression(&child_comp);
       hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN);
       goto end;
     }
-    if (!MATCH(scan, TOKEN_LBRACE))
+    if (!match(scan, TOKEN_LBRACE))
       syntax_error_unexpected(comp);
     compile_block(&child_comp);
     hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
@@ -988,41 +988,41 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     goto end;
   }
   bool is_mutable = false;
-  if (MATCH(scan, TOKEN_MUT))
+  if (match(scan, TOKEN_MUT))
   {
     scanner_next_token(scan);
     is_mutable = true;
   }
-  if (!MATCH(scan, TOKEN_NAME))
+  if (!match(scan, TOKEN_NAME))
     syntax_error_unexpected(comp);
   define_local(&child_comp, &scan->token, is_mutable);
   scanner_next_token(scan);
   int arity = 1;
-  while (MATCH(scan, TOKEN_COMMA))
+  while (match(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
     bool is_mutable = false;
-    if (MATCH(scan, TOKEN_MUT))
+    if (match(scan, TOKEN_MUT))
     {
       scanner_next_token(scan);
       is_mutable = true;
     }
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     define_local(&child_comp, &scan->token, is_mutable);
     scanner_next_token(scan);
     ++arity;
   }
   child_comp.fn->arity = arity;
-  EXPECT(comp, TOKEN_RPAREN);
-  if (MATCH(scan, TOKEN_ARROW))
+  consume(comp, TOKEN_RPAREN);
+  if (match(scan, TOKEN_ARROW))
   {
     scanner_next_token(scan);
     compile_expression(&child_comp);
     hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN);
     goto end;
   }
-  if (!MATCH(scan, TOKEN_LBRACE))
+  if (!match(scan, TOKEN_LBRACE))
     syntax_error_unexpected(comp);
   compile_block(&child_comp);
   hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
@@ -1042,7 +1042,7 @@ static void compile_del_statement(compiler_t *comp)
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   scanner_next_token(scan);
-  if (!MATCH(scan, TOKEN_NAME))
+  if (!match(scan, TOKEN_NAME))
     syntax_error_unexpected(comp);
   token_t tk = scan->token;
   scanner_next_token(scan);
@@ -1063,13 +1063,13 @@ static void compile_delete(compiler_t *comp, bool inplace)
   scanner_t *scan = comp->scan;
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
-  if (MATCH(scan, TOKEN_LBRACKET))
+  if (match(scan, TOKEN_LBRACKET))
   {
     int line = scan->token.line;
     scanner_next_token(scan);
     compile_expression(comp);
-    EXPECT(comp, TOKEN_RBRACKET);
-    if (MATCH(scan, TOKEN_SEMICOLON))
+    consume(comp, TOKEN_RBRACKET);
+    if (match(scan, TOKEN_SEMICOLON))
     {
       scanner_next_token(scan);
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_DELETE_ELEMENT : HK_OP_DELETE_ELEMENT);
@@ -1082,10 +1082,10 @@ static void compile_delete(compiler_t *comp, bool inplace)
     hk_chunk_emit_opcode(chunk, HK_OP_SET_ELEMENT);
     return;
   }
-  if (MATCH(scan, TOKEN_DOT))
+  if (match(scan, TOKEN_DOT))
   {
     scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
@@ -1105,14 +1105,14 @@ static void compile_if_statement(compiler_t *comp)
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
-  EXPECT(comp, TOKEN_LPAREN);
+  consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
-  EXPECT(comp, TOKEN_RPAREN);
+  consume(comp, TOKEN_RPAREN);
   int offset1 = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
   compile_statement(comp);
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);
-  if (MATCH(scan, TOKEN_ELSE))
+  if (match(scan, TOKEN_ELSE))
   {
     scanner_next_token(scan);
     compile_statement(comp);
@@ -1125,12 +1125,12 @@ static void compile_match_statement(compiler_t *comp)
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
-  EXPECT(comp, TOKEN_LPAREN);
+  consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
-  EXPECT(comp, TOKEN_RPAREN);
-  EXPECT(comp, TOKEN_LBRACE);
+  consume(comp, TOKEN_RPAREN);
+  consume(comp, TOKEN_LBRACE);
   compile_expression(comp);
-  EXPECT(comp, TOKEN_ARROW);
+  consume(comp, TOKEN_ARROW);
   int offset1 = emit_jump(chunk, HK_OP_MATCH);
   compile_statement(comp);
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
@@ -1143,23 +1143,23 @@ static void compile_match_statement_member(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
-  if (MATCH(scan, TOKEN_RBRACE))
+  if (match(scan, TOKEN_RBRACE))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_POP);
     return;
   }
-  if (MATCH(scan, TOKEN_UNDERSCORE))
+  if (match(scan, TOKEN_UNDERSCORE))
   {
     scanner_next_token(scan);
-    EXPECT(comp, TOKEN_ARROW);
+    consume(comp, TOKEN_ARROW);
     hk_chunk_emit_opcode(chunk, HK_OP_POP);
     compile_statement(comp);
-    EXPECT(comp, TOKEN_RBRACE);
+    consume(comp, TOKEN_RBRACE);
     return;
   }
   compile_expression(comp);
-  EXPECT(comp, TOKEN_ARROW);
+  consume(comp, TOKEN_ARROW);
   int offset1 = emit_jump(chunk, HK_OP_MATCH);
   compile_statement(comp);
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
@@ -1173,7 +1173,7 @@ static void compile_loop_statement(compiler_t *comp)
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
-  if (!MATCH(scan, TOKEN_LBRACE))
+  if (!match(scan, TOKEN_LBRACE))
     syntax_error_unexpected(comp);
   loop_t loop;
   start_loop(comp, &loop);
@@ -1188,11 +1188,11 @@ static void compile_while_statement(compiler_t *comp)
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
-  EXPECT(comp, TOKEN_LPAREN);
+  consume(comp, TOKEN_LPAREN);
   loop_t loop;
   start_loop(comp, &loop);
   compile_expression(comp);
-  EXPECT(comp, TOKEN_RPAREN);
+  consume(comp, TOKEN_RPAREN);
   int offset = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
   compile_statement(comp);
   hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
@@ -1209,11 +1209,11 @@ static void compile_do_statement(compiler_t *comp)
   loop_t loop;
   start_loop(comp, &loop);
   compile_statement(comp);
-  EXPECT(comp, TOKEN_WHILE);
-  EXPECT(comp, TOKEN_LPAREN);
+  consume(comp, TOKEN_WHILE);
+  consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
-  EXPECT(comp, TOKEN_RPAREN);
-  EXPECT(comp, TOKEN_SEMICOLON);
+  consume(comp, TOKEN_RPAREN);
+  consume(comp, TOKEN_SEMICOLON);
   int offset = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
   hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
   hk_chunk_emit_word(chunk, loop.jump);
@@ -1227,57 +1227,57 @@ static void compile_for_statement(compiler_t *comp)
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   scanner_next_token(scan);
-  EXPECT(comp, TOKEN_LPAREN);
+  consume(comp, TOKEN_LPAREN);
   push_scope(comp);
-  if (MATCH(scan, TOKEN_SEMICOLON))
+  if (match(scan, TOKEN_SEMICOLON))
     scanner_next_token(scan);
   else
   {
-    if (MATCH(scan, TOKEN_VAL))
+    if (match(scan, TOKEN_VAL))
     {
       compile_constant_declaration(comp);
-      EXPECT(comp, TOKEN_SEMICOLON);
+      consume(comp, TOKEN_SEMICOLON);
     }
-    else if (MATCH(scan, TOKEN_MUT))
+    else if (match(scan, TOKEN_MUT))
     {
       compile_variable_declaration(comp);
-      EXPECT(comp, TOKEN_SEMICOLON);
+      consume(comp, TOKEN_SEMICOLON);
     }
-    else if (MATCH(scan, TOKEN_NAME))
+    else if (match(scan, TOKEN_NAME))
     {
       token_t tk = scan->token;
       scanner_next_token(scan);
       compile_assign_statement(comp, &tk);
-      EXPECT(comp, TOKEN_SEMICOLON);
+      consume(comp, TOKEN_SEMICOLON);
     }
     else
       syntax_error_unexpected(comp);
   }
   uint16_t jump1 = (uint16_t) chunk->length;
-  bool missing = MATCH(scan, TOKEN_SEMICOLON);
+  bool missing = match(scan, TOKEN_SEMICOLON);
   int offset1;
   if (missing)
     scanner_next_token(scan);
   else
   {
     compile_expression(comp);
-    EXPECT(comp, TOKEN_SEMICOLON);
+    consume(comp, TOKEN_SEMICOLON);
     offset1 = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
   }
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
   uint16_t jump2 = (uint16_t) chunk->length;
   loop_t loop;
   start_loop(comp, &loop);
-  if (MATCH(scan, TOKEN_RPAREN))
+  if (match(scan, TOKEN_RPAREN))
     scanner_next_token(scan);
   else
   {
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
     compile_assign_statement(comp, &tk);
-    EXPECT(comp, TOKEN_RPAREN);
+    consume(comp, TOKEN_RPAREN);
   }
   hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
   hk_chunk_emit_word(chunk, jump1);
@@ -1301,7 +1301,7 @@ static void compile_continue_statement(compiler_t *comp)
   if (!comp->loop)
     syntax_error(fn->name->chars, scan->file->chars, tk.line, tk.col,
       "cannot use continue outside of a loop");
-  EXPECT(comp, TOKEN_SEMICOLON);
+  consume(comp, TOKEN_SEMICOLON);
   discard_variables(comp, comp->loop->scope_depth + 1);
   hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
   hk_chunk_emit_word(chunk, comp->loop->jump);
@@ -1317,7 +1317,7 @@ static void compile_break_statement(compiler_t *comp)
   if (!comp->loop)
     syntax_error(function, file, tk.line, tk.col,
       "cannot use break outside of a loop");
-  EXPECT(comp, TOKEN_SEMICOLON);
+  consume(comp, TOKEN_SEMICOLON);
   discard_variables(comp, comp->loop->scope_depth + 1);
   loop_t *loop = comp->loop;
   if (loop->num_offsets == MAX_BREAKS)
@@ -1333,7 +1333,7 @@ static void compile_return_statement(compiler_t *comp)
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   scanner_next_token(scan);
-  if (MATCH(scan, TOKEN_SEMICOLON))
+  if (match(scan, TOKEN_SEMICOLON))
   {
     int line = scan->token.line;
     scanner_next_token(scan);
@@ -1342,7 +1342,7 @@ static void compile_return_statement(compiler_t *comp)
     return;
   }
   compile_expression(comp);
-  EXPECT(comp, TOKEN_SEMICOLON);
+  consume(comp, TOKEN_SEMICOLON);
   hk_chunk_emit_opcode(chunk, HK_OP_RETURN);
 }
 
@@ -1351,7 +1351,7 @@ static void compile_block(compiler_t *comp)
   scanner_t *scan = comp->scan;
   scanner_next_token(scan);
   push_scope(comp);
-  while (!MATCH(scan, TOKEN_RBRACE))
+  while (!match(scan, TOKEN_RBRACE))
     compile_statement(comp);
   scanner_next_token(scan);
   pop_scope(comp);
@@ -1361,7 +1361,7 @@ static void compile_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   compile_and_expression(comp);
-  while (MATCH(scan, TOKEN_PIPEPIPE))
+  while (match(scan, TOKEN_PIPEPIPE))
   {
     scanner_next_token(scan);
     int offset = emit_jump(&comp->fn->chunk, HK_OP_OR);
@@ -1374,7 +1374,7 @@ static void compile_and_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   compile_equal_expression(comp);
-  while (MATCH(scan, TOKEN_AMPAMP))
+  while (match(scan, TOKEN_AMPAMP))
   {
     scanner_next_token(scan);
     int offset = emit_jump(&comp->fn->chunk, HK_OP_AND);
@@ -1390,14 +1390,14 @@ static void compile_equal_expression(compiler_t *comp)
   compile_comp_expression(comp);
   for (;;)
   {
-    if (MATCH(scan, TOKEN_EQEQ))
+    if (match(scan, TOKEN_EQEQ))
     {
       scanner_next_token(scan);
       compile_comp_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_EQUAL);
       continue;
     }
-    if (MATCH(scan, TOKEN_BANGEQ))
+    if (match(scan, TOKEN_BANGEQ))
     {
       scanner_next_token(scan);
       compile_comp_expression(comp);
@@ -1417,7 +1417,7 @@ static void compile_comp_expression(compiler_t *comp)
   for (;;)
   {
     int line = scan->token.line;
-    if (MATCH(scan, TOKEN_GT))
+    if (match(scan, TOKEN_GT))
     {
       scanner_next_token(scan);
       compile_add_expression(comp);
@@ -1425,7 +1425,7 @@ static void compile_comp_expression(compiler_t *comp)
       hk_function_add_line(fn, line);
       continue;
     }
-    if (MATCH(scan, TOKEN_GTEQ))
+    if (match(scan, TOKEN_GTEQ))
     {
       scanner_next_token(scan);
       compile_add_expression(comp);
@@ -1433,7 +1433,7 @@ static void compile_comp_expression(compiler_t *comp)
       hk_function_add_line(fn, line);
       continue;
     }
-    if (MATCH(scan, TOKEN_LT))
+    if (match(scan, TOKEN_LT))
     {
       scanner_next_token(scan);
       compile_add_expression(comp);
@@ -1441,7 +1441,7 @@ static void compile_comp_expression(compiler_t *comp)
       hk_function_add_line(fn, line);
       continue;
     }
-    if (MATCH(scan, TOKEN_LTEQ))
+    if (match(scan, TOKEN_LTEQ))
     {
       scanner_next_token(scan);
       compile_add_expression(comp);
@@ -1462,7 +1462,7 @@ static void compile_add_expression(compiler_t *comp)
   for (;;)
   {
     int line = scan->token.line;
-    if (MATCH(scan, TOKEN_PLUS))
+    if (match(scan, TOKEN_PLUS))
     {
       scanner_next_token(scan);
       compile_range_expression(comp);
@@ -1470,7 +1470,7 @@ static void compile_add_expression(compiler_t *comp)
       hk_function_add_line(fn, line);
       continue;
     }
-    if (MATCH(scan, TOKEN_MINUS))
+    if (match(scan, TOKEN_MINUS))
     {
       scanner_next_token(scan);
       compile_range_expression(comp);
@@ -1489,7 +1489,7 @@ static void compile_range_expression(compiler_t *comp)
   hk_chunk_t *chunk = &fn->chunk;
   compile_mul_expression(comp);
   int line = scan->token.line;
-  if (MATCH(scan, TOKEN_DOTDOT))
+  if (match(scan, TOKEN_DOTDOT))
   {
     scanner_next_token(scan);
     compile_mul_expression(comp);
@@ -1507,7 +1507,7 @@ static void compile_mul_expression(compiler_t *comp)
   for (;;)
   {
     int line = scan->token.line;
-    if (MATCH(scan, TOKEN_STAR))
+    if (match(scan, TOKEN_STAR))
     {
       scanner_next_token(scan);
       compile_unary_expression(comp);
@@ -1515,7 +1515,7 @@ static void compile_mul_expression(compiler_t *comp)
       hk_function_add_line(fn, line);
       continue;
     }
-    if (MATCH(scan, TOKEN_SLASH))
+    if (match(scan, TOKEN_SLASH))
     {
       scanner_next_token(scan);
       compile_unary_expression(comp);
@@ -1523,7 +1523,7 @@ static void compile_mul_expression(compiler_t *comp)
       hk_function_add_line(fn, line);
       continue;
     }
-    if (MATCH(scan, TOKEN_PERCENT))
+    if (match(scan, TOKEN_PERCENT))
     {
       scanner_next_token(scan);
       compile_unary_expression(comp);
@@ -1540,7 +1540,7 @@ static void compile_unary_expression(compiler_t *comp)
   scanner_t *scan = comp->scan;
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
-  if (MATCH(scan, TOKEN_MINUS))
+  if (match(scan, TOKEN_MINUS))
   {
     int line = scan->token.line;
     scanner_next_token(scan);
@@ -1549,7 +1549,7 @@ static void compile_unary_expression(compiler_t *comp)
     hk_function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_BANG))
+  if (match(scan, TOKEN_BANG))
   {
     scanner_next_token(scan);
     compile_unary_expression(comp);
@@ -1565,28 +1565,28 @@ static void compile_prim_expression(compiler_t *comp)
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   int line = scan->token.line;
-  if (MATCH(scan, TOKEN_NIL))
+  if (match(scan, TOKEN_NIL))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_NIL);
     hk_function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_FALSE))
+  if (match(scan, TOKEN_FALSE))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_FALSE);
     hk_function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_TRUE))
+  if (match(scan, TOKEN_TRUE))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_TRUE);
     hk_function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_INT))
+  if (match(scan, TOKEN_INT))
   {
     double data = parse_double(comp);
     scanner_next_token(scan);
@@ -1603,7 +1603,7 @@ static void compile_prim_expression(compiler_t *comp)
     hk_function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_NUMBER))
+  if (match(scan, TOKEN_NUMBER))
   {
     double data = parse_double(comp);
     scanner_next_token(scan);
@@ -1613,7 +1613,7 @@ static void compile_prim_expression(compiler_t *comp)
     hk_function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_STRING))
+  if (match(scan, TOKEN_STRING))
   {
     token_t tk = scan->token;
     scanner_next_token(scan);
@@ -1623,46 +1623,46 @@ static void compile_prim_expression(compiler_t *comp)
     hk_function_add_line(fn, line);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACKET))
+  if (match(scan, TOKEN_LBRACKET))
   {
     compile_array_constructor(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_LBRACE))
+  if (match(scan, TOKEN_LBRACE))
   {
     compile_struct_constructor(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_STRUCT))
+  if (match(scan, TOKEN_STRUCT))
   {
     compile_struct_declaration(comp, true);
     return;
   }
-  if (MATCH(scan, TOKEN_FN))
+  if (match(scan, TOKEN_FN))
   {
     compile_function_declaration(comp, true);
     return;
   }
-  if (MATCH(scan, TOKEN_IF))
+  if (match(scan, TOKEN_IF))
   {
     compile_if_expression(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_MATCH))
+  if (match(scan, TOKEN_MATCH))
   {
     compile_match_expression(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_NAME))
+  if (match(scan, TOKEN_NAME))
   {
     compile_subscript(comp);
     return;
   }
-  if (MATCH(scan, TOKEN_LPAREN))
+  if (match(scan, TOKEN_LPAREN))
   {
     scanner_next_token(scan);
     compile_expression(comp);
-    EXPECT(comp, TOKEN_RPAREN);
+    consume(comp, TOKEN_RPAREN);
     return;
   }
   syntax_error_unexpected(comp);
@@ -1676,20 +1676,20 @@ static void compile_array_constructor(compiler_t *comp)
   int line = scan->token.line;
   scanner_next_token(scan);
   uint8_t length = 0;
-  if (MATCH(scan, TOKEN_RBRACKET))
+  if (match(scan, TOKEN_RBRACKET))
   {
     scanner_next_token(scan);
     goto end;
   }
   compile_expression(comp);
   ++length;
-  while (MATCH(scan, TOKEN_COMMA))
+  while (match(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     ++length;
   }
-  EXPECT(comp, TOKEN_RBRACKET);
+  consume(comp, TOKEN_RBRACKET);
 end:
   hk_chunk_emit_opcode(chunk, HK_OP_ARRAY);
   hk_chunk_emit_byte(chunk, length);
@@ -1706,7 +1706,7 @@ static void compile_struct_constructor(compiler_t *comp)
   scanner_next_token(scan);
   hk_chunk_emit_opcode(chunk, HK_OP_NIL);
   hk_function_add_line(fn, line);
-  if (MATCH(scan, TOKEN_RBRACE))
+  if (match(scan, TOKEN_RBRACE))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTRUCT);
@@ -1714,7 +1714,7 @@ static void compile_struct_constructor(compiler_t *comp)
     hk_function_add_line(fn, line);
     return;
   }
-  if (!MATCH(scan, TOKEN_NAME))
+  if (!match(scan, TOKEN_NAME))
     syntax_error_unexpected(comp);
   token_t tk = scan->token;
   scanner_next_token(scan);
@@ -1722,13 +1722,13 @@ static void compile_struct_constructor(compiler_t *comp)
   hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
   hk_chunk_emit_byte(chunk, index);
   hk_function_add_line(fn, tk.line);
-  EXPECT(comp, TOKEN_COLON);
+  consume(comp, TOKEN_COLON);
   compile_expression(comp);
   uint8_t length = 1;
-  while (MATCH(scan, TOKEN_COMMA))
+  while (match(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
-    if (!MATCH(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     tk = scan->token;
     scanner_next_token(scan);
@@ -1736,11 +1736,11 @@ static void compile_struct_constructor(compiler_t *comp)
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     hk_function_add_line(fn, tk.line);
-    EXPECT(comp, TOKEN_COLON);
+    consume(comp, TOKEN_COLON);
     compile_expression(comp);
     ++length;
   }
-  EXPECT(comp, TOKEN_RBRACE);
+  consume(comp, TOKEN_RBRACE);
   hk_chunk_emit_opcode(chunk, HK_OP_CONSTRUCT);
   hk_chunk_emit_byte(chunk, length);
   hk_function_add_line(fn, line);
@@ -1751,14 +1751,14 @@ static void compile_if_expression(compiler_t *comp)
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
-  EXPECT(comp, TOKEN_LPAREN);
+  consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
-  EXPECT(comp, TOKEN_RPAREN);
+  consume(comp, TOKEN_RPAREN);
   int offset1 = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
   compile_expression(comp);
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);
-  EXPECT(comp, TOKEN_ELSE);
+  consume(comp, TOKEN_ELSE);
   compile_expression(comp);
   patch_jump(comp, offset2);
 }
@@ -1768,26 +1768,26 @@ static void compile_match_expression(compiler_t *comp)
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
-  EXPECT(comp, TOKEN_LPAREN);
+  consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
-  EXPECT(comp, TOKEN_RPAREN);
-  EXPECT(comp, TOKEN_LBRACE);
+  consume(comp, TOKEN_RPAREN);
+  consume(comp, TOKEN_LBRACE);
   compile_expression(comp);
-  EXPECT(comp, TOKEN_ARROW);
+  consume(comp, TOKEN_ARROW);
   int offset1 = emit_jump(chunk, HK_OP_MATCH);
   compile_expression(comp);
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);
-  if (MATCH(scan, TOKEN_COMMA))
+  if (match(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
-    if (MATCH(scan, TOKEN_UNDERSCORE))
+    if (match(scan, TOKEN_UNDERSCORE))
     {
       scanner_next_token(scan);
-      EXPECT(comp, TOKEN_ARROW);
+      consume(comp, TOKEN_ARROW);
       hk_chunk_emit_opcode(chunk, HK_OP_POP);
       compile_expression(comp);
-      EXPECT(comp, TOKEN_RBRACE);
+      consume(comp, TOKEN_RBRACE);
       patch_jump(comp, offset2);
       return;
     }
@@ -1803,21 +1803,21 @@ static void compile_match_expression_member(compiler_t *comp)
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
   compile_expression(comp);
-  EXPECT(comp, TOKEN_ARROW);
+  consume(comp, TOKEN_ARROW);
   int offset1 = emit_jump(chunk, HK_OP_MATCH);
   compile_expression(comp);
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);
-  if (MATCH(scan, TOKEN_COMMA))
+  if (match(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
-    if (MATCH(scan, TOKEN_UNDERSCORE))
+    if (match(scan, TOKEN_UNDERSCORE))
     {
       scanner_next_token(scan);
-      EXPECT(comp, TOKEN_ARROW);
+      consume(comp, TOKEN_ARROW);
       hk_chunk_emit_opcode(chunk, HK_OP_POP);
       compile_expression(comp);
-      EXPECT(comp, TOKEN_RBRACE);
+      consume(comp, TOKEN_RBRACE);
       patch_jump(comp, offset2);
       return;
     }
@@ -1838,19 +1838,19 @@ static void compile_subscript(compiler_t *comp)
   for (;;)
   {
     int line = scan->token.line;
-    if (MATCH(scan, TOKEN_LBRACKET))
+    if (match(scan, TOKEN_LBRACKET))
     {
       scanner_next_token(scan);
       compile_expression(comp);
-      EXPECT(comp, TOKEN_RBRACKET);
+      consume(comp, TOKEN_RBRACKET);
       hk_chunk_emit_opcode(chunk, HK_OP_GET_ELEMENT);
       hk_function_add_line(fn, line);
       continue;
     }
-    if (MATCH(scan, TOKEN_DOT))
+    if (match(scan, TOKEN_DOT))
     {
       scanner_next_token(scan);
-      if (!MATCH(scan, TOKEN_NAME))
+      if (!match(scan, TOKEN_NAME))
         syntax_error_unexpected(comp);
       token_t tk = scan->token;
       scanner_next_token(scan);
@@ -1860,10 +1860,10 @@ static void compile_subscript(compiler_t *comp)
       hk_function_add_line(fn, line);
       continue;
     }
-    if (MATCH(scan, TOKEN_LPAREN))
+    if (match(scan, TOKEN_LPAREN))
     {
       scanner_next_token(scan);
-      if (MATCH(scan, TOKEN_RPAREN))
+      if (match(scan, TOKEN_RPAREN))
       {
         scanner_next_token(scan);
         hk_chunk_emit_opcode(chunk, HK_OP_CALL);
@@ -1873,13 +1873,13 @@ static void compile_subscript(compiler_t *comp)
       }
       compile_expression(comp);
       uint8_t num_args = 1;
-      while (MATCH(scan, TOKEN_COMMA))
+      while (match(scan, TOKEN_COMMA))
       {
         scanner_next_token(scan);
         compile_expression(comp);
         ++num_args;
       }
-      EXPECT(comp, TOKEN_RPAREN);
+      consume(comp, TOKEN_RPAREN);
       hk_chunk_emit_opcode(chunk, HK_OP_CALL);
       hk_chunk_emit_byte(chunk, num_args);
       hk_function_add_line(fn, line);
@@ -1887,11 +1887,11 @@ static void compile_subscript(compiler_t *comp)
     }
     break;
   }
-  if (MATCH(scan, TOKEN_LBRACE))
+  if (match(scan, TOKEN_LBRACE))
   {
     int line = scan->token.line;
     scanner_next_token(scan);
-    if (MATCH(scan, TOKEN_RBRACE))
+    if (match(scan, TOKEN_RBRACE))
     {
       scanner_next_token(scan);
       hk_chunk_emit_opcode(chunk, HK_OP_INSTANCE);
@@ -1901,13 +1901,13 @@ static void compile_subscript(compiler_t *comp)
     }
     compile_expression(comp);
     uint8_t num_args = 1;
-    while (MATCH(scan, TOKEN_COMMA))
+    while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
       compile_expression(comp);
       ++num_args;
     }
-    EXPECT(comp, TOKEN_RBRACE);
+    consume(comp, TOKEN_RBRACE);
     hk_chunk_emit_opcode(chunk, HK_OP_INSTANCE);
     hk_chunk_emit_byte(chunk, num_args);
     hk_function_add_line(fn, line);
@@ -1991,7 +1991,7 @@ hk_closure_t *hk_compile(hk_string_t *file, hk_string_t *source)
   char args_name[] = "args";
   token_t tk = {.length = sizeof(args_name) - 1, .start = args_name};
   add_local(&comp, &tk, false);
-  while (!MATCH(comp.scan, TOKEN_EOF))
+  while (!match(comp.scan, TOKEN_EOF))
     compile_statement(&comp);
   hk_function_t *fn = comp.fn;
   hk_chunk_t *chunk = &fn->chunk;

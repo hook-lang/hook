@@ -16,7 +16,7 @@ static inline void ensure_capacity(hk_chunk_t *chunk, int min_capacity)
 {
   if (min_capacity <= chunk->capacity)
     return;
-  int capacity = hk_nearest_power_of_two(chunk->capacity, min_capacity);
+  int capacity = hk_power_of_two_ceil(min_capacity);
   chunk->capacity = capacity;
   chunk->bytes = (uint8_t *) hk_reallocate(chunk->bytes, capacity);
 }

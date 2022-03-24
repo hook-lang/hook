@@ -36,11 +36,16 @@ static void make_directory(char *path)
   mkdir(path, 0777); 
 }
 
-int hk_nearest_power_of_two(int m, int n)
+int hk_power_of_two_ceil(int n)
 {
-  int result = m;
-  for (; result < n; result <<= 1);
-  return result;
+  --n;
+  n |= n >> 1;
+  n |= n >> 2;
+  n |= n >> 4;
+  n |= n >> 8;
+  n |= n >> 16;
+  ++n;  
+  return n;
 }
 
 void hk_ensure_path(const char *filename)

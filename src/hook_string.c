@@ -18,7 +18,9 @@ static inline void add_char(hk_string_t *str, char c);
 static inline hk_string_t *string_allocate(int min_capacity)
 {
   hk_string_t *str = (hk_string_t *) hk_allocate(sizeof(*str));
-  int capacity = hk_nearest_power_of_two(HK_STRING_MIN_CAPACITY, min_capacity + 1);
+  ++min_capacity;
+  int capacity = min_capacity < HK_STRING_MIN_CAPACITY ? HK_STRING_MIN_CAPACITY : min_capacity;
+  capacity = hk_power_of_two_ceil(capacity);
   str->ref_count = 0;
   str->capacity = capacity;
   str->chars = (char *) hk_allocate(capacity);
@@ -82,7 +84,7 @@ void hk_string_ensure_capacity(hk_string_t *str, int min_capacity)
 {
   if (min_capacity <= str->capacity)
     return;
-  int capacity = hk_nearest_power_of_two(str->capacity, min_capacity);
+  int capacity = hk_power_of_two_ceil(min_capacity);
   str->capacity = capacity;
   str->chars = (char *) hk_reallocate(str->chars, capacity);
 }
