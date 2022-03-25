@@ -16,6 +16,7 @@
 #endif
 #include <errno.h>
 #include "hook_struct.h"
+#include "hook_iterable.h"
 #include "hook_utils.h"
 #include "hook_status.h"
 #include "hook_error.h"
@@ -487,8 +488,8 @@ static int iter_call(hk_vm_t *vm, hk_value_t *args)
       return HK_STATUS_ERROR;
     return HK_STATUS_OK;
   }
-  hk_iterator_t *it = hk_is_range(val) ? hk_range_new_iterator(hk_as_range(val))
-    : hk_array_new_iterator(hk_as_array(val));
+  hk_iterator_t *it = hk_new_iterator(val);
+  hk_assert(it, "could not create iterator");
   if (hk_vm_push_iterator(vm, it) == HK_STATUS_ERROR)
   {
     hk_iterator_free(it);

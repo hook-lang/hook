@@ -327,6 +327,18 @@ bool hk_array_slice(hk_array_t *arr, int start, int stop, hk_array_t **result)
   return true;
 }
 
+hk_iterator_t *hk_array_new_iterator(hk_array_t *arr)
+{
+  array_iterator_t *it = (array_iterator_t *) hk_allocate(sizeof(*it));
+  hk_iterator_init((hk_iterator_t *) it, &array_iterator_deinit,
+    &array_iterator_is_valid, &array_iterator_get_current,
+    &array_iterator_next);
+  hk_incr_ref(arr);
+  it->iterable = arr;
+  it->current = 0;
+  return (hk_iterator_t *) it;
+}
+
 void hk_array_serialize(hk_array_t *arr, FILE *stream)
 {
   fwrite(&arr->capacity, sizeof(arr->capacity), 1, stream);
@@ -355,16 +367,4 @@ hk_array_t *hk_array_deserialize(FILE *stream)
     arr->elements[i] = elem;
   }
   return arr;
-}
-
-hk_iterator_t *hk_array_new_iterator(hk_array_t *arr)
-{
-  array_iterator_t *it = (array_iterator_t *) hk_allocate(sizeof(*it));
-  hk_iterator_init((hk_iterator_t *) it, &array_iterator_deinit,
-    &array_iterator_is_valid, &array_iterator_get_current,
-    &array_iterator_next);
-  hk_incr_ref(arr);
-  it->iterable = arr;
-  it->current = 0;
-  return (hk_iterator_t *) it;
 }

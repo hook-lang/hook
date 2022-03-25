@@ -21,18 +21,19 @@
 #define HK_TYPE_CALLABLE 0x09
 #define HK_TYPE_USERDATA 0x0a
 
-#define HK_FLAG_NONE   0b0000
-#define HK_FLAG_OBJECT 0b0001
-#define HK_FLAG_FALSEY 0b0010
-#define HK_FLAG_NATIVE 0b0100
+#define HK_FLAG_NONE     0b0000
+#define HK_FLAG_OBJECT   0b0001
+#define HK_FLAG_FALSEY   0b0010
+#define HK_FLAG_ITERABLE 0b0100
+#define HK_FLAG_NATIVE   0b1000
 
 #define HK_NIL_VALUE         ((hk_value_t) {.type = HK_TYPE_NIL, .flags = HK_FLAG_FALSEY})
 #define HK_FALSE_VALUE       ((hk_value_t) {.type = HK_TYPE_BOOLEAN, .flags = HK_FLAG_FALSEY, .as.boolean = false})
 #define HK_TRUE_VALUE        ((hk_value_t) {.type = HK_TYPE_BOOLEAN, .flags = HK_FLAG_NONE, .as.boolean = true})
 #define hk_number_value(n)   ((hk_value_t) {.type = HK_TYPE_NUMBER, .flags = HK_FLAG_NONE, .as.number = (n)})
 #define hk_string_value(s)   ((hk_value_t) {.type = HK_TYPE_STRING, .flags = HK_FLAG_OBJECT, .as.pointer = (s)})
-#define hk_range_value(r)    ((hk_value_t) {.type = HK_TYPE_RANGE, .flags = HK_FLAG_OBJECT, .as.pointer = (r)})
-#define hk_array_value(a)    ((hk_value_t) {.type = HK_TYPE_ARRAY, .flags = HK_FLAG_OBJECT, .as.pointer = (a)})
+#define hk_range_value(r)    ((hk_value_t) {.type = HK_TYPE_RANGE, .flags = HK_FLAG_OBJECT | HK_FLAG_ITERABLE, .as.pointer = (r)})
+#define hk_array_value(a)    ((hk_value_t) {.type = HK_TYPE_ARRAY, .flags = HK_FLAG_OBJECT | HK_FLAG_ITERABLE, .as.pointer = (a)})
 #define hk_struct_value(s)   ((hk_value_t) {.type = HK_TYPE_STRUCT, .flags = HK_FLAG_OBJECT, .as.pointer = (s)})
 #define hk_instance_value(i) ((hk_value_t) {.type = HK_TYPE_INSTANCE, .flags = HK_FLAG_OBJECT, .as.pointer = (i)})
 #define hk_iterator_value(i) ((hk_value_t) {.type = HK_TYPE_ITERATOR, .flags = HK_FLAG_OBJECT, .as.pointer = (i)})
@@ -56,6 +57,7 @@
 #define hk_is_object(v)   ((v).flags & HK_FLAG_OBJECT)
 #define hk_is_falsey(v)   ((v).flags & HK_FLAG_FALSEY)
 #define hk_is_truthy(v)   (!hk_is_falsey(v))
+#define hk_is_iterable(v) ((v).flags & HK_FLAG_ITERABLE)
 #define hk_is_native(v)   ((v).flags & HK_FLAG_NATIVE)
 
 #define hk_as_string(v)   ((hk_string_t *) (v).as.pointer)

@@ -41,6 +41,7 @@ add_executable(${PROJECT_NAME}
   src/hook_dump.c
   src/hook_error.c
   src/hook_hash.c
+  src/hook_iterable.c
   src/hook_iterator.c
   src/main.c
   src/hook_memory.c
