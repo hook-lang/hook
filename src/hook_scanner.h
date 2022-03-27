@@ -44,7 +44,7 @@
 #define TOKEN_PERCENT    0x21
 #define TOKEN_PERCENTEQ  0x22
 #define TOKEN_INT        0x23
-#define TOKEN_NUMBER     0x24
+#define TOKEN_FLOAT      0x24
 #define TOKEN_STRING     0x25
 #define TOKEN_UNDERSCORE 0x26
 #define TOKEN_AS         0x27
@@ -72,10 +72,10 @@
 
 typedef struct
 {
-  int type;
-  int line;
-  int col;
-  int length;
+  int32_t type;
+  int32_t line;
+  int32_t col;
+  int32_t length;
   char *start;
 } token_t;
 
@@ -84,8 +84,8 @@ typedef struct
   hk_string_t *file;
   hk_string_t *source;
   char *pos;
-  int line;
-  int col;
+  int32_t line;
+  int32_t col;
   token_t token;
 } scanner_t;
 

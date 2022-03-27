@@ -16,9 +16,9 @@ typedef struct
 static inline url_t *url_new(CURL *curl);
 static void url_deinit(hk_userdata_t *udata);
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data);
-static int new_call(hk_vm_t *vm, hk_value_t *args);
-static int cleanup_call(hk_vm_t *vm, hk_value_t *args);
-static int perform_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t new_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t cleanup_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t perform_call(hk_vm_t *vm, hk_value_t *args);
 
 static inline url_t *url_new(CURL *curl)
 {
@@ -41,7 +41,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size;
 }
 
-static int new_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t new_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -54,7 +54,7 @@ static int new_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_userdata(vm, (hk_userdata_t *) url_new(curl));
 }
 
-static int cleanup_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t cleanup_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -62,7 +62,7 @@ static int cleanup_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_nil(vm);
 }
 
-static int perform_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t perform_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -81,9 +81,9 @@ static int perform_call(hk_vm_t *vm, hk_value_t *args)
 }
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_url(hk_vm_t *vm)
+int32_t __declspec(dllexport) __stdcall load_url(hk_vm_t *vm)
 #else
-int load_url(hk_vm_t *vm)
+int32_t load_url(hk_vm_t *vm)
 #endif
 {
   if (hk_vm_push_string_from_chars(vm, -1, "url") == HK_STATUS_ERROR)

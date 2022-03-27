@@ -25,20 +25,20 @@ typedef struct
 
 static inline file_t *file_new(FILE *stream);
 static void file_deinit(hk_userdata_t *udata);
-static int open_call(hk_vm_t *vm, hk_value_t *args);
-static int close_call(hk_vm_t *vm, hk_value_t *args);
-static int popen_call(hk_vm_t *vm, hk_value_t *args);
-static int pclose_call(hk_vm_t *vm, hk_value_t *args);
-static int eof_call(hk_vm_t *vm, hk_value_t *args);
-static int flush_call(hk_vm_t *vm, hk_value_t *args);
-static int sync_call(hk_vm_t *vm, hk_value_t *args);
-static int tell_call(hk_vm_t *vm, hk_value_t *args);
-static int rewind_call(hk_vm_t *vm, hk_value_t *args);
-static int seek_call(hk_vm_t *vm, hk_value_t *args);
-static int read_call(hk_vm_t *vm, hk_value_t *args);
-static int write_call(hk_vm_t *vm, hk_value_t *args);
-static int readln_call(hk_vm_t *vm, hk_value_t *args);
-static int writeln_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t open_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t close_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t popen_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t pclose_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t eof_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t flush_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sync_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t tell_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t rewind_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t seek_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t read_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t write_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t readln_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t writeln_call(hk_vm_t *vm, hk_value_t *args);
 
 static inline file_t *file_new(FILE *stream)
 {
@@ -56,7 +56,7 @@ static void file_deinit(hk_userdata_t *udata)
   fclose(stream);
 }
 
-static int open_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t open_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -70,14 +70,14 @@ static int open_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_userdata(vm, (hk_userdata_t *) file_new(stream));
 }
 
-static int close_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t close_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_number(vm, fclose(((file_t *) hk_as_userdata(args[1]))->stream));
+  return hk_vm_push_float(vm, fclose(((file_t *) hk_as_userdata(args[1]))->stream));
 }
 
-static int popen_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t popen_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -92,56 +92,56 @@ static int popen_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_userdata(vm, (hk_userdata_t *) file_new(stream));
 }
 
-static int pclose_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t pclose_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  int status;
+  int32_t status;
   status = pclose(stream);
-  return hk_vm_push_number(vm, status);
+  return hk_vm_push_float(vm, status);
 }
 
-static int eof_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t eof_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  return hk_vm_push_boolean(vm, (bool) feof(stream));
+  return hk_vm_push_bool(vm, (bool) feof(stream));
 }
 
-static int flush_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t flush_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  return hk_vm_push_number(vm, fflush(stream));
+  return hk_vm_push_float(vm, fflush(stream));
 }
 
-static int sync_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t sync_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  int fd = fileno(stream);
+  int32_t fd = fileno(stream);
   bool result;
 #ifdef _WIN32
   result = FlushFileBuffers(fd);
 #else
   result = !fsync(fd);
 #endif
-  return hk_vm_push_boolean(vm, result);
+  return hk_vm_push_bool(vm, result);
 }
 
-static int tell_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t tell_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  return hk_vm_push_number(vm, ftell(stream));
+  return hk_vm_push_float(vm, ftell(stream));
 }
 
-static int rewind_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t rewind_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -150,7 +150,7 @@ static int rewind_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_nil(vm);
 }
 
-static int seek_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t seek_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -159,21 +159,21 @@ static int seek_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  long offset = (long) args[2].as.number;
-  int whence = (int) args[3].as.number;
-  return hk_vm_push_number(vm, fseek(stream, offset, whence));
+  int64_t offset = (int64_t) args[2].as_float;
+  int32_t whence = (int32_t) args[3].as_float;
+  return hk_vm_push_float(vm, fseek(stream, offset, whence));
 }
 
-static int read_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t read_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_check_integer(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  long size = (long) args[2].as.number;
+  int64_t size = (int64_t) args[2].as_float;
   hk_string_t *str = hk_string_new_with_capacity(size);
-  int length = (int) fread(str->chars, 1, size, stream);
+  int32_t length = (int32_t) fread(str->chars, 1, size, stream);
   if (length < size && !feof(stream))
   {
     hk_string_free(str);
@@ -189,7 +189,7 @@ static int read_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int write_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t write_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -200,10 +200,10 @@ static int write_call(hk_vm_t *vm, hk_value_t *args)
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size)
     return hk_vm_push_nil(vm);
-  return hk_vm_push_number(vm, size);
+  return hk_vm_push_float(vm, size);
 }
 
-static int readln_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t readln_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -211,7 +211,7 @@ static int readln_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_string_from_stream(vm, stream, '\n');
 }
 
-static int writeln_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t writeln_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -222,13 +222,13 @@ static int writeln_call(hk_vm_t *vm, hk_value_t *args)
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size || fwrite("\n", 1, 1, stream) < 1)
     return hk_vm_push_nil(vm);
-  return hk_vm_push_number(vm, size + 1);
+  return hk_vm_push_float(vm, size + 1);
 }
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_io(hk_vm_t *vm)
+int32_t __declspec(dllexport) __stdcall load_io(hk_vm_t *vm)
 #else
-int load_io(hk_vm_t *vm)
+int32_t load_io(hk_vm_t *vm)
 #endif
 {
   if (hk_vm_push_string_from_chars(vm, -1, "io") == HK_STATUS_ERROR)
@@ -247,15 +247,15 @@ int load_io(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "SeekSet") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, SEEK_SET) == HK_STATUS_ERROR)
+  if (hk_vm_push_float(vm, SEEK_SET) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "SeekCurrent") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, SEEK_CUR) == HK_STATUS_ERROR)
+  if (hk_vm_push_float(vm, SEEK_CUR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "SeeEnd") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, SEEK_END) == HK_STATUS_ERROR)
+  if (hk_vm_push_float(vm, SEEK_END) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "open") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

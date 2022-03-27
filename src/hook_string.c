@@ -12,14 +12,14 @@
 #include "hook_utils.h"
 #include "hook_memory.h"
 
-static inline hk_string_t *string_allocate(int min_capacity);
+static inline hk_string_t *string_allocate(int32_t min_capacity);
 static inline void add_char(hk_string_t *str, char c);
 
-static inline hk_string_t *string_allocate(int min_capacity)
+static inline hk_string_t *string_allocate(int32_t min_capacity)
 {
   hk_string_t *str = (hk_string_t *) hk_allocate(sizeof(*str));
   ++min_capacity;
-  int capacity = min_capacity < HK_STRING_MIN_CAPACITY ? HK_STRING_MIN_CAPACITY : min_capacity;
+  int32_t capacity = min_capacity < HK_STRING_MIN_CAPACITY ? HK_STRING_MIN_CAPACITY : min_capacity;
   capacity = hk_power_of_two_ceil(capacity);
   str->ref_count = 0;
   str->capacity = capacity;
@@ -39,7 +39,7 @@ hk_string_t *hk_string_new(void)
   return hk_string_new_with_capacity(0);
 }
 
-hk_string_t *hk_string_new_with_capacity(int min_capacity)
+hk_string_t *hk_string_new_with_capacity(int32_t min_capacity)
 {
   hk_string_t *str = string_allocate(min_capacity);
   str->length = 0;
@@ -47,10 +47,10 @@ hk_string_t *hk_string_new_with_capacity(int min_capacity)
   return str;
 }
 
-hk_string_t *hk_string_from_chars(int length, const char *chars)
+hk_string_t *hk_string_from_chars(int32_t length, const char *chars)
 {
   if (length < 0)
-    length = (int) strnlen(chars, INT_MAX);
+    length = (int32_t) strnlen(chars, INT_MAX);
   hk_string_t *str = string_allocate(length);
   str->length = length;
   memcpy(str->chars, chars, length);
@@ -64,7 +64,7 @@ hk_string_t *hk_string_from_stream(FILE *stream, const char terminal)
   str->length = 0;
   for (;;)
   {
-    int c = fgetc(stream);
+    int32_t c = fgetc(stream);
     if (c == EOF)
     {
       if (feof(stream))
@@ -80,11 +80,11 @@ hk_string_t *hk_string_from_stream(FILE *stream, const char terminal)
   return str;
 }
 
-void hk_string_ensure_capacity(hk_string_t *str, int min_capacity)
+void hk_string_ensure_capacity(hk_string_t *str, int32_t min_capacity)
 {
   if (min_capacity <= str->capacity)
     return;
-  int capacity = hk_power_of_two_ceil(min_capacity);
+  int32_t capacity = hk_power_of_two_ceil(min_capacity);
   str->capacity = capacity;
   str->chars = (char *) hk_reallocate(str->chars, capacity);
 }
@@ -104,7 +104,7 @@ void hk_string_release(hk_string_t *str)
 
 hk_string_t *hk_string_concat(hk_string_t *str1, hk_string_t *str2)
 {
-  int length = str1->length + str2->length;
+  int32_t length = str1->length + str2->length;
   hk_string_t *result = string_allocate(length);
   memcpy(result->chars, str1->chars, str1->length);
   memcpy(&result->chars[str1->length], str2->chars, str2->length);
@@ -113,11 +113,11 @@ hk_string_t *hk_string_concat(hk_string_t *str1, hk_string_t *str2)
   return result;
 }
 
-void hk_string_inplace_concat_chars(hk_string_t *dest, int length, const char *chars)
+void hk_string_inplace_concat_chars(hk_string_t *dest, int32_t length, const char *chars)
 {
   if (length < 0)
-    length = (int) strnlen(chars, INT_MAX);
-  int new_length = dest->length + length;
+    length = (int32_t) strnlen(chars, INT_MAX);
+  int32_t new_length = dest->length + length;
   hk_string_ensure_capacity(dest, new_length + 1);
   memcpy(&dest->chars[dest->length], chars, length);
   dest->length = new_length;
@@ -127,7 +127,7 @@ void hk_string_inplace_concat_chars(hk_string_t *dest, int length, const char *c
 
 void hk_string_inplace_concat(hk_string_t *dest, hk_string_t *src)
 {
-  int length = dest->length + src->length;
+  int32_t length = dest->length + src->length;
   hk_string_ensure_capacity(dest, length + 1);
   memcpy(&dest->chars[dest->length], src->chars, src->length);
   dest->length = length;
@@ -153,18 +153,18 @@ bool hk_string_equal(hk_string_t *str1, hk_string_t *str2)
     && !memcmp(str1->chars, str2->chars, str1->length));
 }
 
-int hk_string_compare(hk_string_t *str1, hk_string_t *str2)
+int32_t hk_string_compare(hk_string_t *str1, hk_string_t *str2)
 {
-  int result = strcmp(str1->chars, str2->chars);
+  int32_t result = strcmp(str1->chars, str2->chars);
   return result > 0 ? 1 : (result < 0 ? -1 : 0);
 }
 
 hk_string_t *hk_string_lower(hk_string_t *str)
 {
-  int length = str->length;
+  int32_t length = str->length;
   hk_string_t *result = string_allocate(length);
   result->length = length;
-  for (int i = 0; i < length; ++i)
+  for (int32_t i = 0; i < length; ++i)
     result->chars[i] = (char) tolower(str->chars[i]);
   result->chars[length] = '\0';
   return result;
@@ -172,10 +172,10 @@ hk_string_t *hk_string_lower(hk_string_t *str)
 
 hk_string_t *hk_string_upper(hk_string_t *str)
 {
-  int length = str->length;
+  int32_t length = str->length;
   hk_string_t *result = string_allocate(length);
   result->length = length;
-  for (int i = 0; i < length; ++i)
+  for (int32_t i = 0; i < length; ++i)
     result->chars[i] = (char) toupper(str->chars[i]);
   result->chars[length] = '\0';
   return result;
@@ -183,21 +183,21 @@ hk_string_t *hk_string_upper(hk_string_t *str)
 
 bool hk_string_trim(hk_string_t *str, hk_string_t **result)
 {
-  int length = str->length;
+  int32_t length = str->length;
   if (!length)
     return false;
-  int l = 0;
+  int32_t l = 0;
   while (isspace(str->chars[l]))
     ++l;
-  int high = length - 1;
-  int h = high;
+  int32_t high = length - 1;
+  int32_t h = high;
   while (h > l && isspace(str->chars[h]))
     --h;
   if (!l && h == high)
     return false;
   hk_string_t *_result = string_allocate(h - l + 1);
-  int j = 0;
-  for (int i = l; i <= h; ++i)
+  int32_t j = 0;
+  for (int32_t i = l; i <= h; ++i)
     _result->chars[j++] = str->chars[i];
   _result->chars[j] = '\0';
   _result->length = j;
@@ -219,15 +219,15 @@ bool hk_string_ends_with(hk_string_t *str1, hk_string_t *str2)
   return !memcmp(&str1->chars[str1->length - str2->length], str2->chars, str2->length);
 }
 
-bool hk_string_slice(hk_string_t *str, int start, int stop, hk_string_t **result)
+bool hk_string_slice(hk_string_t *str, int32_t start, int32_t stop, hk_string_t **result)
 {
   if (start < 1 && stop >= str->length)
     return false;
-  int length = stop - start;
+  int32_t length = stop - start;
   length = length < 0 ? 0 : length;
   hk_string_t *slice = string_allocate(length);
   slice->length = length;
-  for (int i = start, j = 0; i < stop; ++i, ++j)
+  for (int32_t i = start, j = 0; i < stop; ++i, ++j)
     slice->chars[j] = str->chars[i];
   slice->chars[length] = '\0';
   *result = slice;
@@ -244,8 +244,8 @@ void hk_string_serialize(hk_string_t *str, FILE *stream)
 
 hk_string_t *hk_string_deserialize(FILE *stream)
 {
-  int capacity;
-  int length;
+  int32_t capacity;
+  int32_t length;
   if (fread(&capacity, sizeof(capacity), 1, stream) != 1)
     return NULL;
   if (fread(&length, sizeof(length), 1, stream) != 1)

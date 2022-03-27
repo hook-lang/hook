@@ -9,9 +9,9 @@
 #include "hook.h"
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_arrays(hk_vm_t *vm);
+int32_t __declspec(dllexport) __stdcall load_arrays(hk_vm_t *vm);
 #else
-int load_arrays(hk_vm_t *vm);
+int32_t load_arrays(hk_vm_t *vm);
 #endif
 
 #endif // HOOK_ARRAYS_H

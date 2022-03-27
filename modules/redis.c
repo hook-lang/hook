@@ -16,8 +16,8 @@ typedef struct
 static inline redis_context_t *redis_context_new(redisContext *ctx);
 static void redis_context_deinit(hk_userdata_t *udata);
 static hk_value_t redis_reply_to_value(redisReply *reply);
-static int connect_call(hk_vm_t *vm, hk_value_t *args);
-static int command_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t connect_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t command_call(hk_vm_t *vm, hk_value_t *args);
 
 static inline redis_context_t *redis_context_new(redisContext *ctx)
 {
@@ -44,10 +44,10 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
       break;
     case REDIS_REPLY_ARRAY:
       {
-        int length = reply->elements;
+        int32_t length = reply->elements;
         hk_array_t *arr = hk_array_new_with_capacity(length);
         arr->length = length;
-        for (int i = 0; i < length; ++i)
+        for (int32_t i = 0; i < length; ++i)
         {
           redisReply *nested = reply->element[i];
           hk_value_t elem = redis_reply_to_value(nested);
@@ -59,7 +59,7 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
       }
       break;
     case REDIS_REPLY_INTEGER:
-      result = hk_number_value((double) reply->integer);
+      result = hk_float_value((double) reply->integer);
       break;
     case REDIS_REPLY_NIL:
       break;
@@ -70,21 +70,21 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
   return result;
 }
 
-static int connect_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *hostname = hk_as_string(args[1]);
-  int port = (int) args[2].as.number;
+  int32_t port = (int32_t) args[2].as_float;
   redisContext *ctx = redisConnect(hostname->chars, port);
   if (!ctx || ctx->err)
     return hk_vm_push_nil(vm);
   return hk_vm_push_userdata(vm, (hk_userdata_t *) redis_context_new(ctx));
 }
 
-static int command_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t command_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -100,9 +100,9 @@ static int command_call(hk_vm_t *vm, hk_value_t *args)
 }
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_redis(hk_vm_t *vm)
+int32_t __declspec(dllexport) __stdcall load_redis(hk_vm_t *vm)
 #else
-int load_redis(hk_vm_t *vm)
+int32_t load_redis(hk_vm_t *vm)
 #endif
 {
   if (hk_vm_push_string_from_chars(vm, -1, "redis") == HK_STATUS_ERROR)

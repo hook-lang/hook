@@ -15,14 +15,14 @@ static inline void check(void *ptr)
     hk_fatal_error("out of memory");
 }
 
-void *hk_allocate(int size)
+void *hk_allocate(int32_t size)
 {
   void *ptr = malloc(size);
   check(ptr);
   return ptr;
 }
 
-void *hk_reallocate(void *ptr, int size)
+void *hk_reallocate(void *ptr, int32_t size)
 {
   ptr = realloc(ptr, size);
   check(ptr);

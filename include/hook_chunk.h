@@ -69,8 +69,8 @@
 
 typedef struct
 {
-  int capacity;
-  int length;
+  int32_t capacity;
+  int32_t length;
   uint8_t *bytes;
 } hk_chunk_t;
 
@@ -78,7 +78,7 @@ void hk_chunk_init(hk_chunk_t *chunk);
 void hk_chunk_free(hk_chunk_t *chunk);
 void hk_chunk_emit_byte(hk_chunk_t *chunk, uint8_t byte);
 void hk_chunk_emit_word(hk_chunk_t *chunk, uint16_t word);
-void hk_chunk_emit_opcode(hk_chunk_t *chunk, int op);
+void hk_chunk_emit_opcode(hk_chunk_t *chunk, int32_t op);
 void hk_chunk_serialize(hk_chunk_t *chunk, FILE *stream);
 bool hk_chunk_deserialize(hk_chunk_t *chunk, FILE *stream);
 

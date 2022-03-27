@@ -29,11 +29,11 @@ static const char *globals[] = {
   "print",
   "println",
   "type",
-  "bool",
-  "integer",
-  "int",
-  "num",
-  "str",
+  "to_bool",
+  "to_integer",
+  "to_int",
+  "to_float",
+  "to_string",
   "ord",
   "chr",
   "hex",
@@ -54,37 +54,37 @@ static const char *globals[] = {
   "panic"
 };
 
-static inline int string_to_double(hk_string_t *str, double *result);
+static inline int32_t string_to_double(hk_string_t *str, double *result);
 static inline hk_array_t *split(hk_string_t *str, hk_string_t *separator);
-static inline int join(hk_array_t *arr, hk_string_t *separator, hk_string_t **result);
-static int print_call(hk_vm_t *vm, hk_value_t *args);
-static int println_call(hk_vm_t *vm, hk_value_t *args);
-static int type_call(hk_vm_t *vm, hk_value_t *args);
-static int bool_call(hk_vm_t *vm, hk_value_t *args);
-static int integer_call(hk_vm_t *vm, hk_value_t *args);
-static int int_call(hk_vm_t *vm, hk_value_t *args);
-static int num_call(hk_vm_t *vm, hk_value_t *args);
-static int str_call(hk_vm_t *vm, hk_value_t *args);
-static int ord_call(hk_vm_t *vm, hk_value_t *args);
-static int chr_call(hk_vm_t *vm, hk_value_t *args);
-static int hex_call(hk_vm_t *vm, hk_value_t *args);
-static int bin_call(hk_vm_t *vm, hk_value_t *args);
-static int cap_call(hk_vm_t *vm, hk_value_t *args);
-static int len_call(hk_vm_t *vm, hk_value_t *args);
-static int is_empty_call(hk_vm_t *vm, hk_value_t *args);
-static int compare_call(hk_vm_t *vm, hk_value_t *args);
-static int slice_call(hk_vm_t *vm, hk_value_t *args);
-static int split_call(hk_vm_t *vm, hk_value_t *args);
-static int join_call(hk_vm_t *vm, hk_value_t *args);
-static int iter_call(hk_vm_t *vm, hk_value_t *args);
-static int valid_call(hk_vm_t *vm, hk_value_t *args);
-static int current_call(hk_vm_t *vm, hk_value_t *args);
-static int next_call(hk_vm_t *vm, hk_value_t *args);
-static int sleep_call(hk_vm_t *vm, hk_value_t *args);
-static int assert_call(hk_vm_t *vm, hk_value_t *args);
-static int panic_call(hk_vm_t *vm, hk_value_t *args);
+static inline int32_t join(hk_array_t *arr, hk_string_t *separator, hk_string_t **result);
+static int32_t print_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t println_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t type_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t to_bool_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t to_integer_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t to_int_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t to_float_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t to_string_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t ord_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t chr_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t hex_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t bin_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t cap_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t len_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_empty_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t compare_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t slice_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t split_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t join_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t iter_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t valid_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t current_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t next_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sleep_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t assert_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t panic_call(hk_vm_t *vm, hk_value_t *args);
 
-static inline int string_to_double(hk_string_t *str, double *result)
+static inline int32_t string_to_double(hk_string_t *str, double *result)
 {
   if (!str->length)
   {
@@ -122,10 +122,10 @@ static inline hk_array_t *split(hk_string_t *str, hk_string_t *separator)
   return arr;
 }
 
-static inline int join(hk_array_t *arr, hk_string_t *separator, hk_string_t **result)
+static inline int32_t join(hk_array_t *arr, hk_string_t *separator, hk_string_t **result)
 {
   hk_string_t *str = hk_string_new();
-  for (int i = 0; i < arr->length; ++i)
+  for (int32_t i = 0; i < arr->length; ++i)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
     if (!hk_is_string(elem))
@@ -138,74 +138,74 @@ static inline int join(hk_array_t *arr, hk_string_t *separator, hk_string_t **re
   return HK_STATUS_OK;
 }
 
-static int print_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t print_call(hk_vm_t *vm, hk_value_t *args)
 {
   hk_value_print(args[1], false);
   return hk_vm_push_nil(vm);
 }
 
-static int println_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t println_call(hk_vm_t *vm, hk_value_t *args)
 {
   hk_value_print(args[1], false);
   printf("\n");
   return hk_vm_push_nil(vm);
 }
 
-static int type_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t type_call(hk_vm_t *vm, hk_value_t *args)
 {
   return hk_vm_push_string_from_chars(vm, -1, hk_type_name(args[1].type));
 }
 
-static int bool_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t to_bool_call(hk_vm_t *vm, hk_value_t *args)
 {
-  return hk_vm_push_boolean(vm, hk_is_truthy(args[1]));
+  return hk_vm_push_bool(vm, hk_is_truthy(args[1]));
 }
 
-static int integer_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t to_integer_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  int32_t types[] = {HK_TYPE_FLOAT, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
-  if (hk_is_number(val))
-    return hk_vm_push_number(vm, (long) val.as.number);
+  if (hk_is_float(val))
+    return hk_vm_push_float(vm, (int64_t) val.as_float);
   double result;
   if (string_to_double(hk_as_string(val), &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_number(vm, (long) result);
+  return hk_vm_push_float(vm, (int64_t) result);
 }
 
-static int int_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t to_int_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  int32_t types[] = {HK_TYPE_FLOAT, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
-  if (hk_is_number(val))
-    return hk_vm_push_number(vm, (int) val.as.number);
+  if (hk_is_float(val))
+    return hk_vm_push_float(vm, (int32_t) val.as_float);
   double result;
   if (string_to_double(hk_as_string(val), &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_number(vm, (int) result);
+  return hk_vm_push_float(vm, (int32_t) result);
 }
 
-static int num_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t to_float_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  int32_t types[] = {HK_TYPE_FLOAT, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
-  if (hk_is_number(val))
+  if (hk_is_float(val))
     return HK_STATUS_OK;
   double result;
   if (string_to_double(hk_as_string(args[1]), &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_number(vm, result);
+  return hk_vm_push_float(vm, result);
 }
 
-static int str_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t to_string_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int types[] = {HK_TYPE_NIL, HK_TYPE_BOOLEAN, HK_TYPE_NUMBER, HK_TYPE_STRING};
+  int32_t types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_FLOAT, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 1, 4, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
@@ -215,15 +215,15 @@ static int str_call(hk_vm_t *vm, hk_value_t *args)
     str = hk_string_from_chars(-1, "nil");
     goto end;
   }
-  if (hk_is_boolean(val))
+  if (hk_is_bool(val))
   {
-    str = hk_string_from_chars(-1, val.as.boolean ? "true" : "false");
+    str = hk_string_from_chars(-1, val.as_bool ? "true" : "false");
     goto end;
   }
-  if (hk_is_number(val))
+  if (hk_is_float(val))
   {
     char chars[32];
-    sprintf(chars, "%g", val.as.number);
+    sprintf(chars, "%g", val.as_float);
     str = hk_string_from_chars(-1, chars);
     goto end;
   }
@@ -237,7 +237,7 @@ end:
   return HK_STATUS_OK;
 }
 
-static int ord_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t ord_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -248,15 +248,15 @@ static int ord_call(hk_vm_t *vm, hk_value_t *args)
     hk_runtime_error("type error: argument #1 must be a non-empty string");
     return HK_STATUS_ERROR;
   }
-  return hk_vm_push_number(vm, (unsigned int) str->chars[0]);
+  return hk_vm_push_float(vm, (uint32_t) str->chars[0]);
 }
 
-static int chr_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t chr_call(hk_vm_t *vm, hk_value_t *args)
 {
   hk_value_t val = args[1];
   if (hk_vm_check_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int data = (int) val.as.number;
+  int32_t data = (int32_t) val.as_float;
   if (data < 0 || data > UCHAR_MAX)
   {
     hk_runtime_error("range error: argument #1 must be between 0 and %d", UCHAR_MAX);
@@ -274,19 +274,19 @@ static int chr_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int hex_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t hex_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
   if (!str->length)
     return hk_vm_push_string(vm, str);
-  int length = str->length << 1;
+  int32_t length = str->length << 1;
   hk_string_t *result = hk_string_new_with_capacity(length);
   result->length = length;
   result->chars[length] = '\0';
   char *chars = result->chars;
-  for (int i = 0; i < str->length; ++i)
+  for (int32_t i = 0; i < str->length; ++i)
   {
     sprintf(chars, "%.2x", (unsigned char) str->chars[i]);
     chars += 2;
@@ -299,7 +299,7 @@ static int hex_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int bin_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t bin_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -311,12 +311,12 @@ static int bin_call(hk_vm_t *vm, hk_value_t *args)
     hk_vm_push_nil(vm);
     return HK_STATUS_OK;
   }
-  int length = str->length >> 1;
+  int32_t length = str->length >> 1;
   hk_string_t *result = hk_string_new_with_capacity(length);
   result->length = length;
   result->chars[length] = '\0';
   char *chars = str->chars;
-  for (int i = 0; i < length; ++i)
+  for (int32_t i = 0; i < length; ++i)
   {
     sscanf(chars, "%2hhx", &result->chars[i]);
     chars += 2;
@@ -329,79 +329,79 @@ static int bin_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int cap_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t cap_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
+  int32_t types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
-  int capacity = hk_is_string(val) ? hk_as_string(val)->capacity
+  int32_t capacity = hk_is_string(val) ? hk_as_string(val)->capacity
     : hk_as_array(val)->capacity;
-  return hk_vm_push_number(vm, capacity);
+  return hk_vm_push_float(vm, capacity);
 }
 
-static int len_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t len_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
+  int32_t types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
     HK_TYPE_STRUCT, HK_TYPE_INSTANCE};
   if (hk_vm_check_types(args, 1, 5, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
   if (hk_is_string(val))
-    return hk_vm_push_number(vm, hk_as_string(val)->length);
+    return hk_vm_push_float(vm, hk_as_string(val)->length);
   if (hk_is_range(val))
   {
     hk_range_t *range = hk_as_range(val);
     if (range->start < range->end)
     {
-      int result = (int) range->end - range->start + 1;
-      return hk_vm_push_number(vm, result);
+      int32_t result = (int32_t) range->end - range->start + 1;
+      return hk_vm_push_float(vm, result);
     }
     if (range->start > range->end)
     {
-      int result = (int) range->start - range->end + 1;
-      return hk_vm_push_number(vm, result);
+      int32_t result = (int32_t) range->start - range->end + 1;
+      return hk_vm_push_float(vm, result);
     }
-    return hk_vm_push_number(vm, 1);
+    return hk_vm_push_float(vm, 1);
   }
   if (hk_is_array(val))
-    return hk_vm_push_number(vm, hk_as_array(val)->length);
+    return hk_vm_push_float(vm, hk_as_array(val)->length);
   if (hk_is_struct(val))
-    return hk_vm_push_number(vm, hk_as_struct(val)->length);
-  return hk_vm_push_number(vm, hk_as_instance(val)->ztruct->length);
+    return hk_vm_push_float(vm, hk_as_struct(val)->length);
+  return hk_vm_push_float(vm, hk_as_instance(val)->ztruct->length);
 }
 
-static int is_empty_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t is_empty_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
+  int32_t types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
     HK_TYPE_STRUCT, HK_TYPE_INSTANCE};
   if (hk_vm_check_types(args, 1, 5, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
   if (hk_is_string(val))
-    return hk_vm_push_boolean(vm, !hk_as_string(val)->length);
+    return hk_vm_push_bool(vm, !hk_as_string(val)->length);
   if (hk_is_range(val))
-    return hk_vm_push_boolean(vm, false);
+    return hk_vm_push_bool(vm, false);
   if (hk_is_array(val))
-    return hk_vm_push_boolean(vm, !hk_as_array(val)->length);
+    return hk_vm_push_bool(vm, !hk_as_array(val)->length);
   if (hk_is_struct(val))
-    return hk_vm_push_boolean(vm, !hk_as_struct(val)->length);
-  return hk_vm_push_boolean(vm, !hk_as_instance(val)->ztruct->length);
+    return hk_vm_push_bool(vm, !hk_as_struct(val)->length);
+  return hk_vm_push_bool(vm, !hk_as_instance(val)->ztruct->length);
 }
 
-static int compare_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t compare_call(hk_vm_t *vm, hk_value_t *args)
 {
   hk_value_t val1 = args[1];
   hk_value_t val2 = args[2];
-  int result;
+  int32_t result;
   if (hk_value_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_number(vm, result);
+  return hk_vm_push_float(vm, result);
 }
 
-static int slice_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t slice_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
+  int32_t types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
@@ -409,8 +409,8 @@ static int slice_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
-  int start = (int) args[2].as.number;
-  int stop = (int) args[3].as.number;
+  int32_t start = (int32_t) args[2].as_float;
+  int32_t stop = (int32_t) args[3].as_float;
   if (hk_is_string(val))
   {
     hk_string_t *str = hk_as_string(val);
@@ -444,7 +444,7 @@ static int slice_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int split_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t split_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_type(args, 1, HK_TYPE_STRING) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -459,7 +459,7 @@ static int split_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int join_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t join_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_type(args, 1, HK_TYPE_ARRAY) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -476,9 +476,9 @@ static int join_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int iter_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t iter_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int types[] = {HK_TYPE_ITERATOR, HK_TYPE_RANGE, HK_TYPE_ARRAY};
+  int32_t types[] = {HK_TYPE_ITERATOR, HK_TYPE_RANGE, HK_TYPE_ARRAY};
   if (hk_vm_check_types(args, 1, 3, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
@@ -498,14 +498,14 @@ static int iter_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int valid_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t valid_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_type(args, 1, HK_TYPE_ITERATOR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_boolean(vm, hk_iterator_is_valid(hk_as_iterator(args[1])));
+  return hk_vm_push_bool(vm, hk_iterator_is_valid(hk_as_iterator(args[1])));
 }
 
-static int current_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t current_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_type(args, 1, HK_TYPE_ITERATOR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -515,7 +515,7 @@ static int current_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push(vm, hk_iterator_get_current(it));
 }
 
-static int next_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t next_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_type(args, 1, HK_TYPE_ITERATOR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -525,11 +525,11 @@ static int next_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_nil(vm);
 }
 
-static int sleep_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t sleep_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int ms = (int) args[1].as.number;
+  int32_t ms = (int32_t) args[1].as_float;
 #ifdef _WIN32
   Sleep(ms);
 #else
@@ -538,7 +538,7 @@ static int sleep_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_nil(vm);
 }
 
-static int assert_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t assert_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -551,7 +551,7 @@ static int assert_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_nil(vm);
 }
 
-static int panic_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t panic_call(hk_vm_t *vm, hk_value_t *args)
 {
   (void) vm;
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
@@ -566,11 +566,11 @@ void load_globals(hk_vm_t *vm)
   hk_vm_push_new_native(vm, globals[0], 1, &print_call);
   hk_vm_push_new_native(vm, globals[1], 1, &println_call);
   hk_vm_push_new_native(vm, globals[2], 1, &type_call);
-  hk_vm_push_new_native(vm, globals[3], 1, &bool_call);
-  hk_vm_push_new_native(vm, globals[4], 1, &integer_call);
-  hk_vm_push_new_native(vm, globals[5], 1, &int_call);
-  hk_vm_push_new_native(vm, globals[6], 1, &num_call);
-  hk_vm_push_new_native(vm, globals[7], 1, &str_call);
+  hk_vm_push_new_native(vm, globals[3], 1, &to_bool_call);
+  hk_vm_push_new_native(vm, globals[4], 1, &to_integer_call);
+  hk_vm_push_new_native(vm, globals[5], 1, &to_int_call);
+  hk_vm_push_new_native(vm, globals[6], 1, &to_float_call);
+  hk_vm_push_new_native(vm, globals[7], 1, &to_string_call);
   hk_vm_push_new_native(vm, globals[8], 1, &ord_call);
   hk_vm_push_new_native(vm, globals[9], 1, &chr_call);
   hk_vm_push_new_native(vm, globals[10], 1, &hex_call);
@@ -591,14 +591,14 @@ void load_globals(hk_vm_t *vm)
   hk_vm_push_new_native(vm, globals[25], 1, &panic_call);
 }
 
-int num_globals(void)
+int32_t num_globals(void)
 {
-  return (int) (sizeof(globals) / sizeof(*globals));
+  return (int32_t) (sizeof(globals) / sizeof(*globals));
 }
 
-int lookup_global(int length, char *chars)
+int32_t lookup_global(int32_t length, char *chars)
 {
-  int index = num_globals() - 1;
+  int32_t index = num_globals() - 1;
   for (; index > -1; --index)
   {
     const char *global = globals[index];

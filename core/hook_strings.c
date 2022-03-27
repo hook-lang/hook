@@ -6,21 +6,21 @@
 #include "hook_strings.h"
 #include <stdlib.h>
 
-static int hash_call(hk_vm_t *vm, hk_value_t *args);
-static int lower_call(hk_vm_t *vm, hk_value_t *args);
-static int upper_call(hk_vm_t *vm, hk_value_t *args);
-static int trim_call(hk_vm_t *vm, hk_value_t *args);
-static int starts_with_call(hk_vm_t *vm, hk_value_t *args);
-static int ends_with_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t hash_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t lower_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t upper_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t trim_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t starts_with_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t ends_with_call(hk_vm_t *vm, hk_value_t *args);
 
-static int hash_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t hash_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_number(vm, hk_string_hash(hk_as_string(args[1])));
+  return hk_vm_push_float(vm, hk_string_hash(hk_as_string(args[1])));
 }
 
-static int lower_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t lower_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -33,7 +33,7 @@ static int lower_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int upper_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t upper_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -46,7 +46,7 @@ static int upper_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int trim_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t trim_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -61,28 +61,28 @@ static int trim_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int starts_with_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t starts_with_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_boolean(vm, hk_string_starts_with(hk_as_string(args[1]), hk_as_string(args[2])));
+  return hk_vm_push_bool(vm, hk_string_starts_with(hk_as_string(args[1]), hk_as_string(args[2])));
 }
 
-static int ends_with_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t ends_with_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_boolean(vm, hk_string_ends_with(hk_as_string(args[1]), hk_as_string(args[2])));
+  return hk_vm_push_bool(vm, hk_string_ends_with(hk_as_string(args[1]), hk_as_string(args[2])));
 }
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_strings(hk_vm_t *vm)
+int32_t __declspec(dllexport) __stdcall load_strings(hk_vm_t *vm)
 #else
-int load_strings(hk_vm_t *vm)
+int32_t load_strings(hk_vm_t *vm)
 #endif
 {
   if (hk_vm_push_string_from_chars(vm, -1, "strings") == HK_STATUS_ERROR)

@@ -1,2 +1,2 @@
 
-val a = num("123 x");
+val a = to_float("123 x");

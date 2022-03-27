@@ -20,8 +20,8 @@ static inline void value_free(hk_value_t val)
   switch (val.type)
   {
   case HK_TYPE_NIL:
-  case HK_TYPE_BOOLEAN:
-  case HK_TYPE_NUMBER:
+  case HK_TYPE_BOOL:
+  case HK_TYPE_FLOAT:
     break;
   case HK_TYPE_STRING:
     hk_string_free(hk_as_string(val));
@@ -57,18 +57,18 @@ static inline void value_free(hk_value_t val)
   }
 }
 
-const char *hk_type_name(int type)
+const char *hk_type_name(int32_t type)
 {
   char *name = "nil";
   switch (type)
   {
   case HK_TYPE_NIL:
     break;
-  case HK_TYPE_BOOLEAN:
-    name = "boolean";
+  case HK_TYPE_BOOL:
+    name = "bool";
     break;
-  case HK_TYPE_NUMBER:
-    name = "number";
+  case HK_TYPE_FLOAT:
+    name = "float";
     break;
   case HK_TYPE_STRING:
     name = "string";
@@ -115,11 +115,11 @@ void hk_value_print(hk_value_t val, bool quoted)
   case HK_TYPE_NIL:
     printf("nil");
     break;
-  case HK_TYPE_BOOLEAN:
-    printf("%s", val.as.boolean ? "true" : "false");
+  case HK_TYPE_BOOL:
+    printf("%s", val.as_bool ? "true" : "false");
     break;
-  case HK_TYPE_NUMBER:
-    printf("%g", val.as.number);
+  case HK_TYPE_FLOAT:
+    printf("%g", val.as_float);
     break;
   case HK_TYPE_STRING:
     hk_string_print(hk_as_string(val), quoted);
@@ -135,31 +135,31 @@ void hk_value_print(hk_value_t val, bool quoted)
       hk_string_t *name = hk_as_struct(val)->name;
       if (name)
       {
-        printf("<struct %.*s at %p>", name->length, name->chars, val.as.pointer);
+        printf("<struct %.*s at %p>", name->length, name->chars, val.as_pointer);
         break;
       }
-      printf("<struct at %p>", val.as.pointer);
+      printf("<struct at %p>", val.as_pointer);
     }
     break;
   case HK_TYPE_INSTANCE:
     hk_instance_print(hk_as_instance(val));
     break;
   case HK_TYPE_ITERATOR:
-    printf("<iterator at %p>", val.as.pointer);
+    printf("<iterator at %p>", val.as_pointer);
     break;
   case HK_TYPE_CALLABLE:
     {
       hk_string_t *name = hk_is_native(val) ? hk_as_native(val)->name : hk_as_closure(val)->fn->name;
       if (name)
       {
-        printf("<callable %.*s at %p>", name->length, name->chars, val.as.pointer);
+        printf("<callable %.*s at %p>", name->length, name->chars, val.as_pointer);
         break;
       }
-      printf("<callable at %p>", val.as.pointer);
+      printf("<callable at %p>", val.as_pointer);
     }
     break;
   case HK_TYPE_USERDATA:
-    printf("<userdata at %p>", val.as.pointer);
+    printf("<userdata at %p>", val.as_pointer);
     break;
   }
 }
@@ -173,11 +173,11 @@ bool hk_value_equal(hk_value_t val1, hk_value_t val2)
   {
   case HK_TYPE_NIL:
     break;
-  case HK_TYPE_BOOLEAN:
-    result = val1.as.boolean == val2.as.boolean;
+  case HK_TYPE_BOOL:
+    result = val1.as_bool == val2.as_bool;
     break;
-  case HK_TYPE_NUMBER:
-    result = val1.as.number == val2.as.number;
+  case HK_TYPE_FLOAT:
+    result = val1.as_float == val2.as_float;
     break;
   case HK_TYPE_STRING:
     result = hk_string_equal(hk_as_string(val1), hk_as_string(val2));
@@ -195,13 +195,13 @@ bool hk_value_equal(hk_value_t val1, hk_value_t val2)
     result = hk_instance_equal(hk_as_instance(val1), hk_as_instance(val2));
     break;
   default:
-    result = val1.as.pointer == val2.as.pointer;
+    result = val1.as_pointer == val2.as_pointer;
     break;
   }
   return result;
 }
 
-int hk_value_compare(hk_value_t val1, hk_value_t val2, int *result)
+int32_t hk_value_compare(hk_value_t val1, hk_value_t val2, int32_t *result)
 {
   if (val1.type != val2.type)
   {
@@ -214,16 +214,16 @@ int hk_value_compare(hk_value_t val1, hk_value_t val2, int *result)
   case HK_TYPE_NIL:
     *result = 0;
     return HK_STATUS_OK;
-  case HK_TYPE_BOOLEAN:
-    *result = val1.as.boolean - val2.as.boolean;
+  case HK_TYPE_BOOL:
+    *result = val1.as_bool - val2.as_bool;
     return HK_STATUS_OK;
-  case HK_TYPE_NUMBER:
-    if (val1.as.number > val2.as.number)
+  case HK_TYPE_FLOAT:
+    if (val1.as_float > val2.as_float)
     {
       *result = 1;
       return HK_STATUS_OK;
     }
-    if (val1.as.number < val2.as.number)
+    if (val1.as_float < val2.as_float)
     {
       *result = -1;
       return HK_STATUS_OK;
@@ -247,13 +247,13 @@ int hk_value_compare(hk_value_t val1, hk_value_t val2, int *result)
 
 void hk_value_serialize(hk_value_t val, FILE *stream)
 {
-  int type = val.type;
-  int flags = val.flags;
+  int32_t type = val.type;
+  int32_t flags = val.flags;
   fwrite(&type, sizeof(type), 1, stream);
   fwrite(&flags, sizeof(flags), 1, stream);
-  if (type == HK_TYPE_NUMBER)
+  if (type == HK_TYPE_FLOAT)
   {
-    fwrite(&val.as.number, sizeof(val.as.number), 1, stream);
+    fwrite(&val.as_float, sizeof(val.as_float), 1, stream);
     return;
   }
   if (type == HK_TYPE_STRING)
@@ -266,19 +266,19 @@ void hk_value_serialize(hk_value_t val, FILE *stream)
 
 bool hk_value_deserialize(FILE *stream, hk_value_t *result)
 {
-  int type;
-  int flags;
+  int32_t type;
+  int32_t flags;
   if (fread(&type, sizeof(type), 1, stream) != 1)
     return false;
   if (fread(&flags, sizeof(flags), 1, stream) != 1)
     return false;
-  hk_assert(type == HK_TYPE_NUMBER || type == HK_TYPE_STRING, "unimplemented deserialization");
-  if (type == HK_TYPE_NUMBER)
+  hk_assert(type == HK_TYPE_FLOAT || type == HK_TYPE_STRING, "unimplemented deserialization");
+  if (type == HK_TYPE_FLOAT)
   {
     double data;
     if (fread(&data, sizeof(data), 1, stream) != 1)
       return false;
-    *result = hk_number_value(data);
+    *result = hk_float_value(data);
     return true;
   }
   hk_string_t *str = hk_string_deserialize(stream);

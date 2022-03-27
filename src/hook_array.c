@@ -13,19 +13,19 @@ typedef struct
 {
   HK_ITERATOR_HEADER
   hk_array_t *iterable;
-  int current;
+  int32_t current;
 } array_iterator_t;
 
-static inline hk_array_t *array_allocate(int min_capacity);
+static inline hk_array_t *array_allocate(int32_t min_capacity);
 static void array_iterator_deinit(hk_iterator_t *it);
 static bool array_iterator_is_valid(hk_iterator_t *it);
 static hk_value_t array_iterator_get_current(hk_iterator_t *it);
 static void array_iterator_next(hk_iterator_t *it);
 
-static inline hk_array_t *array_allocate(int min_capacity)
+static inline hk_array_t *array_allocate(int32_t min_capacity)
 {
   hk_array_t *arr = (hk_array_t *) hk_allocate(sizeof(*arr));
-  int capacity = min_capacity < HK_ARRAY_MIN_CAPACITY ? HK_ARRAY_MIN_CAPACITY : min_capacity;
+  int32_t capacity = min_capacity < HK_ARRAY_MIN_CAPACITY ? HK_ARRAY_MIN_CAPACITY : min_capacity;
   capacity = hk_power_of_two_ceil(capacity);
   arr->ref_count = 0;
   arr->capacity = capacity;
@@ -62,18 +62,18 @@ hk_array_t *hk_array_new(void)
   return hk_array_new_with_capacity(0);
 }
 
-hk_array_t *hk_array_new_with_capacity(int min_capacity)
+hk_array_t *hk_array_new_with_capacity(int32_t min_capacity)
 {
   hk_array_t *arr = array_allocate(min_capacity);
   arr->length = 0;
   return arr;
 }
 
-void hk_array_ensure_capacity(hk_array_t *arr, int min_capacity)
+void hk_array_ensure_capacity(hk_array_t *arr, int32_t min_capacity)
 {
   if (min_capacity <= arr->capacity)
     return;
-  int capacity = hk_power_of_two_ceil(min_capacity);
+  int32_t capacity = hk_power_of_two_ceil(min_capacity);
   arr->capacity = capacity;
   arr->elements = (hk_value_t *) hk_reallocate(arr->elements,
     sizeof(*arr->elements) * capacity);
@@ -81,7 +81,7 @@ void hk_array_ensure_capacity(hk_array_t *arr, int min_capacity)
 
 void hk_array_free(hk_array_t *arr)
 {
-  for (int i = 0; i < arr->length; ++i)
+  for (int32_t i = 0; i < arr->length; ++i)
     hk_value_release(arr->elements[i]);
   free(arr->elements);
   free(arr);
@@ -94,9 +94,9 @@ void hk_array_release(hk_array_t *arr)
     hk_array_free(arr);
 }
 
-int hk_array_index_of(hk_array_t *arr, hk_value_t elem)
+int32_t hk_array_index_of(hk_array_t *arr, hk_value_t elem)
 {
-  for (int i = 0; i < arr->length; ++i)
+  for (int32_t i = 0; i < arr->length; ++i)
     if (hk_value_equal(arr->elements[i], elem))
       return i;
   return -1;
@@ -104,10 +104,10 @@ int hk_array_index_of(hk_array_t *arr, hk_value_t elem)
 
 hk_array_t *hk_array_add_element(hk_array_t *arr, hk_value_t elem)
 {
-  int length = arr->length;
+  int32_t length = arr->length;
   hk_array_t *result = array_allocate(length + 1);
   result->length = length + 1;
-  for (int i = 0; i < length; i++)
+  for (int32_t i = 0; i < length; i++)
   {
     hk_value_t val = arr->elements[i];
     hk_value_incr_ref(val);
@@ -118,12 +118,12 @@ hk_array_t *hk_array_add_element(hk_array_t *arr, hk_value_t elem)
   return result;
 }
 
-hk_array_t *hk_array_set_element(hk_array_t *arr, int index, hk_value_t elem)
+hk_array_t *hk_array_set_element(hk_array_t *arr, int32_t index, hk_value_t elem)
 {
-  int length = arr->length;
+  int32_t length = arr->length;
   hk_array_t *result = array_allocate(length);
   result->length = length;
-  for (int i = 0; i < index; ++i)
+  for (int32_t i = 0; i < index; ++i)
   {
     hk_value_t val = arr->elements[i];
     hk_value_incr_ref(val);
@@ -131,7 +131,7 @@ hk_array_t *hk_array_set_element(hk_array_t *arr, int index, hk_value_t elem)
   }
   hk_value_incr_ref(elem);
   result->elements[index] = elem;
-  for (int i = index + 1; i < length; ++i)
+  for (int32_t i = index + 1; i < length; ++i)
   {
     hk_value_t val = arr->elements[i];
     hk_value_incr_ref(val);
@@ -140,18 +140,18 @@ hk_array_t *hk_array_set_element(hk_array_t *arr, int index, hk_value_t elem)
   return result;
 }
 
-hk_array_t *hk_array_delete_element(hk_array_t *arr, int index)
+hk_array_t *hk_array_delete_element(hk_array_t *arr, int32_t index)
 {
-  int length = arr->length;
+  int32_t length = arr->length;
   hk_array_t *result = array_allocate(length - 1);
   result->length = length - 1;
-  for (int i = 0; i < index; i++)
+  for (int32_t i = 0; i < index; i++)
   {
     hk_value_t elem = arr->elements[i];
     hk_value_incr_ref(elem);
     result->elements[i] = elem;
   }
-  for (int i = index + 1; i < length; i++)
+  for (int32_t i = index + 1; i < length; i++)
   {
     hk_value_t elem = arr->elements[i];
     hk_value_incr_ref(elem);
@@ -162,17 +162,17 @@ hk_array_t *hk_array_delete_element(hk_array_t *arr, int index)
 
 hk_array_t *hk_array_concat(hk_array_t *arr1, hk_array_t *arr2)
 {
-  int length = arr1->length + arr2->length;
+  int32_t length = arr1->length + arr2->length;
   hk_array_t *result = array_allocate(length);
   result->length = length;
-  int j = 0;
-  for (int i = 0; i < arr1->length; ++i, ++j)
+  int32_t j = 0;
+  for (int32_t i = 0; i < arr1->length; ++i, ++j)
   {
     hk_value_t elem = arr1->elements[i];
     hk_value_incr_ref(elem);
     result->elements[j] = elem;
   }
-  for (int i = 0; i < arr2->length; ++i, ++j)
+  for (int32_t i = 0; i < arr2->length; ++i, ++j)
   {
     hk_value_t elem = arr2->elements[i];
     hk_value_incr_ref(elem);
@@ -185,7 +185,7 @@ hk_array_t *hk_array_diff(hk_array_t *arr1, hk_array_t *arr2)
 {
   hk_array_t *result = array_allocate(0);
   result->length = 0;
-  for (int i = 0; i < arr1->length; ++i)
+  for (int32_t i = 0; i < arr1->length; ++i)
   {
     hk_value_t elem = arr1->elements[i];
     if (hk_array_index_of(arr2, elem) == -1)
@@ -202,26 +202,26 @@ void hk_array_inplace_add_element(hk_array_t *arr, hk_value_t elem)
   ++arr->length;
 }
 
-void hk_array_inplace_set_element(hk_array_t *arr, int index, hk_value_t elem)
+void hk_array_inplace_set_element(hk_array_t *arr, int32_t index, hk_value_t elem)
 {
   hk_value_incr_ref(elem);
   hk_value_release(arr->elements[index]);
   arr->elements[index] = elem;
 }
 
-void hk_array_inplace_delete_element(hk_array_t *arr, int index)
+void hk_array_inplace_delete_element(hk_array_t *arr, int32_t index)
 {
   hk_value_release(arr->elements[index]);
-  for (int i = index; i < arr->length - 1; ++i)
+  for (int32_t i = index; i < arr->length - 1; ++i)
     arr->elements[i] = arr->elements[i + 1];
   --arr->length;
 }
 
 void hk_array_inplace_concat(hk_array_t *dest, hk_array_t *src)
 {
-  int length = dest->length + src->length;
+  int32_t length = dest->length + src->length;
   hk_array_ensure_capacity(dest, length);
-  for (int i = 0; i < src->length; ++i)
+  for (int32_t i = 0; i < src->length; ++i)
   {
     hk_value_t elem = src->elements[i];
     hk_value_incr_ref(elem);
@@ -232,11 +232,11 @@ void hk_array_inplace_concat(hk_array_t *dest, hk_array_t *src)
 
 void hk_array_inplace_diff(hk_array_t *dest, hk_array_t *src)
 {
-  for (int i = 0; i < src->length; ++i)
+  for (int32_t i = 0; i < src->length; ++i)
   {
     hk_value_t elem = src->elements[i];
-    int n = dest->length;
-    for (int j = 0; j < n; ++j)
+    int32_t n = dest->length;
+    for (int32_t j = 0; j < n; ++j)
     {
       if (!hk_value_equal(elem, dest->elements[j]))
         continue;
@@ -249,7 +249,7 @@ void hk_array_inplace_diff(hk_array_t *dest, hk_array_t *src)
 void hk_array_print(hk_array_t *arr)
 {
   printf("[");
-  int length = arr->length;
+  int32_t length = arr->length;
   if (!length)
   {
     printf("]");
@@ -257,7 +257,7 @@ void hk_array_print(hk_array_t *arr)
   }
   hk_value_t *elements = arr->elements;
   hk_value_print(elements[0], true);
-  for (int i = 1; i < length; ++i)
+  for (int32_t i = 1; i < length; ++i)
   {
     printf(", ");
     hk_value_print(elements[i], true);
@@ -271,22 +271,22 @@ bool hk_array_equal(hk_array_t *arr1, hk_array_t *arr2)
     return true;
   if (arr1->length != arr2->length)
     return false;
-  for (int i = 0; i < arr1->length; ++i)
+  for (int32_t i = 0; i < arr1->length; ++i)
     if (!hk_value_equal(arr1->elements[i], arr2->elements[i]))
       return false;  
   return true;
 }
 
-int hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int *result)
+int32_t hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result)
 {
   if (arr1 == arr2)
   {
     *result = 0;
     return HK_STATUS_OK;
   }
-  for (int i = 0; i < arr1->length && i < arr2->length; ++i)
+  for (int32_t i = 0; i < arr1->length && i < arr2->length; ++i)
   {
-    int _result;
+    int32_t _result;
     if (hk_value_compare(arr1->elements[i], arr2->elements[i], &_result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     if (_result)
@@ -309,15 +309,15 @@ int hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int *result)
   return HK_STATUS_OK;
 }
 
-bool hk_array_slice(hk_array_t *arr, int start, int stop, hk_array_t **result)
+bool hk_array_slice(hk_array_t *arr, int32_t start, int32_t stop, hk_array_t **result)
 {
   if (start < 1 && stop >= arr->length)
     return false;
-  int length = stop - start;
+  int32_t length = stop - start;
   length = length < 0 ? 0 : length;
   hk_array_t *slice = array_allocate(length);
   slice->length = length;
-  for (int i = start, j = 0; i < stop; ++i, ++j)
+  for (int32_t i = start, j = 0; i < stop; ++i, ++j)
   {
     hk_value_t elem = arr->elements[i];
     hk_value_incr_ref(elem);
@@ -344,21 +344,21 @@ void hk_array_serialize(hk_array_t *arr, FILE *stream)
   fwrite(&arr->capacity, sizeof(arr->capacity), 1, stream);
   fwrite(&arr->length, sizeof(arr->length), 1, stream);
   hk_value_t *elements = arr->elements;
-  for (int i = 0; i < arr->length; ++i)
+  for (int32_t i = 0; i < arr->length; ++i)
     hk_value_serialize(elements[i], stream);
 }
 
 hk_array_t *hk_array_deserialize(FILE *stream)
 {
-  int capacity;
-  int length;
+  int32_t capacity;
+  int32_t length;
   if (fread(&capacity, sizeof(capacity), 1, stream) != 1)
     return NULL;
   if (fread(&length, sizeof(length), 1, stream) != 1)
     return NULL;
   hk_array_t *arr = array_allocate(capacity);
   arr->length = length;
-  for (int i = 0; i < length; ++i)
+  for (int32_t i = 0; i < length; ++i)
   {
     hk_value_t elem;
     if (!hk_value_deserialize(stream, &elem))

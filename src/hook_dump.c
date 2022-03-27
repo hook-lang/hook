@@ -15,12 +15,12 @@ void hk_dump(hk_function_t *fn)
   printf("%d parameter(s), %d non-local(s), %d constant(s), %d function(s)\n", fn->arity,
     fn->num_nonlocals, fn->consts->length, fn->num_functions);
   uint8_t *bytes = fn->chunk.bytes;
-  int i = 0;
-  int n = 0;
+  int32_t i = 0;
+  int32_t n = 0;
   while (i < fn->chunk.length)
   {
-    int op = bytes[i];
-    int j = i++;
+    int32_t op = bytes[i];
+    int32_t j = i++;
     ++n;
     switch (op)
     {
@@ -35,7 +35,7 @@ void hk_dump(hk_function_t *fn)
       break;
     case HK_OP_INT:
       {
-        int data = *((uint16_t*) &bytes[i]);
+        int32_t data = *((uint16_t*) &bytes[i]);
         i += 2;
         printf("  [%05d] Int                   %d\n", j, data);
       }
@@ -126,35 +126,35 @@ void hk_dump(hk_function_t *fn)
       break;
     case HK_OP_JUMP:
       {
-        int offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &bytes[i]);
         i += 2;
         printf("  [%05d] Jump                  %d\n", j, offset);
       }
       break;
     case HK_OP_JUMP_IF_FALSE:
       {
-        int offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &bytes[i]);
         i += 2;
         printf("  [%05d] JumpIfFalse           %d\n", j, offset);
       }
       break;
     case HK_OP_OR:
       {
-        int offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &bytes[i]);
         i += 2;
         printf("  [%05d] Or                    %d\n", j, offset);
       }
       break;
     case HK_OP_AND:
       {
-        int offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &bytes[i]);
         i += 2;
         printf("  [%05d] And                   %d\n", j, offset);
       }
       break;
     case HK_OP_MATCH:
       {
-        int offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &bytes[i]);
         i += 2;
         printf("  [%05d] Match                 %d\n", j, offset);
       }
@@ -219,6 +219,6 @@ void hk_dump(hk_function_t *fn)
     }
   }
   printf("%d instruction(s)\n\n", n);
-  for (int i = 0; i < fn->num_functions; ++i)
+  for (int32_t i = 0; i < fn->num_functions; ++i)
     hk_dump(fn->functions[i]);  
 }

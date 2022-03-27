@@ -6,17 +6,17 @@
 #include "hook_arrays.h"
 #include <stdlib.h>
 
-static int new_array_call(hk_vm_t *vm, hk_value_t *args);
-static int index_of_call(hk_vm_t *vm, hk_value_t *args);
-static int min_call(hk_vm_t *vm, hk_value_t *args);
-static int max_call(hk_vm_t *vm, hk_value_t *args);
-static int sum_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t new_array_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t index_of_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t min_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t max_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sum_call(hk_vm_t *vm, hk_value_t *args);
 
-static int new_array_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t new_array_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int capacity = (int) args[1].as.number;
+  int32_t capacity = (int32_t) args[1].as_float;
   hk_array_t *arr = hk_array_new_with_capacity(capacity);
   if (hk_vm_push_array(vm, arr) == HK_STATUS_ERROR)
   {
@@ -26,26 +26,26 @@ static int new_array_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int index_of_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t index_of_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_number(vm, hk_array_index_of(hk_as_array(args[1]), args[2]));
+  return hk_vm_push_float(vm, hk_array_index_of(hk_as_array(args[1]), args[2]));
 }
 
-static int min_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t min_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_array_t *arr = hk_as_array(args[1]);
-  int length = arr->length;
+  int32_t length = arr->length;
   if (!length)
     return hk_vm_push_nil(vm);
   hk_value_t min = hk_array_get_element(arr, 0);
-  for (int i = 1; i < length; ++i)
+  for (int32_t i = 1; i < length; ++i)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
-    int result;
+    int32_t result;
     if (hk_value_compare(elem, min, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     min = result < 0 ? elem : min;
@@ -53,19 +53,19 @@ static int min_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push(vm, min);
 }
 
-static int max_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t max_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_array_t *arr = hk_as_array(args[1]);
-  int length = arr->length;
+  int32_t length = arr->length;
   if (!length)
     return hk_vm_push_nil(vm);
   hk_value_t max = hk_array_get_element(arr, 0);
-  for (int i = 1; i < length; ++i)
+  for (int32_t i = 1; i < length; ++i)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
-    int result;
+    int32_t result;
     if (hk_value_compare(elem, max, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     max = result > 0 ? elem : max;
@@ -73,30 +73,30 @@ static int max_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push(vm, max);
 }
 
-static int sum_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t sum_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_array_t *arr = hk_as_array(args[1]);
   double sum = 0;
-  for (int i = 0; i < arr->length; ++i)
+  for (int32_t i = 0; i < arr->length; ++i)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
-    if (!hk_is_number(elem))
+    if (!hk_is_float(elem))
     {
       sum = 0;
       break;
     }
-    sum += elem.as.number;
+    sum += elem.as_float;
   }
-  hk_vm_push_number(vm, sum);
+  hk_vm_push_float(vm, sum);
   return HK_STATUS_OK;
 }
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_arrays(hk_vm_t *vm)
+int32_t __declspec(dllexport) __stdcall load_arrays(hk_vm_t *vm)
 #else
-int load_arrays(hk_vm_t *vm)
+int32_t load_arrays(hk_vm_t *vm)
 #endif
 {
   if (hk_vm_push_string_from_chars(vm,-1, "arrays") == HK_STATUS_ERROR)

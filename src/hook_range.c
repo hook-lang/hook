@@ -11,7 +11,7 @@ typedef struct
 {
   HK_ITERATOR_HEADER
   hk_range_t *iterable;
-  long current;
+  int64_t current;
 } range_iterator_t;
 
 static void range_iterator_deinit(hk_iterator_t *it);
@@ -36,7 +36,7 @@ static bool range_iterator_is_valid(hk_iterator_t *it)
 static hk_value_t range_iterator_get_current(hk_iterator_t *it)
 {
   range_iterator_t *range_it = (range_iterator_t *) it;
-  return hk_number_value((double) range_it->current);
+  return hk_float_value((double) range_it->current);
 }
 
 static void range_iterator_next(hk_iterator_t *it)
@@ -46,7 +46,7 @@ static void range_iterator_next(hk_iterator_t *it)
   range_it->current += range->step;
 }
 
-hk_range_t *hk_range_new(long start, long end)
+hk_range_t *hk_range_new(int64_t start, int64_t end)
 {
   hk_range_t *range = (hk_range_t *) hk_allocate(sizeof(*range));
   range->ref_count = 0;
@@ -79,7 +79,7 @@ bool hk_range_equal(hk_range_t *range1, hk_range_t *range2)
     && range1->end == range2->end;
 }
 
-int hk_range_compare(hk_range_t *range1, hk_range_t *range2)
+int32_t hk_range_compare(hk_range_t *range1, hk_range_t *range2)
 {
   if (range1->start < range2->start)
     return -1;

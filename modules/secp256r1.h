@@ -9,9 +9,9 @@
 #include "hook.h"
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_secp256r1(hk_vm_t *vm);
+int32_t __declspec(dllexport) __stdcall load_secp256r1(hk_vm_t *vm);
 #else
-int load_secp256r1(hk_vm_t *vm);
+int32_t load_secp256r1(hk_vm_t *vm);
 #endif
 
 #endif // SECP256R1_H

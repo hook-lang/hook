@@ -2,24 +2,24 @@
 print(val: value)
 println(val: value)
 type(val: value) -> string
-bool(val: value) -> boolean
-integer(val: number|string) -> integer
-int(val: number|string) -> integer
-num(val: number|string) -> number
-str(val: nil|boolean|number|string) -> string
+to_bool(val: value) -> bool
+to_integer(val: float|string) -> integer
+to_int(val: float|string) -> integer
+to_float(val: float|string) -> float
+to_string(val: nil|bool|float|string) -> string
 ord(val: string) -> integer
 chr(val: integer) -> string
 hex(val: string) -> string
 bin(val: string) -> string
 cap(val: string|array) -> integer
 len(val: string|array) -> integer
-is_empty(val: string|array) -> boolean
+is_empty(val: string|array) -> bool
 compare(val1: value, val2: value) -> integer
 slice(val: string|array, start: integer, stop: integer) -> string|array
 split(src: string, separator: string) -> array
 join(arr: array, separator: string) -> string
 iter(val: iterator|range|array) -> iterator
-valid(it: iterator) -> boolean
+valid(it: iterator) -> bool
 current(it: iterator) -> value
 next(it: iterator)
 sleep(ms: integer)

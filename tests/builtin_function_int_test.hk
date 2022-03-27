@@ -1,5 +1,5 @@
 
-println(int(123));
-println(int(1.23));
-println(int("123"));
-println(int("1.23"));
+println(to_int(123));
+println(to_int(1.23));
+println(to_int("123"));
+println(to_int("1.23"));

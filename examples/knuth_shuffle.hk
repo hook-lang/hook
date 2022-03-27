@@ -7,7 +7,7 @@ use { random } in math;
 fn shuffle(mut arr) {
   val n = len(arr);
   for (mut i = n - 1; i >= 0; i--) {
-    val j = int(random() * (i - 1));
+    val j = to_int(random() * (i - 1));
     val tmp = arr[i];
     arr[i] = arr[j]; 
     arr[j] = tmp;

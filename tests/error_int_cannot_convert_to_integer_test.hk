@@ -1,2 +1,2 @@
 
-val a = int(nil);
+val a = to_int(nil);

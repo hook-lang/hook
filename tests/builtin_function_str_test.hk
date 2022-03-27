@@ -1,2 +1,2 @@
 
-println([str(nil), str(false), str(true), str(1.23), str("foo")]);
+println([to_string(nil), to_string(false), to_string(true), to_string(1.23), to_string("foo")]);

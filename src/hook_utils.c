@@ -36,7 +36,7 @@ static void make_directory(char *path)
   mkdir(path, 0777); 
 }
 
-int hk_power_of_two_ceil(int n)
+int32_t hk_power_of_two_ceil(int32_t n)
 {
   --n;
   n |= n >> 1;

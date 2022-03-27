@@ -1,7 +1,7 @@
 
-println(bool(nil));
-println(bool(false));
-println(bool(true));
-println(bool(0));
-println(bool(""));
-println(bool([]));
+println(to_bool(nil));
+println(to_bool(false));
+println(to_bool(true));
+println(to_bool(0));
+println(to_bool(""));
+println(to_bool([]));

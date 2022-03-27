@@ -1,2 +1,2 @@
 
-val a = int("");
+val a = to_int("");

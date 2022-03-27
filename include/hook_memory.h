@@ -6,7 +6,9 @@
 #ifndef HOOK_MEMORY_H
 #define HOOK_MEMORY_H
 
-void *hk_allocate(int size);
-void *hk_reallocate(void *ptr, int size);
+#include <stdint.h>
+
+void *hk_allocate(int32_t size);
+void *hk_reallocate(void *ptr, int32_t size);
 
 #endif // HOOK_MEMORY_H

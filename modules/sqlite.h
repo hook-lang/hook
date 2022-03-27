@@ -9,9 +9,9 @@
 #include "hook.h"
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_sqlite(hk_vm_t *vm);
+int32_t __declspec(dllexport) __stdcall load_sqlite(hk_vm_t *vm);
 #else
-int load_sqlite(hk_vm_t *vm);
+int32_t load_sqlite(hk_vm_t *vm);
 #endif
 
 #endif // SQLITE_H

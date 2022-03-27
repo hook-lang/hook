@@ -6,6 +6,8 @@
 #ifndef HOOK_UTILS_H
 #define HOOK_UTILS_H
 
+#include <stdint.h>
+
 #define hk_assert(cond, msg) do \
   { \
     if (!(cond)) \
@@ -16,7 +18,7 @@
     } \
   } while(0)
 
-int hk_power_of_two_ceil(int n);
+int32_t hk_power_of_two_ceil(int32_t n);
 void hk_ensure_path(const char *filename);
 
 #endif // HOOK_UTILS_H

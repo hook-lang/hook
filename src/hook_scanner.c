@@ -19,10 +19,10 @@ static inline void lexical_error(scanner_t *scan, const char *fmt, ...);
 static inline void skip_shebang(scanner_t *scan);
 static inline void skip_spaces_comments(scanner_t *scan);
 static inline void next_char(scanner_t *scan);
-static inline void next_chars(scanner_t *scan, int n);
+static inline void next_chars(scanner_t *scan, int32_t n);
 static inline bool match_char(scanner_t *scan, const char c);
 static inline bool match_chars(scanner_t *scan, const char *chars);
-static inline bool match_number(scanner_t *scan);
+static inline bool match_float(scanner_t *scan);
 static inline bool match_string(scanner_t *scan);
 static inline bool match_name(scanner_t *scan);
 
@@ -88,9 +88,9 @@ static inline void next_char(scanner_t *scan)
   ++scan->pos;
 }
 
-static inline void next_chars(scanner_t *scan, int n)
+static inline void next_chars(scanner_t *scan, int32_t n)
 {
-  for (int i = 0; i < n; ++i)
+  for (int32_t i = 0; i < n; ++i)
     next_char(scan);
 }
 
@@ -108,7 +108,7 @@ static inline bool match_char(scanner_t *scan, const char c)
 
 static inline bool match_chars(scanner_t *scan, const char *chars)
 {
-  int n = (int) strnlen(chars, MATCH_MAX_LENGTH);
+  int32_t n = (int32_t) strnlen(chars, MATCH_MAX_LENGTH);
   if (strncmp(scan->pos, chars, n)
    || (isalnum(char_at(scan, n)))
    || (char_at(scan, n) == '_'))
@@ -121,9 +121,9 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
   return true;
 }
 
-static inline bool match_number(scanner_t *scan)
+static inline bool match_float(scanner_t *scan)
 {
-  int n = 0;
+  int32_t n = 0;
   if (char_at(scan, n) == '0')
     ++n;
   else
@@ -134,7 +134,7 @@ static inline bool match_number(scanner_t *scan)
     while (isdigit(char_at(scan, n)))
       ++n;
   }
-  int type = TOKEN_INT;
+  int32_t type = TOKEN_INT;
   if (char_at(scan, n) == '.')
   {
     if (!isdigit(char_at(scan, n + 1)))
@@ -142,7 +142,7 @@ static inline bool match_number(scanner_t *scan)
     n += 2;
     while (isdigit(char_at(scan, n)))
       ++n;
-    type = TOKEN_NUMBER;
+    type = TOKEN_FLOAT;
   }
   if (char_at(scan, n) == 'e' || char_at(scan, n) == 'E')
   {
@@ -172,7 +172,7 @@ static inline bool match_string(scanner_t *scan)
   char chr = current_char(scan);
   if (chr == '\'' || chr == '\"')
   {
-    int n = 1;
+    int32_t n = 1;
     for (;;)
     {
       if (char_at(scan, n) == chr)
@@ -199,7 +199,7 @@ static inline bool match_name(scanner_t *scan)
 {
   if (current_char(scan) != '_' && !isalpha(current_char(scan)))
     return false;
-  int n = 1;
+  int32_t n = 1;
   while (char_at(scan, n) == '_' || isalnum(char_at(scan, n)))
     ++n;
   scan->token.type = TOKEN_NAME;
@@ -408,7 +408,7 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_PERCENT;
     return;
   }
-  if (match_number(scan))
+  if (match_float(scan))
     return;
   if (match_string(scan))
     return;

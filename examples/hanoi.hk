@@ -8,7 +8,7 @@ fn hanoi(n, from, to, aux) {
     return;
   }
   hanoi(n - 1, from, aux, to);
-  println("Move disk " + str(n) + " from rod " + from + " to rod " + to + ".");
+  println("Move disk " + to_string(n) + " from rod " + from + " to rod " + to + ".");
   hanoi(n-1, aux, to, from);
 }
 

@@ -10,6 +10,6 @@
 
 void init_module_cache(void);
 void free_module_cache(void);
-int load_module(hk_vm_t *vm);
+int32_t load_module(hk_vm_t *vm);
 
 #endif // HOOK_MODULE_H

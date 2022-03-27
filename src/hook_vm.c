@@ -14,69 +14,69 @@
 #include "hook_status.h"
 #include "hook_error.h"
 
-static inline void type_error(int index, int num_types, int types[], int val_type);
-static inline int push(hk_vm_t *vm, hk_value_t val);
-static inline int read_byte(uint8_t **pc);
-static inline int read_word(uint8_t **pc);
-static inline int range(hk_vm_t *vm);
-static inline int array(hk_vm_t *vm, int length);
-static inline int ztruct(hk_vm_t *vm, int length);
-static inline int instance(hk_vm_t *vm, int length);
-static inline int construct(hk_vm_t *vm, int length);
-static inline int closure(hk_vm_t *vm, hk_function_t *fn);
-static inline int unpack(hk_vm_t *vm, int n);
-static inline int destruct(hk_vm_t *vm, int n);
-static inline int add_element(hk_vm_t *vm);
-static inline int get_element(hk_vm_t *vm);
-static inline int slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range);
-static inline int fetch_element(hk_vm_t *vm);
+static inline void type_error(int32_t index, int32_t num_types, int32_t types[], int32_t val_type);
+static inline int32_t push(hk_vm_t *vm, hk_value_t val);
+static inline int32_t read_byte(uint8_t **pc);
+static inline int32_t read_word(uint8_t **pc);
+static inline int32_t range(hk_vm_t *vm);
+static inline int32_t array(hk_vm_t *vm, int32_t length);
+static inline int32_t ztruct(hk_vm_t *vm, int32_t length);
+static inline int32_t instance(hk_vm_t *vm, int32_t length);
+static inline int32_t construct(hk_vm_t *vm, int32_t length);
+static inline int32_t closure(hk_vm_t *vm, hk_function_t *fn);
+static inline int32_t unpack(hk_vm_t *vm, int32_t n);
+static inline int32_t destruct(hk_vm_t *vm, int32_t n);
+static inline int32_t add_element(hk_vm_t *vm);
+static inline int32_t get_element(hk_vm_t *vm);
+static inline int32_t slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range);
+static inline int32_t fetch_element(hk_vm_t *vm);
 static inline void set_element(hk_vm_t *vm);
-static inline int put_element(hk_vm_t *vm);
-static inline int delete_element(hk_vm_t *vm);
-static inline int inplace_add_element(hk_vm_t *vm);
-static inline int inplace_put_element(hk_vm_t *vm);
-static inline int inplace_delete_element(hk_vm_t *vm);
-static inline int get_field(hk_vm_t *vm, hk_string_t *name);
-static inline int fetch_field(hk_vm_t *vm, hk_string_t *name);
+static inline int32_t put_element(hk_vm_t *vm);
+static inline int32_t delete_element(hk_vm_t *vm);
+static inline int32_t inplace_add_element(hk_vm_t *vm);
+static inline int32_t inplace_put_element(hk_vm_t *vm);
+static inline int32_t inplace_delete_element(hk_vm_t *vm);
+static inline int32_t get_field(hk_vm_t *vm, hk_string_t *name);
+static inline int32_t fetch_field(hk_vm_t *vm, hk_string_t *name);
 static inline void set_field(hk_vm_t *vm);
-static inline int put_field(hk_vm_t *vm, hk_string_t *name);
-static inline int inplace_put_field(hk_vm_t *vm, hk_string_t *name);
+static inline int32_t put_field(hk_vm_t *vm, hk_string_t *name);
+static inline int32_t inplace_put_field(hk_vm_t *vm, hk_string_t *name);
 static inline void equal(hk_vm_t *vm);
-static inline int greater(hk_vm_t *vm);
-static inline int less(hk_vm_t *vm);
+static inline int32_t greater(hk_vm_t *vm);
+static inline int32_t less(hk_vm_t *vm);
 static inline void not_equal(hk_vm_t *vm);
-static inline int not_greater(hk_vm_t *vm);
-static inline int not_less(hk_vm_t *vm);
-static inline int add(hk_vm_t *vm);
-static inline int concat_strings(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2);
-static inline int concat_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2);
-static inline int subtract(hk_vm_t *vm);
-static inline int diff_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2);
-static inline int multiply(hk_vm_t *vm);
-static inline int divide(hk_vm_t *vm);
-static inline int modulo(hk_vm_t *vm);
-static inline int negate(hk_vm_t *vm);
+static inline int32_t not_greater(hk_vm_t *vm);
+static inline int32_t not_less(hk_vm_t *vm);
+static inline int32_t add(hk_vm_t *vm);
+static inline int32_t concat_strings(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2);
+static inline int32_t concat_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2);
+static inline int32_t subtract(hk_vm_t *vm);
+static inline int32_t diff_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2);
+static inline int32_t multiply(hk_vm_t *vm);
+static inline int32_t divide(hk_vm_t *vm);
+static inline int32_t modulo(hk_vm_t *vm);
+static inline int32_t negate(hk_vm_t *vm);
 static inline void not(hk_vm_t *vm);
-static inline int call(hk_vm_t *vm, int num_args);
-static inline int check_arity(int arity, hk_string_t *name, int num_args);
-static inline void print_trace(hk_string_t *name, hk_string_t *file, int line);
-static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *cl, int *line);
+static inline int32_t call(hk_vm_t *vm, int32_t num_args);
+static inline int32_t check_arity(int32_t arity, hk_string_t *name, int32_t num_args);
+static inline void print_trace(hk_string_t *name, hk_string_t *file, int32_t line);
+static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *cl, int32_t *line);
 static inline void discard_frame(hk_vm_t *vm, hk_value_t *slots);
 static inline void move_result(hk_vm_t *vm, hk_value_t *slots);
 
-static inline void type_error(int index, int num_types, int types[], int val_type)
+static inline void type_error(int32_t index, int32_t num_types, int32_t types[], int32_t val_type)
 {
   hk_assert(num_types > 0, "num_types must be greater than 0");
   fprintf(stderr, "runtime error: type error: argument #%d must be of the type %s",
     index, hk_type_name(types[0]));
-  for (int i = 1; i < num_types; ++i)
+  for (int32_t i = 1; i < num_types; ++i)
     fprintf(stderr, "|%s", hk_type_name(types[i]));
   fprintf(stderr, ", %s given\n", hk_type_name(val_type));
 }
 
-static inline int push(hk_vm_t *vm, hk_value_t val)
+static inline int32_t push(hk_vm_t *vm, hk_value_t val)
 {
-  if (vm->top == vm->limit)
+  if (vm->top == vm->end)
   {
     hk_runtime_error("stack overflow");
     return HK_STATUS_ERROR;
@@ -86,43 +86,43 @@ static inline int push(hk_vm_t *vm, hk_value_t val)
   return HK_STATUS_OK;
 }
 
-static inline int read_byte(uint8_t **pc)
+static inline int32_t read_byte(uint8_t **pc)
 {
-  int byte = **pc;
+  int32_t byte = **pc;
   ++(*pc);
   return byte;
 }
 
-static inline int read_word(uint8_t **pc)
+static inline int32_t read_word(uint8_t **pc)
 {
-  int word = *((uint16_t *) *pc);
+  int32_t word = *((uint16_t *) *pc);
   *pc += 2;
   return word;
 }
 
-static inline int range(hk_vm_t *vm)
+static inline int32_t range(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_number(val1) || !hk_is_number(val2))
+  if (!hk_is_float(val1) || !hk_is_float(val2))
   {
-    hk_runtime_error("type error: range must be of type number");
+    hk_runtime_error("type error: range must be of type float");
     return HK_STATUS_ERROR;
   }
-  hk_range_t *range = hk_range_new(val1.as.number, val2.as.number);
+  hk_range_t *range = hk_range_new(val1.as_float, val2.as_float);
   hk_incr_ref(range);
   slots[0] = hk_range_value(range);
   --vm->top;
   return HK_STATUS_OK;
 }
 
-static inline int array(hk_vm_t *vm, int length)
+static inline int32_t array(hk_vm_t *vm, int32_t length)
 {
   hk_value_t *slots = &vm->slots[vm->top - length + 1];
   hk_array_t *arr = hk_array_new_with_capacity(length);
   arr->length = length;
-  for (int i = 0; i < length; ++i)
+  for (int32_t i = 0; i < length; ++i)
     arr->elements[i] = slots[i];
   vm->top -= length;
   if (push(vm, hk_array_value(arr)) == HK_STATUS_ERROR)
@@ -134,13 +134,13 @@ static inline int array(hk_vm_t *vm, int length)
   return HK_STATUS_OK;
 }
 
-static inline int ztruct(hk_vm_t *vm, int length)
+static inline int32_t ztruct(hk_vm_t *vm, int32_t length)
 {
   hk_value_t *slots = &vm->slots[vm->top - length];
   hk_value_t val = slots[0];
   hk_string_t *struct_name = hk_is_nil(val) ? NULL : hk_as_string(val);
   hk_struct_t *ztruct = hk_struct_new(struct_name);
-  for (int i = 1; i <= length; ++i)
+  for (int32_t i = 1; i <= length; ++i)
   {
     hk_string_t *field_name = hk_as_string(slots[i]);
     if (!hk_struct_define_field(ztruct, field_name))
@@ -151,7 +151,7 @@ static inline int ztruct(hk_vm_t *vm, int length)
       return HK_STATUS_ERROR;
     }
   }
-  for (int i = 1; i <= length; ++i)
+  for (int32_t i = 1; i <= length; ++i)
     hk_decr_ref(hk_as_object(slots[i]));
   vm->top -= length;
   hk_incr_ref(ztruct);
@@ -161,7 +161,7 @@ static inline int ztruct(hk_vm_t *vm, int length)
   return HK_STATUS_OK;
 }
 
-static inline int instance(hk_vm_t *vm, int length)
+static inline int32_t instance(hk_vm_t *vm, int32_t length)
 {
   hk_value_t *slots = &vm->slots[vm->top - length];
   hk_value_t val = slots[0];
@@ -173,7 +173,7 @@ static inline int instance(hk_vm_t *vm, int length)
   hk_struct_t *ztruct = hk_as_struct(val);
   if (ztruct->length > length)
   {
-    int n = ztruct->length - length;
+    int32_t n = ztruct->length - length;
     const char *fmt = n == 1 ? 
       "missing %d value in initializer of %s" :
       "missing %d values in initializer of %s";  
@@ -189,7 +189,7 @@ static inline int instance(hk_vm_t *vm, int length)
     return HK_STATUS_ERROR;
   }
   hk_instance_t *inst = hk_instance_new(ztruct);
-  for (int i = 0; i < length; ++i)
+  for (int32_t i = 0; i < length; ++i)
     inst->values[i] = slots[i + 1];
   vm->top -= length;
   hk_incr_ref(inst);
@@ -198,14 +198,14 @@ static inline int instance(hk_vm_t *vm, int length)
   return HK_STATUS_OK;
 }
 
-static inline int construct(hk_vm_t *vm, int length)
+static inline int32_t construct(hk_vm_t *vm, int32_t length)
 {
-  int n = length << 1;
+  int32_t n = length << 1;
   hk_value_t *slots = &vm->slots[vm->top - n];
   hk_value_t val = slots[0];
   hk_string_t *struct_name = hk_is_nil(val) ? NULL : hk_as_string(val);
   hk_struct_t *ztruct = hk_struct_new(struct_name);
-  for (int i = 1; i <= n; i += 2)
+  for (int32_t i = 1; i <= n; i += 2)
   {
     hk_string_t *field_name = hk_as_string(slots[i]);
     if (!hk_struct_define_field(ztruct, field_name))
@@ -216,10 +216,10 @@ static inline int construct(hk_vm_t *vm, int length)
       return HK_STATUS_ERROR;
     }
   }
-  for (int i = 1; i <= n; i += 2)
+  for (int32_t i = 1; i <= n; i += 2)
     hk_decr_ref(hk_as_object(slots[i]));
   hk_instance_t *inst = hk_instance_new(ztruct);
-  for (int i = 2, j = 0; i <= n + 1; i += 2, ++j)
+  for (int32_t i = 2, j = 0; i <= n + 1; i += 2, ++j)
     inst->values[j] = slots[i];
   vm->top -= n;
   hk_incr_ref(inst);
@@ -229,12 +229,12 @@ static inline int construct(hk_vm_t *vm, int length)
   return HK_STATUS_OK;
 }
 
-static inline int closure(hk_vm_t *vm, hk_function_t *fn)
+static inline int32_t closure(hk_vm_t *vm, hk_function_t *fn)
 {
-  int num_nonlocals = fn->num_nonlocals;
+  int32_t num_nonlocals = fn->num_nonlocals;
   hk_value_t *slots = &vm->slots[vm->top - num_nonlocals + 1];
   hk_closure_t *cl = hk_closure_new(fn);
-  for (int i = 0; i < num_nonlocals; ++i)
+  for (int32_t i = 0; i < num_nonlocals; ++i)
     cl->nonlocals[i] = slots[i];
   vm->top -= num_nonlocals;
   if (push(vm, hk_closure_value(cl)) == HK_STATUS_ERROR)
@@ -246,7 +246,7 @@ static inline int closure(hk_vm_t *vm, hk_function_t *fn)
   return HK_STATUS_OK;
 }
 
-static inline int unpack(hk_vm_t *vm, int n)
+static inline int32_t unpack(hk_vm_t *vm, int32_t n)
 {
   hk_value_t val = vm->slots[vm->top];
   if (!hk_is_array(val))
@@ -257,15 +257,15 @@ static inline int unpack(hk_vm_t *vm, int n)
   }
   hk_array_t *arr = hk_as_array(val);
   --vm->top;
-  int status = HK_STATUS_OK;
-  for (int i = 0; i < n && i < arr->length; ++i)
+  int32_t status = HK_STATUS_OK;
+  for (int32_t i = 0; i < n && i < arr->length; ++i)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
     if ((status = push(vm, elem)) == HK_STATUS_ERROR)
       goto end;
     hk_value_incr_ref(elem);
   }
-  for (int i = arr->length; i < n; ++i)
+  for (int32_t i = arr->length; i < n; ++i)
     if ((status = push(vm, HK_NIL_VALUE)) == HK_STATUS_ERROR)
       break;
 end:
@@ -273,7 +273,7 @@ end:
   return status;
 }
 
-static inline int destruct(hk_vm_t *vm, int n)
+static inline int32_t destruct(hk_vm_t *vm, int32_t n)
 {
   hk_value_t val = vm->slots[vm->top];
   if (!hk_is_instance(val))
@@ -285,10 +285,10 @@ static inline int destruct(hk_vm_t *vm, int n)
   hk_instance_t *inst = hk_as_instance(val);
   hk_struct_t *ztruct = inst->ztruct;
   hk_value_t *slots = &vm->slots[vm->top - n];
-  for (int i = 0; i < n; ++i)
+  for (int32_t i = 0; i < n; ++i)
   {
     hk_string_t *name = hk_as_string(slots[i]);
-    int index = hk_struct_index_of(ztruct, name);
+    int32_t index = hk_struct_index_of(ztruct, name);
     hk_value_t value = index == -1 ? HK_NIL_VALUE :
       hk_instance_get_field(inst, index);
     hk_value_incr_ref(value);
@@ -300,7 +300,7 @@ static inline int destruct(hk_vm_t *vm, int n)
   return HK_STATUS_OK;
 }
 
-static inline int add_element(hk_vm_t *vm)
+static inline int32_t add_element(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
@@ -320,7 +320,7 @@ static inline int add_element(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int get_element(hk_vm_t *vm)
+static inline int32_t get_element(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
@@ -333,7 +333,7 @@ static inline int get_element(hk_vm_t *vm)
   hk_array_t *arr = hk_as_array(val1);
   if (hk_is_int(val2))
   {
-    int index = (int) val2.as.number;
+    int32_t index = (int32_t) val2.as_float;
     if (index < 0 || index >= arr->length)
     {
       hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -353,11 +353,11 @@ static inline int get_element(hk_vm_t *vm)
   return HK_STATUS_ERROR;
 }
 
-static inline int slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range)
+static inline int32_t slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range)
 {
-  int arr_end = arr->length - 1;
-  long start = range->start;
-  long end = range->end;
+  int32_t arr_end = arr->length - 1;
+  int64_t start = range->start;
+  int64_t end = range->end;
   hk_array_t *result;
   if (start > end || start > arr_end || end < 0)
   {
@@ -370,10 +370,10 @@ static inline int slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, h
     hk_range_release(range);
     return HK_STATUS_OK;
   }
-  int length = end - start + 1;
+  int32_t length = end - start + 1;
   result = hk_array_new_with_capacity(length);
   result->length = length;
-  for (int i = start, j = 0; i <= end ; ++i, ++j)
+  for (int32_t i = start, j = 0; i <= end ; ++i, ++j)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
     hk_value_incr_ref(elem);
@@ -388,7 +388,7 @@ end:
   return HK_STATUS_OK;
 }
 
-static inline int fetch_element(hk_vm_t *vm)
+static inline int32_t fetch_element(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
@@ -404,7 +404,7 @@ static inline int fetch_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int index = (int) val2.as.number;
+  int32_t index = (int32_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -425,7 +425,7 @@ static inline void set_element(hk_vm_t *vm)
   hk_value_t val2 = slots[1];
   hk_value_t val3 = slots[2];
   hk_array_t *arr = hk_as_array(val1);
-  int index = (int) val2.as.number;
+  int32_t index = (int32_t) val2.as_float;
   hk_array_t *result = hk_array_set_element(arr, index, val3);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
@@ -434,7 +434,7 @@ static inline void set_element(hk_vm_t *vm)
   hk_value_decr_ref(val3);
 }
 
-static inline int put_element(hk_vm_t *vm)
+static inline int32_t put_element(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 2];
   hk_value_t val1 = slots[0];
@@ -451,7 +451,7 @@ static inline int put_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int index = (int) val2.as.number;
+  int32_t index = (int32_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -467,7 +467,7 @@ static inline int put_element(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int delete_element(hk_vm_t *vm)
+static inline int32_t delete_element(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
@@ -483,7 +483,7 @@ static inline int delete_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int index = (int) val2.as.number;
+  int32_t index = (int32_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -498,7 +498,7 @@ static inline int delete_element(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int inplace_add_element(hk_vm_t *vm)
+static inline int32_t inplace_add_element(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
@@ -525,7 +525,7 @@ static inline int inplace_add_element(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int inplace_put_element(hk_vm_t *vm)
+static inline int32_t inplace_put_element(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 2];
   hk_value_t val1 = slots[0];
@@ -542,7 +542,7 @@ static inline int inplace_put_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int index = (int) val2.as.number;
+  int32_t index = (int32_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -565,7 +565,7 @@ static inline int inplace_put_element(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int inplace_delete_element(hk_vm_t *vm)
+static inline int32_t inplace_delete_element(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
@@ -581,7 +581,7 @@ static inline int inplace_delete_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int index = (int) val2.as.number;
+  int32_t index = (int32_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -602,7 +602,7 @@ static inline int inplace_delete_element(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int get_field(hk_vm_t *vm, hk_string_t *name)
+static inline int32_t get_field(hk_vm_t *vm, hk_string_t *name)
 {
   hk_value_t *slots = &vm->slots[vm->top];
   hk_value_t val = slots[0];
@@ -613,7 +613,7 @@ static inline int get_field(hk_vm_t *vm, hk_string_t *name)
     return HK_STATUS_ERROR;
   }
   hk_instance_t *inst = hk_as_instance(val);
-  int index = hk_struct_index_of(inst->ztruct, name);
+  int32_t index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
     hk_runtime_error("no field %.*s on struct", name->length, name->chars);
@@ -626,7 +626,7 @@ static inline int get_field(hk_vm_t *vm, hk_string_t *name)
   return HK_STATUS_OK;
 }
 
-static inline int fetch_field(hk_vm_t *vm, hk_string_t *name)
+static inline int32_t fetch_field(hk_vm_t *vm, hk_string_t *name)
 {
   hk_value_t *slots = &vm->slots[vm->top];
   hk_value_t val = slots[0];
@@ -636,13 +636,13 @@ static inline int fetch_field(hk_vm_t *vm, hk_string_t *name)
     return HK_STATUS_ERROR;
   }
   hk_instance_t *inst = hk_as_instance(val);
-  int index = hk_struct_index_of(inst->ztruct, name);
+  int32_t index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
     hk_runtime_error("no field %.*s on struct", name->length, name->chars);
     return HK_STATUS_ERROR;
   }
-  if (push(vm, hk_number_value(index)) == HK_STATUS_ERROR)
+  if (push(vm, hk_float_value(index)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t value = hk_instance_get_field(inst, index);
   if (push(vm, value) == HK_STATUS_ERROR)
@@ -658,7 +658,7 @@ static inline void set_field(hk_vm_t *vm)
   hk_value_t val2 = slots[1];
   hk_value_t val3 = slots[2];
   hk_instance_t *inst = hk_as_instance(val1);
-  int index = (int) val2.as.number;
+  int32_t index = (int32_t) val2.as_float;
   hk_instance_t *result = hk_instance_set_field(inst, index, val3);
   hk_incr_ref(result);
   slots[0] = hk_instance_value(result);
@@ -667,7 +667,7 @@ static inline void set_field(hk_vm_t *vm)
   hk_value_decr_ref(val3);
 }
 
-static inline int put_field(hk_vm_t *vm, hk_string_t *name)
+static inline int32_t put_field(hk_vm_t *vm, hk_string_t *name)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
@@ -678,7 +678,7 @@ static inline int put_field(hk_vm_t *vm, hk_string_t *name)
     return HK_STATUS_ERROR;
   }
   hk_instance_t *inst = hk_as_instance(val1);
-  int index = hk_struct_index_of(inst->ztruct, name);
+  int32_t index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
     hk_runtime_error("no field %.*s on struct", name->length, name->chars);
@@ -693,7 +693,7 @@ static inline int put_field(hk_vm_t *vm, hk_string_t *name)
   return HK_STATUS_OK;
 }
 
-static inline int inplace_put_field(hk_vm_t *vm, hk_string_t *name)
+static inline int32_t inplace_put_field(hk_vm_t *vm, hk_string_t *name)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
@@ -704,7 +704,7 @@ static inline int inplace_put_field(hk_vm_t *vm, hk_string_t *name)
     return HK_STATUS_ERROR;
   }
   hk_instance_t *inst = hk_as_instance(val1);
-  int index = hk_struct_index_of(inst->ztruct, name);
+  int32_t index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
     hk_runtime_error("no field %.*s on struct", name->length, name->chars);
@@ -737,12 +737,12 @@ static inline void equal(hk_vm_t *vm)
   hk_value_release(val2);
 }
 
-static inline int greater(hk_vm_t *vm)
+static inline int32_t greater(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  int result;
+  int32_t result;
   if (hk_value_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result > 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
@@ -752,12 +752,12 @@ static inline int greater(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int less(hk_vm_t *vm)
+static inline int32_t less(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  int result;
+  int32_t result;
   if (hk_value_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result < 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
@@ -778,12 +778,12 @@ static inline void not_equal(hk_vm_t *vm)
   hk_value_release(val2);
 }
 
-static inline int not_greater(hk_vm_t *vm)
+static inline int32_t not_greater(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  int result;
+  int32_t result;
   if (hk_value_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result > 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
@@ -793,12 +793,12 @@ static inline int not_greater(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int not_less(hk_vm_t *vm)
+static inline int32_t not_less(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  int result;
+  int32_t result;
   if (hk_value_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result < 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
@@ -808,20 +808,20 @@ static inline int not_less(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int add(hk_vm_t *vm)
+static inline int32_t add(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (hk_is_number(val1))
+  if (hk_is_float(val1))
   {
-    if (!hk_is_number(val2))
+    if (!hk_is_float(val2))
     {
-      hk_runtime_error("type error: cannot add %s to number", hk_type_name(val2.type));
+      hk_runtime_error("type error: cannot add %s to float", hk_type_name(val2.type));
       return HK_STATUS_ERROR;
     }
-    double data = val1.as.number + val2.as.number;
-    slots[0] = hk_number_value(data);
+    double data = val1.as_float + val2.as_float;
+    slots[0] = hk_float_value(data);
     --vm->top;
     return HK_STATUS_OK;
   }
@@ -850,7 +850,7 @@ static inline int add(hk_vm_t *vm)
   return HK_STATUS_ERROR;
 }
 
-static inline int concat_strings(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2)
+static inline int32_t concat_strings(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2)
 {
   hk_string_t *str1 = hk_as_string(val1);
   if (!str1->length)
@@ -883,7 +883,7 @@ static inline int concat_strings(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1
   return HK_STATUS_OK;
 }
 
-static inline int concat_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2)
+static inline int32_t concat_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2)
 {
   hk_array_t *arr1 = hk_as_array(val1);
   if (!arr1->length)
@@ -916,21 +916,21 @@ static inline int concat_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1,
   return HK_STATUS_OK;
 }
 
-static inline int subtract(hk_vm_t *vm)
+static inline int32_t subtract(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (hk_is_number(val1))
+  if (hk_is_float(val1))
   {
-    if (!hk_is_number(val2))
+    if (!hk_is_float(val2))
     {
-      hk_runtime_error("type error: cannot subtract %s from number",
+      hk_runtime_error("type error: cannot subtract %s from float",
         hk_type_name(val2.type));
       return HK_STATUS_ERROR;
     }
-    double data = val1.as.number - val2.as.number;
-    slots[0] = hk_number_value(data);
+    double data = val1.as_float - val2.as_float;
+    slots[0] = hk_float_value(data);
     --vm->top;
     return HK_STATUS_OK;
   }
@@ -949,7 +949,7 @@ static inline int subtract(hk_vm_t *vm)
   return HK_STATUS_ERROR;
 }
 
-static inline int diff_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2)
+static inline int32_t diff_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2)
 {
   hk_array_t *arr1 = hk_as_array(val1);
   hk_array_t *arr2 = hk_as_array(val2);
@@ -975,69 +975,69 @@ static inline int diff_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, h
   return HK_STATUS_OK;
 }
 
-static inline int multiply(hk_vm_t *vm)
+static inline int32_t multiply(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_number(val1) || !hk_is_number(val2))
+  if (!hk_is_float(val1) || !hk_is_float(val2))
   {
     hk_runtime_error("type error: cannot multiply %s to %s", hk_type_name(val2.type),
       hk_type_name(val1.type));
     return HK_STATUS_ERROR;
   }
-  double data = val1.as.number * val2.as.number;
-  slots[0] = hk_number_value(data);
+  double data = val1.as_float * val2.as_float;
+  slots[0] = hk_float_value(data);
   --vm->top;
   return HK_STATUS_OK;
 }
 
-static inline int divide(hk_vm_t *vm)
+static inline int32_t divide(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_number(val1) || !hk_is_number(val2))
+  if (!hk_is_float(val1) || !hk_is_float(val2))
   {
     hk_runtime_error("type error: cannot divide %s by %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  double data = val1.as.number / val2.as.number;
-  slots[0] = hk_number_value(data);
+  double data = val1.as_float / val2.as_float;
+  slots[0] = hk_float_value(data);
   --vm->top;
   return HK_STATUS_OK;
 }
 
-static inline int modulo(hk_vm_t *vm)
+static inline int32_t modulo(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_number(val1) || !hk_is_number(val2))
+  if (!hk_is_float(val1) || !hk_is_float(val2))
   {
     hk_runtime_error("type error: cannot apply modulo operation between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  double data = fmod(val1.as.number, val2.as.number);
-  slots[0] = hk_number_value(data);
+  double data = fmod(val1.as_float, val2.as_float);
+  slots[0] = hk_float_value(data);
   --vm->top;
   return HK_STATUS_OK;
 }
 
-static inline int negate(hk_vm_t *vm)
+static inline int32_t negate(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top];
   hk_value_t val = slots[0];
-  if (!hk_is_number(val))
+  if (!hk_is_float(val))
   {
     hk_runtime_error("type error: cannot apply unary minus operation to %s",
       hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
-  double data = -val.as.number;
-  slots[0] = hk_number_value(data);
+  double data = -val.as_float;
+  slots[0] = hk_float_value(data);
   return HK_STATUS_OK;
 }
 
@@ -1049,35 +1049,35 @@ static inline void not(hk_vm_t *vm)
   hk_value_release(val);
 }
 
-static inline int incr(hk_vm_t *vm)
+static inline int32_t incr(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top];
   hk_value_t val = slots[0];
-  if (!hk_is_number(val))
+  if (!hk_is_float(val))
   {
     hk_runtime_error("type error: cannot increment value of type %s",
       hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
-  ++slots[0].as.number;
+  ++slots[0].as_float;
   return HK_STATUS_OK;
 }
 
-static inline int decr(hk_vm_t *vm)
+static inline int32_t decr(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top];
   hk_value_t val = slots[0];
-  if (!hk_is_number(val))
+  if (!hk_is_float(val))
   {
     hk_runtime_error("type error: cannot decrement value of type %s",
       hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
-  --slots[0].as.number;
+  --slots[0].as_float;
   return HK_STATUS_OK;
 }
 
-static inline int call(hk_vm_t *vm, int num_args)
+static inline int32_t call(hk_vm_t *vm, int32_t num_args)
 {
   hk_value_t *slots = &vm->slots[vm->top - num_args];
   hk_value_t val = slots[0];
@@ -1096,7 +1096,7 @@ static inline int call(hk_vm_t *vm, int num_args)
       discard_frame(vm, slots);
       return HK_STATUS_ERROR;
     }
-    int status;
+    int32_t status;
     if ((status = native->call(vm, slots)) != HK_STATUS_OK)
     {
       if (status != HK_STATUS_NO_TRACE)
@@ -1115,7 +1115,7 @@ static inline int call(hk_vm_t *vm, int num_args)
     discard_frame(vm, slots);
     return HK_STATUS_ERROR;
   }
-  int line;
+  int32_t line;
   if (call_function(vm, slots, cl, &line) == HK_STATUS_ERROR)
   {
     print_trace(fn->name, fn->file, line);
@@ -1127,7 +1127,7 @@ static inline int call(hk_vm_t *vm, int num_args)
   return HK_STATUS_OK;
 }
 
-static inline int check_arity(int arity, hk_string_t *name, int num_args)
+static inline int32_t check_arity(int32_t arity, hk_string_t *name, int32_t num_args)
 {
   if (num_args >= arity)
     return HK_STATUS_OK;
@@ -1138,7 +1138,7 @@ static inline int check_arity(int arity, hk_string_t *name, int num_args)
   return HK_STATUS_ERROR;
 }
 
-static inline void print_trace(hk_string_t *name, hk_string_t *file, int line)
+static inline void print_trace(hk_string_t *name, hk_string_t *file, int32_t line)
 {
   char *name_chars = name ? name->chars : "<anonymous>";
   if (file)
@@ -1149,7 +1149,7 @@ static inline void print_trace(hk_string_t *name, hk_string_t *file, int line)
   fprintf(stderr, "  at %s() in <native>\n", name_chars);
 }
 
-static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *cl, int *line)
+static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *cl, int32_t *line)
 {
   hk_value_t *slots = vm->slots;
   hk_function_t *fn = cl->fn;
@@ -1160,7 +1160,7 @@ static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *c
   uint8_t *pc = code;
   for (;;)
   {
-    int op = read_byte(&pc);
+    int32_t op = read_byte(&pc);
     switch (op)
     {
     case HK_OP_NIL:
@@ -1176,7 +1176,7 @@ static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *c
         goto error;
       break;
     case HK_OP_INT:
-      if (push(vm, hk_number_value(read_word(&pc))) == HK_STATUS_ERROR)
+      if (push(vm, hk_float_value(read_word(&pc))) == HK_STATUS_ERROR)
         goto error;
       break;
     case HK_OP_CONSTANT:
@@ -1248,7 +1248,7 @@ static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *c
       break;
     case HK_OP_SET_LOCAL:
       {
-        int index = read_byte(&pc);
+        int32_t index = read_byte(&pc);
         hk_value_t val = slots[vm->top];
         --vm->top;
         hk_value_release(locals[index]);
@@ -1314,7 +1314,7 @@ static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *c
       break;
     case HK_OP_JUMP_IF_FALSE:
       {
-        int offset = read_word(&pc);
+        int32_t offset = read_word(&pc);
         hk_value_t val = slots[vm->top];
         if (hk_is_falsey(val))
           pc = &code[offset];
@@ -1324,7 +1324,7 @@ static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *c
       break;
     case HK_OP_OR:
       {
-        int offset = read_word(&pc);
+        int32_t offset = read_word(&pc);
         hk_value_t val = slots[vm->top];
         if (hk_is_truthy(val))
         {
@@ -1337,7 +1337,7 @@ static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *c
       break;
     case HK_OP_AND:
       {
-        int offset = read_word(&pc);
+        int32_t offset = read_word(&pc);
         hk_value_t val = slots[vm->top];
         if (hk_is_falsey(val))
         {
@@ -1350,7 +1350,7 @@ static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *c
       break;
     case HK_OP_MATCH:
       {
-        int offset = read_word(&pc);
+        int32_t offset = read_word(&pc);
         hk_value_t val1 = slots[vm->top - 1];
         hk_value_t val2 = slots[vm->top];
         if (hk_value_equal(val1, val2))
@@ -1439,7 +1439,7 @@ static inline int call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *c
     }
   }
 error:
-  *line = hk_function_get_line(fn, (int) (pc - fn->chunk.bytes));
+  *line = hk_function_get_line(fn, (int32_t) (pc - fn->chunk.bytes));
   return HK_STATUS_ERROR;
 }
 
@@ -1457,11 +1457,11 @@ static inline void move_result(hk_vm_t *vm, hk_value_t *slots)
     hk_value_release(vm->slots[vm->top--]);
 }
 
-void hk_vm_init(hk_vm_t *vm, int min_capacity)
+void hk_vm_init(hk_vm_t *vm, int32_t min_capacity)
 {
-  int capacity = min_capacity < HK_VM_MIN_CAPACITY ? HK_VM_MIN_CAPACITY : min_capacity;
+  int32_t capacity = min_capacity < HK_VM_MIN_CAPACITY ? HK_VM_MIN_CAPACITY : min_capacity;
   capacity = hk_power_of_two_ceil(capacity);
-  vm->limit = capacity - 1;
+  vm->end = capacity - 1;
   vm->top = -1;
   vm->slots = (hk_value_t *) hk_allocate(sizeof(*vm->slots) * capacity);
   load_globals(vm);
@@ -1477,7 +1477,7 @@ void hk_vm_free(hk_vm_t *vm)
   free(vm->slots);
 }
 
-int hk_vm_push(hk_vm_t *vm, hk_value_t val)
+int32_t hk_vm_push(hk_vm_t *vm, hk_value_t val)
 {
   if (push(vm, val) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1485,22 +1485,22 @@ int hk_vm_push(hk_vm_t *vm, hk_value_t val)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_nil(hk_vm_t *vm)
+int32_t hk_vm_push_nil(hk_vm_t *vm)
 {
   return push(vm, HK_NIL_VALUE);
 }
 
-int hk_vm_push_boolean(hk_vm_t *vm, bool data)
+int32_t hk_vm_push_bool(hk_vm_t *vm, bool data)
 {
   return push(vm, data ? HK_TRUE_VALUE : HK_FALSE_VALUE);
 }
 
-int hk_vm_push_number(hk_vm_t *vm, double data)
+int32_t hk_vm_push_float(hk_vm_t *vm, double data)
 {
-  return push(vm, hk_number_value(data));
+  return push(vm, hk_float_value(data));
 }
 
-int hk_vm_push_string(hk_vm_t *vm, hk_string_t *str)
+int32_t hk_vm_push_string(hk_vm_t *vm, hk_string_t *str)
 {
   if (push(vm, hk_string_value(str)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1508,7 +1508,7 @@ int hk_vm_push_string(hk_vm_t *vm, hk_string_t *str)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_string_from_chars(hk_vm_t *vm, int length, const char *chars)
+int32_t hk_vm_push_string_from_chars(hk_vm_t *vm, int32_t length, const char *chars)
 {   
   hk_string_t *str = hk_string_from_chars(length, chars);
   if (hk_vm_push_string(vm, str) == HK_STATUS_ERROR)
@@ -1519,7 +1519,7 @@ int hk_vm_push_string_from_chars(hk_vm_t *vm, int length, const char *chars)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_string_from_stream(hk_vm_t *vm, FILE *stream, const char terminal)
+int32_t hk_vm_push_string_from_stream(hk_vm_t *vm, FILE *stream, const char terminal)
 {
   hk_string_t *str = hk_string_from_stream(stream, terminal);
   if (hk_vm_push_string(vm, str) == HK_STATUS_ERROR)
@@ -1530,7 +1530,7 @@ int hk_vm_push_string_from_stream(hk_vm_t *vm, FILE *stream, const char terminal
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_range(hk_vm_t *vm, hk_range_t *range)
+int32_t hk_vm_push_range(hk_vm_t *vm, hk_range_t *range)
 {
   if (push(vm, hk_range_value(range)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1538,7 +1538,7 @@ int hk_vm_push_range(hk_vm_t *vm, hk_range_t *range)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_array(hk_vm_t *vm, hk_array_t *arr)
+int32_t hk_vm_push_array(hk_vm_t *vm, hk_array_t *arr)
 {
   if (push(vm, hk_array_value(arr)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1546,7 +1546,7 @@ int hk_vm_push_array(hk_vm_t *vm, hk_array_t *arr)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_struct(hk_vm_t *vm, hk_struct_t *ztruct)
+int32_t hk_vm_push_struct(hk_vm_t *vm, hk_struct_t *ztruct)
 {
   if (push(vm, hk_struct_value(ztruct)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1554,7 +1554,7 @@ int hk_vm_push_struct(hk_vm_t *vm, hk_struct_t *ztruct)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_instance(hk_vm_t *vm, hk_instance_t *inst)
+int32_t hk_vm_push_instance(hk_vm_t *vm, hk_instance_t *inst)
 {
   if (push(vm, hk_instance_value(inst)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1562,7 +1562,7 @@ int hk_vm_push_instance(hk_vm_t *vm, hk_instance_t *inst)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_iterator(hk_vm_t *vm, hk_iterator_t *it)
+int32_t hk_vm_push_iterator(hk_vm_t *vm, hk_iterator_t *it)
 {
   if (push(vm, hk_iterator_value(it)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1570,7 +1570,7 @@ int hk_vm_push_iterator(hk_vm_t *vm, hk_iterator_t *it)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_closure(hk_vm_t *vm, hk_closure_t *cl)
+int32_t hk_vm_push_closure(hk_vm_t *vm, hk_closure_t *cl)
 {
   if (push(vm, hk_closure_value(cl)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1578,7 +1578,7 @@ int hk_vm_push_closure(hk_vm_t *vm, hk_closure_t *cl)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_native(hk_vm_t *vm, hk_native_t *native)
+int32_t hk_vm_push_native(hk_vm_t *vm, hk_native_t *native)
 {
   if (push(vm, hk_native_value(native)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1586,7 +1586,7 @@ int hk_vm_push_native(hk_vm_t *vm, hk_native_t *native)
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_new_native(hk_vm_t *vm, const char *name, int arity, int (*call)(hk_vm_t *, hk_value_t *))
+int32_t hk_vm_push_new_native(hk_vm_t *vm, const char *name, int32_t arity, int32_t (*call)(hk_vm_t *, hk_value_t *))
 {
   hk_native_t *native = hk_native_new(hk_string_from_chars(-1, name), arity, call);
   if (hk_vm_push_native(vm, native) == HK_STATUS_ERROR)
@@ -1597,7 +1597,7 @@ int hk_vm_push_new_native(hk_vm_t *vm, const char *name, int arity, int (*call)(
   return HK_STATUS_OK;
 }
 
-int hk_vm_push_userdata(hk_vm_t *vm, hk_userdata_t *udata)
+int32_t hk_vm_push_userdata(hk_vm_t *vm, hk_userdata_t *udata)
 {
   if (push(vm, hk_userdata_value(udata)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -1605,22 +1605,22 @@ int hk_vm_push_userdata(hk_vm_t *vm, hk_userdata_t *udata)
   return HK_STATUS_OK;
 }
 
-int hk_vm_array(hk_vm_t *vm, int length)
+int32_t hk_vm_array(hk_vm_t *vm, int32_t length)
 {
   return array(vm, length);
 }
 
-int hk_vm_struct(hk_vm_t *vm, int length)
+int32_t hk_vm_struct(hk_vm_t *vm, int32_t length)
 {
   return ztruct(vm, length);
 }
 
-int hk_vm_instance(hk_vm_t *vm, int length)
+int32_t hk_vm_instance(hk_vm_t *vm, int32_t length)
 {
   return instance(vm, length);
 }
 
-int hk_vm_construct(hk_vm_t *vm, int length)
+int32_t hk_vm_construct(hk_vm_t *vm, int32_t length)
 {
   return construct(vm, length);
 }
@@ -1633,14 +1633,14 @@ void hk_vm_pop(hk_vm_t *vm)
   hk_value_release(val);
 }
 
-int hk_vm_call(hk_vm_t *vm, int num_args)
+int32_t hk_vm_call(hk_vm_t *vm, int32_t num_args)
 {
   return call(vm, num_args);
 }
 
-int hk_vm_check_type(hk_value_t *args, int index, int type)
+int32_t hk_vm_check_type(hk_value_t *args, int32_t index, int32_t type)
 {
-  int val_type = args[index].type;
+  int32_t val_type = args[index].type;
   if (val_type != type)
   {
     hk_runtime_error("type error: argument #%d must be of the type %s, %s given", index,
@@ -1650,11 +1650,11 @@ int hk_vm_check_type(hk_value_t *args, int index, int type)
   return HK_STATUS_OK;
 }
 
-int hk_vm_check_types(hk_value_t *args, int index, int num_types, int types[])
+int32_t hk_vm_check_types(hk_value_t *args, int32_t index, int32_t num_types, int32_t types[])
 {
-  int val_type = args[index].type;
+  int32_t val_type = args[index].type;
   bool match = false;
-  for (int i = 0; i < num_types; ++i)
+  for (int32_t i = 0; i < num_types; ++i)
     if ((match = val_type == types[i]))
       break;
   if (!match)
@@ -1665,17 +1665,17 @@ int hk_vm_check_types(hk_value_t *args, int index, int num_types, int types[])
   return HK_STATUS_OK;
 }
 
-int hk_vm_check_boolean(hk_value_t *args, int index)
+int32_t hk_vm_check_bool(hk_value_t *args, int32_t index)
 {
-  return hk_vm_check_type(args, index, HK_TYPE_BOOLEAN);
+  return hk_vm_check_type(args, index, HK_TYPE_BOOL);
 }
 
-int hk_vm_check_number(hk_value_t *args, int index)
+int32_t hk_vm_check_float(hk_value_t *args, int32_t index)
 {
-  return hk_vm_check_type(args, index, HK_TYPE_NUMBER);
+  return hk_vm_check_type(args, index, HK_TYPE_FLOAT);
 }
 
-int hk_vm_check_integer(hk_value_t *args, int index)
+int32_t hk_vm_check_integer(hk_value_t *args, int32_t index)
 {
   hk_value_t val = args[index];
   if (!hk_is_integer(val))
@@ -1687,7 +1687,7 @@ int hk_vm_check_integer(hk_value_t *args, int index)
   return HK_STATUS_OK;
 }
 
-int hk_vm_check_int(hk_value_t *args, int index)
+int32_t hk_vm_check_int(hk_value_t *args, int32_t index)
 {
   hk_value_t val = args[index];
   if (!hk_is_int(val))
@@ -1699,42 +1699,42 @@ int hk_vm_check_int(hk_value_t *args, int index)
   return HK_STATUS_OK;
 }
 
-int hk_vm_check_string(hk_value_t *args, int index)
+int32_t hk_vm_check_string(hk_value_t *args, int32_t index)
 {
   return hk_vm_check_type(args, index, HK_TYPE_STRING);
 }
 
-int hk_vm_check_range(hk_value_t *args, int index)
+int32_t hk_vm_check_range(hk_value_t *args, int32_t index)
 {
   return hk_vm_check_type(args, index, HK_TYPE_RANGE);
 }
 
-int hk_vm_check_array(hk_value_t *args, int index)
+int32_t hk_vm_check_array(hk_value_t *args, int32_t index)
 {
   return hk_vm_check_type(args, index, HK_TYPE_ARRAY);
 }
 
-int hk_vm_check_struct(hk_value_t *args, int index)
+int32_t hk_vm_check_struct(hk_value_t *args, int32_t index)
 {
   return hk_vm_check_type(args, index, HK_TYPE_STRUCT);
 }
 
-int hk_vm_check_instance(hk_value_t *args, int index)
+int32_t hk_vm_check_instance(hk_value_t *args, int32_t index)
 {
   return hk_vm_check_type(args, index, HK_TYPE_INSTANCE);
 }
 
-int hk_vm_check_iterator(hk_value_t *args, int index)
+int32_t hk_vm_check_iterator(hk_value_t *args, int32_t index)
 {
   return hk_vm_check_type(args, index, HK_TYPE_ITERATOR);
 }
 
-int hk_vm_check_callable(hk_value_t *args, int index)
+int32_t hk_vm_check_callable(hk_value_t *args, int32_t index)
 {
   return hk_vm_check_type(args, index, HK_TYPE_CALLABLE);
 }
 
-int hk_vm_check_userdata(hk_value_t *args, int index)
+int32_t hk_vm_check_userdata(hk_value_t *args, int32_t index)
 {
   return hk_vm_check_type(args, index, HK_TYPE_USERDATA);
 }

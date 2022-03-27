@@ -9,18 +9,18 @@
 
 #define RIPEMD160_DIGEST_SIZE 20
 
-static int sha224_call(hk_vm_t *vm, hk_value_t *args);
-static int sha256_call(hk_vm_t *vm, hk_value_t *args);
-static int sha384_call(hk_vm_t *vm, hk_value_t *args);
-static int sha512_call(hk_vm_t *vm, hk_value_t *args);
-static int ripemd160_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sha224_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sha256_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sha384_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sha512_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t ripemd160_call(hk_vm_t *vm, hk_value_t *args);
 
-static int sha224_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t sha224_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
-  int length = SHA224_DIGEST_SIZE;
+  int32_t length = SHA224_DIGEST_SIZE;
   hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
@@ -33,12 +33,12 @@ static int sha224_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int sha256_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t sha256_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
-  int length = SHA256_DIGEST_SIZE;
+  int32_t length = SHA256_DIGEST_SIZE;
   hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
@@ -51,12 +51,12 @@ static int sha256_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int sha384_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t sha384_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
-  int length = SHA384_DIGEST_SIZE;
+  int32_t length = SHA384_DIGEST_SIZE;
   hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
@@ -69,12 +69,12 @@ static int sha384_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int sha512_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t sha512_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
-  int length = SHA512_DIGEST_SIZE;
+  int32_t length = SHA512_DIGEST_SIZE;
   hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
@@ -87,12 +87,12 @@ static int sha512_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int ripemd160_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t ripemd160_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
-  int length = RIPEMD160_DIGEST_SIZE;
+  int32_t length = RIPEMD160_DIGEST_SIZE;
   hk_string_t *digest = hk_string_new_with_capacity(length);
   digest->length = length;
   digest->chars[length] = '\0';
@@ -106,9 +106,9 @@ static int ripemd160_call(hk_vm_t *vm, hk_value_t *args)
 }
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_hashing(hk_vm_t *vm)
+int32_t __declspec(dllexport) __stdcall load_hashing(hk_vm_t *vm)
 #else
-int load_hashing(hk_vm_t *vm)
+int32_t load_hashing(hk_vm_t *vm)
 #endif
 {
   if (hk_vm_push_string_from_chars(vm, -1, "hashing") == HK_STATUS_ERROR)

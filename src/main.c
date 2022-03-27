@@ -18,14 +18,14 @@ typedef struct
   bool opt_dump;
   bool opt_compile;
   bool opt_run;
-  int stack_size; 
+  int32_t stack_size; 
   const char *input;
   const char *output;
   const char **args;
-  int num_args;
+  int32_t num_args;
 } parsed_args_t;
 
-static inline void parse_args(parsed_args_t *parsed_args, int argc, const char **argv);
+static inline void parse_args(parsed_args_t *parsed_args, int32_t argc, const char **argv);
 static inline void parse_option(parsed_args_t *parsed_args, const char *arg);
 static inline const char *option(const char *arg, const char *opt);
 static inline hk_array_t *args_array(parsed_args_t *parsed_args);
@@ -35,9 +35,9 @@ static inline hk_closure_t *load_bytecode_from_file(const char *filename);
 static inline hk_closure_t *load_bytecode_from_stream(FILE *stream);
 static inline void save_bytecode_to_file(hk_closure_t *cl, const char *filename);
 static inline hk_string_t *load_source_from_file(const char *filename);
-static inline int run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args);
+static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args);
 
-static inline void parse_args(parsed_args_t *parsed_args, int argc, const char **argv)
+static inline void parse_args(parsed_args_t *parsed_args, int32_t argc, const char **argv)
 {
   parsed_args->cmd = argv[0];
   parsed_args->opt_help = false;
@@ -49,7 +49,7 @@ static inline void parse_args(parsed_args_t *parsed_args, int argc, const char *
   parsed_args->stack_size = 0;
   parsed_args->input = NULL;
   parsed_args->output = NULL;
-  int i = 1;
+  int32_t i = 1;
   for (; i < argc; ++i)
   {
     const char *arg = argv[i];
@@ -111,7 +111,7 @@ static inline void parse_option(parsed_args_t *parsed_args, const char *arg)
 
 static inline const char *option(const char *arg, const char *opt)
 {
-  int len = 0;
+  int32_t len = 0;
   while (opt[len] && opt[len] != '=')
     ++len;
   if (memcmp(arg, opt, len))
@@ -121,10 +121,10 @@ static inline const char *option(const char *arg, const char *opt)
 
 static inline hk_array_t *args_array(parsed_args_t *parsed_args)
 {
-  int length = parsed_args->num_args;
+  int32_t length = parsed_args->num_args;
   hk_array_t *args = hk_array_new_with_capacity(length);
   args->length = length;
-  for (int i = 0; i < length; ++i)
+  for (int32_t i = 0; i < length; ++i)
   {
     hk_string_t *arg = hk_string_from_chars(-1, parsed_args->args[i]);
     hk_incr_ref(arg);
@@ -192,7 +192,7 @@ static inline hk_string_t *load_source_from_file(const char *filename)
   if (!stream)
     hk_fatal_error("unable to open file `%s`", filename);
   fseek(stream, 0L, SEEK_END);
-  int length = ftell(stream);
+  int32_t length = ftell(stream);
   rewind(stream);
   hk_string_t *str = hk_string_new_with_capacity(length);
   str->length = length;
@@ -202,7 +202,7 @@ static inline hk_string_t *load_source_from_file(const char *filename)
   return str;
 }
 
-static inline int run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args)
+static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args)
 {
   hk_vm_t vm;
   hk_vm_init(&vm, parsed_args->stack_size);
@@ -214,13 +214,13 @@ static inline int run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args)
     return EXIT_FAILURE;
   }
   hk_value_t result = vm.slots[vm.top];
-  int status = hk_is_int(result) ? (int) result.as.number : 0;
+  int32_t status = hk_is_int(result) ? (int32_t) result.as_float : 0;
   --vm.top;
   hk_vm_free(&vm);
   return status;
 }
 
-int main(int argc, const char **argv)
+int32_t main(int32_t argc, const char **argv)
 {
   parsed_args_t parsed_args;
   parse_args(&parsed_args, argc, argv);

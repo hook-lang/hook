@@ -1,2 +1,2 @@
 
-val a = num("");
+val a = to_float("");

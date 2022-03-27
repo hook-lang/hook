@@ -1,2 +1,2 @@
 
-val a = num(nil);
+val a = to_float(nil);

@@ -8,7 +8,7 @@ use { trim } in strings;
 
 println("Guess the number!");
 
-val secret_number = int(1 + random() * 99);
+val secret_number = to_int(1 + random() * 99);
 
 loop {
   println("Please input your guess.");
@@ -20,9 +20,9 @@ loop {
   if (is_empty(guess))
     continue;
 
-  guess = int(guess);
+  guess = to_int(guess);
 
-  println("You guessed: " + str(guess));
+  println("You guessed: " + to_string(guess));
 
   val cmp = compare(guess, secret_number);
   

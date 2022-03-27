@@ -1,5 +1,5 @@
 
-println(num(123));
-println(num(1.23));
-println(num("123"));
-println(num("1.23"));
+println(to_float(123));
+println(to_float(1.23));
+println(to_float("123"));
+println(to_float("1.23"));

@@ -32,9 +32,9 @@
 #define FUNC_PREFIX "load_"
 
 #ifdef _WIN32
-typedef int (__stdcall *load_module_t)(hk_vm_t *);
+typedef int32_t (__stdcall *load_module_t)(hk_vm_t *);
 #else
-typedef int (*load_module_t)(hk_vm_t *);
+typedef int32_t (*load_module_t)(hk_vm_t *);
 #endif
 
 static string_map_t module_cache;
@@ -42,7 +42,7 @@ static string_map_t module_cache;
 static inline bool get_module_result(hk_string_t *name, hk_value_t *result);
 static inline void put_module_result(hk_string_t *name, hk_value_t result);
 static inline const char *get_home_dir(void);
-static inline int load_native_module(hk_vm_t *vm, hk_string_t *name);
+static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name);
 
 static inline bool get_module_result(hk_string_t *name, hk_value_t *result)
 {
@@ -77,7 +77,7 @@ static inline const char *get_home_dir(void)
   return home_dir;
 }
 
-static inline int load_native_module(hk_vm_t *vm, hk_string_t *name)
+static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name)
 {
   hk_string_t *file = hk_string_from_chars(-1, get_home_dir());
   hk_string_inplace_concat_chars(file, -1, FILE_INFIX);
@@ -127,7 +127,7 @@ void free_module_cache(void)
   string_map_free(&module_cache);
 }
 
-int load_module(hk_vm_t *vm)
+int32_t load_module(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top];
   hk_value_t val = slots[0];

@@ -11,19 +11,19 @@
 #define BASE58_ENCODE_OUT_SIZE(n) ((n) * 138 / 100 + 1)
 #define BASE58_DECODE_OUT_SIZE(n) ((n) * 733 /1000 + 1)
 
-static int base32_encode_call(hk_vm_t *vm, hk_value_t *args);
-static int base32_decode_call(hk_vm_t *vm, hk_value_t *args);
-static int base58_encode_call(hk_vm_t *vm, hk_value_t *args);
-static int base58_decode_call(hk_vm_t *vm, hk_value_t *args);
-static int base64_encode_call(hk_vm_t *vm, hk_value_t *args);
-static int base64_decode_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t base32_encode_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t base32_decode_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t base58_encode_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t base58_decode_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t base64_encode_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t base64_decode_call(hk_vm_t *vm, hk_value_t *args);
 
-static int base32_encode_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t base32_encode_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
-  int length = BASE32_LEN(str->length);
+  int32_t length = BASE32_LEN(str->length);
   hk_string_t *result = hk_string_new_with_capacity(length);
   result->length = length;
   result->chars[result->length] = '\0';
@@ -36,13 +36,13 @@ static int base32_encode_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int base32_decode_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t base32_decode_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
   hk_string_t *result = hk_string_new_with_capacity(UNBASE32_LEN(str->length));
-  int length = (int) base32_decode((unsigned char *) str->chars,
+  int32_t length = (int32_t) base32_decode((unsigned char *) str->chars,
     (unsigned char *) result->chars);
   result->length = length;
   result->chars[length] = '\0';
@@ -54,7 +54,7 @@ static int base32_decode_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int base58_encode_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t base58_encode_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -62,7 +62,7 @@ static int base58_encode_call(hk_vm_t *vm, hk_value_t *args)
   hk_string_t *result = hk_string_new_with_capacity(BASE58_ENCODE_OUT_SIZE(str->length));
   size_t out_len;
   (void) base58_encode(str->chars, str->length, result->chars, &out_len);
-  result->length = (int) out_len;
+  result->length = (int32_t) out_len;
   result->chars[result->length] = '\0';
   if (hk_vm_push_string(vm, result) == HK_STATUS_ERROR)
   {
@@ -72,7 +72,7 @@ static int base58_encode_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int base58_decode_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t base58_decode_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -80,7 +80,7 @@ static int base58_decode_call(hk_vm_t *vm, hk_value_t *args)
   hk_string_t *result = hk_string_new_with_capacity(BASE58_DECODE_OUT_SIZE(str->length));
   size_t out_len;
   (void) base58_decode(str->chars, str->length, result->chars, &out_len);
-  result->length = (int) out_len;
+  result->length = (int32_t) out_len;
   result->chars[result->length] = '\0';
   if (hk_vm_push_string(vm, result) == HK_STATUS_ERROR)
   {
@@ -90,12 +90,12 @@ static int base58_decode_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int base64_encode_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t base64_encode_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
-  int length = BASE64_ENCODE_OUT_SIZE(str->length) - 1;
+  int32_t length = BASE64_ENCODE_OUT_SIZE(str->length) - 1;
   hk_string_t *result = hk_string_new_with_capacity(length);
   result->length = length;
   result->chars[length] = '\0';
@@ -108,12 +108,12 @@ static int base64_encode_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int base64_decode_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t base64_decode_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
-  int length = BASE64_DECODE_OUT_SIZE(str->length) - 1;
+  int32_t length = BASE64_DECODE_OUT_SIZE(str->length) - 1;
   hk_string_t *result = hk_string_new_with_capacity(length);
   result->length = length;
   result->chars[length] = '\0';
@@ -127,9 +127,9 @@ static int base64_decode_call(hk_vm_t *vm, hk_value_t *args)
 }
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_encoding(hk_vm_t *vm)
+int32_t __declspec(dllexport) __stdcall load_encoding(hk_vm_t *vm)
 #else
-int load_encoding(hk_vm_t *vm)
+int32_t load_encoding(hk_vm_t *vm)
 #endif
 {
   if (hk_vm_push_string_from_chars(vm, -1, "encoding") == HK_STATUS_ERROR)

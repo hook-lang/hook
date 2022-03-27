@@ -11,7 +11,7 @@ for (mut door = 1; door <= 100; door++)
 {
   if (door != square)
     continue;
-  print(str(door) + " ");
+  print(to_string(door) + " ");
   square += increment;
   increment += 2;
 }

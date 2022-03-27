@@ -34,10 +34,10 @@ val p1 = Point { 7, 10 };
 val p2 = Point { 11, 13 };
 val result1 = euclidean_distance(p1, p2);
 
-println("The euclidean distance between p1 and p2 is: " + str(result1));
+println("The euclidean distance between p1 and p2 is: " + to_string(result1));
 
 val p3 = Point { -43.917214, -19.925845 };
 val p4 = Point { -47.879983, -15.793476 };
 val result2 = haversine_distance(p3, p4);
 
-println("The haversine distance between p3 and p4 is: " + str(result2) + " km");
+println("The haversine distance between p3 and p4 is: " + to_string(result2) + " km");

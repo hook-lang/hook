@@ -6,18 +6,18 @@
 #include "secp256r1.h"
 #include "ecc.h"
 
-static int new_key_pair_call(hk_vm_t *vm, hk_value_t *args);
-static int sign_hash_call(hk_vm_t *vm, hk_value_t *args);
-static int verify_signature_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t new_key_pair_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sign_hash_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t verify_signature_call(hk_vm_t *vm, hk_value_t *args);
 
-static int new_key_pair_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t new_key_pair_call(hk_vm_t *vm, hk_value_t *args)
 {
   (void) args;
-  int pub_key_len = ECC_BYTES + 1;
+  int32_t pub_key_len = ECC_BYTES + 1;
   hk_string_t *pub_key = hk_string_new_with_capacity(pub_key_len);
   pub_key->length = pub_key_len;
   pub_key->chars[pub_key_len] = '\0';
-  int priv_key_len = ECC_BYTES;
+  int32_t priv_key_len = ECC_BYTES;
   hk_string_t *priv_key = hk_string_new_with_capacity(priv_key_len);
   priv_key->length = priv_key_len;
   priv_key->chars[priv_key_len] = '\0';
@@ -36,7 +36,7 @@ static int new_key_pair_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int sign_hash_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t sign_hash_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -44,7 +44,7 @@ static int sign_hash_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   hk_string_t *priv_key = hk_as_string(args[1]);
   hk_string_t *hash = hk_as_string(args[2]);
-  int length = ECC_BYTES << 1;
+  int32_t length = ECC_BYTES << 1;
   hk_string_t *signature = hk_string_new_with_capacity(length);
   signature->length = length;
   signature->chars[length] = '\0';
@@ -58,7 +58,7 @@ static int sign_hash_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int verify_signature_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t verify_signature_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -71,13 +71,13 @@ static int verify_signature_call(hk_vm_t *vm, hk_value_t *args)
   hk_string_t *signature = hk_as_string(args[3]);
   bool valid = (bool) ecdsa_verify((uint8_t *) pub_key->chars, (uint8_t *) hash->chars,
     (uint8_t *) signature->chars);
-  return hk_vm_push_boolean(vm, valid);
+  return hk_vm_push_bool(vm, valid);
 }
 
 #ifdef _WIN32
-int __declspec(dllexport) __stdcall load_secp256r1(hk_vm_t *vm)
+int32_t __declspec(dllexport) __stdcall load_secp256r1(hk_vm_t *vm)
 #else
-int load_secp256r1(hk_vm_t *vm)
+int32_t load_secp256r1(hk_vm_t *vm)
 #endif
 {
   if (hk_vm_push_string_from_chars(vm, -1, "secp256r1") == HK_STATUS_ERROR)

@@ -10,13 +10,13 @@
 
 #define CHUNK_MIN_CAPACITY (1 << 3)
 
-static inline void ensure_capacity(hk_chunk_t *chunk, int min_capacity);
+static inline void ensure_capacity(hk_chunk_t *chunk, int32_t min_capacity);
 
-static inline void ensure_capacity(hk_chunk_t *chunk, int min_capacity)
+static inline void ensure_capacity(hk_chunk_t *chunk, int32_t min_capacity)
 {
   if (min_capacity <= chunk->capacity)
     return;
-  int capacity = hk_power_of_two_ceil(min_capacity);
+  int32_t capacity = hk_power_of_two_ceil(min_capacity);
   chunk->capacity = capacity;
   chunk->bytes = (uint8_t *) hk_reallocate(chunk->bytes, capacity);
 }
@@ -47,7 +47,7 @@ void hk_chunk_emit_word(hk_chunk_t *chunk, uint16_t word)
   chunk->length += 2;
 }
 
-void hk_chunk_emit_opcode(hk_chunk_t *chunk, int op)
+void hk_chunk_emit_opcode(hk_chunk_t *chunk, int32_t op)
 {
   hk_chunk_emit_byte(chunk, (uint8_t) op);
 }

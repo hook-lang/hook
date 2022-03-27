@@ -10,14 +10,14 @@
 
 #define MIN_CAPACITY (1 << 3)
 
-hk_function_t *function_allocate(int arity, hk_string_t *name, hk_string_t *file);
+hk_function_t *function_allocate(int32_t arity, hk_string_t *name, hk_string_t *file);
 static inline void init_lines(hk_function_t *fn);
 static inline void init_functions(hk_function_t *fn);
 static inline void free_functions(hk_function_t *fn);
 static inline void grow_lines(hk_function_t *fn);
 static inline void grow_functions(hk_function_t *fn);
 
-hk_function_t *function_allocate(int arity, hk_string_t *name, hk_string_t *file)
+hk_function_t *function_allocate(int32_t arity, hk_string_t *name, hk_string_t *file)
 {
   hk_function_t *fn = (hk_function_t *) hk_allocate(sizeof(*fn));
   fn->ref_count = 0;
@@ -46,7 +46,7 @@ static inline void init_functions(hk_function_t *fn)
 
 static inline void free_functions(hk_function_t *fn)
 {
-  for (int i = 0; i < fn->num_functions; ++i)
+  for (int32_t i = 0; i < fn->num_functions; ++i)
     hk_function_release(fn->functions[i]);
   free(fn->functions);
 }
@@ -55,7 +55,7 @@ static inline void grow_lines(hk_function_t *fn)
 {
   if (fn->num_lines < fn->lines_capacity)
     return;
-  int capacity = fn->lines_capacity << 1;
+  int32_t capacity = fn->lines_capacity << 1;
   fn->lines_capacity = capacity;
   fn->lines = (hk_line_t *) hk_reallocate(fn->lines,
     sizeof(*fn->lines) * capacity);
@@ -71,7 +71,7 @@ static inline void grow_functions(hk_function_t *fn)
     sizeof(*fn->functions) * capacity);
 }
 
-hk_function_t *hk_function_new(int arity, hk_string_t *name, hk_string_t *file)
+hk_function_t *hk_function_new(int32_t arity, hk_string_t *name, hk_string_t *file)
 {
   hk_function_t *fn = function_allocate(arity, name, file);
   init_lines(fn);
@@ -102,7 +102,7 @@ void hk_function_release(hk_function_t *fn)
     hk_function_free(fn);
 }
 
-void hk_function_add_line(hk_function_t *fn, int line_no)
+void hk_function_add_line(hk_function_t *fn, int32_t line_no)
 {
   grow_lines(fn);
   hk_line_t *line = &fn->lines[fn->num_lines];
@@ -111,11 +111,11 @@ void hk_function_add_line(hk_function_t *fn, int line_no)
   ++fn->num_lines;
 }
 
-int hk_function_get_line(hk_function_t *fn, int offset)
+int32_t hk_function_get_line(hk_function_t *fn, int32_t offset)
 {
-  int line_no = -1;
+  int32_t line_no = -1;
   hk_line_t *lines = fn->lines;
-  for (int i = 0; i < fn->num_lines; ++i)
+  for (int32_t i = 0; i < fn->num_lines; ++i)
   {
     hk_line_t *line = &lines[i];
     if (line->offset == offset)
@@ -143,7 +143,7 @@ void hk_function_serialize(hk_function_t *fn, FILE *stream)
   hk_string_serialize(fn->file, stream);
   fwrite(&fn->lines_capacity, sizeof(fn->lines_capacity), 1, stream);
   fwrite(&fn->num_lines, sizeof(fn->num_lines), 1, stream);
-  for (int i = 0; i < fn->num_lines; ++i)
+  for (int32_t i = 0; i < fn->num_lines; ++i)
   {
     hk_line_t *line = &fn->lines[i];
     fwrite(line, sizeof(*line), 1, stream);
@@ -153,14 +153,14 @@ void hk_function_serialize(hk_function_t *fn, FILE *stream)
   fwrite(&fn->functions_capacity, sizeof(fn->functions_capacity), 1, stream);
   fwrite(&fn->num_functions, sizeof(fn->num_functions), 1, stream);
   hk_function_t **functions = fn->functions;
-  for (int i = 0; i < fn->num_functions; ++i)
+  for (int32_t i = 0; i < fn->num_functions; ++i)
     hk_function_serialize(functions[i], stream);
   fwrite(&fn->num_nonlocals, sizeof(fn->num_nonlocals), 1, stream);
 }
 
 hk_function_t *hk_function_deserialize(FILE *stream)
 {
-  int arity;
+  int32_t arity;
   if (fread(&arity, sizeof(arity), 1, stream) != 1)
     return NULL;
   hk_string_t *name = hk_string_deserialize(stream);
@@ -175,7 +175,7 @@ hk_function_t *hk_function_deserialize(FILE *stream)
   if (fread(&fn->num_lines, sizeof(fn->num_lines), 1, stream) != 1)
     return NULL;
   fn->lines = (hk_line_t *) hk_allocate(sizeof(*fn->lines) * fn->lines_capacity);
-  for (int i = 0; i < fn->num_lines; ++i)
+  for (int32_t i = 0; i < fn->num_lines; ++i)
   {
     hk_line_t *line = &fn->lines[i];
     if (fread(line, sizeof(*line), 1, stream) != 1)
@@ -192,7 +192,7 @@ hk_function_t *hk_function_deserialize(FILE *stream)
   if (fread(&fn->num_functions, sizeof(fn->num_functions), 1, stream) != 1)
     return NULL;
   hk_function_t **functions = (hk_function_t **) hk_allocate(sizeof(*functions) * fn->functions_capacity);
-  for (int i = 0; i < fn->num_functions; ++i)
+  for (int32_t i = 0; i < fn->num_functions; ++i)
   {
     hk_function_t *fn = hk_function_deserialize(stream);
     if (!fn)
@@ -208,7 +208,7 @@ hk_function_t *hk_function_deserialize(FILE *stream)
 
 hk_closure_t *hk_closure_new(hk_function_t *fn)
 {
-  int size = sizeof(hk_closure_t) + sizeof(hk_value_t) * fn->num_nonlocals;
+  int32_t size = sizeof(hk_closure_t) + sizeof(hk_value_t) * fn->num_nonlocals;
   hk_closure_t *cl = (hk_closure_t *) hk_allocate(size);
   cl->ref_count = 0;
   hk_incr_ref(fn);
@@ -219,9 +219,9 @@ hk_closure_t *hk_closure_new(hk_function_t *fn)
 void hk_closure_free(hk_closure_t *cl)
 {
   hk_function_t *fn = cl->fn;
-  int num_nonlocals = fn->num_nonlocals;
+  int32_t num_nonlocals = fn->num_nonlocals;
   hk_function_release(fn);
-  for (int i = 0; i < num_nonlocals; ++i)
+  for (int32_t i = 0; i < num_nonlocals; ++i)
     hk_value_release(cl->nonlocals[i]);
   free(cl);
 }
@@ -233,7 +233,7 @@ void hk_closure_release(hk_closure_t *cl)
     hk_closure_free(cl);
 }
 
-hk_native_t *hk_native_new(hk_string_t *name, int arity, int (*call)(struct hk_vm *, hk_value_t *))
+hk_native_t *hk_native_new(hk_string_t *name, int32_t arity, int32_t (*call)(struct hk_vm *, hk_value_t *))
 {
   hk_native_t *native = (hk_native_t *) hk_allocate(sizeof(*native));
   native->ref_count = 0;

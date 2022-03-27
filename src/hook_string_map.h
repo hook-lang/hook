@@ -19,13 +19,13 @@ typedef struct
 
 typedef struct
 {
-  int capacity;
-  int mask;
-  int length;
+  int32_t capacity;
+  int32_t mask;
+  int32_t length;
   string_map_entry_t *entries;
 } string_map_t;
 
-void string_map_init(string_map_t *map, int min_capacity);
+void string_map_init(string_map_t *map, int32_t min_capacity);
 void string_map_free(string_map_t *map);
 string_map_entry_t *string_map_get_entry(string_map_t *map, hk_string_t *key);
 void string_map_inplace_put(string_map_t *map, hk_string_t *key, hk_value_t value);
