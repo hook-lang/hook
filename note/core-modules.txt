@@ -42,7 +42,7 @@ io:
   eof(stream: userdata) -> bool
   flush(stream: userdata) -> float
   sync(stream: userdata) -> bool
-  tell(stream: userdata) -> integer
+  tell(stream: userdata) -> int
   rewind(stream: userdata)
   seek(stream: userdata, offset: float, whence: float) -> float
   read(stream: userdata, size: float) -> nil|string
@@ -52,7 +52,7 @@ io:
 
 strings:
 
-  hash(str: string) -> integer
+  hash(str: string) -> int
   lower(str: string) -> string
   upper(str: string) -> string
   trim(str: string) -> string
@@ -61,8 +61,8 @@ strings:
 
 arrays:
 
-  new_array(min_capacity: integer) -> array
-  index_of(arr: array, elem: value) -> integer
+  new_array(min_capacity: int) -> array
+  index_of(arr: array, elem: value) -> int
   min(arr: array) -> value
   max(arr: array) -> value
   sum(arr: array) -> float

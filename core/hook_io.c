@@ -154,7 +154,7 @@ static int32_t seek_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_integer(args, 2) == HK_STATUS_ERROR)
+  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -168,7 +168,7 @@ static int32_t read_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_integer(args, 2) == HK_STATUS_ERROR)
+  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
   int64_t size = (int64_t) args[2].as_float;

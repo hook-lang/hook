@@ -333,14 +333,14 @@ static inline int32_t get_element(hk_vm_t *vm)
   hk_array_t *arr = hk_as_array(val1);
   if (hk_is_int(val2))
   {
-    int32_t index = (int32_t) val2.as_float;
+    int64_t index = (int64_t) val2.as_float;
     if (index < 0 || index >= arr->length)
     {
       hk_runtime_error("range error: index %d is out of bounds for array of length %d",
         index, arr->length);
       return HK_STATUS_ERROR;
     }
-    hk_value_t elem = hk_array_get_element(arr, index);
+    hk_value_t elem = hk_array_get_element(arr, (int32_t) index);
     hk_value_incr_ref(elem);
     slots[0] = elem;
     --vm->top;
@@ -404,14 +404,14 @@ static inline int32_t fetch_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int32_t index = (int32_t) val2.as_float;
+  int64_t index = (int64_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
       index, arr->length);
     return HK_STATUS_ERROR;
   }
-  hk_value_t elem = hk_array_get_element(arr, index);
+  hk_value_t elem = hk_array_get_element(arr, (int32_t) index);
   if (push(vm, elem) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_incr_ref(elem);
@@ -451,14 +451,14 @@ static inline int32_t put_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int32_t index = (int32_t) val2.as_float;
+  int64_t index = (int64_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
       index, arr->length);
     return HK_STATUS_ERROR;
   }
-  hk_array_t *result = hk_array_set_element(arr, index, val3);
+  hk_array_t *result = hk_array_set_element(arr, (int32_t) index, val3);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
   vm->top -= 2;
@@ -483,14 +483,14 @@ static inline int32_t delete_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int32_t index = (int32_t) val2.as_float;
+  int64_t index = (int64_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
       index, arr->length);
     return HK_STATUS_ERROR;
   }
-  hk_array_t *result = hk_array_delete_element(arr, index);
+  hk_array_t *result = hk_array_delete_element(arr, (int32_t) index);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
   --vm->top;
@@ -542,7 +542,7 @@ static inline int32_t inplace_put_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int32_t index = (int32_t) val2.as_float;
+  int64_t index = (int64_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -551,7 +551,7 @@ static inline int32_t inplace_put_element(hk_vm_t *vm)
   }
   if (arr->ref_count == 2)
   {
-    hk_array_inplace_set_element(arr, index, val3);
+    hk_array_inplace_set_element(arr, (int32_t) index, val3);
     vm->top -= 2;
     hk_value_decr_ref(val3);
     return HK_STATUS_OK;
@@ -581,7 +581,7 @@ static inline int32_t inplace_delete_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int32_t index = (int32_t) val2.as_float;
+  int64_t index = (int64_t) val2.as_float;
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -590,7 +590,7 @@ static inline int32_t inplace_delete_element(hk_vm_t *vm)
   }
   if (arr->ref_count == 2)
   {
-    hk_array_inplace_delete_element(arr, index);
+    hk_array_inplace_delete_element(arr, (int32_t) index);
     --vm->top;
     return HK_STATUS_OK;
   }
@@ -1673,18 +1673,6 @@ int32_t hk_vm_check_bool(hk_value_t *args, int32_t index)
 int32_t hk_vm_check_float(hk_value_t *args, int32_t index)
 {
   return hk_vm_check_type(args, index, HK_TYPE_FLOAT);
-}
-
-int32_t hk_vm_check_integer(hk_value_t *args, int32_t index)
-{
-  hk_value_t val = args[index];
-  if (!hk_is_integer(val))
-  {
-    hk_runtime_error("type error: argument #%d must be of the type integer, %s given",
-      index, hk_type_name(val.type));
-    return HK_STATUS_ERROR;
-  }
-  return HK_STATUS_OK;
 }
 
 int32_t hk_vm_check_int(hk_value_t *args, int32_t index)

@@ -48,7 +48,6 @@ int32_t hk_vm_check_type(hk_value_t *args, int32_t index, int32_t type);
 int32_t hk_vm_check_types(hk_value_t *args, int32_t index, int32_t num_types, int32_t types[]);
 int32_t hk_vm_check_bool(hk_value_t *args, int32_t index);
 int32_t hk_vm_check_float(hk_value_t *args, int32_t index);
-int32_t hk_vm_check_integer(hk_value_t *args, int32_t index);
 int32_t hk_vm_check_int(hk_value_t *args, int32_t index);
 int32_t hk_vm_check_string(hk_value_t *args, int32_t index);
 int32_t hk_vm_check_range(hk_value_t *args, int32_t index);

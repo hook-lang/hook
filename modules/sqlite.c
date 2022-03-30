@@ -144,7 +144,7 @@ static int32_t bind_call(hk_vm_t *vm, hk_value_t *args)
   {
     double data = val.as_float;
     if (hk_is_int(val))
-      return hk_vm_push_float(vm, sqlite3_bind_int(stmt, index, (int32_t) data));
+      return hk_vm_push_float(vm, sqlite3_bind_int64(stmt, index, (int64_t) data));
     return hk_vm_push_float(vm, sqlite3_bind_double(stmt, index, data));
   }
   hk_string_t *str = hk_as_string(val);

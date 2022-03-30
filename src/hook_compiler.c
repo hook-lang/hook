@@ -161,7 +161,7 @@ static inline double parse_double(compiler_t *comp)
   double result = strtod(tk->start, NULL);
   if (errno == ERANGE)
     syntax_error(comp->fn->name->chars, scan->file->chars, tk->line, tk->col,
-      "floating point32_t number `%.*s` out of range", tk->length, tk->start);
+      "floating point number `%.*s` out of range", tk->length, tk->start);
   return result;
 }
 
