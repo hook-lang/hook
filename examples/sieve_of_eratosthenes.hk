@@ -1,0 +1,35 @@
+//
+// sieve_of_eratosthenes.hk
+//
+
+use { new_array } in arrays;
+
+fn sieve_of_eratosthenes(n) {
+  mut prime = new_array(n + 1);
+  mut i;
+  i = 0;
+  while (i < n + 1) {
+    prime[] = true;
+    i++;
+  }
+  i = 2;
+  while (i * i <= n) {
+    if (prime[i]) {
+      mut j = i * 2;
+      while (j <= n) {
+        prime[j] = false;
+        j += i;
+      }
+    }
+    i++;
+  }
+  i = 2;
+  while (i <= n) {
+    if (prime[i])
+      println(i);
+    i++;
+  }
+}
+
+val n = 100;
+sieve_of_eratosthenes(n);
