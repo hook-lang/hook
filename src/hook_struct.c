@@ -6,7 +6,6 @@
 #include "hook_struct.h"
 #include <stdlib.h>
 #include <string.h>
-#include "hook_hash.h"
 #include "hook_string.h"
 #include "hook_memory.h"
 

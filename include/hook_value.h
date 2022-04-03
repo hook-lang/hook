@@ -22,17 +22,18 @@
 #define HK_TYPE_CALLABLE 0x09
 #define HK_TYPE_USERDATA 0x0a
 
-#define HK_FLAG_NONE     0b0000
-#define HK_FLAG_OBJECT   0b0001
-#define HK_FLAG_FALSEY   0b0010
-#define HK_FLAG_ITERABLE 0b0100
-#define HK_FLAG_NATIVE   0b1000
+#define HK_FLAG_NONE     0x00
+#define HK_FLAG_OBJECT   0x01
+#define HK_FLAG_FALSEY   0x02
+#define HK_FLAG_HASHABLE 0x04
+#define HK_FLAG_ITERABLE 0x08
+#define HK_FLAG_NATIVE   0x10
 
 #define HK_NIL_VALUE         ((hk_value_t) {.type = HK_TYPE_NIL, .flags = HK_FLAG_FALSEY})
 #define HK_FALSE_VALUE       ((hk_value_t) {.type = HK_TYPE_BOOL, .flags = HK_FLAG_FALSEY, .as_bool = false})
 #define HK_TRUE_VALUE        ((hk_value_t) {.type = HK_TYPE_BOOL, .flags = HK_FLAG_NONE, .as_bool = true})
 #define hk_float_value(n)    ((hk_value_t) {.type = HK_TYPE_FLOAT, .flags = HK_FLAG_NONE, .as_float = (n)})
-#define hk_string_value(s)   ((hk_value_t) {.type = HK_TYPE_STRING, .flags = HK_FLAG_OBJECT, .as_pointer = (s)})
+#define hk_string_value(s)   ((hk_value_t) {.type = HK_TYPE_STRING, .flags = HK_FLAG_OBJECT | HK_FLAG_HASHABLE, .as_pointer = (s)})
 #define hk_range_value(r)    ((hk_value_t) {.type = HK_TYPE_RANGE, .flags = HK_FLAG_OBJECT | HK_FLAG_ITERABLE, .as_pointer = (r)})
 #define hk_array_value(a)    ((hk_value_t) {.type = HK_TYPE_ARRAY, .flags = HK_FLAG_OBJECT | HK_FLAG_ITERABLE, .as_pointer = (a)})
 #define hk_struct_value(s)   ((hk_value_t) {.type = HK_TYPE_STRUCT, .flags = HK_FLAG_OBJECT, .as_pointer = (s)})
@@ -57,6 +58,7 @@
 #define hk_is_object(v)   ((v).flags & HK_FLAG_OBJECT)
 #define hk_is_falsey(v)   ((v).flags & HK_FLAG_FALSEY)
 #define hk_is_truthy(v)   (!hk_is_falsey(v))
+#define hk_is_hashable(v) ((v).flags & HK_FLAG_HASHABLE)
 #define hk_is_iterable(v) ((v).flags & HK_FLAG_ITERABLE)
 #define hk_is_native(v)   ((v).flags & HK_FLAG_NATIVE)
 
@@ -100,6 +102,7 @@ typedef struct
 const char *hk_type_name(int32_t type);
 void hk_value_release(hk_value_t val);
 void hk_value_print(hk_value_t val, bool quoted);
+int32_t hk_value_hash(hk_value_t val, uint32_t *result);
 bool hk_value_equal(hk_value_t val1, hk_value_t val2);
 int32_t hk_value_compare(hk_value_t val1, hk_value_t val2, int32_t *result);
 void hk_value_serialize(hk_value_t val, FILE *stream);

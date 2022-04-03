@@ -8,12 +8,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
-#include "hook_hash.h"
 #include "hook_utils.h"
 #include "hook_memory.h"
 
 static inline hk_string_t *string_allocate(int32_t min_capacity);
 static inline void add_char(hk_string_t *str, char c);
+static inline uint32_t hash(int32_t length, char *chars);
 
 static inline hk_string_t *string_allocate(int32_t min_capacity)
 {
@@ -32,6 +32,17 @@ static inline void add_char(hk_string_t *str, char c)
 {
   hk_string_ensure_capacity(str, str->length + 1);
   str->chars[str->length] = c;
+}
+
+static inline uint32_t hash(int32_t length, char *chars)
+{
+  uint32_t hash = 2166136261u;
+  for (int32_t i = 0; i < length; i++)
+  {
+    hash ^= chars[i];
+    hash *= 16777619;
+  }
+  return hash;
 }
 
 hk_string_t *hk_string_new(void)
@@ -143,7 +154,7 @@ void hk_string_print(hk_string_t *str, bool quoted)
 uint32_t hk_string_hash(hk_string_t *str)
 {
   if (str->hash == -1)
-    str->hash = hash_fnv1a(str->length, str->chars);
+    str->hash = hash(str->length, str->chars);
   return (uint32_t) str->hash;
 }
 

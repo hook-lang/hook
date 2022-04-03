@@ -12,7 +12,6 @@ add_library(math SHARED
   ../src/hook_utils.c
   ../src/hook_compiler.c
   ../src/hook_error.c
-  ../src/hook_hash.c
   ../src/hook_iterable.c
   ../src/hook_iterator.c
   hook_math.c
@@ -35,7 +34,6 @@ add_library(os SHARED
   ../src/hook_utils.c
   ../src/hook_compiler.c
   ../src/hook_error.c
-  ../src/hook_hash.c
   ../src/hook_iterable.c
   ../src/hook_iterator.c
   ../src/hook_memory.c
@@ -58,7 +56,6 @@ add_library(io SHARED
   ../src/hook_utils.c
   ../src/hook_compiler.c
   ../src/hook_error.c
-  ../src/hook_hash.c
   hook_io.c
   ../src/hook_iterable.c
   ../src/hook_iterator.c
@@ -80,7 +77,6 @@ add_library(strings SHARED
   ../src/hook_chunk.c
   ../src/hook_utils.c
   ../src/hook_error.c
-  ../src/hook_hash.c
   ../src/hook_iterable.c
   ../src/hook_iterator.c
   ../src/hook_memory.c
@@ -102,7 +98,6 @@ add_library(arrays SHARED
   ../src/hook_chunk.c
   ../src/hook_utils.c
   ../src/hook_error.c
-  ../src/hook_hash.c
   ../src/hook_iterable.c
   ../src/hook_iterator.c
   ../src/hook_memory.c
