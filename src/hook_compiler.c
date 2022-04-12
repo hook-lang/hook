@@ -522,7 +522,7 @@ static void compile_load_module(compiler_t *comp)
       ++n;
     }
     consume(comp, TOKEN_RBRACE);
-    consume(comp, TOKEN_IN);
+    consume(comp, TOKEN_FROM);
     int32_t line = scan->token.line;
     if (!match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);

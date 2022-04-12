@@ -56,8 +56,8 @@
 #define TOKEN_FALSE      0x2d
 #define TOKEN_FN         0x2e
 #define TOKEN_FOR        0x2f
-#define TOKEN_IF         0x30
-#define TOKEN_IN         0x31
+#define TOKEN_FROM       0x30
+#define TOKEN_IF         0x31
 #define TOKEN_LOOP       0x32
 #define TOKEN_MATCH      0x33
 #define TOKEN_MUT        0x34

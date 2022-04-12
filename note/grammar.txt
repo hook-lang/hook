@@ -2,7 +2,7 @@
 chunk       ::= stmt* EOF
 
 stmt        ::= 'use' NAME ( 'as' NAME )? ';'
-              | 'use' '{' NAME ( ',' NAME )* '}' 'in' NAME ';'
+              | 'use' '{' NAME ( ',' NAME )* '}' 'from' NAME ';'
               | var_decl ';'
               | assign_call ';'
               | 'struct' NAME '{' ( NAME ( ',' NAME )* )? '}'

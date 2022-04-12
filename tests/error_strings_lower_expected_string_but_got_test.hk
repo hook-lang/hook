@@ -1,3 +1,3 @@
 
-use { lower } in strings;
+use { lower } from strings;
 val a = lower(1);

@@ -2,7 +2,7 @@
 // knuth_shuffle.hk
 //
 
-use { random } in math;
+use { random } from math;
 
 fn shuffle(mut arr) {
   val n = len(arr);

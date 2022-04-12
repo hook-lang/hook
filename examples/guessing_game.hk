@@ -2,9 +2,9 @@
 // guessing_game.hk
 //
 
-use { random } in math;
-use { StdIn, readln } in io;
-use { trim } in strings;
+use { random } from math;
+use { StdIn, readln } from io;
+use { trim } from strings;
 
 println("Guess the number!");
 

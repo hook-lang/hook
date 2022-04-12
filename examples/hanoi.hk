@@ -2,14 +2,14 @@
 // hanoi.hk
 //
 
-fn hanoi(n, from, to, aux) {
+fn hanoi(n, src, dest, aux) {
   if (n == 1) {
-    println("Move disk 1 from rod " + from + " to rod " + to + ".");
+    println("Move disk 1 from rod " + src + " to rod " + dest + ".");
     return;
   }
-  hanoi(n - 1, from, aux, to);
-  println("Move disk " + to_string(n) + " from rod " + from + " to rod " + to + ".");
-  hanoi(n-1, aux, to, from);
+  hanoi(n - 1, src, aux, dest);
+  println("Move disk " + to_string(n) + " from rod " + src + " to rod " + dest + ".");
+  hanoi(n-1, aux, dest, src);
 }
 
 val n = 4;
