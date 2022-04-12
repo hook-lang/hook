@@ -1,0 +1,11 @@
+//
+// pythagoras.hk
+//
+
+use { sqrt, pow } from math;
+
+fn hypothenuse(a, b) {
+  return sqrt(pow(a, 2) + pow(b, 2));
+}
+
+println(hypothenuse(3, 4));
