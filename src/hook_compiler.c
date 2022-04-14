@@ -772,11 +772,19 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     hk_function_add_line(fn, line);
     return SYN_ASSIGN;
   }
+  if (match(scan, TOKEN_TILDESLASHEQ))
+  {
+    scanner_next_token(scan);
+    compile_expression(comp);
+    hk_chunk_emit_opcode(chunk, HK_OP_QUOTIENT);
+    hk_function_add_line(fn, line);
+    return SYN_ASSIGN;
+  }
   if (match(scan, TOKEN_PERCENTEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
-    hk_chunk_emit_opcode(chunk, HK_OP_MODULO);
+    hk_chunk_emit_opcode(chunk, HK_OP_REMINDER);
     hk_function_add_line(fn, line);
     return SYN_ASSIGN;
   }
@@ -1523,11 +1531,19 @@ static void compile_mul_expression(compiler_t *comp)
       hk_function_add_line(fn, line);
       continue;
     }
+    if (match(scan, TOKEN_TILDESLASH))
+    {
+      scanner_next_token(scan);
+      compile_unary_expression(comp);
+      hk_chunk_emit_opcode(chunk, HK_OP_QUOTIENT);
+      hk_function_add_line(fn, line);
+      continue;
+    }
     if (match(scan, TOKEN_PERCENT))
     {
       scanner_next_token(scan);
       compile_unary_expression(comp);
-      hk_chunk_emit_opcode(chunk, HK_OP_MODULO);
+      hk_chunk_emit_opcode(chunk, HK_OP_REMINDER);
       hk_function_add_line(fn, line);
       continue;
     }

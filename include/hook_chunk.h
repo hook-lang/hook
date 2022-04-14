@@ -57,15 +57,16 @@
 #define HK_OP_SUBTRACT               0x2c
 #define HK_OP_MULTIPLY               0x2d
 #define HK_OP_DIVIDE                 0x2e
-#define HK_OP_MODULO                 0x2f
-#define HK_OP_NEGATE                 0x30
-#define HK_OP_NOT                    0x31
-#define HK_OP_INCR                   0x32
-#define HK_OP_DECR                   0x33
-#define HK_OP_CALL                   0x34
-#define HK_OP_LOAD_MODULE            0x35
-#define HK_OP_RETURN                 0x36
-#define HK_OP_RETURN_NIL             0X37
+#define HK_OP_QUOTIENT               0x2f
+#define HK_OP_REMINDER               0x30
+#define HK_OP_NEGATE                 0x31
+#define HK_OP_NOT                    0x32
+#define HK_OP_INCR                   0x33
+#define HK_OP_DECR                   0x34
+#define HK_OP_CALL                   0x35
+#define HK_OP_LOAD_MODULE            0x36
+#define HK_OP_RETURN                 0x37
+#define HK_OP_RETURN_NIL             0X38
 
 typedef struct
 {

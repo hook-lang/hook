@@ -3,6 +3,7 @@ println(123 + 1.23);
 println(123 - 1.23);
 println(123 * 1.23);
 println(123 / 1.23);
+println(3 ~/ 1.23);
 println(123 % 12.3);
 println(-123);
 println(-1.23);

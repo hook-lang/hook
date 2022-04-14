@@ -54,7 +54,8 @@ static inline int32_t subtract(hk_vm_t *vm);
 static inline int32_t diff_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2);
 static inline int32_t multiply(hk_vm_t *vm);
 static inline int32_t divide(hk_vm_t *vm);
-static inline int32_t modulo(hk_vm_t *vm);
+static inline int32_t quotient(hk_vm_t *vm);
+static inline int32_t reminder(hk_vm_t *vm);
 static inline int32_t negate(hk_vm_t *vm);
 static inline void not(hk_vm_t *vm);
 static inline int32_t call(hk_vm_t *vm, int32_t num_args);
@@ -1009,14 +1010,31 @@ static inline int32_t divide(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int32_t modulo(hk_vm_t *vm)
+static inline int32_t quotient(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
   if (!hk_is_float(val1) || !hk_is_float(val2))
   {
-    hk_runtime_error("type error: cannot apply modulo operation between %s and %s",
+    hk_runtime_error("type error: cannot apply quotient operation between %s and %s",
+      hk_type_name(val1.type), hk_type_name(val2.type));
+    return HK_STATUS_ERROR;
+  }
+  double data = floor(val1.as_float / val2.as_float);
+  slots[0] = hk_float_value(data);
+  --vm->top;
+  return HK_STATUS_OK;
+}
+
+static inline int32_t reminder(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->slots[vm->top - 1];
+  hk_value_t val1 = slots[0];
+  hk_value_t val2 = slots[1];
+  if (!hk_is_float(val1) || !hk_is_float(val2))
+  {
+    hk_runtime_error("type error: cannot apply reminder operation between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
@@ -1403,8 +1421,12 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
       if (divide(vm) == HK_STATUS_ERROR)
         goto error;
       break;
-    case HK_OP_MODULO:
-      if (modulo(vm) == HK_STATUS_ERROR)
+    case HK_OP_QUOTIENT:
+      if (quotient(vm) == HK_STATUS_ERROR)
+        goto error;
+      break;
+    case HK_OP_REMINDER:
+      if (reminder(vm) == HK_STATUS_ERROR)
         goto error;
       break;
     case HK_OP_NEGATE:

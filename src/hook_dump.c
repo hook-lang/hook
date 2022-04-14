@@ -189,8 +189,11 @@ void hk_dump(hk_function_t *fn)
     case HK_OP_DIVIDE:
       printf("  [%05d] Divide\n", j);
       break;
-    case HK_OP_MODULO:
-      printf("  [%05d] Modulo\n", j);
+    case HK_OP_QUOTIENT:
+      printf("  [%05d] Quotient\n", j);
+      break;
+    case HK_OP_REMINDER:
+      printf("  [%05d] Reminder\n", j);
       break;
     case HK_OP_NEGATE:
       printf("  [%05d] Negate\n", j);
