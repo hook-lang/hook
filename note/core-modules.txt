@@ -22,8 +22,9 @@ os:
 
   ClocksPerSecond: float
 
-  clock() -> float
-  system(cmd: string) -> float
+  clock() -> int
+  time() -> int
+  system(cmd: string) -> int
   getenv(var: string) -> string
 
 io:
@@ -36,19 +37,19 @@ io:
   SeekEnd: float
 
   open(filename: string, mode: string) -> nil|userdata
-  close(stream: userdata) -> float
+  close(stream: userdata) -> int
   popen(command: string, mode: string) -> nil|userdata
-  pclose(stream: userdata) -> float
+  pclose(stream: userdata) -> int
   eof(stream: userdata) -> bool
-  flush(stream: userdata) -> float
+  flush(stream: userdata) -> int
   sync(stream: userdata) -> bool
   tell(stream: userdata) -> int
   rewind(stream: userdata)
-  seek(stream: userdata, offset: float, whence: float) -> float
-  read(stream: userdata, size: float) -> nil|string
-  write(stream: userdata, str: string) -> nil|float
+  seek(stream: userdata, offset: int, whence: int) -> int
+  read(stream: userdata, size: int) -> nil|string
+  write(stream: userdata, str: string) -> nil|int
   readln(stream: userdata) -> string
-  writeln(stream: userdata, str: string) -> nil|float
+  writeln(stream: userdata, str: string) -> nil|int
 
 strings:
 
