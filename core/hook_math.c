@@ -21,6 +21,7 @@ static int32_t acos_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t atan_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t floor_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t ceil_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t round_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t pow_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sqrt_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t log_call(hk_vm_t *vm, hk_value_t *args);
@@ -88,6 +89,13 @@ static int32_t ceil_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_vm_push_float(vm, ceil(args[1].as_float));
+}
+
+static int32_t round_call(hk_vm_t *vm, hk_value_t *args)
+{
+  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_vm_push_float(vm, round(args[1].as_float));
 }
 
 static int32_t pow_call(hk_vm_t *vm, hk_value_t *args)
@@ -176,6 +184,10 @@ int32_t load_math(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "ceil", 1, &ceil_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
+  if (hk_vm_push_string_from_chars(vm, -1, "round") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_new_native(vm, "round", 1, &round_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "pow") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "pow", 2, &pow_call) == HK_STATUS_ERROR)
@@ -196,5 +208,5 @@ int32_t load_math(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "random", 0, &random_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 15);
+  return hk_vm_construct(vm, 16);
 }

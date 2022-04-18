@@ -10,8 +10,9 @@ math:
   asin(num: float) -> float
   acos(num: float) -> float
   atan(num: float) -> float
-  floor(num: float) -> float
-  ceil(num: float) -> float
+  floor(num: float) -> int
+  ceil(num: float) -> int
+  round(num: float) -> int
   pow(base: float, power: float) -> float
   sqrt(num: float) -> float
   log(num: float) -> float
