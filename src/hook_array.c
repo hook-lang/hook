@@ -140,6 +140,28 @@ hk_array_t *hk_array_set_element(hk_array_t *arr, int32_t index, hk_value_t elem
   return result;
 }
 
+hk_array_t *hk_array_insert_element(hk_array_t *arr, int32_t index, hk_value_t elem)
+{
+  int32_t length = arr->length;
+  hk_array_t *result = array_allocate(length + 1);
+  result->length = length + 1;
+  for (int32_t i = 0; i < index; ++i)
+  {
+    hk_value_t val = arr->elements[i];
+    hk_value_incr_ref(val);
+    result->elements[i] = val;
+  }
+  hk_value_incr_ref(elem);
+  result->elements[index] = elem;
+  for (int32_t i = index; i < length; ++i)
+  {
+    hk_value_t val = arr->elements[i];
+    hk_value_incr_ref(val);
+    result->elements[i + 1] = val;
+  }
+  return result;
+}
+
 hk_array_t *hk_array_delete_element(hk_array_t *arr, int32_t index)
 {
   int32_t length = arr->length;
@@ -207,6 +229,16 @@ void hk_array_inplace_set_element(hk_array_t *arr, int32_t index, hk_value_t ele
   hk_value_incr_ref(elem);
   hk_value_release(arr->elements[index]);
   arr->elements[index] = elem;
+}
+
+void hk_array_inplace_insert_element(hk_array_t *arr, int32_t index, hk_value_t elem)
+{
+  hk_array_ensure_capacity(arr, arr->length + 1);
+  hk_value_incr_ref(elem);
+  for (int32_t i = arr->length; i > index; --i)
+    arr->elements[i] = arr->elements[i - 1];
+  arr->elements[index] = elem;
+  ++arr->length;
 }
 
 void hk_array_inplace_delete_element(hk_array_t *arr, int32_t index)
