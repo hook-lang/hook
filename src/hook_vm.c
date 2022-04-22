@@ -1256,7 +1256,7 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
         hk_value_incr_ref(val);
       }
       break;
-    case HK_OP_GET_LOCAL:
+    case HK_OP_LOAD:
       {
         hk_value_t val = locals[read_byte(&pc)];
         if (push(vm, val) == HK_STATUS_ERROR)
@@ -1264,7 +1264,7 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
         hk_value_incr_ref(val);
       }
       break;
-    case HK_OP_SET_LOCAL:
+    case HK_OP_STORE:
       {
         int32_t index = read_byte(&pc);
         hk_value_t val = slots[vm->top];

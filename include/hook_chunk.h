@@ -26,8 +26,8 @@
 #define HK_OP_POP                    0x0d
 #define HK_OP_GLOBAL                 0x0e
 #define HK_OP_NONLOCAL               0x0f
-#define HK_OP_GET_LOCAL              0x10
-#define HK_OP_SET_LOCAL              0x11
+#define HK_OP_LOAD                   0x10
+#define HK_OP_STORE                  0x11
 #define HK_OP_ADD_ELEMENT            0x12
 #define HK_OP_GET_ELEMENT            0x13
 #define HK_OP_FETCH_ELEMENT          0x14

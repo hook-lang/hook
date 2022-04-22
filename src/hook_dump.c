@@ -76,11 +76,11 @@ void hk_dump(hk_function_t *fn)
     case HK_OP_NONLOCAL:
       printf("  [%05d] NonLocal              %d\n", j, bytes[i++]);
       break;
-    case HK_OP_GET_LOCAL:
-      printf("  [%05d] GetLocal              %d\n", j, bytes[i++]);
+    case HK_OP_LOAD:
+      printf("  [%05d] Load                  %d\n", j, bytes[i++]);
       break;
-    case HK_OP_SET_LOCAL:
-      printf("  [%05d] SetLocal              %d\n", j, bytes[i++]);
+    case HK_OP_STORE:
+      printf("  [%05d] Store                 %d\n", j, bytes[i++]);
       break;
     case HK_OP_ADD_ELEMENT:
       printf("  [%05d] AddElement\n", j);

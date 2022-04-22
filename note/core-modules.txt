@@ -58,8 +58,8 @@ strings:
   lower(str: string) -> string
   upper(str: string) -> string
   trim(str: string) -> string
-  starts_with(str1: string, str1: string) -> bool
-  ends_with(str1: string, str1: string) -> bool
+  starts_with(str1: string, str2: string) -> bool
+  ends_with(str1: string, str2: string) -> bool
 
 arrays:
 

@@ -730,7 +730,7 @@ end:
   if (!var.is_mutable)
     syntax_error(fn->name->chars, scan->file->chars, tk->line, tk->col,
       "cannot assign to immutable variable `%.*s`", tk->length, tk->start);
-  hk_chunk_emit_opcode(chunk, HK_OP_SET_LOCAL);
+  hk_chunk_emit_opcode(chunk, HK_OP_STORE);
   hk_chunk_emit_byte(chunk, var.index);
 }
 
@@ -1058,11 +1058,11 @@ static void compile_del_statement(compiler_t *comp)
   if (!var.is_mutable)
     syntax_error(fn->name->chars, scan->file->chars, tk.line, tk.col,
       "cannot delete element from immutable variable `%.*s`", tk.length, tk.start);
-  hk_chunk_emit_opcode(chunk, HK_OP_GET_LOCAL);
+  hk_chunk_emit_opcode(chunk, HK_OP_LOAD);
   hk_chunk_emit_byte(chunk, var.index);
   hk_function_add_line(fn, tk.line);
   compile_delete(comp, true);
-  hk_chunk_emit_opcode(chunk, HK_OP_SET_LOCAL);
+  hk_chunk_emit_opcode(chunk, HK_OP_STORE);
   hk_chunk_emit_byte(chunk, var.index);
 }
 
@@ -1939,7 +1939,7 @@ static variable_t compile_variable(compiler_t *comp, token_t *tk, bool emit)
   {
     if (!emit)
       return *var;
-    hk_chunk_emit_opcode(chunk, var->is_local ? HK_OP_GET_LOCAL : HK_OP_NONLOCAL);
+    hk_chunk_emit_opcode(chunk, var->is_local ? HK_OP_LOAD : HK_OP_NONLOCAL);
     hk_chunk_emit_byte(chunk, var->index);
     hk_function_add_line(fn, tk->line);
     return *var;
@@ -1979,7 +1979,7 @@ static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk)
       if (var->is_mutable)
         syntax_error(fn->name->chars, comp->scan->file->chars, tk->line, tk->col,
           "cannot capture mutable variable `%.*s`", tk->length, tk->start);
-      op = HK_OP_GET_LOCAL;
+      op = HK_OP_LOAD;
     }
     hk_chunk_emit_opcode(chunk, op);
     hk_chunk_emit_byte(chunk, var->index);
