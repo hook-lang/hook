@@ -1,0 +1,30 @@
+//
+// knapsack.hk
+//
+
+fn knapsack(weight_cap, weights, values) {
+  mut high = 0;
+  val n = len(weights);
+  for (mut i = 0; i < n; i++) {
+    mut cap = weights[i];
+    mut value = values[i];
+    val new_cap = weights[i];
+    val new_value = values[i];
+    for (mut j = i + 1; j < n; j++) {
+      if (cap < weight_cap && cap + weights[j] <= weight_cap) {
+        cap += weights[j];
+        value += values[j];
+      } else if (new_cap + weights[j] <= weight_cap) {
+        cap = new_cap + weights[j];
+        value = new_value + values[j];
+      }
+      high = if (value > high) value else high;
+    }
+  }
+  return high;
+}
+
+val weight_cap = 10;
+val weights = [3, 6, 3];
+val values = [70, 60, 100];
+println(knapsack(weight_cap, weights, values));
