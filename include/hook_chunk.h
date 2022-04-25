@@ -6,9 +6,7 @@
 #ifndef HOOK_CHUNK_H
 #define HOOK_CHUNK_H
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdio.h>
+#include "hook_array.h"
 
 #define HK_OP_NIL                    0x00
 #define HK_OP_FALSE                  0x01
@@ -70,9 +68,19 @@
 
 typedef struct
 {
-  int32_t capacity;
-  int32_t length;
-  uint8_t *bytes;
+  int32_t no;
+  int32_t offset;
+} hk_line_t;
+
+typedef struct
+{
+  int32_t code_capacity;
+  int32_t code_length;
+  uint8_t *code;
+  int32_t lines_capacity;
+  int32_t lines_length;
+  hk_line_t *lines;
+  hk_array_t *consts;
 } hk_chunk_t;
 
 void hk_chunk_init(hk_chunk_t *chunk);
@@ -80,6 +88,8 @@ void hk_chunk_free(hk_chunk_t *chunk);
 void hk_chunk_emit_byte(hk_chunk_t *chunk, uint8_t byte);
 void hk_chunk_emit_word(hk_chunk_t *chunk, uint16_t word);
 void hk_chunk_emit_opcode(hk_chunk_t *chunk, int32_t op);
+void hk_chunk_add_line(hk_chunk_t *chunk, int32_t line_no);
+int32_t hk_chunk_get_line(hk_chunk_t *chunk, int32_t offset);
 void hk_chunk_serialize(hk_chunk_t *chunk, FILE *stream);
 bool hk_chunk_deserialize(hk_chunk_t *chunk, FILE *stream);
 

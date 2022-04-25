@@ -1172,8 +1172,9 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
   hk_value_t *slots = vm->slots;
   hk_function_t *fn = cl->fn;
   hk_value_t *nonlocals = cl->nonlocals;
-  uint8_t *code = fn->chunk.bytes;
-  hk_value_t *consts = fn->consts->elements;
+  hk_chunk_t *chunk = &fn->chunk;
+  uint8_t *code = chunk->code;
+  hk_value_t *consts = chunk->consts->elements;
   hk_function_t **functions = fn->functions;
   uint8_t *pc = code;
   for (;;)
@@ -1461,7 +1462,7 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
     }
   }
 error:
-  *line = hk_function_get_line(fn, (int32_t) (pc - fn->chunk.bytes));
+  *line = hk_chunk_get_line(chunk, (int32_t) (pc - code));
   return HK_STATUS_ERROR;
 }
 

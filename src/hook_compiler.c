@@ -173,7 +173,7 @@ static inline bool string_match(token_t *tk, hk_string_t *str)
 
 static inline uint8_t add_float_constant(compiler_t *comp, double data)
 {
-  hk_array_t *consts = comp->fn->consts;
+  hk_array_t *consts = comp->fn->chunk.consts;
   hk_value_t *elements = consts->elements;
   for (int32_t i = 0; i < consts->length; ++i)
   {
@@ -188,7 +188,7 @@ static inline uint8_t add_float_constant(compiler_t *comp, double data)
 
 static inline uint8_t add_string_constant(compiler_t *comp, token_t *tk)
 {
-  hk_array_t *consts = comp->fn->consts;
+  hk_array_t *consts = comp->fn->chunk.consts;
   hk_value_t *elements = consts->elements;
   for (int32_t i = 0; i < consts->length; ++i)
   {
@@ -205,7 +205,7 @@ static inline uint8_t add_string_constant(compiler_t *comp, token_t *tk)
 static inline uint8_t add_constant(compiler_t *comp, hk_value_t val)
 {
   hk_function_t *fn = comp->fn;
-  hk_array_t *consts = fn->consts;
+  hk_array_t *consts = fn->chunk.consts;
   scanner_t *scan = comp->scan;
   token_t *tk = &scan->token;
   if (consts->length == MAX_CONSTANTS)
@@ -319,7 +319,7 @@ static inline bool nonlocal_exists(compiler_t *comp, token_t *tk)
 static inline int32_t emit_jump(hk_chunk_t *chunk, int32_t op)
 {
   hk_chunk_emit_opcode(chunk, op);
-  int32_t offset = chunk->length;
+  int32_t offset = chunk->code_length;
   hk_chunk_emit_word(chunk, 0);
   return offset;
 }
@@ -329,23 +329,23 @@ static inline void patch_jump(compiler_t *comp, int32_t offset)
   hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_t *scan = comp->scan;
   token_t *tk = &scan->token;
-  int32_t jump = chunk->length;
+  int32_t jump = chunk->code_length;
   if (jump > UINT16_MAX)
     syntax_error(comp->fn->name->chars, scan->file->chars, tk->line, tk->col,
       "code too large");
-  *((uint16_t *) &chunk->bytes[offset]) = (uint16_t) jump;
+  *((uint16_t *) &chunk->code[offset]) = (uint16_t) jump;
 }
 
 static inline void patch_opcode(hk_chunk_t *chunk, int32_t offset, int32_t op)
 {
-  chunk->bytes[offset] = (uint8_t) op;
+  chunk->code[offset] = (uint8_t) op;
 }
 
 static inline void start_loop(compiler_t *comp, loop_t *loop)
 {
   loop->parent = comp->loop;
   loop->scope_depth = comp->scope_depth;
-  loop->jump = (uint16_t) comp->fn->chunk.length;
+  loop->jump = (uint16_t) comp->fn->chunk.code_length;
   loop->num_offsets = 0;
   comp->loop = loop;
 }
@@ -479,7 +479,7 @@ static void compile_load_module(compiler_t *comp)
     uint8_t index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     if (match(scan, TOKEN_AS))
     {
       scanner_next_token(scan);
@@ -491,7 +491,7 @@ static void compile_load_module(compiler_t *comp)
     define_local(comp, &tk, false);
     consume(comp, TOKEN_SEMICOLON);
     hk_chunk_emit_opcode(chunk, HK_OP_LOAD_MODULE);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     return;
   }
   if (match(scan, TOKEN_LBRACE))
@@ -505,7 +505,7 @@ static void compile_load_module(compiler_t *comp)
     uint8_t index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     uint8_t n = 1;
     while (match(scan, TOKEN_COMMA))
     {
@@ -518,7 +518,7 @@ static void compile_load_module(compiler_t *comp)
       uint8_t index = add_string_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
       hk_chunk_emit_byte(chunk, index);
-      hk_function_add_line(fn, tk.line);
+      hk_chunk_add_line(chunk, tk.line);
       ++n;
     }
     consume(comp, TOKEN_RBRACE);
@@ -532,12 +532,12 @@ static void compile_load_module(compiler_t *comp)
     index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     hk_chunk_emit_opcode(chunk, HK_OP_LOAD_MODULE);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     hk_chunk_emit_opcode(chunk, HK_OP_DESTRUCT);
     hk_chunk_emit_byte(chunk, n);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   syntax_error_unexpected(comp);
@@ -580,7 +580,7 @@ static void compile_constant_declaration(compiler_t *comp)
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_UNPACK);
     hk_chunk_emit_byte(chunk, n);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (match(scan, TOKEN_LBRACE))
@@ -594,7 +594,7 @@ static void compile_constant_declaration(compiler_t *comp)
     uint8_t index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     uint8_t n = 1;
     while (match(scan, TOKEN_COMMA))
     {
@@ -607,7 +607,7 @@ static void compile_constant_declaration(compiler_t *comp)
       uint8_t index = add_string_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
       hk_chunk_emit_byte(chunk, index);
-      hk_function_add_line(fn, tk.line);
+      hk_chunk_add_line(chunk, tk.line);
       ++n;
     }
     consume(comp, TOKEN_RBRACE);
@@ -616,7 +616,7 @@ static void compile_constant_declaration(compiler_t *comp)
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_DESTRUCT);
     hk_chunk_emit_byte(chunk, n);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   syntax_error_unexpected(comp);
@@ -639,7 +639,7 @@ static void compile_variable_declaration(compiler_t *comp)
       return;  
     }
     hk_chunk_emit_opcode(chunk, HK_OP_NIL);
-    hk_function_add_line(fn, scan->token.line);
+    hk_chunk_add_line(chunk, scan->token.line);
     return;
   }
   if (match(scan, TOKEN_LBRACKET))
@@ -665,7 +665,7 @@ static void compile_variable_declaration(compiler_t *comp)
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_UNPACK);
     hk_chunk_emit_byte(chunk, n);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (match(scan, TOKEN_LBRACE))
@@ -679,7 +679,7 @@ static void compile_variable_declaration(compiler_t *comp)
     uint8_t index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     uint8_t n = 1;
     while (match(scan, TOKEN_COMMA))
     {
@@ -692,7 +692,7 @@ static void compile_variable_declaration(compiler_t *comp)
       uint8_t index = add_string_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
       hk_chunk_emit_byte(chunk, index);
-      hk_function_add_line(fn, tk.line);
+      hk_chunk_add_line(chunk, tk.line);
       ++n;
     }
     consume(comp, TOKEN_RBRACE);
@@ -701,7 +701,7 @@ static void compile_variable_declaration(compiler_t *comp)
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_DESTRUCT);
     hk_chunk_emit_byte(chunk, n);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   syntax_error_unexpected(comp);
@@ -745,7 +745,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_ADD);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return SYN_ASSIGN;
   }
   if (match(scan, TOKEN_MINUSEQ))
@@ -753,7 +753,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_SUBTRACT);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return SYN_ASSIGN;
   }
   if (match(scan, TOKEN_STAREQ))
@@ -761,7 +761,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_MULTIPLY);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return SYN_ASSIGN;
   }
   if (match(scan, TOKEN_SLASHEQ))
@@ -769,7 +769,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_DIVIDE);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return SYN_ASSIGN;
   }
   if (match(scan, TOKEN_TILDESLASHEQ))
@@ -777,7 +777,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_QUOTIENT);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return SYN_ASSIGN;
   }
   if (match(scan, TOKEN_PERCENTEQ))
@@ -785,7 +785,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_REMINDER);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return SYN_ASSIGN;
   }
   if (match(scan, TOKEN_PLUSPLUS))
@@ -809,7 +809,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
       consume(comp, TOKEN_EQ);
       compile_expression(comp);
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_ADD_ELEMENT : HK_OP_ADD_ELEMENT);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       return SYN_ASSIGN;
     }
     compile_expression(comp);
@@ -819,12 +819,12 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
       scanner_next_token(scan);
       compile_expression(comp);
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_PUT_ELEMENT : HK_OP_PUT_ELEMENT);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       return SYN_ASSIGN;
     }
-    int32_t offset = chunk->length;
+    int32_t offset = chunk->code_length;
     hk_chunk_emit_opcode(chunk, HK_OP_GET_ELEMENT);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     int32_t syn = compile_assign(comp, SYN_SUBSCRIPT, false);
     if (syn == SYN_ASSIGN)
     {
@@ -847,13 +847,13 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
       compile_expression(comp);
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_PUT_FIELD : HK_OP_PUT_FIELD);
       hk_chunk_emit_byte(chunk, index);
-      hk_function_add_line(fn, tk.line);
+      hk_chunk_add_line(chunk, tk.line);
       return SYN_ASSIGN;
     }
-    int32_t offset = chunk->length;
+    int32_t offset = chunk->code_length;
     hk_chunk_emit_opcode(chunk, HK_OP_GET_FIELD);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     int32_t syn = compile_assign(comp, SYN_SUBSCRIPT, false);
     if (syn == SYN_ASSIGN)
     {
@@ -870,7 +870,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
       scanner_next_token(scan);
       hk_chunk_emit_opcode(chunk, HK_OP_CALL);
       hk_chunk_emit_byte(chunk, 0);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       return compile_assign(comp, SYN_CALL, false);
     }
     compile_expression(comp);
@@ -884,7 +884,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     consume(comp, TOKEN_RPAREN);
     hk_chunk_emit_opcode(chunk, HK_OP_CALL);
     hk_chunk_emit_byte(chunk, num_args);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return compile_assign(comp, SYN_CALL, false);
   }
   if (syntax == SYN_NONE || syntax == SYN_SUBSCRIPT)
@@ -904,7 +904,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
   if (is_anonymous)
   {
     hk_chunk_emit_opcode(chunk, HK_OP_NIL);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
   }
   else
   {
@@ -916,7 +916,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
     index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
   }
   consume(comp, TOKEN_LBRACE);
   if (match(scan, TOKEN_RBRACE))
@@ -924,7 +924,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_STRUCT);
     hk_chunk_emit_byte(chunk, 0);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (!match(scan, TOKEN_NAME))
@@ -934,7 +934,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
   index = add_string_constant(comp, &tk);
   hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
   hk_chunk_emit_byte(chunk, index);
-  hk_function_add_line(fn, tk.line);
+  hk_chunk_add_line(chunk, tk.line);
   uint8_t length = 1;
   while (match(scan, TOKEN_COMMA))
   {
@@ -946,13 +946,13 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
     index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     ++length;
   }
   consume(comp, TOKEN_RBRACE);
   hk_chunk_emit_opcode(chunk, HK_OP_STRUCT);
   hk_chunk_emit_byte(chunk, length);
-  hk_function_add_line(fn, line);
+  hk_chunk_add_line(chunk, line);
 }
 
 static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
@@ -992,7 +992,7 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
       syntax_error_unexpected(comp);
     compile_block(&child_comp);
     hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
-    hk_function_add_line(fn, scan->token.line);
+    hk_chunk_add_line(chunk, scan->token.line);
     goto end;
   }
   bool is_mutable = false;
@@ -1034,14 +1034,14 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
     syntax_error_unexpected(comp);
   compile_block(&child_comp);
   hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
-  hk_function_add_line(fn, scan->token.line);
+  hk_chunk_add_line(chunk, scan->token.line);
   uint8_t index;
 end:
-  index = fn->num_functions;
+  index = fn->functions_length;
   hk_function_add_child(fn, child_comp.fn);
   hk_chunk_emit_opcode(chunk, HK_OP_CLOSURE);
   hk_chunk_emit_byte(chunk, index);
-  hk_function_add_line(fn, line);
+  hk_chunk_add_line(chunk, line);
 }
 
 static void compile_del_statement(compiler_t *comp)
@@ -1060,7 +1060,7 @@ static void compile_del_statement(compiler_t *comp)
       "cannot delete element from immutable variable `%.*s`", tk.length, tk.start);
   hk_chunk_emit_opcode(chunk, HK_OP_LOAD);
   hk_chunk_emit_byte(chunk, var.index);
-  hk_function_add_line(fn, tk.line);
+  hk_chunk_add_line(chunk, tk.line);
   compile_delete(comp, true);
   hk_chunk_emit_opcode(chunk, HK_OP_STORE);
   hk_chunk_emit_byte(chunk, var.index);
@@ -1081,11 +1081,11 @@ static void compile_delete(compiler_t *comp, bool inplace)
     {
       scanner_next_token(scan);
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_DELETE_ELEMENT : HK_OP_DELETE_ELEMENT);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       return;
     }
     hk_chunk_emit_opcode(chunk, HK_OP_FETCH_ELEMENT);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     compile_delete(comp, false);
     hk_chunk_emit_opcode(chunk, HK_OP_SET_ELEMENT);
     return;
@@ -1100,7 +1100,7 @@ static void compile_delete(compiler_t *comp, bool inplace)
     uint8_t index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_FETCH_FIELD);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     compile_delete(comp, false);
     hk_chunk_emit_opcode(chunk, HK_OP_SET_FIELD);
     return;
@@ -1261,7 +1261,7 @@ static void compile_for_statement(compiler_t *comp)
     else
       syntax_error_unexpected(comp);
   }
-  uint16_t jump1 = (uint16_t) chunk->length;
+  uint16_t jump1 = (uint16_t) chunk->code_length;
   bool missing = match(scan, TOKEN_SEMICOLON);
   int32_t offset1;
   if (missing)
@@ -1273,7 +1273,7 @@ static void compile_for_statement(compiler_t *comp)
     offset1 = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
   }
   int32_t offset2 = emit_jump(chunk, HK_OP_JUMP);
-  uint16_t jump2 = (uint16_t) chunk->length;
+  uint16_t jump2 = (uint16_t) chunk->code_length;
   loop_t loop;
   start_loop(comp, &loop);
   if (match(scan, TOKEN_RPAREN))
@@ -1346,7 +1346,7 @@ static void compile_return_statement(compiler_t *comp)
     int32_t line = scan->token.line;
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_RETURN_NIL);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   compile_expression(comp);
@@ -1430,7 +1430,7 @@ static void compile_comp_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_range_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_GREATER);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     if (match(scan, TOKEN_GTEQ))
@@ -1438,7 +1438,7 @@ static void compile_comp_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_range_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_NOT_LESS);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     if (match(scan, TOKEN_LT))
@@ -1446,7 +1446,7 @@ static void compile_comp_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_range_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_LESS);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     if (match(scan, TOKEN_LTEQ))
@@ -1454,7 +1454,7 @@ static void compile_comp_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_range_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_NOT_GREATER);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     break;
@@ -1473,7 +1473,7 @@ static void compile_range_expression(compiler_t *comp)
     scanner_next_token(scan);
     compile_add_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_RANGE);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
   }
 }
 
@@ -1491,7 +1491,7 @@ static void compile_add_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_mul_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_ADD);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     if (match(scan, TOKEN_MINUS))
@@ -1499,7 +1499,7 @@ static void compile_add_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_mul_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_SUBTRACT);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     break;
@@ -1520,7 +1520,7 @@ static void compile_mul_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_unary_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_MULTIPLY);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     if (match(scan, TOKEN_SLASH))
@@ -1528,7 +1528,7 @@ static void compile_mul_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_unary_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_DIVIDE);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     if (match(scan, TOKEN_TILDESLASH))
@@ -1536,7 +1536,7 @@ static void compile_mul_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_unary_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_QUOTIENT);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     if (match(scan, TOKEN_PERCENT))
@@ -1544,7 +1544,7 @@ static void compile_mul_expression(compiler_t *comp)
       scanner_next_token(scan);
       compile_unary_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_REMINDER);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     break;
@@ -1562,7 +1562,7 @@ static void compile_unary_expression(compiler_t *comp)
     scanner_next_token(scan);
     compile_unary_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_NEGATE);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (match(scan, TOKEN_BANG))
@@ -1585,21 +1585,21 @@ static void compile_prim_expression(compiler_t *comp)
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_NIL);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (match(scan, TOKEN_FALSE))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_FALSE);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (match(scan, TOKEN_TRUE))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_TRUE);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (match(scan, TOKEN_INT))
@@ -1610,13 +1610,13 @@ static void compile_prim_expression(compiler_t *comp)
     {
       hk_chunk_emit_opcode(chunk, HK_OP_INT);
       hk_chunk_emit_word(chunk, (uint16_t) data);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       return;
     }
     uint8_t index = add_float_constant(comp, data);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (match(scan, TOKEN_FLOAT))
@@ -1626,7 +1626,7 @@ static void compile_prim_expression(compiler_t *comp)
     uint8_t index = add_float_constant(comp, data);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (match(scan, TOKEN_STRING))
@@ -1636,7 +1636,7 @@ static void compile_prim_expression(compiler_t *comp)
     uint8_t index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (match(scan, TOKEN_LBRACKET))
@@ -1709,7 +1709,7 @@ static void compile_array_constructor(compiler_t *comp)
 end:
   hk_chunk_emit_opcode(chunk, HK_OP_ARRAY);
   hk_chunk_emit_byte(chunk, length);
-  hk_function_add_line(fn, line);
+  hk_chunk_add_line(chunk, line);
   return;
 }
 
@@ -1721,13 +1721,13 @@ static void compile_struct_constructor(compiler_t *comp)
   int32_t line = scan->token.line;
   scanner_next_token(scan);
   hk_chunk_emit_opcode(chunk, HK_OP_NIL);
-  hk_function_add_line(fn, line);
+  hk_chunk_add_line(chunk, line);
   if (match(scan, TOKEN_RBRACE))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTRUCT);
     hk_chunk_emit_byte(chunk, 0);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
     return;
   }
   if (!match(scan, TOKEN_NAME))
@@ -1737,7 +1737,7 @@ static void compile_struct_constructor(compiler_t *comp)
   uint8_t index = add_string_constant(comp, &tk);
   hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
   hk_chunk_emit_byte(chunk, index);
-  hk_function_add_line(fn, tk.line);
+  hk_chunk_add_line(chunk, tk.line);
   consume(comp, TOKEN_COLON);
   compile_expression(comp);
   uint8_t length = 1;
@@ -1751,7 +1751,7 @@ static void compile_struct_constructor(compiler_t *comp)
     index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk.line);
+    hk_chunk_add_line(chunk, tk.line);
     consume(comp, TOKEN_COLON);
     compile_expression(comp);
     ++length;
@@ -1759,7 +1759,7 @@ static void compile_struct_constructor(compiler_t *comp)
   consume(comp, TOKEN_RBRACE);
   hk_chunk_emit_opcode(chunk, HK_OP_CONSTRUCT);
   hk_chunk_emit_byte(chunk, length);
-  hk_function_add_line(fn, line);
+  hk_chunk_add_line(chunk, line);
 }
 
 static void compile_if_expression(compiler_t *comp)
@@ -1860,7 +1860,7 @@ static void compile_subscript(compiler_t *comp)
       compile_expression(comp);
       consume(comp, TOKEN_RBRACKET);
       hk_chunk_emit_opcode(chunk, HK_OP_GET_ELEMENT);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     if (match(scan, TOKEN_DOT))
@@ -1873,7 +1873,7 @@ static void compile_subscript(compiler_t *comp)
       uint8_t index = add_string_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_GET_FIELD);
       hk_chunk_emit_byte(chunk, index);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     if (match(scan, TOKEN_LPAREN))
@@ -1884,7 +1884,7 @@ static void compile_subscript(compiler_t *comp)
         scanner_next_token(scan);
         hk_chunk_emit_opcode(chunk, HK_OP_CALL);
         hk_chunk_emit_byte(chunk, 0);
-        hk_function_add_line(fn, line);
+        hk_chunk_add_line(chunk, line);
         return;
       }
       compile_expression(comp);
@@ -1898,7 +1898,7 @@ static void compile_subscript(compiler_t *comp)
       consume(comp, TOKEN_RPAREN);
       hk_chunk_emit_opcode(chunk, HK_OP_CALL);
       hk_chunk_emit_byte(chunk, num_args);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       continue;
     }
     break;
@@ -1912,7 +1912,7 @@ static void compile_subscript(compiler_t *comp)
       scanner_next_token(scan);
       hk_chunk_emit_opcode(chunk, HK_OP_INSTANCE);
       hk_chunk_emit_byte(chunk, 0);
-      hk_function_add_line(fn, line);
+      hk_chunk_add_line(chunk, line);
       return;
     }
     compile_expression(comp);
@@ -1926,7 +1926,7 @@ static void compile_subscript(compiler_t *comp)
     consume(comp, TOKEN_RBRACE);
     hk_chunk_emit_opcode(chunk, HK_OP_INSTANCE);
     hk_chunk_emit_byte(chunk, num_args);
-    hk_function_add_line(fn, line);
+    hk_chunk_add_line(chunk, line);
   }
 }
 
@@ -1941,7 +1941,7 @@ static variable_t compile_variable(compiler_t *comp, token_t *tk, bool emit)
       return *var;
     hk_chunk_emit_opcode(chunk, var->is_local ? HK_OP_LOAD : HK_OP_NONLOCAL);
     hk_chunk_emit_byte(chunk, var->index);
-    hk_function_add_line(fn, tk->line);
+    hk_chunk_add_line(chunk, tk->line);
     return *var;
   }
   var = compile_nonlocal(comp->parent, tk);
@@ -1950,7 +1950,7 @@ static variable_t compile_variable(compiler_t *comp, token_t *tk, bool emit)
     uint8_t index = add_nonlocal(comp, tk);
     hk_chunk_emit_opcode(chunk, HK_OP_NONLOCAL);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk->line);
+    hk_chunk_add_line(chunk, tk->line);
     return *var;
   }
   int32_t index = lookup_global(tk->length, tk->start);
@@ -1959,7 +1959,7 @@ static variable_t compile_variable(compiler_t *comp, token_t *tk, bool emit)
       "variable `%.*s` is used but not defined", tk->length, tk->start);
   hk_chunk_emit_opcode(chunk, HK_OP_GLOBAL);
   hk_chunk_emit_byte(chunk, (uint8_t) index);
-  hk_function_add_line(fn, tk->line);
+  hk_chunk_add_line(chunk, tk->line);
   return (variable_t) {.is_local = false, .depth = -1, .index = index, .length = tk->length,
     .start = tk->start, .is_mutable = false};
 }
@@ -1983,7 +1983,7 @@ static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk)
     }
     hk_chunk_emit_opcode(chunk, op);
     hk_chunk_emit_byte(chunk, var->index);
-    hk_function_add_line(fn, tk->line);
+    hk_chunk_add_line(chunk, tk->line);
     return var;
   }
   var = compile_nonlocal(comp->parent, tk);
@@ -1992,7 +1992,7 @@ static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk)
     uint8_t index = add_nonlocal(comp, tk);
     hk_chunk_emit_opcode(chunk, HK_OP_NONLOCAL);
     hk_chunk_emit_byte(chunk, index);
-    hk_function_add_line(fn, tk->line);
+    hk_chunk_add_line(chunk, tk->line);
     return var;
   }
   return NULL;
@@ -2012,7 +2012,7 @@ hk_closure_t *hk_compile(hk_string_t *file, hk_string_t *source)
   hk_function_t *fn = comp.fn;
   hk_chunk_t *chunk = &fn->chunk;
   hk_chunk_emit_opcode(chunk, HK_OP_RETURN_NIL);
-  hk_function_add_line(fn, scan.token.line);
+  hk_chunk_add_line(chunk, scan.token.line);
   hk_closure_t *cl = hk_closure_new(fn);
   scanner_free(&scan);
   return cl;

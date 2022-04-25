@@ -13,13 +13,13 @@ void hk_dump(hk_function_t *fn)
   char *file_chars = file ? file->chars : "<srdin>";
   printf("%s in %s at %p\n", name_chars, file_chars, fn);
   printf("%d parameter(s), %d non-local(s), %d constant(s), %d function(s)\n", fn->arity,
-    fn->num_nonlocals, fn->consts->length, fn->num_functions);
-  uint8_t *bytes = fn->chunk.bytes;
+    fn->num_nonlocals, fn->chunk.consts->length, fn->functions_length);
+  uint8_t *code = fn->chunk.code;
   int32_t i = 0;
   int32_t n = 0;
-  while (i < fn->chunk.length)
+  while (i < fn->chunk.code_length)
   {
-    int32_t op = bytes[i];
+    int32_t op = code[i];
     int32_t j = i++;
     ++n;
     switch (op)
@@ -35,52 +35,52 @@ void hk_dump(hk_function_t *fn)
       break;
     case HK_OP_INT:
       {
-        int32_t data = *((uint16_t*) &bytes[i]);
+        int32_t data = *((uint16_t*) &code[i]);
         i += 2;
         printf("  [%05d] Int                   %d\n", j, data);
       }
       break;
     case HK_OP_CONSTANT:
-      printf("  [%05d] Constant              %d\n", j, bytes[i++]);
+      printf("  [%05d] Constant              %d\n", j, code[i++]);
       break;
     case HK_OP_RANGE:
       printf("  [%05d] Range\n", j);
       break;
     case HK_OP_ARRAY:
-      printf("  [%05d] Array                 %d\n", j, bytes[i++]);
+      printf("  [%05d] Array                 %d\n", j, code[i++]);
       break;
     case HK_OP_STRUCT:
-      printf("  [%05d] Struct                %d\n", j, bytes[i++]);
+      printf("  [%05d] Struct                %d\n", j, code[i++]);
       break;
     case HK_OP_INSTANCE:
-      printf("  [%05d] Instance              %d\n", j, bytes[i++]);
+      printf("  [%05d] Instance              %d\n", j, code[i++]);
       break;
     case HK_OP_CONSTRUCT:
-      printf("  [%05d] Construct             %d\n", j, bytes[i++]);
+      printf("  [%05d] Construct             %d\n", j, code[i++]);
       break;
     case HK_OP_CLOSURE:
-      printf("  [%05d] Closure               %d\n", j, bytes[i++]);
+      printf("  [%05d] Closure               %d\n", j, code[i++]);
       break;
     case HK_OP_UNPACK:
-      printf("  [%05d] Unpack                %d\n", j, bytes[i++]);
+      printf("  [%05d] Unpack                %d\n", j, code[i++]);
       break;
     case HK_OP_DESTRUCT:
-      printf("  [%05d] Destruct              %d\n", j, bytes[i++]);
+      printf("  [%05d] Destruct              %d\n", j, code[i++]);
       break;
     case HK_OP_POP:
       printf("  [%05d] Pop\n", j);
       break;
     case HK_OP_GLOBAL:
-      printf("  [%05d] Global                %d\n", j, bytes[i++]);
+      printf("  [%05d] Global                %d\n", j, code[i++]);
       break;
     case HK_OP_NONLOCAL:
-      printf("  [%05d] NonLocal              %d\n", j, bytes[i++]);
+      printf("  [%05d] NonLocal              %d\n", j, code[i++]);
       break;
     case HK_OP_LOAD:
-      printf("  [%05d] Load                  %d\n", j, bytes[i++]);
+      printf("  [%05d] Load                  %d\n", j, code[i++]);
       break;
     case HK_OP_STORE:
-      printf("  [%05d] Store                 %d\n", j, bytes[i++]);
+      printf("  [%05d] Store                 %d\n", j, code[i++]);
       break;
     case HK_OP_ADD_ELEMENT:
       printf("  [%05d] AddElement\n", j);
@@ -110,51 +110,51 @@ void hk_dump(hk_function_t *fn)
       printf("  [%05d] InplaceDeleteElement\n", j);
       break;
     case HK_OP_GET_FIELD:
-      printf("  [%05d] GetField              %d\n", j, bytes[i++]);
+      printf("  [%05d] GetField              %d\n", j, code[i++]);
       break;
     case HK_OP_FETCH_FIELD:
-      printf("  [%05d] FetchField            %d\n", j, bytes[i++]);
+      printf("  [%05d] FetchField            %d\n", j, code[i++]);
       break;
     case HK_OP_SET_FIELD:
       printf("  [%05d] SetField\n", j);
       break;
     case HK_OP_PUT_FIELD:
-      printf("  [%05d] PutField              %d\n", j, bytes[i++]);
+      printf("  [%05d] PutField              %d\n", j, code[i++]);
       break;
     case HK_OP_INPLACE_PUT_FIELD:
-      printf("  [%05d] InplacePutField       %d\n", j, bytes[i++]);
+      printf("  [%05d] InplacePutField       %d\n", j, code[i++]);
       break;
     case HK_OP_JUMP:
       {
-        int32_t offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
         printf("  [%05d] Jump                  %d\n", j, offset);
       }
       break;
     case HK_OP_JUMP_IF_FALSE:
       {
-        int32_t offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
         printf("  [%05d] JumpIfFalse           %d\n", j, offset);
       }
       break;
     case HK_OP_OR:
       {
-        int32_t offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
         printf("  [%05d] Or                    %d\n", j, offset);
       }
       break;
     case HK_OP_AND:
       {
-        int32_t offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
         printf("  [%05d] And                   %d\n", j, offset);
       }
       break;
     case HK_OP_MATCH:
       {
-        int32_t offset = *((uint16_t*) &bytes[i]);
+        int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
         printf("  [%05d] Match                 %d\n", j, offset);
       }
@@ -208,7 +208,7 @@ void hk_dump(hk_function_t *fn)
       printf("  [%05d] Decr\n", j);
       break;
     case HK_OP_CALL:
-      printf("  [%05d] Call                  %d\n", j, bytes[i++]);
+      printf("  [%05d] Call                  %d\n", j, code[i++]);
       break;
     case HK_OP_LOAD_MODULE:
       printf("  [%05d] LoadModule\n", j);
@@ -222,6 +222,6 @@ void hk_dump(hk_function_t *fn)
     }
   }
   printf("%d instruction(s)\n\n", n);
-  for (int32_t i = 0; i < fn->num_functions; ++i)
+  for (int32_t i = 0; i < fn->functions_length; ++i)
     hk_dump(fn->functions[i]);  
 }

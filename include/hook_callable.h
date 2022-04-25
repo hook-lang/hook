@@ -8,13 +8,6 @@
 
 #include "hook_string.h"
 #include "hook_chunk.h"
-#include "hook_array.h"
-
-typedef struct
-{
-  int32_t no;
-  int32_t offset;
-} hk_line_t;
 
 typedef struct hk_function
 {
@@ -22,13 +15,9 @@ typedef struct hk_function
   int32_t arity;
   hk_string_t *name;
   hk_string_t *file;
-  int32_t lines_capacity;
-  int32_t num_lines;
-  hk_line_t *lines;
   hk_chunk_t chunk;
-  hk_array_t *consts;
   uint8_t functions_capacity;
-  uint8_t num_functions;
+  uint8_t functions_length;
   struct hk_function **functions;
   uint8_t num_nonlocals;
 } hk_function_t;
@@ -53,8 +42,6 @@ typedef struct
 hk_function_t *hk_function_new(int32_t arity, hk_string_t *name, hk_string_t *file);
 void hk_function_free(hk_function_t *fn);
 void hk_function_release(hk_function_t *fn);
-void hk_function_add_line(hk_function_t *fn, int32_t line_no);
-int32_t hk_function_get_line(hk_function_t *fn, int32_t offset);
 void hk_function_add_child(hk_function_t *fn, hk_function_t *child);
 void hk_function_serialize(hk_function_t *fn, FILE *stream);
 hk_function_t *hk_function_deserialize(FILE *stream);
