@@ -28,7 +28,8 @@ static inline int32_t unpack(hk_vm_t *vm, int32_t n);
 static inline int32_t destruct(hk_vm_t *vm, int32_t n);
 static inline int32_t add_element(hk_vm_t *vm);
 static inline int32_t get_element(hk_vm_t *vm);
-static inline int32_t slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range);
+static inline void slice_string(hk_vm_t *vm, hk_value_t *slots, hk_string_t *str, hk_range_t *range);
+static inline void slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range);
 static inline int32_t fetch_element(hk_vm_t *vm);
 static inline void set_element(hk_vm_t *vm);
 static inline int32_t put_element(hk_vm_t *vm);
@@ -326,9 +327,36 @@ static inline int32_t get_element(hk_vm_t *vm)
   hk_value_t *slots = &vm->slots[vm->top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
+  if (hk_is_string(val1))
+  {
+    hk_string_t *str = hk_as_string(val1);
+    if (hk_is_int(val2))
+    {
+      int64_t index = (int64_t) val2.as_float;
+      if (index < 0 || index >= str->length)
+      {
+        hk_runtime_error("range error: index %d is out of bounds for string of length %d",
+          index, str->length);
+        return HK_STATUS_ERROR;
+      }
+      hk_value_t result = hk_string_value(hk_string_from_chars(1, &str->chars[(int32_t) index]));
+      hk_value_incr_ref(result);
+      slots[0] = result;
+      --vm->top;
+      hk_string_release(str);
+      return HK_STATUS_OK;
+    }
+    if (!hk_is_range(val2))
+    {
+      hk_runtime_error("type error: string cannot be indexed by %s", hk_type_name(val2.type));
+      return HK_STATUS_ERROR;
+    }
+    slice_string(vm, slots, str, hk_as_range(val2));
+    return HK_STATUS_OK;
+  }
   if (!hk_is_array(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an array", hk_type_name(val1.type));
+    hk_runtime_error("type error: %s cannot be indexed", hk_type_name(val1.type));
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
@@ -341,20 +369,50 @@ static inline int32_t get_element(hk_vm_t *vm)
         index, arr->length);
       return HK_STATUS_ERROR;
     }
-    hk_value_t elem = hk_array_get_element(arr, (int32_t) index);
-    hk_value_incr_ref(elem);
-    slots[0] = elem;
+    hk_value_t result = hk_array_get_element(arr, (int32_t) index);
+    hk_value_incr_ref(result);
+    slots[0] = result;
     --vm->top;
     hk_array_release(arr);
     return HK_STATUS_OK;
   }
-  if (hk_is_range(val2))
-    return slice_array(vm, slots, arr, hk_as_range(val2));
-  hk_runtime_error("type error: array cannot be indexed by %s", hk_type_name(val2.type));
-  return HK_STATUS_ERROR;
+  if (!hk_is_range(val2))
+  {
+    hk_runtime_error("type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    return HK_STATUS_ERROR;
+  }
+  slice_array(vm, slots, arr, hk_as_range(val2));
+  return HK_STATUS_OK;
 }
 
-static inline int32_t slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range)
+static inline void slice_string(hk_vm_t *vm, hk_value_t *slots, hk_string_t *str, hk_range_t *range)
+{
+  int32_t str_end = str->length - 1;
+  int64_t start = range->start;
+  int64_t end = range->end;
+  hk_string_t *result;
+  if (start > end || start > str_end || end < 0)
+  {
+    result = hk_string_new();
+    goto end;
+  }
+  if (start <= 0 && end >= str_end)
+  {
+    --vm->top;
+    hk_range_release(range);
+    return;
+  }
+  int32_t length = end - start + 1;
+  result = hk_string_from_chars(length, &str->chars[start]);
+end:
+  hk_incr_ref(result);
+  slots[0] = hk_string_value(result);
+  --vm->top;
+  hk_string_release(str);
+  hk_range_release(range);
+}
+
+static inline void slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range)
 {
   int32_t arr_end = arr->length - 1;
   int64_t start = range->start;
@@ -369,7 +427,7 @@ static inline int32_t slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *ar
   {
     --vm->top;
     hk_range_release(range);
-    return HK_STATUS_OK;
+    return;
   }
   int32_t length = end - start + 1;
   result = hk_array_new_with_capacity(length);
@@ -386,7 +444,6 @@ end:
   --vm->top;
   hk_array_release(arr);
   hk_range_release(range);
-  return HK_STATUS_OK;
 }
 
 static inline int32_t fetch_element(hk_vm_t *vm)
