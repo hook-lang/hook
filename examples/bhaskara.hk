@@ -1,0 +1,17 @@
+//
+// bhaskara.hk
+//
+
+use { sqrt } from math;
+
+fn bhaskara(a, b, c) {
+  val d = b * b - 4 * a * c;
+  if (d < 0)
+    return nil;
+  val sd = sqrt(d);
+  val x1 = (-b + sd) / (2 * a);
+  val x2 = (-b - sd) / (2 * a);
+  return [x1, x2];
+}
+
+println(bhaskara(1, 3, 2));
