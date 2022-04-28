@@ -56,6 +56,11 @@ It's possible to run our `Hello, world!` directly from the command-line interfac
 hook -e 'println("Hello, world!");'
 ```
 
+## Documentation
+
+Sorry. The language undergoes constant changes, including in its lexemes and syntax. That's why there's no documentation.
+Maybe the `examples` folder will help.
+
 ## License
 
 Hook is released under [MIT](https://choosealicense.com/licenses/mit/) license.
