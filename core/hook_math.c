@@ -24,7 +24,10 @@ static int32_t ceil_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t round_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t pow_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sqrt_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t cbrt_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t log_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t log2_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t log10_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t exp_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t random_call(hk_vm_t *vm, hk_value_t *args);
 
@@ -114,11 +117,32 @@ static int32_t sqrt_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_float(vm, sqrt(args[1].as_float));
 }
 
+static int32_t cbrt_call(hk_vm_t *vm, hk_value_t *args)
+{
+  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_vm_push_float(vm, cbrt(args[1].as_float));
+}
+
 static int32_t log_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_vm_push_float(vm, log(args[1].as_float));
+}
+
+static int32_t log2_call(hk_vm_t *vm, hk_value_t *args)
+{
+  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_vm_push_float(vm, log2(args[1].as_float));
+}
+
+static int32_t log10_call(hk_vm_t *vm, hk_value_t *args)
+{
+  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_vm_push_float(vm, log10(args[1].as_float));
 }
 
 static int32_t exp_call(hk_vm_t *vm, hk_value_t *args)
@@ -196,9 +220,21 @@ int32_t load_math(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "sqrt", 1, &sqrt_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
+  if (hk_vm_push_string_from_chars(vm, -1, "cbrt") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_new_native(vm, "cbrt", 1, &cbrt_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "log") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "log", 0, &log_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_string_from_chars(vm, -1, "log2") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_new_native(vm, "log2", 0, &log2_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_string_from_chars(vm, -1, "log10") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_new_native(vm, "log10", 0, &log10_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "exp") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -208,5 +244,5 @@ int32_t load_math(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "random", 0, &random_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 16);
+  return hk_vm_construct(vm, 19);
 }

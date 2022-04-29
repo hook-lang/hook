@@ -15,6 +15,7 @@ math:
   round(num: float) -> int
   pow(base: float, power: float) -> float
   sqrt(num: float) -> float
+  cbrt(num: float) -> float
   log(num: float) -> float
   exp(num: float) -> float
   random() -> float
