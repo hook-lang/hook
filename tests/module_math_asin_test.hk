@@ -1,0 +1,3 @@
+
+use math;
+println(math.asin(1));
