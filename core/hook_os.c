@@ -48,7 +48,7 @@ int32_t load_os(hk_vm_t *vm)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "os") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "ClocksPerSecond") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "CLOCKS_PER_SEC") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_float(vm, CLOCKS_PER_SEC) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

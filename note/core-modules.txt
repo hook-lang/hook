@@ -1,7 +1,7 @@
 
 math:
 
-  Pi: float
+  PI: float
 
   abs(num: float) -> float
   sin(num: float) -> float
@@ -25,7 +25,7 @@ math:
 
 os:
 
-  ClocksPerSecond: float
+  CLOCKS_PER_SEC: float
 
   clock() -> int
   time() -> int
@@ -34,12 +34,13 @@ os:
 
 io:
 
-  StdIn: userdata
-  StdOut: userdata
-  StdErr: userdata
-  SeekSet: float
-  SeekCurrent: float
-  SeekEnd: float
+  SEEK_SET: float
+  SEEK_CUR: float
+  SEEK_END: float
+
+  stdin: userdata
+  stdout: userdata
+  stderr: userdata
 
   open(filename: string, mode: string) -> nil|userdata
   close(stream: userdata) -> int

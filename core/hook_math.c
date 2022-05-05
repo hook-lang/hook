@@ -168,7 +168,7 @@ int32_t load_math(hk_vm_t *vm)
   srand((uint32_t) time(NULL));
   if (hk_vm_push_string_from_chars(vm, -1, "math") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "Pi") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "PI") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_float(vm, M_PI) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

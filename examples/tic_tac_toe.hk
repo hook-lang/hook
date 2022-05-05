@@ -2,7 +2,7 @@
 // tic_tac_toe.hk
 //
 
-use { StdIn, readln } from io;
+use { stdin, readln } from io;
 
 fn grid_char(i) {
   return match (i) {
@@ -84,7 +84,7 @@ fn player_move(mut board) {
   mut move;
   do {
     print("Input move ([0..8]): ");
-    move = to_int(readln(StdIn));
+    move = to_int(readln(stdin));
   } while (move >= 9 || move < 0 && board[move] == 0);
   board[move] = -1;
   return board;
@@ -95,7 +95,7 @@ mut board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 println("CPU: O, You: X");
 println("Play (1)st or (2)nd? ");
 
-val player = to_int(readln(StdIn));
+val player = to_int(readln(stdin));
 
 for (mut turn = 0; turn < 9 && win(board) == 0; turn++) {
   if ((turn + player) % 2 == 0) {

@@ -1,7 +1,7 @@
 
-use { Pi, sqrt } from math;
+use { PI, sqrt } from math;
 
-val SOLAR_MASS = 4 * Pi * Pi;
+val SOLAR_MASS = 4 * PI * PI;
 val DAYS_PER_YEAR = 365.24;
 
 struct Body {

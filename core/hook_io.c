@@ -233,27 +233,27 @@ int32_t load_io(hk_vm_t *vm)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "io") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "StdIn") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "stdin") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_userdata(vm, (hk_userdata_t *) file_new(stdin)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "StdOut") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "stdout") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_userdata(vm, (hk_userdata_t *) file_new(stdout)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "StdErr") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "stderr") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_userdata(vm, (hk_userdata_t *) file_new(stderr)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "SeekSet") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "SEEK_SET") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_float(vm, SEEK_SET) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "SeekCurrent") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "SEEK_CUR") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_float(vm, SEEK_CUR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "SeeEnd") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "SEEK_END") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_float(vm, SEEK_END) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
