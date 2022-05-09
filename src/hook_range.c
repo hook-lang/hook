@@ -70,7 +70,7 @@ void hk_range_release(hk_range_t *range)
 
 void hk_range_print(hk_range_t *range)
 {
-  printf("%ld..%ld", range->start, range->end);
+  printf("%lld..%lld", (long long) range->start, (long long) range->end);
 }
 
 bool hk_range_equal(hk_range_t *range1, hk_range_t *range2)
