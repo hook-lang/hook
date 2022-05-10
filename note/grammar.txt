@@ -22,7 +22,7 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
 
 var_decl    ::= 'val' NAME '=' expr
               | 'mut' NAME ( '=' expr )?
-              | ( 'val' | 'mut' ) '[' NAME ( ',' NAME )* ']' '=' expr
+              | ( 'val' | 'mut' ) '[' '_' | NAME ( ',' '_' | NAME )* ']' '=' expr
               | ( 'val' | 'mut' ) '{' NAME ( ',' NAME )* '}' '=' expr
 
 assign_call ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '%=' ) expr

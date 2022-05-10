@@ -32,6 +32,11 @@
 #define SYN_CALL      0x02
 #define SYN_SUBSCRIPT 0x03
 
+#define add_placeholder(c) do \
+  { \
+    ++(c)->local_index; \
+  } while (0)
+
 typedef struct
 {
   bool is_local;
@@ -560,17 +565,27 @@ static void compile_constant_declaration(compiler_t *comp)
   if (match(scan, TOKEN_LBRACKET))
   {
     scanner_next_token(scan);
-    if (!match(scan, TOKEN_NAME))
-      syntax_error_unexpected(comp);
-    define_local(comp, &scan->token, false);
+    if (match(scan, TOKEN_UNDERSCORE))
+      add_placeholder(comp);
+    else
+    {
+      if (!match(scan, TOKEN_NAME))
+        syntax_error_unexpected(comp);
+      define_local(comp, &scan->token, false);
+    }
     scanner_next_token(scan);
     uint8_t n = 1;
     while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
-      if (!match(scan, TOKEN_NAME))
-        syntax_error_unexpected(comp);
-      define_local(comp, &scan->token, false);
+      if (match(scan, TOKEN_UNDERSCORE))
+        add_placeholder(comp);
+      else
+      {
+        if (!match(scan, TOKEN_NAME))
+          syntax_error_unexpected(comp);
+        define_local(comp, &scan->token, false);
+      }
       scanner_next_token(scan);
       ++n;
     }
@@ -645,17 +660,27 @@ static void compile_variable_declaration(compiler_t *comp)
   if (match(scan, TOKEN_LBRACKET))
   {
     scanner_next_token(scan);
-    if (!match(scan, TOKEN_NAME))
-      syntax_error_unexpected(comp);
-    define_local(comp, &scan->token, true);
+    if (match(scan, TOKEN_UNDERSCORE))
+      add_placeholder(comp);
+    else
+    {
+      if (!match(scan, TOKEN_NAME))
+        syntax_error_unexpected(comp);
+      define_local(comp, &scan->token, false);
+    }
     scanner_next_token(scan);
     uint8_t n = 1;
     while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
-      if (!match(scan, TOKEN_NAME))
-        syntax_error_unexpected(comp);
-      define_local(comp, &scan->token, true);
+      if (match(scan, TOKEN_UNDERSCORE))
+        add_placeholder(comp);
+      else
+      {
+        if (!match(scan, TOKEN_NAME))
+          syntax_error_unexpected(comp);
+        define_local(comp, &scan->token, false);
+      }
       scanner_next_token(scan);
       ++n;
     }

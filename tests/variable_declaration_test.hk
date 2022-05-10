@@ -11,6 +11,9 @@ val {k, l} = {k: "foo", l: "bar"};
 mut {m} = {m: "baz"};
 mut {n, o, p} = {n: "qux", p: "quux"};
 
+val [_, q, _] = [1, 2, 3];
+mut [r, _, s] = [4, 5, 6];
+
 println(a);
 println(b);
 println(c);
@@ -27,3 +30,6 @@ println(m);
 println(n);
 println(o);
 println(p);
+println(q);
+println(r);
+println(s);
