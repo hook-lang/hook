@@ -809,7 +809,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
   {
     scanner_next_token(scan);
     compile_expression(comp);
-    hk_chunk_emit_opcode(chunk, HK_OP_REMINDER);
+    hk_chunk_emit_opcode(chunk, HK_OP_REMAINDER);
     hk_chunk_add_line(chunk, line);
     return SYN_ASSIGN;
   }
@@ -1568,7 +1568,7 @@ static void compile_mul_expression(compiler_t *comp)
     {
       scanner_next_token(scan);
       compile_unary_expression(comp);
-      hk_chunk_emit_opcode(chunk, HK_OP_REMINDER);
+      hk_chunk_emit_opcode(chunk, HK_OP_REMAINDER);
       hk_chunk_add_line(chunk, line);
       continue;
     }

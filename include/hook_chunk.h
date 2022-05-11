@@ -56,7 +56,7 @@
 #define HK_OP_MULTIPLY               0x2d
 #define HK_OP_DIVIDE                 0x2e
 #define HK_OP_QUOTIENT               0x2f
-#define HK_OP_REMINDER               0x30
+#define HK_OP_REMAINDER              0x30
 #define HK_OP_NEGATE                 0x31
 #define HK_OP_NOT                    0x32
 #define HK_OP_INCR                   0x33

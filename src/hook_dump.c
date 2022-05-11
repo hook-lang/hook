@@ -192,8 +192,8 @@ void hk_dump(hk_function_t *fn)
     case HK_OP_QUOTIENT:
       printf("  [%05d] Quotient\n", j);
       break;
-    case HK_OP_REMINDER:
-      printf("  [%05d] Reminder\n", j);
+    case HK_OP_REMAINDER:
+      printf("  [%05d] Remainder\n", j);
       break;
     case HK_OP_NEGATE:
       printf("  [%05d] Negate\n", j);
