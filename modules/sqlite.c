@@ -6,7 +6,6 @@
 #include "sqlite.h"
 #include <stdlib.h>
 #include <sqlite3.h>
-#include <assert.h>
 
 typedef struct
 {
@@ -30,7 +29,7 @@ static int32_t execute_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t prepare_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t finalize_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t bind_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t fetch_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args);
 
 static inline sqlite_t *sqlite_new(sqlite3 *db)
 {
@@ -152,7 +151,7 @@ static int32_t bind_call(hk_vm_t *vm, hk_value_t *args)
     NULL));
 }
 
-static int32_t fetch_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -229,9 +228,9 @@ int32_t load_sqlite(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "bind", 3, &bind_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "fetch") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "fetch_row") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "fetch", 1, &fetch_call) == HK_STATUS_ERROR)
+  if (hk_vm_push_new_native(vm, "fetch_row", 1, &fetch_row_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_vm_construct(vm, 7);
 }

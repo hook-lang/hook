@@ -30,6 +30,7 @@ static int32_t error_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t select_db_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t query_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t affected_rows_call(hk_vm_t *vm, hk_value_t *args);
 
 static inline mysql_t *mysql_new(MYSQL *my)
 {
@@ -187,6 +188,7 @@ static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   MYSQL_RES *res = ((mysql_result_t *) hk_as_userdata(args[1]))->res;
+  MYSQL_FIELD *fields = mysql_fetch_fields(res);
   MYSQL_ROW row = mysql_fetch_row(res);
   if (!row)
     return hk_vm_push_nil(vm);
@@ -195,10 +197,56 @@ static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args)
   for (int32_t i = 0; i < num_fields; ++i)
   {
     char *chars = row[i];
-    hk_value_t elem = chars ? hk_string_value(hk_string_from_chars(-1, chars)) : HK_NIL_VALUE;
+    hk_value_t elem = HK_NIL_VALUE;
+    switch (fields[i].type)
+    {
+    case MYSQL_TYPE_NULL:
+      break;
+    case MYSQL_TYPE_DECIMAL:
+    case MYSQL_TYPE_TINY:
+    case MYSQL_TYPE_SHORT:
+    case MYSQL_TYPE_LONG:
+    case MYSQL_TYPE_FLOAT:
+    case MYSQL_TYPE_DOUBLE:
+    case MYSQL_TYPE_LONGLONG:
+    case MYSQL_TYPE_INT24:
+    case MYSQL_TYPE_YEAR:
+    case MYSQL_TYPE_NEWDECIMAL:
+      elem = hk_float_value(atof(chars));
+      break;
+    case MYSQL_TYPE_TIMESTAMP:
+    case MYSQL_TYPE_DATE:
+    case MYSQL_TYPE_TIME:
+    case MYSQL_TYPE_DATETIME:
+    case MYSQL_TYPE_VARCHAR:
+    case MYSQL_TYPE_BIT:
+    case MYSQL_TYPE_TIMESTAMP2:
+    case MYSQL_TYPE_JSON:
+    case MYSQL_TYPE_ENUM:
+    case MYSQL_TYPE_SET:
+    case MYSQL_TYPE_TINY_BLOB:
+    case MYSQL_TYPE_MEDIUM_BLOB:
+    case MYSQL_TYPE_LONG_BLOB:
+    case MYSQL_TYPE_BLOB:
+    case MYSQL_TYPE_VAR_STRING:
+    case MYSQL_TYPE_STRING:
+    case MYSQL_TYPE_GEOMETRY:
+      elem = hk_string_value(hk_string_from_chars(-1, chars));
+      break;
+    default:
+      break;
+    }
     hk_array_inplace_add_element(arr, elem);
   }
   return hk_vm_push_array(vm, arr);
+}
+
+static int32_t affected_rows_call(hk_vm_t *vm, hk_value_t *args)
+{
+  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  MYSQL *my = ((mysql_t *) hk_as_userdata(args[1]))->my;
+  return hk_vm_push_float(vm, (double) mysql_affected_rows(my));
 }
 
 #ifdef _WIN32
@@ -237,5 +285,9 @@ int32_t load_mysql(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "fetch_row", 1, &fetch_row_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 7);
+  if (hk_vm_push_string_from_chars(vm, -1, "affected_rows") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_new_native(vm, "affected_rows", 1, &affected_rows_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_vm_construct(vm, 8);
 }
