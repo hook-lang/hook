@@ -1,0 +1,21 @@
+//
+// collatz.hk
+//
+
+fn collatz(mut n) {
+  mut count = 0;
+  while (n != 1) {
+    count++;
+    if (n % 2 == 0)
+      n /= 2;
+    else
+      n = n * 3 + 1;
+  }
+  return count;
+}
+
+println(collatz(2));
+println(collatz(3));
+println(collatz(4));
+println(collatz(5));
+println(collatz(6));
