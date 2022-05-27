@@ -1,0 +1,7 @@
+
+use { reverse } from strings;
+
+assert(reverse("") == "", "reverse('') == ''");
+assert(reverse("foo") == "oof", "reverse('foo') == 'oof'");
+assert(reverse("foobar") == "raboof", "reverse('foobar') == 'raboof'");
+assert(reverse("foobarbaz") == "zabraboof", "reverse('foobarbaz') == 'zabraboof'");

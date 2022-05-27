@@ -230,6 +230,17 @@ bool hk_string_ends_with(hk_string_t *str1, hk_string_t *str2)
   return !memcmp(&str1->chars[str1->length - str2->length], str2->chars, str2->length);
 }
 
+hk_string_t *hk_string_reverse(hk_string_t *str)
+{
+  int32_t length = str->length;
+  hk_string_t *result = string_allocate(length);
+  result->length = length;
+  for (int32_t i = 0; i < length; ++i)
+    result->chars[i] = str->chars[length - i - 1];
+  result->chars[length] = '\0';
+  return result;
+}
+
 bool hk_string_slice(hk_string_t *str, int32_t start, int32_t stop, hk_string_t **result)
 {
   if (start < 1 && stop >= str->length)

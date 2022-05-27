@@ -38,6 +38,7 @@ hk_string_t *hk_string_upper(hk_string_t *str);
 bool hk_string_trim(hk_string_t *str, hk_string_t **result);
 bool hk_string_starts_with(hk_string_t *str1, hk_string_t *str2);
 bool hk_string_ends_with(hk_string_t *str1, hk_string_t *str2);
+hk_string_t *hk_string_reverse(hk_string_t *str);
 bool hk_string_slice(hk_string_t *str, int32_t start, int32_t stop, hk_string_t **result);
 void hk_string_serialize(hk_string_t *str, FILE *stream);
 hk_string_t *hk_string_deserialize(FILE *stream);

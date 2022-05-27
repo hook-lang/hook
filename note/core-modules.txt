@@ -65,6 +65,7 @@ strings:
   trim(str: string) -> string
   starts_with(str1: string, str2: string) -> bool
   ends_with(str1: string, str2: string) -> bool
+  reverse(str: string) -> string
 
 arrays:
 
