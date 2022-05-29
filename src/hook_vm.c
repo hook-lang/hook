@@ -1400,6 +1400,16 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
         --vm->top;
       }
       break;
+    case HK_OP_JUMP_IF_TRUE:
+      {
+        int32_t offset = read_word(&pc);
+        hk_value_t val = slots[vm->top];
+        if (hk_is_truthy(val))
+          pc = &code[offset];
+        hk_value_release(val);
+        --vm->top;
+      }
+      break;
     case HK_OP_OR:
       {
         int32_t offset = read_word(&pc);

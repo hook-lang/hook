@@ -9,11 +9,11 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | 'fn' NAME '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
                 ( '=>' expr | block )
               | 'del' NAME subscr* '[' expr ']' ';'
-              | 'if' '(' expr ')' stmt ( 'else' stmt )?
+              | ( 'if' | 'if!' ) '(' expr ')' stmt ( 'else' stmt )?
               | 'match' '(' expr ')' '{' ( expr '=>' stmt )+ ( '_' '=>' stmt )? '}'
               | 'loop' stmt
-              | 'while' '(' expr ')' stmt
-              | 'do' stmt 'while' '(' expr ')' ';'
+              | ( 'while' | 'while!' ) '(' expr ')' stmt
+              | 'do' stmt ( 'while' | 'while!' ) '(' expr ')' ';'
               | 'for' '(' var_decl | assign_call? ';' expr? ';' assign_call? ')' stmt
               | 'continue' ';'
               | 'break' ';'
@@ -59,7 +59,7 @@ prim_expr   ::= 'nil' | 'false' | 'true' | INT | FLOAT | STRING
               | 'struct' '{' ( NAME ( ',' NAME )* )? '}'
               | 'fn' '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
                 ( '=>' expr | block )
-              | 'if' '(' expr ')' expr 'else' expr
+              | ( 'if' | 'if!' ) '(' expr ')' expr 'else' expr
               | 'match' '(' expr ')' '{' expr '=>' expr ( ',' expr '=>' expr )*
                 ',' '_' '=>' expr '}'
               | NAME ( subscr | call )* ( '{' ( expr ( ',' expr )* )? '}' )?

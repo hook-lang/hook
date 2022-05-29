@@ -1,0 +1,57 @@
+
+mut i;
+
+i = 0;
+loop {
+  println("foo");
+  if (i == 1)
+    break;
+  i++;
+}
+
+i = 0;
+while (true) {
+  println("foo");
+  if (i == 1)
+    break;
+  i++;
+}
+
+while (false) {
+  println("foo");
+}
+
+i = 0;
+do {
+  println("foo");
+  if (i == 1)
+    break;
+  i++;
+} while (true);
+
+do {
+  println("foo");
+} while (false);
+
+while! (true) {
+  println("foo");
+}
+
+i = 0;
+while! (false) {
+  println("foo");
+  if (i == 1)
+    break;
+  i++;
+}
+
+do {
+  println("foo");
+} while! (true);
+
+i = 0;
+do {
+  if (i == 1)
+    break;
+  i++;
+} while! (false);

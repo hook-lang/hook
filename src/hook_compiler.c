@@ -105,11 +105,11 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_function_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_del_statement(compiler_t *comp);
 static void compile_delete(compiler_t *comp, bool inplace);
-static void compile_if_statement(compiler_t *comp);
+static void compile_if_statement(compiler_t *comp, bool not);
 static void compile_match_statement(compiler_t *comp);
 static void compile_match_statement_member(compiler_t *comp);
 static void compile_loop_statement(compiler_t *comp);
-static void compile_while_statement(compiler_t *comp);
+static void compile_while_statement(compiler_t *comp, bool not);
 static void compile_do_statement(compiler_t *comp);
 static void compile_for_statement(compiler_t *comp);
 static void compile_continue_statement(compiler_t *comp);
@@ -127,7 +127,7 @@ static void compile_unary_expression(compiler_t *comp);
 static void compile_prim_expression(compiler_t *comp);
 static void compile_array_constructor(compiler_t *comp);
 static void compile_struct_constructor(compiler_t *comp);
-static void compile_if_expression(compiler_t *comp);
+static void compile_if_expression(compiler_t *comp, bool not);
 static void compile_match_expression(compiler_t *comp);
 static void compile_match_expression_member(compiler_t *comp);
 static void compile_subscript(compiler_t *comp);
@@ -420,7 +420,12 @@ static void compile_statement(compiler_t *comp)
   }
   if (match(scan, TOKEN_IF))
   {
-    compile_if_statement(comp);
+    compile_if_statement(comp, false);
+    return;
+  }
+  if (match(scan, TOKEN_IFBANG))
+  {
+    compile_if_statement(comp, true);
     return;
   }
   if (match(scan, TOKEN_MATCH))
@@ -435,7 +440,12 @@ static void compile_statement(compiler_t *comp)
   }
   if (match(scan, TOKEN_WHILE))
   {
-    compile_while_statement(comp);
+    compile_while_statement(comp, false);
+    return;
+  }
+  if (match(scan, TOKEN_WHILEBANG))
+  {
+    compile_while_statement(comp, true);
     return;
   }
   if (match(scan, TOKEN_DO))
@@ -1133,7 +1143,7 @@ static void compile_delete(compiler_t *comp, bool inplace)
   syntax_error_unexpected(comp); 
 }
 
-static void compile_if_statement(compiler_t *comp)
+static void compile_if_statement(compiler_t *comp, bool not)
 {
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
@@ -1141,7 +1151,8 @@ static void compile_if_statement(compiler_t *comp)
   consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
-  int32_t offset1 = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
+  int32_t op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
+  int32_t offset1 = emit_jump(chunk, op);
   compile_statement(comp);
   int32_t offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);
@@ -1216,7 +1227,7 @@ static void compile_loop_statement(compiler_t *comp)
   end_loop(comp);
 }
 
-static void compile_while_statement(compiler_t *comp)
+static void compile_while_statement(compiler_t *comp, bool not)
 {
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
@@ -1226,7 +1237,8 @@ static void compile_while_statement(compiler_t *comp)
   start_loop(comp, &loop);
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
-  int32_t offset = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
+  int32_t op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
+  int32_t offset = emit_jump(chunk, op);
   compile_statement(comp);
   hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
   hk_chunk_emit_word(chunk, loop.jump);
@@ -1241,13 +1253,20 @@ static void compile_do_statement(compiler_t *comp)
   scanner_next_token(scan);
   loop_t loop;
   start_loop(comp, &loop);
-  compile_statement(comp);
-  consume(comp, TOKEN_WHILE);
+  compile_statement(comp);  
+  int32_t op = HK_OP_JUMP_IF_FALSE;
+  if (match(scan, TOKEN_WHILEBANG))
+  {
+    scanner_next_token(scan);
+    op = HK_OP_JUMP_IF_TRUE;
+  }
+  else
+    consume(comp, TOKEN_WHILE);
   consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
   consume(comp, TOKEN_SEMICOLON);
-  int32_t offset = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
+  int32_t offset = emit_jump(chunk, op);
   hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
   hk_chunk_emit_word(chunk, loop.jump);
   patch_jump(comp, offset);
@@ -1686,7 +1705,12 @@ static void compile_prim_expression(compiler_t *comp)
   }
   if (match(scan, TOKEN_IF))
   {
-    compile_if_expression(comp);
+    compile_if_expression(comp, false);
+    return;
+  }
+  if (match(scan, TOKEN_IFBANG))
+  {
+    compile_if_expression(comp, true);
     return;
   }
   if (match(scan, TOKEN_MATCH))
@@ -1787,7 +1811,7 @@ static void compile_struct_constructor(compiler_t *comp)
   hk_chunk_add_line(chunk, line);
 }
 
-static void compile_if_expression(compiler_t *comp)
+static void compile_if_expression(compiler_t *comp, bool not)
 {
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
@@ -1795,7 +1819,8 @@ static void compile_if_expression(compiler_t *comp)
   consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
-  int32_t offset1 = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
+  int32_t op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
+  int32_t offset1 = emit_jump(chunk, op);
   compile_expression(comp);
   int32_t offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);

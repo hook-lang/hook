@@ -138,6 +138,13 @@ void hk_dump(hk_function_t *fn)
         printf("  [%05d] JumpIfFalse           %d\n", j, offset);
       }
       break;
+    case HK_OP_JUMP_IF_TRUE:
+      {
+        int32_t offset = *((uint16_t*) &code[i]);
+        i += 2;
+        printf("  [%05d] JumpIfTrue            %d\n", j, offset);
+      }
+      break;
     case HK_OP_OR:
       {
         int32_t offset = *((uint16_t*) &code[i]);

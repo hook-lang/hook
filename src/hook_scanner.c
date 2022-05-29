@@ -477,6 +477,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_FROM;
     return;
   }
+  if (match_chars(scan, "if!"))
+  {
+    scan->token.type = TOKEN_IFBANG;
+    return;
+  }
   if (match_chars(scan, "if"))
   {
     scan->token.type = TOKEN_IF;
@@ -525,6 +530,11 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "val"))
   {
     scan->token.type = TOKEN_VAL;
+    return;
+  }
+  if (match_chars(scan, "while!"))
+  {
+    scan->token.type = TOKEN_WHILEBANG;
     return;
   }
   if (match_chars(scan, "while"))
