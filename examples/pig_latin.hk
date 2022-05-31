@@ -1,0 +1,29 @@
+//
+// pig_latin.hk
+//
+
+use { lower } from strings;
+
+val vowels = ['a', 'e', 'i', 'o', 'u'];
+val num_vowels = len(vowels);
+
+fn pig_latin(mut word) {
+  word = lower(word);
+  val first = word[0];
+
+  for (mut i = 0; i < num_vowels; i++) {
+    if (first != vowels[i])
+      continue;
+    return word + "way";
+  }
+  word = word[1 .. len(word) - 1];
+  word += first + "ay";
+  return word;
+}
+
+println(pig_latin("Apple"));
+println(pig_latin("Banana"));
+println(pig_latin("Cherry"));
+println(pig_latin("Damascus"));
+println(pig_latin("Eggplant"));
+println(pig_latin("Fig"));
