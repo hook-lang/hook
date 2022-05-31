@@ -145,25 +145,25 @@ void hk_dump(hk_function_t *fn)
         printf("  [%05d] JumpIfTrue            %d\n", j, offset);
       }
       break;
-    case HK_OP_OR:
+    case HK_OP_JUMP_IF_TRUE_OR_POP:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        printf("  [%05d] Or                    %d\n", j, offset);
+        printf("  [%05d] JumpIfTrueOrPop       %d\n", j, offset);
       }
       break;
-    case HK_OP_AND:
+    case HK_OP_JUMP_IF_FALSE_OR_POP:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        printf("  [%05d] And                   %d\n", j, offset);
+        printf("  [%05d] JumpIfFalseOrPop      %d\n", j, offset);
       }
       break;
-    case HK_OP_MATCH:
+    case HK_OP_JUMP_IF_NOT_EQUAL:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        printf("  [%05d] Match                 %d\n", j, offset);
+        printf("  [%05d] JumpIfNotEqual        %d\n", j, offset);
       }
       break;
     case HK_OP_EQUAL:

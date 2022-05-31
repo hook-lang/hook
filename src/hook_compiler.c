@@ -1175,7 +1175,7 @@ static void compile_match_statement(compiler_t *comp)
   consume(comp, TOKEN_LBRACE);
   compile_expression(comp);
   consume(comp, TOKEN_ARROW);
-  int32_t offset1 = emit_jump(chunk, HK_OP_MATCH);
+  int32_t offset1 = emit_jump(chunk, HK_OP_JUMP_IF_NOT_EQUAL);
   compile_statement(comp);
   int32_t offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);
@@ -1204,7 +1204,7 @@ static void compile_match_statement_member(compiler_t *comp)
   }
   compile_expression(comp);
   consume(comp, TOKEN_ARROW);
-  int32_t offset1 = emit_jump(chunk, HK_OP_MATCH);
+  int32_t offset1 = emit_jump(chunk, HK_OP_JUMP_IF_NOT_EQUAL);
   compile_statement(comp);
   int32_t offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);
@@ -1416,7 +1416,7 @@ static void compile_expression(compiler_t *comp)
   while (match(scan, TOKEN_PIPEPIPE))
   {
     scanner_next_token(scan);
-    int32_t offset = emit_jump(&comp->fn->chunk, HK_OP_OR);
+    int32_t offset = emit_jump(&comp->fn->chunk, HK_OP_JUMP_IF_TRUE_OR_POP);
     compile_and_expression(comp);
     patch_jump(comp, offset);
   }
@@ -1429,7 +1429,7 @@ static void compile_and_expression(compiler_t *comp)
   while (match(scan, TOKEN_AMPAMP))
   {
     scanner_next_token(scan);
-    int32_t offset = emit_jump(&comp->fn->chunk, HK_OP_AND);
+    int32_t offset = emit_jump(&comp->fn->chunk, HK_OP_JUMP_IF_FALSE_OR_POP);
     compile_equal_expression(comp);
     patch_jump(comp, offset);
   }
@@ -1840,7 +1840,7 @@ static void compile_match_expression(compiler_t *comp)
   consume(comp, TOKEN_LBRACE);
   compile_expression(comp);
   consume(comp, TOKEN_ARROW);
-  int32_t offset1 = emit_jump(chunk, HK_OP_MATCH);
+  int32_t offset1 = emit_jump(chunk, HK_OP_JUMP_IF_NOT_EQUAL);
   compile_expression(comp);
   int32_t offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);
@@ -1870,7 +1870,7 @@ static void compile_match_expression_member(compiler_t *comp)
   hk_chunk_t *chunk = &comp->fn->chunk;
   compile_expression(comp);
   consume(comp, TOKEN_ARROW);
-  int32_t offset1 = emit_jump(chunk, HK_OP_MATCH);
+  int32_t offset1 = emit_jump(chunk, HK_OP_JUMP_IF_NOT_EQUAL);
   compile_expression(comp);
   int32_t offset2 = emit_jump(chunk, HK_OP_JUMP);
   patch_jump(comp, offset1);

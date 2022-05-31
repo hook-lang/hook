@@ -1410,7 +1410,7 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
         --vm->top;
       }
       break;
-    case HK_OP_OR:
+    case HK_OP_JUMP_IF_TRUE_OR_POP:
       {
         int32_t offset = read_word(&pc);
         hk_value_t val = slots[vm->top];
@@ -1423,7 +1423,7 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
         --vm->top;
       }
       break;
-    case HK_OP_AND:
+    case HK_OP_JUMP_IF_FALSE_OR_POP:
       {
         int32_t offset = read_word(&pc);
         hk_value_t val = slots[vm->top];
@@ -1436,7 +1436,7 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
         --vm->top;
       }
       break;
-    case HK_OP_MATCH:
+    case HK_OP_JUMP_IF_NOT_EQUAL:
       {
         int32_t offset = read_word(&pc);
         hk_value_t val1 = slots[vm->top - 1];

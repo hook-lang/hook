@@ -43,9 +43,9 @@
 #define HK_OP_JUMP                   0x20
 #define HK_OP_JUMP_IF_FALSE          0x21
 #define HK_OP_JUMP_IF_TRUE           0x22
-#define HK_OP_OR                     0x23
-#define HK_OP_AND                    0x24
-#define HK_OP_MATCH                  0x25
+#define HK_OP_JUMP_IF_TRUE_OR_POP    0x23
+#define HK_OP_JUMP_IF_FALSE_OR_POP   0x24
+#define HK_OP_JUMP_IF_NOT_EQUAL      0x25
 #define HK_OP_EQUAL                  0x26
 #define HK_OP_GREATER                0x27
 #define HK_OP_LESS                   0x28
