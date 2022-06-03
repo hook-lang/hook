@@ -16,7 +16,6 @@ math:
   pow(base: float, power: float) -> float
   sqrt(num: float) -> float
   cbrt(num: float) -> float
-  cbrt(num: float) -> float
   log(num: float) -> float
   log2(num: float) -> float
   log10(num: float) -> float
@@ -34,13 +33,13 @@ os:
 
 io:
 
-  SEEK_SET: float
-  SEEK_CUR: float
-  SEEK_END: float
-
   stdin: userdata
   stdout: userdata
   stderr: userdata
+
+  SEEK_SET: float
+  SEEK_CUR: float
+  SEEK_END: float
 
   open(filename: string, mode: string) -> nil|userdata
   close(stream: userdata) -> int

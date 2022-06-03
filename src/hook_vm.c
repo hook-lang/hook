@@ -62,7 +62,7 @@ static inline void do_not(hk_vm_t *vm);
 static inline int32_t do_incr(hk_vm_t *vm);
 static inline int32_t do_decr(hk_vm_t *vm);
 static inline int32_t do_call(hk_vm_t *vm, int32_t num_args);
-static inline int32_t check_arity(int32_t arity, hk_string_t *name, int32_t num_args);
+static inline int32_t adjust_args(hk_vm_t *vm, int32_t arity, int32_t num_args);
 static inline void print_trace(hk_string_t *name, hk_string_t *file, int32_t line);
 static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *cl, int32_t *line);
 static inline void discard_frame(hk_vm_t *vm, hk_value_t *slots);
@@ -1168,7 +1168,7 @@ static inline int32_t do_call(hk_vm_t *vm, int32_t num_args)
   if (hk_is_native(val))
   {
     hk_native_t *native = hk_as_native(val);
-    if (check_arity(native->arity, native->name, num_args) == HK_STATUS_ERROR)
+    if (adjust_args(vm, native->arity, num_args) == HK_STATUS_ERROR)
     {
       discard_frame(vm, slots);
       return HK_STATUS_ERROR;
@@ -1187,7 +1187,7 @@ static inline int32_t do_call(hk_vm_t *vm, int32_t num_args)
   }
   hk_closure_t *cl = hk_as_closure(val);
   hk_function_t *fn = cl->fn;
-  if (check_arity(fn->arity, fn->name, num_args) == HK_STATUS_ERROR)
+  if (adjust_args(vm, fn->arity, num_args) == HK_STATUS_ERROR)
   {
     discard_frame(vm, slots);
     return HK_STATUS_ERROR;
@@ -1204,15 +1204,14 @@ static inline int32_t do_call(hk_vm_t *vm, int32_t num_args)
   return HK_STATUS_OK;
 }
 
-static inline int32_t check_arity(int32_t arity, hk_string_t *name, int32_t num_args)
+static inline int32_t adjust_args(hk_vm_t *vm, int32_t arity,int32_t num_args)
 {
   if (num_args >= arity)
     return HK_STATUS_OK;
-  const char *fmt = arity < 2 ? "%s() expects %d argument but got %d" :
-    "%s() expects %d arguments but got %d";
-  char *name_chars = name ? name->chars : "<anonymous>";
-  hk_runtime_error(fmt, name_chars, arity, num_args);
-  return HK_STATUS_ERROR;
+  for (int32_t i = num_args; i < arity; ++i)
+    if (push(vm, HK_NIL_VALUE) == HK_STATUS_ERROR)
+      return HK_STATUS_ERROR;
+  return HK_STATUS_OK;
 }
 
 static inline void print_trace(hk_string_t *name, hk_string_t *file, int32_t line)
