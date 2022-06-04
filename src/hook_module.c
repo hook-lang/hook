@@ -129,7 +129,7 @@ void free_module_cache(void)
 
 int32_t load_module(hk_vm_t *vm)
 {
-  hk_value_t *slots = &vm->slots[vm->top];
+  hk_value_t *slots = &vm->stack[vm->stack_top];
   hk_value_t val = slots[0];
   hk_assert(hk_is_string(val), "module name must be a string");
   hk_string_t *name = hk_as_string(val);
@@ -138,15 +138,15 @@ int32_t load_module(hk_vm_t *vm)
   {
     hk_value_incr_ref(result);
     slots[0] = result;
-    --vm->top;
+    --vm->stack_top;
     hk_string_release(name);
     return HK_STATUS_OK;
   }
   if (load_native_module(vm, name) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  put_module_result(name, vm->slots[vm->top]);
-  slots[0] = vm->slots[vm->top];
-  --vm->top;
+  put_module_result(name, vm->stack[vm->stack_top]);
+  slots[0] = vm->stack[vm->stack_top];
+  --vm->stack_top;
   hk_string_release(name);
   return HK_STATUS_OK;
 }

@@ -11,13 +11,13 @@
 #include "hook_callable.h"
 #include "hook_userdata.h"
 
-#define HK_VM_MIN_CAPACITY (1 << 8)
+#define HK_STACK_MIN_CAPACITY (1 << 8)
 
 typedef struct hk_vm
 {
-  int32_t end;
-  int32_t top;
-  hk_value_t *slots;
+  int32_t stack_end;
+  int32_t stack_top;
+  hk_value_t *stack;
 } hk_vm_t;
 
 void hk_vm_init(hk_vm_t *vm, int32_t min_capacity);

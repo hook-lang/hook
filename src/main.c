@@ -213,9 +213,9 @@ static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args)
     hk_vm_free(&vm);
     return EXIT_FAILURE;
   }
-  hk_value_t result = vm.slots[vm.top];
+  hk_value_t result = vm.stack[vm.stack_top];
   int32_t status = hk_is_int(result) ? (int32_t) result.as_float : 0;
-  --vm.top;
+  --vm.stack_top;
   hk_vm_free(&vm);
   return status;
 }
