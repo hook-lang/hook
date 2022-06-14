@@ -11,6 +11,7 @@ static int32_t index_of_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t min_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t max_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sum_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t avg_call(hk_vm_t *vm, hk_value_t *args);
 
 static int32_t new_array_call(hk_vm_t *vm, hk_value_t *args)
 {
@@ -89,8 +90,26 @@ static int32_t sum_call(hk_vm_t *vm, hk_value_t *args)
     }
     sum += elem.as_float;
   }
-  hk_vm_push_float(vm, sum);
-  return HK_STATUS_OK;
+  return hk_vm_push_float(vm, sum);
+}
+
+static int32_t avg_call(hk_vm_t *vm, hk_value_t *args)
+{
+  if (hk_vm_check_array(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  hk_array_t *arr = hk_as_array(args[1]);
+  int length = arr->length;
+  if (!length)
+    return hk_vm_push_float(vm, 0);
+  double sum = 0;
+  for (int32_t i = 0; i < length; ++i)
+  {
+    hk_value_t elem = hk_array_get_element(arr, i);
+    if (!hk_is_float(elem))
+      return hk_vm_push_float(vm, 0);
+    sum += elem.as_float;
+  }
+  return hk_vm_push_float(vm, sum / length);
 }
 
 #ifdef _WIN32
@@ -121,5 +140,9 @@ int32_t load_arrays(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "sum", 1, &sum_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 5);
+  if (hk_vm_push_string_from_chars(vm,-1, "avg") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_new_native(vm, "avg", 1, &avg_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_vm_construct(vm, 6);
 }
