@@ -41,7 +41,6 @@ static const char *globals[] = {
   "len",
   "is_empty",
   "compare",
-  "slice",
   "split",
   "join",
   "iter",
@@ -71,7 +70,6 @@ static int32_t cap_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t len_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t is_empty_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t compare_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t slice_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t split_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t join_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t iter_call(hk_vm_t *vm, hk_value_t *args);
@@ -383,51 +381,6 @@ static int32_t compare_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_float(vm, result);
 }
 
-static int32_t slice_call(hk_vm_t *vm, hk_value_t *args)
-{
-  int32_t types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
-  if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  hk_value_t val = args[1];
-  int32_t start = (int32_t) args[2].as_float;
-  int32_t stop = (int32_t) args[3].as_float;
-  if (hk_is_string(val))
-  {
-    hk_string_t *str = hk_as_string(val);
-    hk_string_t *result;
-    if (!hk_string_slice(str, start, stop, &result))
-    {
-      hk_vm_pop(vm);
-      hk_vm_pop(vm);
-      return HK_STATUS_OK;
-    }
-    if (hk_vm_push_string(vm, result) == HK_STATUS_ERROR)
-    {
-      hk_string_free(result);
-      return HK_STATUS_ERROR;
-    }
-    return HK_STATUS_OK;
-  }
-  hk_array_t *arr = hk_as_array(val);
-  hk_array_t *result;
-  if (!hk_array_slice(arr, start, stop, &result))
-  {
-    hk_vm_pop(vm);
-    hk_vm_pop(vm);
-    return HK_STATUS_OK;
-  }
-  if (hk_vm_push_array(vm, result) == HK_STATUS_ERROR)
-  {
-    hk_array_free(result);
-    return HK_STATUS_ERROR;
-  }
-  return HK_STATUS_OK;
-}
-
 static int32_t split_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_type(args, 1, HK_TYPE_STRING) == HK_STATUS_ERROR)
@@ -562,16 +515,15 @@ void load_globals(hk_vm_t *vm)
   hk_vm_push_new_native(vm, globals[12], 1, &len_call);
   hk_vm_push_new_native(vm, globals[13], 1, &is_empty_call);
   hk_vm_push_new_native(vm, globals[14], 2, &compare_call);
-  hk_vm_push_new_native(vm, globals[15], 3, &slice_call);
-  hk_vm_push_new_native(vm, globals[16], 2, &split_call);
-  hk_vm_push_new_native(vm, globals[17], 2, &join_call);
-  hk_vm_push_new_native(vm, globals[18], 1, &iter_call);
-  hk_vm_push_new_native(vm, globals[19], 1, &valid_call);
-  hk_vm_push_new_native(vm, globals[20], 1, &current_call);
-  hk_vm_push_new_native(vm, globals[21], 1, &next_call);
-  hk_vm_push_new_native(vm, globals[22], 1, &sleep_call);
-  hk_vm_push_new_native(vm, globals[23], 2, &assert_call);
-  hk_vm_push_new_native(vm, globals[24], 1, &panic_call);
+  hk_vm_push_new_native(vm, globals[15], 2, &split_call);
+  hk_vm_push_new_native(vm, globals[16], 2, &join_call);
+  hk_vm_push_new_native(vm, globals[17], 1, &iter_call);
+  hk_vm_push_new_native(vm, globals[18], 1, &valid_call);
+  hk_vm_push_new_native(vm, globals[19], 1, &current_call);
+  hk_vm_push_new_native(vm, globals[20], 1, &next_call);
+  hk_vm_push_new_native(vm, globals[21], 1, &sleep_call);
+  hk_vm_push_new_native(vm, globals[22], 2, &assert_call);
+  hk_vm_push_new_native(vm, globals[23], 1, &panic_call);
 }
 
 int32_t num_globals(void)

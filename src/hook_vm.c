@@ -28,8 +28,8 @@ static inline int32_t do_unpack(hk_vm_t *vm, int32_t n);
 static inline int32_t do_destruct(hk_vm_t *vm, int32_t n);
 static inline int32_t do_add_element(hk_vm_t *vm);
 static inline int32_t do_get_element(hk_vm_t *vm);
-static inline void slice_string(hk_vm_t *vm, hk_value_t *slots, hk_string_t *str, hk_range_t *range);
-static inline void slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range);
+static inline void slice_string(hk_vm_t *vm, hk_value_t *slot, hk_string_t *str, hk_range_t *range);
+static inline void slice_array(hk_vm_t *vm, hk_value_t *slot, hk_array_t *arr, hk_range_t *range);
 static inline int32_t do_fetch_element(hk_vm_t *vm);
 static inline void do_set_element(hk_vm_t *vm);
 static inline int32_t do_put_element(hk_vm_t *vm);
@@ -387,7 +387,7 @@ static inline int32_t do_get_element(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline void slice_string(hk_vm_t *vm, hk_value_t *slots, hk_string_t *str, hk_range_t *range)
+static inline void slice_string(hk_vm_t *vm, hk_value_t *slot, hk_string_t *str, hk_range_t *range)
 {
   int32_t str_end = str->length - 1;
   int64_t start = range->start;
@@ -408,13 +408,13 @@ static inline void slice_string(hk_vm_t *vm, hk_value_t *slots, hk_string_t *str
   result = hk_string_from_chars(length, &str->chars[start]);
 end:
   hk_incr_ref(result);
-  slots[0] = hk_string_value(result);
+  *slot = hk_string_value(result);
   --vm->stack_top;
   hk_string_release(str);
   hk_range_release(range);
 }
 
-static inline void slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, hk_range_t *range)
+static inline void slice_array(hk_vm_t *vm, hk_value_t *slot, hk_array_t *arr, hk_range_t *range)
 {
   int32_t arr_end = arr->length - 1;
   int64_t start = range->start;
@@ -442,7 +442,7 @@ static inline void slice_array(hk_vm_t *vm, hk_value_t *slots, hk_array_t *arr, 
   }
 end:
   hk_incr_ref(result);
-  slots[0] = hk_array_value(result);
+  *slot = hk_array_value(result);
   --vm->stack_top;
   hk_array_release(arr);
   hk_range_release(range);

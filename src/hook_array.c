@@ -341,24 +341,6 @@ int32_t hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result)
   return HK_STATUS_OK;
 }
 
-bool hk_array_slice(hk_array_t *arr, int32_t start, int32_t stop, hk_array_t **result)
-{
-  if (start < 1 && stop >= arr->length)
-    return false;
-  int32_t length = stop - start;
-  length = length < 0 ? 0 : length;
-  hk_array_t *slice = array_allocate(length);
-  slice->length = length;
-  for (int32_t i = start, j = 0; i < stop; ++i, ++j)
-  {
-    hk_value_t elem = arr->elements[i];
-    hk_value_incr_ref(elem);
-    slice->elements[j] = elem;
-  }
-  *result = slice;
-  return true;
-}
-
 hk_iterator_t *hk_array_new_iterator(hk_array_t *arr)
 {
   array_iterator_t *it = (array_iterator_t *) hk_allocate(sizeof(*it));

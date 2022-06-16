@@ -42,7 +42,6 @@ void hk_array_inplace_diff(hk_array_t *dest, hk_array_t *src);
 void hk_array_print(hk_array_t *arr);
 bool hk_array_equal(hk_array_t *arr1, hk_array_t *arr2);
 int32_t hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result);
-bool hk_array_slice(hk_array_t *arr, int32_t start, int32_t stop, hk_array_t **result);
 hk_iterator_t *hk_array_new_iterator(hk_array_t *arr);
 void hk_array_serialize(hk_array_t *arr, FILE *stream);
 hk_array_t *hk_array_deserialize(FILE *stream);

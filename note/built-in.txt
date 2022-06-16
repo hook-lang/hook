@@ -14,7 +14,6 @@ cap(val: string|array) -> int
 len(val: string|array) -> int
 is_empty(val: string|array) -> bool
 compare(val1: value, val2: value) -> int
-slice(val: string|array, start: int, stop: int) -> string|array
 split(src: string, separator: string) -> array
 join(arr: array, separator: string) -> string
 iter(val: iterator|range|array) -> iterator

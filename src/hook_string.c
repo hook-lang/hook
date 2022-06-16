@@ -241,21 +241,6 @@ hk_string_t *hk_string_reverse(hk_string_t *str)
   return result;
 }
 
-bool hk_string_slice(hk_string_t *str, int32_t start, int32_t stop, hk_string_t **result)
-{
-  if (start < 1 && stop >= str->length)
-    return false;
-  int32_t length = stop - start;
-  length = length < 0 ? 0 : length;
-  hk_string_t *slice = string_allocate(length);
-  slice->length = length;
-  for (int32_t i = start, j = 0; i < stop; ++i, ++j)
-    slice->chars[j] = str->chars[i];
-  slice->chars[length] = '\0';
-  *result = slice;
-  return true;
-}
-
 void hk_string_serialize(hk_string_t *str, FILE *stream)
 {
   fwrite(&str->capacity, sizeof(str->capacity), 1, stream);
