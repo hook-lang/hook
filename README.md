@@ -48,6 +48,10 @@ curl -sSLO https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install
 install
 ```
 
+## Building from the source code
+
+If you prefer, follow the instructions in [BUILDING.md](BUILDING.md) to build Hook locally.
+
 ## Hello, world!
 
 It's possible to run our `Hello, world!` directly from the command-line interface:
@@ -64,4 +68,4 @@ Maybe the `examples` folder will help.
 ## License
 
 Hook is released under [MIT](https://choosealicense.com/licenses/mit/) license.
-See [LICENSE](https://github.com/fabiosvm/hook/blob/main/LICENSE) for more details.
+See [LICENSE](LICENSE) for more details.
