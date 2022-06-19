@@ -43,9 +43,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Installing dependencies
       run: |
-        curl -sSLO https://github.com/microsoft/vcpkg/archive/refs/tags/2022.02.23.tar.gz
-        tar -xzf 2022.02.23.tar.gz
-        cd vcpkg-2022.02.23
+        git clone https://github.com/Microsoft/vcpkg.git
+        cd vcpkg
         bootstrap-vcpkg.bat
         vcpkg integrate install
         vcpkg install sqlite3:x64-windows
@@ -54,7 +53,7 @@ jobs:
         vcpkg install libmysql:x64-windows
     - name: Configure CMake
       run: |
-        cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg-2022.02.23/scripts/buildsystems/vcpkg.cmake
+        cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
     - name: Build
       run: |
         cmake --build ${{ github.workspace }}/build
