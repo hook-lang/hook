@@ -321,11 +321,10 @@ int32_t hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result)
     int32_t _result;
     if (hk_value_compare(arr1->elements[i], arr2->elements[i], &_result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
-    if (_result)
-    {
-      *result = _result;
-      return HK_STATUS_OK;
-    }
+    if (!_result)
+      continue;
+    *result = _result;
+    return HK_STATUS_OK;
   }
   if (arr1->length > arr2->length)
   {

@@ -91,11 +91,10 @@ int32_t hk_chunk_get_line(hk_chunk_t *chunk, int32_t offset)
   for (int32_t i = 0; i < chunk->lines_length; ++i)
   {
     hk_line_t *line = &lines[i];
-    if (line->offset == offset)
-    {
-      line_no = line->no;
-      break;
-    }
+    if (line->offset != offset)
+      continue;
+    line_no = line->no;
+    break;
   }
   hk_assert(line_no != -1, "chunk must contain the line number");
   return line_no;

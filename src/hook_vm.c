@@ -212,13 +212,12 @@ static inline int32_t do_construct(hk_vm_t *vm, int32_t length)
   for (int32_t i = 1; i <= n; i += 2)
   {
     hk_string_t *field_name = hk_as_string(slots[i]);
-    if (!hk_struct_define_field(ztruct, field_name))
-    {
-      hk_runtime_error("field %.*s is already defined", field_name->length,
-        field_name->chars);
-      hk_struct_free(ztruct);
-      return HK_STATUS_ERROR;
-    }
+    if (hk_struct_define_field(ztruct, field_name))
+      continue;
+    hk_runtime_error("field %.*s is already defined", field_name->length,
+      field_name->chars);
+    hk_struct_free(ztruct);
+    return HK_STATUS_ERROR;
   }
   for (int32_t i = 1; i <= n; i += 2)
     hk_decr_ref(hk_as_object(slots[i]));
