@@ -197,6 +197,11 @@ static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args)
   for (int32_t i = 0; i < num_fields; ++i)
   {
     char *chars = row[i];
+    if (!chars)
+    {
+      hk_array_inplace_add_element(arr, HK_NIL_VALUE);
+      break;
+    }
     hk_value_t elem = HK_NIL_VALUE;
     switch (fields[i].type)
     {
