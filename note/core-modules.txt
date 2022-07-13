@@ -74,3 +74,4 @@ arrays:
   max(arr: array) -> value
   sum(arr: array) -> float
   avg(arr: array) -> float
+  reverse(arr: array) -> array

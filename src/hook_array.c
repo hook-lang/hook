@@ -352,6 +352,20 @@ hk_iterator_t *hk_array_new_iterator(hk_array_t *arr)
   return (hk_iterator_t *) it;
 }
 
+hk_array_t *hk_array_reverse(hk_array_t *arr)
+{
+  int32_t length = arr->length;
+  hk_array_t *result = array_allocate(length);
+  result->length = length;
+  for (int32_t i = 0; i < length; ++i)
+  {
+    hk_value_t elem = arr->elements[length - i - 1];
+    hk_value_incr_ref(elem);
+    result->elements[i] = elem;
+  }
+  return result;
+}
+
 void hk_array_serialize(hk_array_t *arr, FILE *stream)
 {
   fwrite(&arr->capacity, sizeof(arr->capacity), 1, stream);

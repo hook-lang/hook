@@ -1,0 +1,7 @@
+
+use { reverse } from arrays;
+
+assert(reverse([]) == [], "reverse([]) == []");
+assert(reverse(["foo"]) == ["foo"], "reverse(['foo']) == ['foo']");
+assert(reverse(["foo", "bar"]) == ["bar", "foo"], "reverse(['foo', 'bar']) == ['bar', 'foo']");
+assert(reverse(["foo", "bar", "baz"]) == ["baz", "bar", "foo"], "reverse(['foo', 'bar', 'baz']) == ['baz', 'bar', 'foo']");
