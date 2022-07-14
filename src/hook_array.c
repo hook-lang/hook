@@ -318,12 +318,12 @@ int32_t hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result)
   }
   for (int32_t i = 0; i < arr1->length && i < arr2->length; ++i)
   {
-    int32_t _result;
-    if (hk_value_compare(arr1->elements[i], arr2->elements[i], &_result) == HK_STATUS_ERROR)
+    int32_t comp;
+    if (hk_value_compare(arr1->elements[i], arr2->elements[i], &comp) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
-    if (!_result)
+    if (!comp)
       continue;
-    *result = _result;
+    *result = comp;
     return HK_STATUS_OK;
   }
   if (arr1->length > arr2->length)
@@ -364,6 +364,33 @@ hk_array_t *hk_array_reverse(hk_array_t *arr)
     result->elements[i] = elem;
   }
   return result;
+}
+
+int32_t hk_array_sort(hk_array_t *arr, hk_array_t **result)
+{
+  int32_t length = arr->length;
+  hk_array_t *_result = array_allocate(length);
+  _result->length = 0;
+  for (int32_t i = 0; i < length; ++i)
+  {
+    hk_value_t elem1 = arr->elements[i];
+    int32_t index = 0;
+    for (; index < _result->length; ++index)
+    {
+      hk_value_t elem2 = _result->elements[index];
+      int32_t comp;
+      if (hk_value_compare(elem1, elem2, &comp) == HK_STATUS_ERROR)
+      {
+        hk_array_free(_result);
+        return HK_STATUS_ERROR;
+      }
+      if (comp < 0)
+        break;
+    }
+    hk_array_inplace_insert_element(_result, index, elem1);
+  }
+  *result = _result;
+  return HK_STATUS_OK;
 }
 
 void hk_array_serialize(hk_array_t *arr, FILE *stream)

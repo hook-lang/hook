@@ -75,3 +75,4 @@ arrays:
   sum(arr: array) -> float
   avg(arr: array) -> float
   reverse(arr: array) -> array
+  sort(arr: array) -> array

@@ -13,6 +13,7 @@ static int32_t max_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sum_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t avg_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t reverse_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sort_call(hk_vm_t *vm, hk_value_t *args);
 
 static int32_t new_array_call(hk_vm_t *vm, hk_value_t *args)
 {
@@ -126,6 +127,21 @@ static int32_t reverse_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
+static int32_t sort_call(hk_vm_t *vm, hk_value_t *args)
+{
+  if (hk_vm_check_array(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  hk_array_t *arr;
+  if (hk_array_sort(hk_as_array(args[1]), &arr) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_array(vm, arr) == HK_STATUS_ERROR)
+  {
+    hk_array_free(arr);
+    return HK_STATUS_ERROR;
+  }
+  return HK_STATUS_OK;
+}
+
 #ifdef _WIN32
 int32_t __declspec(dllexport) __stdcall load_arrays(hk_vm_t *vm)
 #else
@@ -161,6 +177,10 @@ int32_t load_arrays(hk_vm_t *vm)
   if (hk_vm_push_string_from_chars(vm,-1, "reverse") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "reverse", 1, &reverse_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;  
+  if (hk_vm_push_string_from_chars(vm,-1, "sort") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 7);
+  if (hk_vm_push_new_native(vm, "sort", 1, &sort_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_vm_construct(vm, 8);
 }

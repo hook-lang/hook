@@ -1,0 +1,7 @@
+
+use { sort } from arrays;
+
+assert(sort([]) == [], "sort([]) == []");
+assert(sort([3]) == [3], "sort([3]) == [3]");
+assert(sort([3, 1]) == [1, 3], "sort([3, 1]) == [1, 3]");
+assert(sort([3, 1, 2]) == [1, 2, 3], "sort([3, 1, 2]) == [1, 2, 3]");
