@@ -52,20 +52,25 @@
 #define HK_OP_NOT_EQUAL              0x29
 #define HK_OP_NOT_GREATER            0x2a
 #define HK_OP_NOT_LESS               0x2b
-#define HK_OP_ADD                    0x2c
-#define HK_OP_SUBTRACT               0x2d
-#define HK_OP_MULTIPLY               0x2e
-#define HK_OP_DIVIDE                 0x2f
-#define HK_OP_QUOTIENT               0x30
-#define HK_OP_REMAINDER              0x31
-#define HK_OP_NEGATE                 0x32
-#define HK_OP_NOT                    0x33
-#define HK_OP_INCR                   0x34
-#define HK_OP_DECR                   0x35
-#define HK_OP_CALL                   0x36
-#define HK_OP_LOAD_MODULE            0x37
-#define HK_OP_RETURN                 0x38
-#define HK_OP_RETURN_NIL             0X39
+#define HK_OP_BITWISE_OR             0x2c
+#define HK_OP_BITWISE_AND            0x2d
+#define HK_OP_LEFT_SHIFT             0x2e
+#define HK_OP_RIGHT_SHIFT            0x2f
+#define HK_OP_ADD                    0x30
+#define HK_OP_SUBTRACT               0x31
+#define HK_OP_MULTIPLY               0x32
+#define HK_OP_DIVIDE                 0x33
+#define HK_OP_QUOTIENT               0x34
+#define HK_OP_REMAINDER              0x35
+#define HK_OP_NEGATE                 0x36
+#define HK_OP_NOT                    0x37
+#define HK_OP_BITWISE_NOT            0x38
+#define HK_OP_INCR                   0x39
+#define HK_OP_DECR                   0x3a
+#define HK_OP_CALL                   0x3b
+#define HK_OP_LOAD_MODULE            0x3c
+#define HK_OP_RETURN                 0x3d
+#define HK_OP_RETURN_NIL             0x3e
 
 typedef struct
 {

@@ -43,7 +43,13 @@ and_expr    ::= equal_expr ( '&&' equal_expr )*
 
 equal_expr  ::= comp_expr ( ( '==' | '!=' ) comp_expr )*
 
-comp_expr   ::= range_expr ( ( '>' | '>=' | '<' | '<=' ) range_expr )*
+comp_expr   ::= bor_expr ( ( '>' | '>=' | '<' | '<=' ) bor_expr )*
+
+bor_expr    ::= band_expr ( '|' band_expr )*
+
+band_expr   ::= shift_expr ( '&' shift_expr )*
+
+shift_expr  ::= range_expr ( ( '<<' | '>>' ) range_expr )*
 
 range_expr  ::= add_expr ( '..' add_expr )?
 
@@ -51,7 +57,7 @@ add_expr    ::= mul_expr ( ( '+' | '-' ) mul_expr )*
 
 mul_expr    ::= unary_expr ( ( '*' | '/' | '~/' | '%' ) unary_expr )*
 
-unary_expr  ::= ( '-' | '!' ) unary_expr | prim_expr
+unary_expr  ::= ( '-' | '!' | '~' ) unary_expr | prim_expr
 
 prim_expr   ::= 'nil' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'

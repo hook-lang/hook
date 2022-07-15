@@ -48,6 +48,10 @@ static inline int32_t do_less(hk_vm_t *vm);
 static inline void do_not_equal(hk_vm_t *vm);
 static inline int32_t do_not_greater(hk_vm_t *vm);
 static inline int32_t do_not_less(hk_vm_t *vm);
+static inline int32_t do_bitwise_or(hk_vm_t *vm);
+static inline int32_t do_bitwise_and(hk_vm_t *vm);
+static inline int32_t do_left_shift(hk_vm_t *vm);
+static inline int32_t do_right_shift(hk_vm_t *vm);
 static inline int32_t do_add(hk_vm_t *vm);
 static inline int32_t concat_strings(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2);
 static inline int32_t concat_arrays(hk_vm_t *vm, hk_value_t *slots, hk_value_t val1, hk_value_t val2);
@@ -59,6 +63,7 @@ static inline int32_t do_quotient(hk_vm_t *vm);
 static inline int32_t do_remainder(hk_vm_t *vm);
 static inline int32_t do_negate(hk_vm_t *vm);
 static inline void do_not(hk_vm_t *vm);
+static inline int32_t do_bitwise_not(hk_vm_t *vm);
 static inline int32_t do_incr(hk_vm_t *vm);
 static inline int32_t do_decr(hk_vm_t *vm);
 static inline int32_t do_call(hk_vm_t *vm, int32_t num_args);
@@ -867,6 +872,74 @@ static inline int32_t do_not_less(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
+static inline int32_t do_bitwise_or(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->stack[vm->stack_top - 1];
+  hk_value_t val1 = slots[0];
+  hk_value_t val2 = slots[1];
+  if (!hk_is_float(val1) || !hk_is_float(val2))
+  {
+    hk_runtime_error("type error: cannot apply `bitwise or` between %s and %s", hk_type_name(val1.type),
+      hk_type_name(val2.type));
+    return HK_STATUS_ERROR;
+  }
+  int64_t data = ((int64_t) val1.as_float) | ((int64_t) val2.as_float);
+  slots[0] = hk_float_value(data);
+  --vm->stack_top;
+  return HK_STATUS_OK;
+}
+
+static inline int32_t do_bitwise_and(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->stack[vm->stack_top - 1];
+  hk_value_t val1 = slots[0];
+  hk_value_t val2 = slots[1];
+  if (!hk_is_float(val1) || !hk_is_float(val2))
+  {
+    hk_runtime_error("type error: cannot apply `bitwise and` between %s and %s", hk_type_name(val1.type),
+      hk_type_name(val2.type));
+    return HK_STATUS_ERROR;
+  }
+  int64_t data = ((int64_t) val1.as_float) & ((int64_t) val2.as_float);
+  slots[0] = hk_float_value(data);
+  --vm->stack_top;
+  return HK_STATUS_OK;
+}
+
+static inline int32_t do_left_shift(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->stack[vm->stack_top - 1];
+  hk_value_t val1 = slots[0];
+  hk_value_t val2 = slots[1];
+  if (!hk_is_float(val1) || !hk_is_float(val2))
+  {
+    hk_runtime_error("type error: cannot apply `left shift` between %s and %s", hk_type_name(val1.type),
+      hk_type_name(val2.type));
+    return HK_STATUS_ERROR;
+  }
+  int64_t data = ((int64_t) val1.as_float) << ((int64_t) val2.as_float);
+  slots[0] = hk_float_value(data);
+  --vm->stack_top;
+  return HK_STATUS_OK;
+}
+
+static inline int32_t do_right_shift(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->stack[vm->stack_top - 1];
+  hk_value_t val1 = slots[0];
+  hk_value_t val2 = slots[1];
+  if (!hk_is_float(val1) || !hk_is_float(val2))
+  {
+    hk_runtime_error("type error: cannot apply `right shift` between %s and %s", hk_type_name(val1.type),
+      hk_type_name(val2.type));
+    return HK_STATUS_ERROR;
+  }
+  int64_t data = ((int64_t) val1.as_float) >> ((int64_t) val2.as_float);
+  slots[0] = hk_float_value(data);
+  --vm->stack_top;
+  return HK_STATUS_OK;
+}
+
 static inline int32_t do_add(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
@@ -1075,7 +1148,7 @@ static inline int32_t do_quotient(hk_vm_t *vm)
   hk_value_t val2 = slots[1];
   if (!hk_is_float(val1) || !hk_is_float(val2))
   {
-    hk_runtime_error("type error: cannot apply quotient operation between %s and %s",
+    hk_runtime_error("type error: cannot apply `quotient` between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
@@ -1092,7 +1165,7 @@ static inline int32_t do_remainder(hk_vm_t *vm)
   hk_value_t val2 = slots[1];
   if (!hk_is_float(val1) || !hk_is_float(val2))
   {
-    hk_runtime_error("type error: cannot apply remainder operation between %s and %s",
+    hk_runtime_error("type error: cannot apply `remainder` between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
@@ -1108,8 +1181,7 @@ static inline int32_t do_negate(hk_vm_t *vm)
   hk_value_t val = slots[0];
   if (!hk_is_float(val))
   {
-    hk_runtime_error("type error: cannot apply unary minus operation to %s",
-      hk_type_name(val.type));
+    hk_runtime_error("type error: cannot apply `negate` to %s", hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
   double data = -val.as_float;
@@ -1123,6 +1195,20 @@ static inline void do_not(hk_vm_t *vm)
   hk_value_t val = slots[0];
   slots[0] = hk_is_falsey(val) ? HK_TRUE_VALUE : HK_FALSE_VALUE;
   hk_value_release(val);
+}
+
+static inline int32_t do_bitwise_not(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->stack[vm->stack_top];
+  hk_value_t val = slots[0];
+  if (!hk_is_float(val))
+  {
+    hk_runtime_error("type error: cannot apply `bitwise not` to %s", hk_type_name(val.type));
+    return HK_STATUS_ERROR;
+  }
+  int64_t data = ~((int64_t) val.as_float);
+  slots[0] = hk_float_value(data);
+  return HK_STATUS_OK;
 }
 
 static inline int32_t do_incr(hk_vm_t *vm)
@@ -1473,6 +1559,22 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
       if (do_not_less(vm) == HK_STATUS_ERROR)
         goto error;
       break;
+    case HK_OP_BITWISE_OR:
+      if (do_bitwise_or(vm) == HK_STATUS_ERROR)
+        goto error;
+      break;
+    case HK_OP_BITWISE_AND:
+      if (do_bitwise_and(vm) == HK_STATUS_ERROR)
+        goto error;
+      break;
+    case HK_OP_LEFT_SHIFT:
+      if (do_left_shift(vm) == HK_STATUS_ERROR)
+        goto error;
+      break;
+    case HK_OP_RIGHT_SHIFT:
+      if (do_right_shift(vm) == HK_STATUS_ERROR)
+        goto error;
+      break;
     case HK_OP_ADD:
       if (do_add(vm) == HK_STATUS_ERROR)
         goto error;
@@ -1503,6 +1605,10 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
       break;
     case HK_OP_NOT:
       do_not(vm);
+      break;
+    case HK_OP_BITWISE_NOT:
+      if (do_bitwise_not(vm) == HK_STATUS_ERROR)
+        goto error;
       break;
     case HK_OP_INCR:
       if (do_incr(vm) == HK_STATUS_ERROR)
