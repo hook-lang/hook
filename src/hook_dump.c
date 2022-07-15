@@ -184,6 +184,18 @@ void hk_dump(hk_function_t *fn)
     case HK_OP_NOT_LESS:
       printf("  [%05d] NotLess\n", j);
       break;
+    case HK_OP_BITWISE_OR:
+      printf("  [%05d] BitwiseOr\n", j);
+      break;
+    case HK_OP_BITWISE_AND:
+      printf("  [%05d] BitwiseAnd\n", j);
+      break;
+    case HK_OP_LEFT_SHIFT:
+      printf("  [%05d] LeftShift\n", j);
+      break;
+    case HK_OP_RIGHT_SHIFT:
+      printf("  [%05d] RightShift\n", j);
+      break;
     case HK_OP_ADD:
       printf("  [%05d] Add\n", j);
       break;
@@ -207,6 +219,9 @@ void hk_dump(hk_function_t *fn)
       break;
     case HK_OP_NOT:
       printf("  [%05d] Not\n", j);
+      break;
+    case HK_OP_BITWISE_NOT:
+      printf("  [%05d] BitwiseNot\n", j);
       break;
     case HK_OP_INCR:
       printf("  [%05d] Incr\n", j);

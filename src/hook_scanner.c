@@ -233,7 +233,7 @@ void scanner_free(scanner_t *scan)
 void scanner_next_token(scanner_t *scan)
 {
   skip_spaces_comments(scan);
-  if (match_char(scan, 0))
+  if (match_char(scan, '\0'))
   {
     scan->token.type = TOKEN_EOF;
     return;
@@ -298,9 +298,19 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_PIPEPIPE;
     return;
   }
+  if (match_char(scan, '|'))
+  {
+    scan->token.type = TOKEN_PIPE;
+    return;
+  }
   if (match_chars(scan, "&&"))
   {
     scan->token.type = TOKEN_AMPAMP;
+    return;
+  }
+  if (match_char(scan, '&'))
+  {
+    scan->token.type = TOKEN_AMP;
     return;
   }
   if (match_chars(scan, "=>"))
@@ -333,6 +343,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_GTEQ;
     return;
   }
+  if (match_chars(scan, ">>"))
+  {
+    scan->token.type = TOKEN_GTGT;
+    return;
+  }
   if (match_char(scan, '>'))
   {
     scan->token.type = TOKEN_GT;
@@ -343,14 +358,14 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_LTEQ;
     return;
   }
+  if (match_chars(scan, "<<"))
+  {
+    scan->token.type = TOKEN_LTLT;
+    return;
+  }
   if (match_char(scan, '<'))
   {
     scan->token.type = TOKEN_LT;
-    return;
-  }
-  if (match_chars(scan, "++"))
-  {
-    scan->token.type = TOKEN_PLUSPLUS;
     return;
   }
   if (match_chars(scan, "+="))
@@ -358,19 +373,24 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_PLUSEQ;
     return;
   }
+  if (match_chars(scan, "++"))
+  {
+    scan->token.type = TOKEN_PLUSPLUS;
+    return;
+  }
   if (match_char(scan, '+'))
   {
     scan->token.type = TOKEN_PLUS;
     return;
   }
-  if (match_chars(scan, "--"))
-  {
-    scan->token.type = TOKEN_MINUSMINUS;
-    return;
-  }
   if (match_chars(scan, "-="))
   {
     scan->token.type = TOKEN_MINUSEQ;
+    return;
+  }
+  if (match_chars(scan, "--"))
+  {
+    scan->token.type = TOKEN_MINUSMINUS;
     return;
   }
   if (match_char(scan, '-'))
@@ -406,6 +426,11 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "~/"))
   {
     scan->token.type = TOKEN_TILDESLASH;
+    return;
+  }
+  if (match_char(scan, '~'))
+  {
+    scan->token.type = TOKEN_TILDE;
     return;
   }
   if (match_chars(scan, "%="))
