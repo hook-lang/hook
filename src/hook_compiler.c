@@ -120,6 +120,10 @@ static void compile_expression(compiler_t *comp);
 static void compile_and_expression(compiler_t *comp);
 static void compile_equal_expression(compiler_t *comp);
 static void compile_comp_expression(compiler_t *comp);
+static void compile_bitwise_or_expression(compiler_t *comp);
+static void compile_bitwise_and_expression(compiler_t *comp);
+static void compile_left_shift_expression(compiler_t *comp);
+static void compile_right_shift_expression(compiler_t *comp);
 static void compile_range_expression(compiler_t *comp);
 static void compile_add_expression(compiler_t *comp);
 static void compile_mul_expression(compiler_t *comp);
@@ -484,8 +488,7 @@ static void compile_statement(compiler_t *comp)
 static void compile_load_module(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   if (match(scan, TOKEN_NAME))
   {
@@ -561,8 +564,7 @@ static void compile_load_module(compiler_t *comp)
 static void compile_constant_declaration(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   if (match(scan, TOKEN_NAME))
   {
@@ -650,8 +652,7 @@ static void compile_constant_declaration(compiler_t *comp)
 static void compile_variable_declaration(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   if (match(scan, TOKEN_NAME))
   {
@@ -772,8 +773,7 @@ end:
 static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   int32_t line = scan->token.line;
   if (match(scan, TOKEN_PLUSEQ))
   {
@@ -930,8 +930,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
 static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   int32_t line = scan->token.line;
   scanner_next_token(scan);
   token_t tk;
@@ -1104,8 +1103,7 @@ static void compile_del_statement(compiler_t *comp)
 static void compile_delete(compiler_t *comp, bool inplace)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   if (match(scan, TOKEN_LBRACKET))
   {
     int32_t line = scan->token.line;
@@ -1276,8 +1274,7 @@ static void compile_do_statement(compiler_t *comp)
 static void compile_for_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   consume(comp, TOKEN_LPAREN);
   push_scope(comp);
@@ -1382,8 +1379,7 @@ static void compile_break_statement(compiler_t *comp)
 static void compile_return_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   if (match(scan, TOKEN_SEMICOLON))
   {
@@ -1463,16 +1459,15 @@ static void compile_equal_expression(compiler_t *comp)
 static void compile_comp_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
-  compile_range_expression(comp);
+  hk_chunk_t *chunk = &comp->fn->chunk;
+  compile_bitwise_or_expression(comp);
   for (;;)
   {
     int32_t line = scan->token.line;
     if (match(scan, TOKEN_GT))
     {
       scanner_next_token(scan);
-      compile_range_expression(comp);
+      compile_bitwise_or_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_GREATER);
       hk_chunk_add_line(chunk, line);
       continue;
@@ -1480,7 +1475,7 @@ static void compile_comp_expression(compiler_t *comp)
     if (match(scan, TOKEN_GTEQ))
     {
       scanner_next_token(scan);
-      compile_range_expression(comp);
+      compile_bitwise_or_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_NOT_LESS);
       hk_chunk_add_line(chunk, line);
       continue;
@@ -1488,7 +1483,7 @@ static void compile_comp_expression(compiler_t *comp)
     if (match(scan, TOKEN_LT))
     {
       scanner_next_token(scan);
-      compile_range_expression(comp);
+      compile_bitwise_or_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_LESS);
       hk_chunk_add_line(chunk, line);
       continue;
@@ -1496,7 +1491,7 @@ static void compile_comp_expression(compiler_t *comp)
     if (match(scan, TOKEN_LTEQ))
     {
       scanner_next_token(scan);
-      compile_range_expression(comp);
+      compile_bitwise_or_expression(comp);
       hk_chunk_emit_opcode(chunk, HK_OP_NOT_GREATER);
       hk_chunk_add_line(chunk, line);
       continue;
@@ -1505,11 +1500,70 @@ static void compile_comp_expression(compiler_t *comp)
   }
 }
 
+static void compile_bitwise_or_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  hk_chunk_t *chunk = &comp->fn->chunk;
+  compile_bitwise_and_expression(comp);
+  int32_t line = scan->token.line;
+  while (match(scan, TOKEN_PIPE))
+  {
+    scanner_next_token(scan);
+    compile_bitwise_and_expression(comp);
+    hk_chunk_emit_opcode(chunk, HK_OP_BITWISE_OR);
+    hk_chunk_add_line(chunk, line);
+  }
+}
+
+static void compile_bitwise_and_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  hk_chunk_t *chunk = &comp->fn->chunk;
+  compile_left_shift_expression(comp);
+  int32_t line = scan->token.line;
+  while (match(scan, TOKEN_AMP))
+  {
+    scanner_next_token(scan);
+    compile_left_shift_expression(comp);
+    hk_chunk_emit_opcode(chunk, HK_OP_BITWISE_AND);
+    hk_chunk_add_line(chunk, line);
+  }
+}
+
+static void compile_left_shift_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  hk_chunk_t *chunk = &comp->fn->chunk;
+  compile_right_shift_expression(comp);
+  int32_t line = scan->token.line;
+  while (match(scan, TOKEN_LTLT))
+  {
+    scanner_next_token(scan);
+    compile_right_shift_expression(comp);
+    hk_chunk_emit_opcode(chunk, HK_OP_LEFT_SHIFT);
+    hk_chunk_add_line(chunk, line);
+  }
+}
+
+static void compile_right_shift_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  hk_chunk_t *chunk = &comp->fn->chunk;
+  compile_range_expression(comp);
+  int32_t line = scan->token.line;
+  while (match(scan, TOKEN_GTGT))
+  {
+    scanner_next_token(scan);
+    compile_range_expression(comp);
+    hk_chunk_emit_opcode(chunk, HK_OP_RIGHT_SHIFT);
+    hk_chunk_add_line(chunk, line);
+  }
+}
+
 static void compile_range_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   compile_add_expression(comp);
   int32_t line = scan->token.line;
   if (match(scan, TOKEN_DOTDOT))
@@ -1524,8 +1578,7 @@ static void compile_range_expression(compiler_t *comp)
 static void compile_add_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   compile_mul_expression(comp);
   for (;;)
   {
@@ -1554,8 +1607,7 @@ static void compile_mul_expression(compiler_t *comp)
 {
   compile_unary_expression(comp);
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   for (;;)
   {
     int32_t line = scan->token.line;
@@ -1598,8 +1650,7 @@ static void compile_mul_expression(compiler_t *comp)
 static void compile_unary_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   if (match(scan, TOKEN_MINUS))
   {
     int32_t line = scan->token.line;
@@ -1616,14 +1667,20 @@ static void compile_unary_expression(compiler_t *comp)
     hk_chunk_emit_opcode(chunk, HK_OP_NOT);
     return;
   }
+  if (match(scan, TOKEN_TILDE))
+  {
+    scanner_next_token(scan);
+    compile_unary_expression(comp);
+    hk_chunk_emit_opcode(chunk, HK_OP_BITWISE_NOT);
+    return;
+  }
   compile_prim_expression(comp);
 }
 
 static void compile_prim_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   int32_t line = scan->token.line;
   if (match(scan, TOKEN_NIL))
   {
@@ -1736,8 +1793,7 @@ static void compile_prim_expression(compiler_t *comp)
 static void compile_array_constructor(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   int32_t line = scan->token.line;
   scanner_next_token(scan);
   uint8_t length = 0;
@@ -1765,8 +1821,7 @@ end:
 static void compile_struct_constructor(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   int32_t line = scan->token.line;
   scanner_next_token(scan);
   hk_chunk_emit_opcode(chunk, HK_OP_NIL);
@@ -1897,8 +1952,7 @@ static void compile_match_expression_member(compiler_t *comp)
 static void compile_subscript(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  hk_function_t *fn = comp->fn;
-  hk_chunk_t *chunk = &fn->chunk;
+  hk_chunk_t *chunk = &comp->fn->chunk;
   compile_variable(comp, &scan->token, true);
   scanner_next_token(scan);
   for (;;)
