@@ -293,6 +293,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_RBRACE;
     return;
   }
+  if (match_chars(scan, "|="))
+  {
+    scan->token.type = TOKEN_PIPEEQ;
+    return;
+  }
   if (match_chars(scan, "||"))
   {
     scan->token.type = TOKEN_PIPEPIPE;
@@ -303,9 +308,19 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_PIPE;
     return;
   }
+  if (match_chars(scan, "^="))
+  {
+    scan->token.type = TOKEN_CARETEQ;
+    return;
+  }
   if (match_char(scan, '^'))
   {
     scan->token.type = TOKEN_CARET;
+    return;
+  }
+  if (match_chars(scan, "&="))
+  {
+    scan->token.type = TOKEN_AMPEQ;
     return;
   }
   if (match_chars(scan, "&&"))
@@ -348,6 +363,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_GTEQ;
     return;
   }
+  if (match_chars(scan, ">>="))
+  {
+    scan->token.type = TOKEN_GTGTEQ;
+    return;
+  }
   if (match_chars(scan, ">>"))
   {
     scan->token.type = TOKEN_GTGT;
@@ -361,6 +381,11 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "<="))
   {
     scan->token.type = TOKEN_LTEQ;
+    return;
+  }
+  if (match_chars(scan, "<<="))
+  {
+    scan->token.type = TOKEN_LTLTEQ;
     return;
   }
   if (match_chars(scan, "<<"))
