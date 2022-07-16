@@ -303,6 +303,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_PIPE;
     return;
   }
+  if (match_char(scan, '^'))
+  {
+    scan->token.type = TOKEN_CARET;
+    return;
+  }
   if (match_chars(scan, "&&"))
   {
     scan->token.type = TOKEN_AMPAMP;

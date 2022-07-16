@@ -121,6 +121,7 @@ static void compile_and_expression(compiler_t *comp);
 static void compile_equal_expression(compiler_t *comp);
 static void compile_comp_expression(compiler_t *comp);
 static void compile_bitwise_or_expression(compiler_t *comp);
+static void compile_bitwise_xor_expression(compiler_t *comp);
 static void compile_bitwise_and_expression(compiler_t *comp);
 static void compile_left_shift_expression(compiler_t *comp);
 static void compile_right_shift_expression(compiler_t *comp);
@@ -1504,13 +1505,28 @@ static void compile_bitwise_or_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
-  compile_bitwise_and_expression(comp);
+  compile_bitwise_xor_expression(comp);
   int32_t line = scan->token.line;
   while (match(scan, TOKEN_PIPE))
   {
     scanner_next_token(scan);
-    compile_bitwise_and_expression(comp);
+    compile_bitwise_xor_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_BITWISE_OR);
+    hk_chunk_add_line(chunk, line);
+  }
+}
+
+static void compile_bitwise_xor_expression(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  hk_chunk_t *chunk = &comp->fn->chunk;
+  compile_bitwise_and_expression(comp);
+  int32_t line = scan->token.line;
+  while (match(scan, TOKEN_CARET))
+  {
+    scanner_next_token(scan);
+    compile_bitwise_and_expression(comp);
+    hk_chunk_emit_opcode(chunk, HK_OP_BITWISE_XOR);
     hk_chunk_add_line(chunk, line);
   }
 }

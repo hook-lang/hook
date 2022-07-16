@@ -45,7 +45,9 @@ equal_expr  ::= comp_expr ( ( '==' | '!=' ) comp_expr )*
 
 comp_expr   ::= bor_expr ( ( '>' | '>=' | '<' | '<=' ) bor_expr )*
 
-bor_expr    ::= band_expr ( '|' band_expr )*
+bor_expr    ::= bxor_expr ( '|' bxor_expr )*
+
+bxor_expr   ::= band_expr ( '^' band_expr )*
 
 band_expr   ::= shift_expr ( '&' shift_expr )*
 
