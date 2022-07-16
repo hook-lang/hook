@@ -78,8 +78,8 @@ add_library(redis SHARED
 
 add_library(hashing SHARED
   hashing.c
-  ripemd160.c
-  sha2.c
+  ../deps/ripemd160.c
+  ../deps/sha2.c
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
@@ -99,10 +99,10 @@ add_library(hashing SHARED
   ../src/hook_vm.c)
 
 add_library(encoding SHARED
-  base32.c
-  base58.c
-  base64.c
   encoding.c
+  ../deps/base32.c
+  ../deps/base58.c
+  ../deps/base64.c
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
@@ -122,8 +122,8 @@ add_library(encoding SHARED
   ../src/hook_vm.c)
 
 add_library(secp256r1 SHARED
-  ecc.c
   secp256r1.c
+  ../deps/ecc.c
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
