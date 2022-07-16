@@ -1,0 +1,8 @@
+
+use numbers;
+println(numbers.PI);
+println(numbers.TAU);
+println(numbers.LARGEST);
+println(numbers.SMALLEST);
+println(numbers.MAX_INTEGER);
+println(numbers.MIN_INTEGER);

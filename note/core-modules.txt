@@ -1,8 +1,6 @@
 
 math:
 
-  PI: float
-
   abs(num: float) -> float
   sin(num: float) -> float
   cos(num: float) -> float
@@ -55,6 +53,15 @@ io:
   write(stream: userdata, str: string) -> nil|int
   readln(stream: userdata) -> string
   writeln(stream: userdata, str: string) -> nil|int
+
+numbers:
+
+  PI: float
+  TAU: float
+  LARGEST: float
+  SMALLEST: float
+  MAX_INTEGER: int
+  MIN_INTEGER: int
 
 strings:
 
