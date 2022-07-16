@@ -25,11 +25,14 @@ var_decl    ::= 'val' NAME '=' expr
               | ( 'val' | 'mut' ) '[' '_' | NAME ( ',' '_' | NAME )* ']' '=' expr
               | ( 'val' | 'mut' ) '{' NAME ( ',' NAME )* '}' '=' expr
 
-assign_call ::= NAME subscr* ( '=' | '+=' | '-=' | '*=' | '/=' | '~/=' | '%=' ) expr
+assign_call ::= NAME subscr* assign_op expr
               | NAME subscr* ( '++' | '--' )
               | NAME subscr* '[' ']' '=' expr
               | NAME subscr* subscr '=' expr
               | NAME ( subscr | call )* call
+
+assign_op   ::= '=' | '|=' | '^=' | '&=' | '<<=' | '>>=' 
+              | '+=' | '-=' | '*=' | '/=' | '~/=' | '%='
 
 subscr      ::= '[' expr ']' | '.' NAME 
 
