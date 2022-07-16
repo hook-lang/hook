@@ -4,6 +4,11 @@ println(0 | 15);
 println(15 | 0);
 println(15 | 15);
 
+println(0 ^ 0);
+println(0 ^ 15);
+println(15 ^ 0);
+println(15 ^ 15);
+
 println(0 & 0);
 println(0 & 15);
 println(15 & 0);

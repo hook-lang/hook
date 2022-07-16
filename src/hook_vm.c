@@ -49,6 +49,7 @@ static inline void do_not_equal(hk_vm_t *vm);
 static inline int32_t do_not_greater(hk_vm_t *vm);
 static inline int32_t do_not_less(hk_vm_t *vm);
 static inline int32_t do_bitwise_or(hk_vm_t *vm);
+static inline int32_t do_bitwise_xor(hk_vm_t *vm);
 static inline int32_t do_bitwise_and(hk_vm_t *vm);
 static inline int32_t do_left_shift(hk_vm_t *vm);
 static inline int32_t do_right_shift(hk_vm_t *vm);
@@ -889,6 +890,23 @@ static inline int32_t do_bitwise_or(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
+static inline int32_t do_bitwise_xor(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->stack[vm->stack_top - 1];
+  hk_value_t val1 = slots[0];
+  hk_value_t val2 = slots[1];
+  if (!hk_is_float(val1) || !hk_is_float(val2))
+  {
+    hk_runtime_error("type error: cannot apply `bitwise xor` between %s and %s", hk_type_name(val1.type),
+      hk_type_name(val2.type));
+    return HK_STATUS_ERROR;
+  }
+  int64_t data = ((int64_t) val1.as_float) ^ ((int64_t) val2.as_float);
+  slots[0] = hk_float_value(data);
+  --vm->stack_top;
+  return HK_STATUS_OK;
+}
+
 static inline int32_t do_bitwise_and(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
@@ -1561,6 +1579,10 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
       break;
     case HK_OP_BITWISE_OR:
       if (do_bitwise_or(vm) == HK_STATUS_ERROR)
+        goto error;
+      break;
+    case HK_OP_BITWISE_XOR:
+      if (do_bitwise_xor(vm) == HK_STATUS_ERROR)
         goto error;
       break;
     case HK_OP_BITWISE_AND:
