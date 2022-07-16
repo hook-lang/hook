@@ -187,6 +187,9 @@ void hk_dump(hk_function_t *fn)
     case HK_OP_BITWISE_OR:
       printf("  [%05d] BitwiseOr\n", j);
       break;
+    case HK_OP_BITWISE_XOR:
+      printf("  [%05d] BitwiseXor\n", j);
+      break;
     case HK_OP_BITWISE_AND:
       printf("  [%05d] BitwiseAnd\n", j);
       break;
