@@ -2,7 +2,8 @@
 // nbody.hk
 //
 
-use { PI, sqrt } from math;
+use { PI } from numbers;
+use { sqrt } from math;
 
 val SOLAR_MASS = 4 * PI * PI;
 val DAYS_PER_YEAR = 365.24;

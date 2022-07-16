@@ -17,6 +17,7 @@ if(APPLE)
 endif()
 
 add_library(sqlite SHARED
+  sqlite.c
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
@@ -28,7 +29,6 @@ add_library(sqlite SHARED
   ../src/hook_memory.c
   ../src/hook_module.c
   ../src/hook_range.c
-  sqlite.c
   ../src/hook_string_map.c
   ../src/hook_string.c
   ../src/hook_struct.c
@@ -37,6 +37,7 @@ add_library(sqlite SHARED
   ../src/hook_vm.c)
 
 add_library(url SHARED
+  url.c
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
@@ -51,12 +52,12 @@ add_library(url SHARED
   ../src/hook_string_map.c
   ../src/hook_string.c
   ../src/hook_struct.c
-  url.c
   ../src/hook_userdata.c
   ../src/hook_value.c
   ../src/hook_vm.c)
 
 add_library(redis SHARED
+  redis.c
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
@@ -68,7 +69,6 @@ add_library(redis SHARED
   ../src/hook_memory.c
   ../src/hook_module.c
   ../src/hook_range.c
-  redis.c
   ../src/hook_string_map.c
   ../src/hook_string.c
   ../src/hook_struct.c
@@ -77,20 +77,20 @@ add_library(redis SHARED
   ../src/hook_vm.c)
 
 add_library(hashing SHARED
+  hashing.c
+  ripemd160.c
+  sha2.c
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
   ../src/hook_utils.c
   ../src/hook_error.c
-  hashing.c
   ../src/hook_iterable.c
   ../src/hook_iterator.c
   ../src/hook_memory.c
   ../src/hook_module.c
   ../src/hook_range.c
-  ripemd160.c
-  sha2.c
   ../src/hook_string_map.c
   ../src/hook_string.c
   ../src/hook_struct.c
@@ -99,15 +99,15 @@ add_library(hashing SHARED
   ../src/hook_vm.c)
 
 add_library(encoding SHARED
-  ../src/hook_array.c
-  ../src/hook_builtin.c
   base32.c
   base58.c
   base64.c
+  encoding.c
+  ../src/hook_array.c
+  ../src/hook_builtin.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
   ../src/hook_utils.c
-  encoding.c
   ../src/hook_error.c
   ../src/hook_iterable.c
   ../src/hook_iterator.c
@@ -122,19 +122,19 @@ add_library(encoding SHARED
   ../src/hook_vm.c)
 
 add_library(secp256r1 SHARED
+  ecc.c
+  secp256r1.c
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
   ../src/hook_chunk.c
   ../src/hook_utils.c
-  ecc.c
   ../src/hook_error.c
   ../src/hook_iterable.c
   ../src/hook_iterator.c
   ../src/hook_memory.c
   ../src/hook_module.c
   ../src/hook_range.c
-  secp256r1.c
   ../src/hook_string_map.c
   ../src/hook_string.c
   ../src/hook_struct.c
@@ -143,6 +143,7 @@ add_library(secp256r1 SHARED
   ../src/hook_vm.c)
 
 add_library(mysql SHARED
+  mysql.c
   ../src/hook_array.c
   ../src/hook_builtin.c
   ../src/hook_callable.c
@@ -153,7 +154,6 @@ add_library(mysql SHARED
   ../src/hook_iterator.c
   ../src/hook_memory.c
   ../src/hook_module.c
-  mysql.c
   ../src/hook_range.c
   ../src/hook_string_map.c
   ../src/hook_string.c

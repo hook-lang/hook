@@ -8,10 +8,6 @@
 #include <time.h>
 #include <math.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 static int32_t abs_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sin_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t cos_call(hk_vm_t *vm, hk_value_t *args);
@@ -168,10 +164,6 @@ int32_t load_math(hk_vm_t *vm)
   srand((uint32_t) time(NULL));
   if (hk_vm_push_string_from_chars(vm, -1, "math") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "PI") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, M_PI) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "abs") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "abs", 1, &abs_call) == HK_STATUS_ERROR)
@@ -244,5 +236,5 @@ int32_t load_math(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "random", 0, &random_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 19);
+  return hk_vm_construct(vm, 18);
 }
