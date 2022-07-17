@@ -4,9 +4,9 @@
 //
 
 #include "encoding.h"
-#include "base32.h"
-#include "base64.h"
-#include "base58.h"
+#include "../deps/base32.h"
+#include "../deps/base64.h"
+#include "../deps/base58.h"
 
 #define BASE58_ENCODE_OUT_SIZE(n) ((n) * 138 / 100 + 1)
 #define BASE58_DECODE_OUT_SIZE(n) ((n) * 733 /1000 + 1)

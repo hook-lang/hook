@@ -4,8 +4,8 @@
 //
 
 #include "hashing.h"
-#include "sha2.h"
-#include "ripemd160.h"
+#include "../deps/sha2.h"
+#include "../deps/ripemd160.h"
 
 #define RIPEMD160_DIGEST_SIZE 20
 
