@@ -1,0 +1,29 @@
+//
+// fractal.hk
+//
+
+val y_min = -0.2;
+val y_max =  0.1;
+val x_min = -1.5;
+val x_max = -1.1;
+val pixels = " .:;+=xX$&";
+
+for (mut y = 0; y < 40; y++) {
+  val y0 = (y / 40.0) * (y_max - y_min) + y_min;
+  for (mut x = 0; x < 79; x++) {
+    val x0 = (x / 78.0) * (x_max - x_min) + x_min;
+    mut x = x0;
+    mut y = y0;
+    mut pixel = ' ';
+    for (mut i = 0; i < 80; i++) {
+      x = x * x - y * y + x0;
+      y = 2 * x * y + y0;
+      if (x * x + y * y > 4) {
+        pixel = pixels[to_int(i / 8)];
+        break;
+      }
+    }
+    print(pixel);
+  }
+  println("");
+}
