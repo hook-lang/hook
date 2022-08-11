@@ -68,7 +68,7 @@ static inline const char *get_home_dir(void)
     hk_assert(drive, "environment variable 'SystemDrive' not set");
     char *path[MAX_PATH + 1];
     snprintf(path, MAX_PATH, "%s\\hook", drive);
-    strncpy(path, drive, MAX_PATH);
+    strncpy_s(path, MAX_PATH, drive, _TRUNCATE);
     home_dir = (const char *) path;
 #else
     home_dir = "/usr/local/hook";

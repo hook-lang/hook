@@ -15,8 +15,50 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install -y libcurl4-openssl-dev
-        sudo apt-get install -y libhiredis-dev
         sudo apt-get install -y libmysqlclient-dev
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Release
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build
+    - name: Packing
+      run: |
+        cpack --config build/CPackConfig.cmake
+    - name: Upload asset
+      uses: shogo82148/actions-upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ github.workspace }}/package/*.tar.gz
+        overwrite: true
+    - name: Cleaning
+      run: |
+        rm -fr bin
+        rm -fr build
+        rm -fr lib
+        rm -fr package
+
+  macos-release:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        brew install mysql-connector-c
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
     - name: Configure CMake
       run: |
         cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Release
@@ -51,8 +93,15 @@ jobs:
         vcpkg integrate install
         vcpkg install sqlite3:x64-windows
         vcpkg install curl:x64-windows
-        vcpkg install hiredis:x64-windows
         vcpkg install libmysql:x64-windows
+        cd ..
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build
+        cmake --build build --config Release
+        cmake --install build
     - name: Configure CMake
       run: |
         cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -74,36 +123,3 @@ jobs:
         Remove-Item build -Recurse
         Remove-Item lib -Recurse
         Remove-Item package -Recurse
-
-  macos-release:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Installing dependencies
-      run: |
-        git clone https://github.com/redis/hiredis.git
-        cd hiredis
-        make
-        sudo make install
-        brew install mysql-connector-c
-    - name: Configure CMake
-      run: |
-        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Release
-    - name: Build
-      run: |
-        cmake --build ${{ github.workspace }}/build
-    - name: Packing
-      run: |
-        cpack --config build/CPackConfig.cmake
-    - name: Upload asset
-      uses: shogo82148/actions-upload-release-asset@v1
-      with:
-        upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ${{ github.workspace }}/package/*.tar.gz
-        overwrite: true
-    - name: Cleaning
-      run: |
-        rm -fr bin
-        rm -fr build
-        rm -fr lib
-        rm -fr package

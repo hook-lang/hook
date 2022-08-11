@@ -44,7 +44,7 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
       break;
     case REDIS_REPLY_ARRAY:
       {
-        int32_t length = reply->elements;
+        int32_t length = (int32_t) reply->elements;
         hk_array_t *arr = hk_array_new_with_capacity(length);
         arr->length = length;
         for (int32_t i = 0; i < length; ++i)
@@ -62,6 +62,25 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
       result = hk_float_value((double) reply->integer);
       break;
     case REDIS_REPLY_NIL:
+      result = HK_NIL_VALUE;
+      break;
+    case REDIS_REPLY_DOUBLE:
+      {
+        double data;
+        hk_double_from_chars(&data, reply->str);
+        result = hk_float_value(data);
+      }
+      break;
+    case REDIS_REPLY_BOOL:
+      result = reply->integer ? HK_TRUE_VALUE : HK_FALSE_VALUE;
+      break;
+    case REDIS_REPLY_MAP:
+    case REDIS_REPLY_SET:
+    case REDIS_REPLY_ATTR:
+    case REDIS_REPLY_PUSH:
+    case REDIS_REPLY_BIGNUM:
+    case REDIS_REPLY_VERB:
+      result = hk_string_value(hk_string_from_chars(-1, "unsupported reply type"));
       break;
     default:
       result = hk_string_value(hk_string_from_chars(-1, "unknown reply type"));

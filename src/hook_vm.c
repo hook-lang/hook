@@ -1873,7 +1873,7 @@ int32_t hk_vm_check_types(hk_value_t *args, int32_t index, int32_t num_types, in
   int32_t val_type = args[index].type;
   bool match = false;
   for (int32_t i = 0; i < num_types; ++i)
-    if ((match = val_type == types[i]))
+    if ((match = (val_type == types[i])))
       break;
   if (!match)
   {

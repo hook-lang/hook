@@ -17,8 +17,14 @@ jobs:
       run: |
         sudo apt-get update -y
         sudo apt-get install -y libcurl4-openssl-dev
-        sudo apt-get install -y libhiredis-dev
         sudo apt-get install -y libmysqlclient-dev
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
     - name: Configure CMake
       run: |
         cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug
@@ -37,6 +43,32 @@ jobs:
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
+  macos-build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        brew install mysql-connector-c
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build
+    - name: Running tests
+      run: |
+        ./run-tests.sh
+      env:
+        HOOK_HOME: ${{ github.workspace }}
+
   windows-build:
     runs-on: windows-latest
     steps:
@@ -49,8 +81,15 @@ jobs:
         vcpkg integrate install
         vcpkg install sqlite3:x64-windows
         vcpkg install curl:x64-windows
-        vcpkg install hiredis:x64-windows
         vcpkg install libmysql:x64-windows
+        cd ..
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build
+        cmake --build build --config Release
+        cmake --install build
     - name: Configure CMake
       run: |
         cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
@@ -60,28 +99,5 @@ jobs:
     - name: Running tests
       run: |
         ${{ github.workspace }}/run-tests.bat
-      env:
-        HOOK_HOME: ${{ github.workspace }}
-
-  macos-build:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Installing dependencies
-      run: |
-        git clone https://github.com/redis/hiredis.git
-        cd hiredis
-        make
-        sudo make install
-        brew install mysql-connector-c
-    - name: Configure CMake
-      run: |
-        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug
-    - name: Build
-      run: |
-        cmake --build ${{ github.workspace }}/build
-    - name: Running tests
-      run: |
-        ./run-tests.sh
       env:
         HOOK_HOME: ${{ github.workspace }}

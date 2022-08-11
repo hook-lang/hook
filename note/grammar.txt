@@ -34,7 +34,7 @@ assign_call ::= NAME subscr* assign_op expr
 assign_op   ::= '=' | '|=' | '^=' | '&=' | '<<=' | '>>=' 
               | '+=' | '-=' | '*=' | '/=' | '~/=' | '%='
 
-subscr      ::= '[' expr ']' | '.' NAME 
+subscr      ::= '[' expr ']' | '.' NAME
 
 call        ::= '(' ( expr ( ',' expr )* )? ')'
 

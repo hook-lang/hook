@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <errno.h>
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -54,8 +55,43 @@ void hk_ensure_path(const char *filename)
   if (sep)
   {
     char path[PATH_MAX + 1];
-    strncpy(path, filename, PATH_MAX);
+    hk_copy_cstring(path, filename, PATH_MAX);
     path[sep - filename] = '\0';
     make_directory(path);
   }
+}
+
+bool hk_long_from_chars(long *result, const char *chars)
+{
+  errno = 0;
+  char *end = (char *) chars;
+  long _result = strtol(chars, &end, 10);
+  if (errno == ERANGE)
+    return false;
+  if (*end)
+    return false;
+  *result = _result;
+  return true;
+}
+
+bool hk_double_from_chars(double *result, const char *chars)
+{
+  errno = 0;
+  char *end = (char *) chars;
+  double _result = strtod(chars, &end);
+  if (errno == ERANGE)
+    return false;
+  if (*end)
+    return false;
+  *result = _result;
+  return true;
+}
+
+void hk_copy_cstring(char *dest, const char *src, int max_len)
+{
+#ifdef _WIN32
+  strncpy_s(dest, max_len, src, _TRUNCATE);
+#else
+  strncpy(dest, src, max_len);
+#endif
 }

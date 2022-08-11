@@ -14,7 +14,6 @@
 #else
 #include <unistd.h>
 #endif
-#include <errno.h>
 #include "hook_struct.h"
 #include "hook_iterable.h"
 #include "hook_utils.h"
@@ -87,17 +86,7 @@ static inline int32_t string_to_double(hk_string_t *str, double *result)
     hk_runtime_error("type error: argument #1 must be a non-empty string");
     return HK_STATUS_ERROR;
   }
-  errno = 0;
-  char *ptr;
-  *result = strtod(str->chars, &ptr);
-  if (errno == ERANGE)
-  {
-    hk_runtime_error("type error: argument #1 is a too large string");
-    return HK_STATUS_ERROR;
-  }
-  while (*ptr != 0 && isspace(*ptr))
-    ++ptr;
-  if (ptr < &str->chars[str->length])
+  if (!hk_double_from_chars(result, str->chars))
   {
     hk_runtime_error("type error: argument #1 is not a convertible string");
     return HK_STATUS_ERROR;
