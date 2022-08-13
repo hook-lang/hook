@@ -43,6 +43,7 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
       result = hk_string_value(hk_string_from_chars(reply->len, reply->str));
       break;
     case REDIS_REPLY_ARRAY:
+    case REDIS_REPLY_SET:
       {
         int32_t length = (int32_t) reply->elements;
         hk_array_t *arr = hk_array_new_with_capacity(length);
@@ -75,7 +76,6 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
       result = reply->integer ? HK_TRUE_VALUE : HK_FALSE_VALUE;
       break;
     case REDIS_REPLY_MAP:
-    case REDIS_REPLY_SET:
     case REDIS_REPLY_ATTR:
     case REDIS_REPLY_PUSH:
     case REDIS_REPLY_BIGNUM:
