@@ -164,19 +164,6 @@ void hk_value_print(hk_value_t val, bool quoted)
   }
 }
 
-int32_t hk_value_hash(hk_value_t val, uint32_t *result)
-{
-  if (!hk_is_hashable(val))
-  {
-    hk_runtime_error("type error: value of type %s is not hashable", hk_type_name(val.type));
-    return HK_STATUS_ERROR;
-  }
-  hk_assert(hk_is_string(val), "only strings are hashable");
-  hk_string_t *str = hk_as_string(val);
-  *result = hk_string_hash(str);
-  return HK_STATUS_OK;
-}
-
 bool hk_value_equal(hk_value_t val1, hk_value_t val2)
 {
   if (val1.type != val2.type)

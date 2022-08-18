@@ -102,7 +102,6 @@ typedef struct
 const char *hk_type_name(int32_t type);
 void hk_value_release(hk_value_t val);
 void hk_value_print(hk_value_t val, bool quoted);
-int32_t hk_value_hash(hk_value_t val, uint32_t *result);
 bool hk_value_equal(hk_value_t val1, hk_value_t val2);
 int32_t hk_value_compare(hk_value_t val1, hk_value_t val2, int32_t *result);
 void hk_value_serialize(hk_value_t val, FILE *stream);
