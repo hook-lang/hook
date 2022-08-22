@@ -16,12 +16,14 @@
 
 static inline void type_error(int32_t index, int32_t num_types, int32_t types[], int32_t val_type);
 static inline int32_t push(hk_vm_t *vm, hk_value_t val);
+static inline void pop(hk_vm_t *vm);
 static inline int32_t read_byte(uint8_t **pc);
 static inline int32_t read_word(uint8_t **pc);
 static inline int32_t do_range(hk_vm_t *vm);
 static inline int32_t do_array(hk_vm_t *vm, int32_t length);
 static inline int32_t do_struct(hk_vm_t *vm, int32_t length);
-static inline int32_t do_instance(hk_vm_t *vm, int32_t length);
+static inline int32_t do_instance(hk_vm_t *vm, int32_t num_args);
+static inline int32_t adjust_instance_args(hk_vm_t *vm, int32_t length, int32_t num_args);
 static inline int32_t do_construct(hk_vm_t *vm, int32_t length);
 static inline int32_t do_closure(hk_vm_t *vm, hk_function_t *fn);
 static inline int32_t do_unpack(hk_vm_t *vm, int32_t n);
@@ -68,7 +70,7 @@ static inline int32_t do_bitwise_not(hk_vm_t *vm);
 static inline int32_t do_incr(hk_vm_t *vm);
 static inline int32_t do_decr(hk_vm_t *vm);
 static inline int32_t do_call(hk_vm_t *vm, int32_t num_args);
-static inline int32_t adjust_args(hk_vm_t *vm, int32_t arity, int32_t num_args);
+static inline int32_t adjust_call_args(hk_vm_t *vm, int32_t arity, int32_t num_args);
 static inline void print_trace(hk_string_t *name, hk_string_t *file, int32_t line);
 static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_t *cl, int32_t *line);
 static inline void discard_frame(hk_vm_t *vm, hk_value_t *slots);
@@ -94,6 +96,14 @@ static inline int32_t push(hk_vm_t *vm, hk_value_t val)
   ++vm->stack_top;
   vm->stack[vm->stack_top] = val;
   return HK_STATUS_OK;
+}
+
+static inline void pop(hk_vm_t *vm)
+{
+  hk_assert(vm->stack_top > -1, "stack underflow");
+  hk_value_t val = vm->stack[vm->stack_top];
+  --vm->stack_top;
+  hk_value_release(val);
 }
 
 static inline int32_t read_byte(uint8_t **pc)
@@ -171,9 +181,9 @@ static inline int32_t do_struct(hk_vm_t *vm, int32_t length)
   return HK_STATUS_OK;
 }
 
-static inline int32_t do_instance(hk_vm_t *vm, int32_t length)
+static inline int32_t do_instance(hk_vm_t *vm, int32_t num_args)
 {
-  hk_value_t *slots = &vm->stack[vm->stack_top - length];
+  hk_value_t *slots = &vm->stack[vm->stack_top - num_args];
   hk_value_t val = slots[0];
   if (!hk_is_struct(val))
   {
@@ -181,23 +191,8 @@ static inline int32_t do_instance(hk_vm_t *vm, int32_t length)
     return HK_STATUS_ERROR;
   }
   hk_struct_t *ztruct = hk_as_struct(val);
-  if (ztruct->length > length)
-  {
-    int32_t n = ztruct->length - length;
-    const char *fmt = n == 1 ? 
-      "missing %d value in initializer of %s" :
-      "missing %d values in initializer of %s";  
-    hk_string_t *name = ztruct->name;
-    hk_runtime_error(fmt, n, name ? name->chars : "<anonymous>");
-    return HK_STATUS_ERROR;
-  }
-  if (ztruct->length < length)
-  {
-    const char *fmt = "too many values in initializer of %s";
-    hk_string_t *name = ztruct->name;
-    hk_runtime_error(fmt, name ? name->chars : "<anonymous>");
-    return HK_STATUS_ERROR;
-  }
+  int32_t length = ztruct->length;
+  adjust_instance_args(vm, length, num_args);
   hk_instance_t *inst = hk_instance_new(ztruct);
   for (int32_t i = 0; i < length; ++i)
     inst->values[i] = slots[i + 1];
@@ -205,6 +200,27 @@ static inline int32_t do_instance(hk_vm_t *vm, int32_t length)
   hk_incr_ref(inst);
   slots[0] = hk_instance_value(inst);
   hk_struct_release(ztruct);
+  return HK_STATUS_OK;
+}
+
+static inline int32_t adjust_instance_args(hk_vm_t *vm, int32_t length, int32_t num_args)
+{
+  if (num_args > length)
+  {
+    do
+    {
+      pop(vm);
+      --num_args;
+    }
+    while (num_args > length);
+    return HK_STATUS_OK;
+  }
+  while (num_args < length)
+  {
+    if (push(vm, HK_NIL_VALUE) == HK_STATUS_ERROR)
+      return HK_STATUS_ERROR;
+    ++num_args;
+  }
   return HK_STATUS_OK;
 }
 
@@ -1271,7 +1287,7 @@ static inline int32_t do_call(hk_vm_t *vm, int32_t num_args)
   if (hk_is_native(val))
   {
     hk_native_t *native = hk_as_native(val);
-    if (adjust_args(vm, native->arity, num_args) == HK_STATUS_ERROR)
+    if (adjust_call_args(vm, native->arity, num_args) == HK_STATUS_ERROR)
     {
       discard_frame(vm, slots);
       return HK_STATUS_ERROR;
@@ -1290,7 +1306,7 @@ static inline int32_t do_call(hk_vm_t *vm, int32_t num_args)
   }
   hk_closure_t *cl = hk_as_closure(val);
   hk_function_t *fn = cl->fn;
-  if (adjust_args(vm, fn->arity, num_args) == HK_STATUS_ERROR)
+  if (adjust_call_args(vm, fn->arity, num_args) == HK_STATUS_ERROR)
   {
     discard_frame(vm, slots);
     return HK_STATUS_ERROR;
@@ -1307,13 +1323,16 @@ static inline int32_t do_call(hk_vm_t *vm, int32_t num_args)
   return HK_STATUS_OK;
 }
 
-static inline int32_t adjust_args(hk_vm_t *vm, int32_t arity,int32_t num_args)
+static inline int32_t adjust_call_args(hk_vm_t *vm, int32_t arity,int32_t num_args)
 {
   if (num_args >= arity)
     return HK_STATUS_OK;
-  for (int32_t i = num_args; i < arity; ++i)
+  while (num_args < arity)
+  {
     if (push(vm, HK_NIL_VALUE) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
+    ++num_args;
+  }
   return HK_STATUS_OK;
 }
 
@@ -1833,9 +1852,9 @@ int32_t hk_vm_struct(hk_vm_t *vm, int32_t length)
   return do_struct(vm, length);
 }
 
-int32_t hk_vm_instance(hk_vm_t *vm, int32_t length)
+int32_t hk_vm_instance(hk_vm_t *vm, int32_t num_args)
 {
-  return do_instance(vm, length);
+  return do_instance(vm, num_args);
 }
 
 int32_t hk_vm_construct(hk_vm_t *vm, int32_t length)
@@ -1845,10 +1864,7 @@ int32_t hk_vm_construct(hk_vm_t *vm, int32_t length)
 
 void hk_vm_pop(hk_vm_t *vm)
 {
-  hk_assert(vm->stack_top > -1, "stack underflow");
-  hk_value_t val = vm->stack[vm->stack_top];
-  --vm->stack_top;
-  hk_value_release(val);
+  pop(vm);
 }
 
 int32_t hk_vm_call(hk_vm_t *vm, int32_t num_args)

@@ -40,7 +40,7 @@ int32_t hk_vm_push_new_native(hk_vm_t *vm, const char *name, int32_t arity, int3
 int32_t hk_vm_push_userdata(hk_vm_t *vm, hk_userdata_t *udata);
 int32_t hk_vm_array(hk_vm_t *vm, int32_t length);
 int32_t hk_vm_struct(hk_vm_t *vm, int32_t length);
-int32_t hk_vm_instance(hk_vm_t *vm, int32_t length);
+int32_t hk_vm_instance(hk_vm_t *vm, int32_t num_args);
 int32_t hk_vm_construct(hk_vm_t *vm, int32_t length);
 void hk_vm_pop(hk_vm_t *vm);
 int32_t hk_vm_call(hk_vm_t *vm, int32_t num_args);
