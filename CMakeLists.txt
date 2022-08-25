@@ -6,14 +6,7 @@ project(hook
   LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-
 set(CMAKE_VERBOSE_MAKEFILE OFF)
-
-if(NOT MSVC)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wextra")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -fsanitize=address -fprofile-arcs -ftest-coverage")
-endif()
 
 include_directories(/usr/local/include)
 include_directories(include)
@@ -31,28 +24,35 @@ else()
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_DIR})
 endif()
 
+if(MSVC)
+  add_compile_options(/W4)
+else()
+  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_link_options(-fsanitize=address -fprofile-arcs -ftest-coverage)
+endif()
+
 add_executable(${PROJECT_NAME}
-  src/hook_array.c
-  src/hook_builtin.c
-  src/hook_callable.c
-  src/hook_chunk.c
-  src/hook_utils.c
-  src/hook_compiler.c
-  src/hook_dump.c
-  src/hook_error.c
-  src/hook_iterable.c
-  src/hook_iterator.c
+  src/hk_array.c
+  src/hk_builtin.c
+  src/hk_callable.c
+  src/hk_chunk.c
+  src/hk_utils.c
+  src/hk_compiler.c
+  src/hk_dump.c
+  src/hk_error.c
+  src/hk_iterable.c
+  src/hk_iterator.c
   src/main.c
-  src/hook_memory.c
-  src/hook_module.c
-  src/hook_range.c
-  src/hook_scanner.c
-  src/hook_string_map.c
-  src/hook_string.c
-  src/hook_struct.c
-  src/hook_userdata.c
-  src/hook_value.c
-  src/hook_vm.c)
+  src/hk_memory.c
+  src/hk_module.c
+  src/hk_range.c
+  src/hk_scanner.c
+  src/hk_string_map.c
+  src/hk_string.c
+  src/hk_struct.c
+  src/hk_userdata.c
+  src/hk_value.c
+  src/hk_vm.c)
 
 if(NOT MSVC)
   target_link_libraries(${PROJECT_NAME} m)

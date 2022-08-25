@@ -1,11 +1,14 @@
 //
-// Hook Programming Language
+// The Hook Programming Language
 // sqlite.c
 //
 
 #include "sqlite.h"
 #include <stdlib.h>
 #include <sqlite3.h>
+#include "hk_memory.h"
+#include "hk_status.h"
+#include "hk_error.h"
 
 typedef struct
 {
@@ -133,15 +136,15 @@ static int32_t bind_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_types(args, 3, 4, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   sqlite3_stmt *stmt = ((sqlite_stmt_t *) hk_as_userdata(args[1]))->stmt;
-  int32_t index = (int32_t) args[2].as_float;
+  int32_t index = (int32_t) hk_as_float(args[2]);
   hk_value_t val = args[3];
   if (hk_is_nil(val))
     return hk_vm_push_float(vm, sqlite3_bind_null(stmt, index));
   if (hk_is_bool(val))
-    return hk_vm_push_float(vm, sqlite3_bind_int(stmt, index, (int32_t) val.as_bool));
+    return hk_vm_push_float(vm, sqlite3_bind_int(stmt, index, (int32_t) hk_as_bool(val)));
   if (hk_is_float(val))
   {
-    double data = val.as_float;
+    double data = hk_as_float(val);
     if (hk_is_int(val))
       return hk_vm_push_float(vm, sqlite3_bind_int64(stmt, index, (int64_t) data));
     return hk_vm_push_float(vm, sqlite3_bind_double(stmt, index, data));

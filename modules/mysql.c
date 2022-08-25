@@ -1,11 +1,14 @@
 //
-// Hook Programming Language
+// The Hook Programming Language
 // mysql.c
 //
 
 #include "mysql.h"
 #include <mysql/mysql.h>
 #include <assert.h>
+#include "hk_memory.h"
+#include "hk_status.h"
+#include "hk_error.h"
 
 typedef struct
 {
@@ -85,7 +88,7 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
   MYSQL *my = NULL;
   my = mysql_init(my);
   const char *host = hk_is_nil(args[1]) ? NULL : hk_as_string(args[1])->chars;
-  int32_t port = hk_is_nil(args[2]) ? 0 : (int32_t) args[2].as_float;
+  int32_t port = hk_is_nil(args[2]) ? 0 : (int32_t) hk_as_float(args[2]);
   const char *username = hk_is_nil(args[3]) ? NULL : hk_as_string(args[3])->chars;
   const char *password = hk_is_nil(args[4]) ? NULL : hk_as_string(args[4])->chars;
   const char *database = hk_is_nil(args[5]) ? NULL : hk_as_string(args[5])->chars;

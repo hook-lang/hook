@@ -1,11 +1,12 @@
 //
-// Hook Programming Language
+// The Hook Programming Language
 // hashing.c
 //
 
 #include "hashing.h"
-#include "../deps/sha2.h"
-#include "../deps/ripemd160.h"
+#include "deps/sha2.h"
+#include "deps/ripemd160.h"
+#include "hk_status.h"
 
 #define RIPEMD160_DIGEST_SIZE 20
 

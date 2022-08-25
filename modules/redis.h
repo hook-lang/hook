@@ -1,12 +1,12 @@
 //
-// Hook Programming Language
+// The Hook Programming Language
 // redis.h
 //
 
 #ifndef REDIS_H
 #define REDIS_H
 
-#include "hook.h"
+#include "hk_vm.h"
 
 #ifdef _WIN32
 int32_t __declspec(dllexport) __stdcall load_redis(hk_vm_t *vm);

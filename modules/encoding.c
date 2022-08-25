@@ -1,12 +1,13 @@
 //
-// Hook Programming Language
+// The Hook Programming Language
 // encoding.c
 //
 
 #include "encoding.h"
-#include "../deps/base32.h"
-#include "../deps/base64.h"
-#include "../deps/base58.h"
+#include "deps/base32.h"
+#include "deps/base64.h"
+#include "deps/base58.h"
+#include "hk_status.h"
 
 #define BASE58_ENCODE_OUT_SIZE(n) ((n) * 138 / 100 + 1)
 #define BASE58_DECODE_OUT_SIZE(n) ((n) * 733 /1000 + 1)

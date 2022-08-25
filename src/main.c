@@ -1,11 +1,16 @@
 //
-// Hook Programming Language
+// The Hook Programming Language
 // main.c
 //
 
 #include <stdlib.h>
 #include <string.h>
-#include "hook.h"
+#include "hk_compiler.h"
+#include "hk_dump.h"
+#include "hk_vm.h"
+#include "hk_utils.h"
+#include "hk_status.h"
+#include "hk_error.h"
 
 #define VERSION "0.1.0"
 
@@ -214,7 +219,7 @@ static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args)
     return EXIT_FAILURE;
   }
   hk_value_t result = vm.stack[vm.stack_top];
-  int32_t status = hk_is_int(result) ? (int32_t) result.as_float : 0;
+  int32_t status = hk_is_int(result) ? (int32_t) hk_as_float(result) : 0;
   --vm.stack_top;
   hk_vm_free(&vm);
   return status;

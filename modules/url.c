@@ -1,11 +1,14 @@
 //
-// Hook Programming Language
+// The Hook Programming Language
 // url.c
 //
 
 #include "url.h"
 #include <stdlib.h>
 #include <curl/curl.h>
+#include "hk_memory.h"
+#include "hk_status.h"
+#include "hk_error.h"
 
 typedef struct
 {

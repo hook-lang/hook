@@ -1,11 +1,14 @@
 //
-// Hook Programming Language
+// The Hook Programming Language
 // redis.c
 //
 
 #include "redis.h"
 #include <stdlib.h>
 #include <hiredis/hiredis.h>
+#include "hk_utils.h"
+#include "hk_memory.h"
+#include "hk_status.h"
 
 typedef struct
 {
@@ -96,7 +99,7 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *hostname = hk_as_string(args[1]);
-  int32_t port = (int32_t) args[2].as_float;
+  int32_t port = (int32_t) hk_as_float(args[2]);
   redisContext *ctx = redisConnect(hostname->chars, port);
   if (!ctx || ctx->err)
     return hk_vm_push_nil(vm);
