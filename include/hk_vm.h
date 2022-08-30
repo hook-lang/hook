@@ -44,6 +44,7 @@ int32_t hk_vm_instance(hk_vm_t *vm, int32_t num_args);
 int32_t hk_vm_construct(hk_vm_t *vm, int32_t length);
 void hk_vm_pop(hk_vm_t *vm);
 int32_t hk_vm_call(hk_vm_t *vm, int32_t num_args);
+int32_t hk_vm_compare(hk_vm_t *vm, hk_value_t val1, hk_value_t val2, int32_t *result);
 int32_t hk_vm_check_type(hk_value_t *args, int32_t index, int32_t type);
 int32_t hk_vm_check_types(hk_value_t *args, int32_t index, int32_t num_types, int32_t types[]);
 int32_t hk_vm_check_bool(hk_value_t *args, int32_t index);

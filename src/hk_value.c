@@ -201,48 +201,41 @@ bool hk_value_equal(hk_value_t val1, hk_value_t val2)
   return result;
 }
 
-int32_t hk_value_compare(hk_value_t val1, hk_value_t val2, int32_t *result)
+bool hk_value_compare(hk_value_t val1, hk_value_t val2, int32_t *result)
 {
   if (val1.type != val2.type)
-  {
-    hk_runtime_error("type error: cannot compare %s and %s", hk_type_name(val1.type),
-      hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
-  }
+    return false;
   switch (val1.type)
   {
   case HK_TYPE_NIL:
     *result = 0;
-    return HK_STATUS_OK;
+    return true;
   case HK_TYPE_BOOL:
     *result = hk_as_bool(val1) - hk_as_bool(val2);
-    return HK_STATUS_OK;
+    return true;
   case HK_TYPE_FLOAT:
     if (hk_as_float(val1) > hk_as_float(val2))
     {
       *result = 1;
-      return HK_STATUS_OK;
+      return true;
     }
     if (hk_as_float(val1) < hk_as_float(val2))
     {
       *result = -1;
-      return HK_STATUS_OK;
+      return true;
     }
     *result = 0;
-    return HK_STATUS_OK;
+    return true;
   case HK_TYPE_STRING:
     *result = hk_string_compare(hk_as_string(val1), hk_as_string(val2));
-    return HK_STATUS_OK;
+    return true;
   case HK_TYPE_RANGE:
     *result = hk_range_compare(hk_as_range(val1), hk_as_range(val2));
-    return HK_STATUS_OK;
+    return true;
   case HK_TYPE_ARRAY:
     return hk_array_compare(hk_as_array(val1), hk_as_array(val2), result);
-  default:
-    break;
   }
-  hk_runtime_error("type error: value of type %s is not comparable", hk_type_name(val1.type));
-  return HK_STATUS_ERROR;
+  return false;
 }
 
 void hk_value_serialize(hk_value_t val, FILE *stream)

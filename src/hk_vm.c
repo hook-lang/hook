@@ -824,7 +824,7 @@ static inline int32_t do_greater(hk_vm_t *vm)
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
   int32_t result;
-  if (hk_value_compare(val1, val2, &result) == HK_STATUS_ERROR)
+  if (hk_vm_compare(vm, val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result > 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
   --vm->stack_top;
@@ -839,7 +839,7 @@ static inline int32_t do_less(hk_vm_t *vm)
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
   int32_t result;
-  if (hk_value_compare(val1, val2, &result) == HK_STATUS_ERROR)
+  if (hk_vm_compare(vm, val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result < 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
   --vm->stack_top;
@@ -865,7 +865,7 @@ static inline int32_t do_not_greater(hk_vm_t *vm)
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
   int32_t result;
-  if (hk_value_compare(val1, val2, &result) == HK_STATUS_ERROR)
+  if (hk_vm_compare(vm, val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result > 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
   --vm->stack_top;
@@ -880,7 +880,7 @@ static inline int32_t do_not_less(hk_vm_t *vm)
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
   int32_t result;
-  if (hk_value_compare(val1, val2, &result) == HK_STATUS_ERROR)
+  if (hk_vm_compare(vm, val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result < 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
   --vm->stack_top;
@@ -1870,6 +1870,24 @@ void hk_vm_pop(hk_vm_t *vm)
 int32_t hk_vm_call(hk_vm_t *vm, int32_t num_args)
 {
   return do_call(vm, num_args);
+}
+
+int32_t hk_vm_compare(hk_vm_t *vm, hk_value_t val1, hk_value_t val2, int32_t *result)
+{
+  (void) vm;
+  if (!hk_is_comparable(val1))
+  {
+    hk_runtime_error("type error: value of type %s is not comparable", hk_type_name(val1.type));
+    return HK_STATUS_ERROR;
+  }
+  if (val1.type != val2.type)
+  {
+    hk_runtime_error("type error: cannot compare %s and %s", hk_type_name(val1.type),
+      hk_type_name(val2.type));
+    return HK_STATUS_ERROR;
+  }
+  hk_assert(hk_value_compare(val1, val2, result), "hk_value_compare failed");
+  return HK_STATUS_OK; 
 }
 
 int32_t hk_vm_check_type(hk_value_t *args, int32_t index, int32_t type)

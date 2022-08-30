@@ -309,35 +309,35 @@ bool hk_array_equal(hk_array_t *arr1, hk_array_t *arr2)
   return true;
 }
 
-int32_t hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result)
+bool hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result)
 {
   if (arr1 == arr2)
   {
     *result = 0;
-    return HK_STATUS_OK;
+    return true;
   }
   for (int32_t i = 0; i < arr1->length && i < arr2->length; ++i)
   {
     int32_t comp;
-    if (hk_value_compare(arr1->elements[i], arr2->elements[i], &comp) == HK_STATUS_ERROR)
-      return HK_STATUS_ERROR;
+    if (!hk_value_compare(arr1->elements[i], arr2->elements[i], &comp))
+      return false;
     if (!comp)
       continue;
     *result = comp;
-    return HK_STATUS_OK;
+    return true;
   }
   if (arr1->length > arr2->length)
   {
     *result = 1;
-    return HK_STATUS_OK;
+    return true;
   }
   if (arr1->length < arr2->length)
   {
     *result = -1;
-    return HK_STATUS_OK;
+    return true;
   }
   *result = 0;
-  return HK_STATUS_OK;
+  return true;
 }
 
 hk_iterator_t *hk_array_new_iterator(hk_array_t *arr)
@@ -366,7 +366,7 @@ hk_array_t *hk_array_reverse(hk_array_t *arr)
   return result;
 }
 
-int32_t hk_array_sort(hk_array_t *arr, hk_array_t **result)
+bool hk_array_sort(hk_array_t *arr, hk_array_t **result)
 {
   int32_t length = arr->length;
   hk_array_t *_result = array_allocate(length);
@@ -379,10 +379,10 @@ int32_t hk_array_sort(hk_array_t *arr, hk_array_t **result)
     {
       hk_value_t elem2 = _result->elements[index];
       int32_t comp;
-      if (hk_value_compare(elem1, elem2, &comp) == HK_STATUS_ERROR)
+      if (!hk_value_compare(elem1, elem2, &comp))
       {
         hk_array_free(_result);
-        return HK_STATUS_ERROR;
+        return false;
       }
       if (comp < 0)
         break;
@@ -390,7 +390,7 @@ int32_t hk_array_sort(hk_array_t *arr, hk_array_t **result)
     hk_array_inplace_insert_element(_result, index, elem1);
   }
   *result = _result;
-  return HK_STATUS_OK;
+  return true;
 }
 
 void hk_array_serialize(hk_array_t *arr, FILE *stream)

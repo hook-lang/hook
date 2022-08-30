@@ -6,6 +6,7 @@
 #include "hk_arrays.h"
 #include <stdlib.h>
 #include "hk_status.h"
+#include "hk_error.h"
 
 static int32_t new_array_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t index_of_call(hk_vm_t *vm, hk_value_t *args);
@@ -50,7 +51,7 @@ static int32_t min_call(hk_vm_t *vm, hk_value_t *args)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
     int32_t result;
-    if (hk_value_compare(elem, min, &result) == HK_STATUS_ERROR)
+    if (hk_vm_compare(vm, elem, min, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     min = result < 0 ? elem : min;
   }
@@ -70,7 +71,7 @@ static int32_t max_call(hk_vm_t *vm, hk_value_t *args)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
     int32_t result;
-    if (hk_value_compare(elem, max, &result) == HK_STATUS_ERROR)
+    if (hk_vm_compare(vm, elem, max, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     max = result > 0 ? elem : max;
   }
@@ -133,8 +134,11 @@ static int32_t sort_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_array_t *arr;
-  if (hk_array_sort(hk_as_array(args[1]), &arr) == HK_STATUS_ERROR)
+  if (!hk_array_sort(hk_as_array(args[1]), &arr))
+  {
+    hk_runtime_error("cannot compare elements of array");
     return HK_STATUS_ERROR;
+  }
   if (hk_vm_push_array(vm, arr) == HK_STATUS_ERROR)
   {
     hk_array_free(arr);
