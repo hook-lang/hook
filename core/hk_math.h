@@ -7,11 +7,8 @@
 #define HK_MATH_H
 
 #include "hk_vm.h"
+#include "hk_utils.h"
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_math(hk_vm_t *vm);
-#else
-int32_t load_math(hk_vm_t *vm);
-#endif
+HK_LOAD_FN(math);
 
 #endif // HK_MATH_H

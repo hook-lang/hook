@@ -5,8 +5,8 @@
 
 #include "hk_string_map.h"
 #include <stdlib.h>
-#include "hk_utils.h"
 #include "hk_memory.h"
+#include "hk_utils.h"
 
 static inline string_map_entry_t *allocate_entries(int32_t capacity);
 static inline void grow(string_map_t *map);

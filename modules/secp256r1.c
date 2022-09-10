@@ -101,11 +101,7 @@ static int32_t verify_signature_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_bool(vm, valid);
 }
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_secp256r1(hk_vm_t *vm)
-#else
-int32_t load_secp256r1(hk_vm_t *vm)
-#endif
+HK_LOAD_FN(secp256r1)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "secp256r1") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

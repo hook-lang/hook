@@ -16,9 +16,9 @@
 #endif
 #include "hk_struct.h"
 #include "hk_iterable.h"
-#include "hk_utils.h"
 #include "hk_status.h"
 #include "hk_error.h"
+#include "hk_utils.h"
 
 #ifdef _WIN32
 #define strtok_r strtok_s

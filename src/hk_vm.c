@@ -9,10 +9,10 @@
 #include "hk_builtin.h"
 #include "hk_struct.h"
 #include "hk_module.h"
-#include "hk_utils.h"
 #include "hk_memory.h"
 #include "hk_status.h"
 #include "hk_error.h"
+#include "hk_utils.h"
 
 static inline void type_error(int32_t index, int32_t num_types, int32_t types[], int32_t val_type);
 static inline int32_t push(hk_vm_t *vm, hk_value_t val);

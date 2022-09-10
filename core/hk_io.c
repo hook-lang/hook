@@ -227,11 +227,7 @@ static int32_t writeln_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_float(vm, size + 1);
 }
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_io(hk_vm_t *vm)
-#else
-int32_t load_io(hk_vm_t *vm)
-#endif
+HK_LOAD_FN(io)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "io") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

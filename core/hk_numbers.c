@@ -16,11 +16,7 @@
 #define MAX_INTEGER 9007199254740991.0
 #define MIN_INTEGER -9007199254740991.0
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_numbers(hk_vm_t *vm)
-#else
-int32_t load_numbers(hk_vm_t *vm)
-#endif
+HK_LOAD_FN(numbers)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "numbers") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

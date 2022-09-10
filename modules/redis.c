@@ -6,9 +6,9 @@
 #include "redis.h"
 #include <stdlib.h>
 #include <hiredis/hiredis.h>
-#include "hk_utils.h"
 #include "hk_memory.h"
 #include "hk_status.h"
+#include "hk_utils.h"
 
 typedef struct
 {
@@ -121,11 +121,7 @@ static int32_t command_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push(vm, result);
 }
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_redis(hk_vm_t *vm)
-#else
-int32_t load_redis(hk_vm_t *vm)
-#endif
+HK_LOAD_FN(redis)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "redis") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

@@ -5,8 +5,8 @@
 
 #include "hk_chunk.h"
 #include <stdlib.h>
-#include "hk_utils.h"
 #include "hk_memory.h"
+#include "hk_utils.h"
 
 #define MIN_CAPACITY (1 << 3)
 

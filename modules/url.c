@@ -83,11 +83,7 @@ static int32_t perform_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_string(vm, str);
 }
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_url(hk_vm_t *vm)
-#else
-int32_t load_url(hk_vm_t *vm)
-#endif
+HK_LOAD_FN(url)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "url") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

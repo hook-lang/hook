@@ -11,9 +11,9 @@
 #include <dlfcn.h>
 #endif
 #include "hk_string_map.h"
-#include "hk_utils.h"
 #include "hk_status.h"
 #include "hk_error.h"
+#include "hk_utils.h"
 
 #define HOME_VAR "HOOK_HOME"
 
@@ -28,8 +28,6 @@
 #define FILE_EXT   ".so"
 #endif
 #endif
-
-#define FUNC_PREFIX "load_"
 
 #ifdef _WIN32
 typedef int32_t (__stdcall *load_module_t)(hk_vm_t *);
@@ -95,21 +93,21 @@ static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name)
     return HK_STATUS_ERROR;
   }
   hk_string_free(file);
-  hk_string_t *func = hk_string_from_chars(-1, FUNC_PREFIX);
-  hk_string_inplace_concat(func, name);
+  hk_string_t *fn_name = hk_string_from_chars(-1, HK_LOAD_FN_PREFIX);
+  hk_string_inplace_concat(fn_name, name);
   load_module_t load;
 #ifdef _WIN32
-  load = (load_module_t) GetProcAddress(handle, func->chars);
+  load = (load_module_t) GetProcAddress(handle, fn_name->chars);
 #else
-  *((void **) &load) = dlsym(handle, func->chars);
+  *((void **) &load) = dlsym(handle, fn_name->chars);
 #endif
   if (!load)
   {
-    hk_runtime_error("no such function %.*s()", func->length, func->chars);
-    hk_string_free(func);
+    hk_runtime_error("no such function %.*s()", fn_name->length, fn_name->chars);
+    hk_string_free(fn_name);
     return HK_STATUS_ERROR;
   }
-  hk_string_free(func);
+  hk_string_free(fn_name);
   if (load(vm) == HK_STATUS_ERROR)
   {
     hk_runtime_error("cannot load module `%.*s`", name->length, name->chars);

@@ -156,11 +156,7 @@ static int32_t random_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_float(vm, result);
 }
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_math(hk_vm_t *vm)
-#else
-int32_t load_math(hk_vm_t *vm)
-#endif
+HK_LOAD_FN(math)
 {
   srand((uint32_t) time(NULL));
   if (hk_vm_push_string_from_chars(vm, -1, "math") == HK_STATUS_ERROR)

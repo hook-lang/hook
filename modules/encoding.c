@@ -127,11 +127,7 @@ static int32_t base64_decode_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_encoding(hk_vm_t *vm)
-#else
-int32_t load_encoding(hk_vm_t *vm)
-#endif
+HK_LOAD_FN(encoding)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "encoding") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

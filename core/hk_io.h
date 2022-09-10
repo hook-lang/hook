@@ -7,11 +7,8 @@
 #define HK_IO_H
 
 #include "hk_vm.h"
+#include "hk_utils.h"
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_io(hk_vm_t *vm);
-#else
-int32_t load_io(hk_vm_t *vm);
-#endif
+HK_LOAD_FN(io);
 
 #endif // HK_IO_H

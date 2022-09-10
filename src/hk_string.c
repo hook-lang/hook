@@ -8,8 +8,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
-#include "hk_utils.h"
 #include "hk_memory.h"
+#include "hk_utils.h"
 
 static inline hk_string_t *string_allocate(int32_t min_capacity);
 static inline void add_char(hk_string_t *str, char c);

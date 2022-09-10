@@ -106,11 +106,7 @@ static int32_t ripemd160_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_hashing(hk_vm_t *vm)
-#else
-int32_t load_hashing(hk_vm_t *vm)
-#endif
+HK_LOAD_FN(hashing)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "hashing") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

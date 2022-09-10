@@ -147,11 +147,7 @@ static int32_t sort_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-#ifdef _WIN32
-int32_t __declspec(dllexport) __stdcall load_arrays(hk_vm_t *vm)
-#else
-int32_t load_arrays(hk_vm_t *vm)
-#endif
+HK_LOAD_FN(arrays)
 {
   if (hk_vm_push_string_from_chars(vm,-1, "arrays") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

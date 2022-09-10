@@ -9,9 +9,9 @@
 #include "hk_struct.h"
 #include "hk_callable.h"
 #include "hk_userdata.h"
-#include "hk_utils.h"
 #include "hk_status.h"
 #include "hk_error.h"
+#include "hk_utils.h"
 
 static inline void value_free(hk_value_t val);
 

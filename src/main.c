@@ -8,9 +8,9 @@
 #include "hk_compiler.h"
 #include "hk_dump.h"
 #include "hk_vm.h"
-#include "hk_utils.h"
 #include "hk_status.h"
 #include "hk_error.h"
+#include "hk_utils.h"
 
 #define VERSION "0.1.0"
 
