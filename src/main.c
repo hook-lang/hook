@@ -37,10 +37,10 @@ static inline hk_array_t *args_array(parsed_args_t *parsed_args);
 static inline void print_help(const char *cmd);
 static inline void print_version(void);
 static inline FILE *open_file(const char *filename, const char *mode);
+static inline hk_string_t *load_source_from_file(const char *filename);
 static inline hk_closure_t *load_bytecode_from_file(const char *filename);
 static inline hk_closure_t *load_bytecode_from_stream(FILE *stream);
 static inline void save_bytecode_to_file(hk_closure_t *cl, const char *filename);
-static inline hk_string_t *load_source_from_file(const char *filename);
 static inline void dump_bytecode_to_file(hk_function_t *fn, const char *filename);
 static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args);
 
@@ -170,6 +170,14 @@ static inline FILE *open_file(const char *filename, const char *mode)
   return stream;
 }
 
+static inline hk_string_t *load_source_from_file(const char *filename)
+{
+  FILE *stream = open_file(filename, "r");
+  hk_string_t *source = hk_string_from_stream(stream, '\0');
+  fclose(stream);
+  return source;
+}
+
 static inline hk_closure_t *load_bytecode_from_file(const char *filename)
 {
   FILE *stream = open_file(filename, "rb");
@@ -197,24 +205,10 @@ static inline void save_bytecode_to_file(hk_closure_t *cl, const char *filename)
   fclose(stream);
 }
 
-static inline hk_string_t *load_source_from_file(const char *filename)
-{
-  FILE *stream = open_file(filename, "rb");
-  fseek(stream, 0L, SEEK_END);
-  int32_t length = ftell(stream);
-  rewind(stream);
-  hk_string_t *str = hk_string_new_with_capacity(length);
-  str->length = length;
-  hk_assert(fread(str->chars, length, 1, stream) == 1, "unexpected error on fread()");
-  str->chars[length] = '\0';
-  fclose(stream);
-  return str;
-}
-
 static inline void dump_bytecode_to_file(hk_function_t *fn, const char *filename)
 {
   hk_ensure_path(filename);
-  FILE *stream = open_file(filename, "wb");
+  FILE *stream = open_file(filename, "w");
   hk_dump(fn, stream);
   fclose(stream);
 }

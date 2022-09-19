@@ -60,7 +60,11 @@ if(NOT MSVC)
 endif()
 
 add_subdirectory(core)
-add_subdirectory(modules)
+
+if(BUILD_EXTENSIONS)
+  message("Building with extensions")
+  add_subdirectory(extensions)
+endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

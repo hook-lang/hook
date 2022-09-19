@@ -16,15 +16,6 @@ sudo apt-get update -y
 sudo apt-get install -y cmake
 ```
 
-## Installing the dependencies
-
-Hook has some built-in modules that require the presence of some libraries on your system. Here are the commands 
-to install them:
-
-```
-sudo apt-get install -y libcurl4-openssl-dev libhiredis-dev libmysqlclient-dev
-```
-
 ## Building and compiling
 
 Use the following commands to build the binaries:
@@ -34,6 +25,23 @@ cd ~
 git clone https://github.com/fabiosvm/hook-lang.git
 mv hook-lang hook && cd hook
 cmake -B build
+cmake --build build
+```
+
+### Building the extensions
+
+Hook's project brings some extensions (non-core built-in modules) that are not compiled by default.
+
+To build the extensions, you need to install some dependencies:
+
+```
+sudo apt-get install -y libcurl4-openssl-dev libhiredis-dev libmysqlclient-dev
+```
+
+So you can build with the following command:
+
+```
+cmake -B build -DBUILD_EXTENSIONS=On
 cmake --build build
 ```
 
