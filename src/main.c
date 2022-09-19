@@ -36,10 +36,12 @@ static inline const char *option(const char *arg, const char *opt);
 static inline hk_array_t *args_array(parsed_args_t *parsed_args);
 static inline void print_help(const char *cmd);
 static inline void print_version(void);
+static inline FILE *open_file(const char *filename, const char *mode);
 static inline hk_closure_t *load_bytecode_from_file(const char *filename);
 static inline hk_closure_t *load_bytecode_from_stream(FILE *stream);
 static inline void save_bytecode_to_file(hk_closure_t *cl, const char *filename);
 static inline hk_string_t *load_source_from_file(const char *filename);
+static inline void dump_bytecode_to_file(hk_function_t *fn, const char *filename);
 static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args);
 
 static inline void parse_args(parsed_args_t *parsed_args, int32_t argc, const char **argv)
@@ -160,11 +162,17 @@ static inline void print_version(void)
   printf("hook version %s\n", VERSION);
 }
 
-static inline hk_closure_t *load_bytecode_from_file(const char *filename)
+static inline FILE *open_file(const char *filename, const char *mode)
 {
-  FILE *stream = fopen(filename, "rb");
+  FILE *stream = fopen(filename, mode);
   if (!stream)
     hk_fatal_error("unable to open file `%s`", filename);
+  return stream;
+}
+
+static inline hk_closure_t *load_bytecode_from_file(const char *filename)
+{
+  FILE *stream = open_file(filename, "rb");
   hk_closure_t *cl = load_bytecode_from_stream(stream);
   if (!cl)
     hk_fatal_error("unable to load file `%s`", filename);
@@ -184,18 +192,14 @@ static inline void save_bytecode_to_file(hk_closure_t *cl, const char *filename)
 {
   filename = filename ? filename : "a.out";
   hk_ensure_path(filename);
-  FILE *stream = fopen(filename, "wb");
-  if (!stream)
-    hk_fatal_error("unable to open file `%s`", filename);
+  FILE *stream = open_file(filename, "wb");
   hk_function_serialize(cl->fn, stream);
   fclose(stream);
 }
 
 static inline hk_string_t *load_source_from_file(const char *filename)
 {
-  FILE *stream = fopen(filename, "rb");
-  if (!stream)
-    hk_fatal_error("unable to open file `%s`", filename);
+  FILE *stream = open_file(filename, "rb");
   fseek(stream, 0L, SEEK_END);
   int32_t length = ftell(stream);
   rewind(stream);
@@ -205,6 +209,14 @@ static inline hk_string_t *load_source_from_file(const char *filename)
   str->chars[length] = '\0';
   fclose(stream);
   return str;
+}
+
+static inline void dump_bytecode_to_file(hk_function_t *fn, const char *filename)
+{
+  hk_ensure_path(filename);
+  FILE *stream = open_file(filename, "wb");
+  hk_dump(fn, stream);
+  fclose(stream);
 }
 
 static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args)
@@ -264,15 +276,22 @@ int32_t main(int32_t argc, const char **argv)
   hk_string_t *file = hk_string_from_chars(-1, input ? input : "<stdin>");
   hk_string_t *source = input ? load_source_from_file(input) : hk_string_from_stream(stdin, '\0');
   hk_closure_t *cl = hk_compile(file, source);
+  const char *output = parsed_args.output;
   if (parsed_args.opt_dump)
   {
-    hk_dump(cl->fn);
+    if (output)
+    {
+      dump_bytecode_to_file(cl->fn, output);
+      hk_closure_free(cl);
+      return EXIT_SUCCESS;
+    }
+    hk_dump(cl->fn, stdout);
     hk_closure_free(cl);
     return EXIT_SUCCESS;
   }
   if (parsed_args.opt_compile)
   {
-    save_bytecode_to_file(cl, parsed_args.output);
+    save_bytecode_to_file(cl, output);
     hk_closure_free(cl);
     return EXIT_SUCCESS;
   }

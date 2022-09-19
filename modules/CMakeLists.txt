@@ -18,8 +18,8 @@ endif()
 if(APPLE)
   include_directories(/usr/local/opt/mysql-client/include)
   link_directories(/usr/local/opt/mysql-client/lib)
-  #include_directories(/opt/homebrew/opt/mysql-client/include)
-  #link_directories(/opt/homebrew/opt/mysql-client/lib)
+  include_directories(/opt/homebrew/opt/mysql-client/include)
+  link_directories(/opt/homebrew/opt/mysql-client/lib)
 endif()
 
 add_library(sqlite SHARED
