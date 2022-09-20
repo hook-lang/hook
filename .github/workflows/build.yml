@@ -27,7 +27,7 @@ jobs:
         sudo cmake --install build
     - name: Configure CMake
       run: |
-        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXTENSIONS=On
     - name: Build
       run: |
         cmake --build ${{ github.workspace }}/build
@@ -59,7 +59,7 @@ jobs:
         sudo cmake --install build
     - name: Configure CMake
       run: |
-        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXTENSIONS=On
     - name: Build
       run: |
         cmake --build ${{ github.workspace }}/build
@@ -93,7 +93,7 @@ jobs:
         cmake --install build
     - name: Configure CMake
       run: |
-        cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+        cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_EXTENSIONS=On
     - name: Build
       run: |
         cmake --build ${{ github.workspace }}/build

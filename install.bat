@@ -74,7 +74,8 @@ rem End
 rem ------------------------------------------------------------------------------
 
 echo "Install successful."
-echo "To start using Hook, run: 'hook --help'"
+echo "You can check the installation by running 'hook --version'."
+echo "Enjoy!"
 
 endlocal & (
   set "HOOK_HOME=%HOOK_HOME%"

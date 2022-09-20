@@ -159,6 +159,6 @@ fi
 sudo chmod +x "$home_dir/bin/hook"
 
 info "Install successful."
-info "To start using Hook, run: 'hook --help'"
-
-exec bash
+info "Hook is now available in your PATH, but you may need to restart your shell."
+info "You can check the installation by running 'hook --version'."
+info "Enjoy!"
