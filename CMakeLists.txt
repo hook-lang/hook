@@ -28,7 +28,12 @@ if(MSVC)
   add_compile_options(/W4)
 else()
   add_compile_options(-Wall -Wextra -Wpedantic)
-  add_link_options(-fsanitize=address -fprofile-arcs -ftest-coverage)
+  add_compile_options("$<$<CONFIG:Debug>:-fsanitize=address>")
+  add_compile_options("$<$<CONFIG:Debug>:-fprofile-arcs>")
+  add_compile_options("$<$<CONFIG:Debug>:-ftest-coverage>")
+  add_link_options("$<$<CONFIG:Debug>:-fsanitize=address>")
+  add_link_options("$<$<CONFIG:Debug>:-fprofile-arcs>")
+  add_link_options("$<$<CONFIG:Debug>:-ftest-coverage>")
 endif()
 
 add_executable(${PROJECT_NAME}

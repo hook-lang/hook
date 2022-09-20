@@ -96,7 +96,7 @@ jobs:
         cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_EXTENSIONS=On
     - name: Build
       run: |
-        cmake --build ${{ github.workspace }}/build
+        cmake --build ${{ github.workspace }}/build --config Debug
     - name: Running tests
       run: |
         ${{ github.workspace }}/run-tests.bat
