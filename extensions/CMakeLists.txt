@@ -5,7 +5,6 @@ if(MSVC)
 endif()
 
 if(MSVC)
-  find_package(unofficial-sqlite3 CONFIG REQUIRED)
   find_package(CURL CONFIG REQUIRED)
   find_package(libmysql REQUIRED)
 endif()
@@ -24,6 +23,7 @@ endif()
 
 add_library(sqlite SHARED
   sqlite.c
+  deps/sqlite3.c
   ../src/hk_array.c
   ../src/hk_builtin.c
   ../src/hk_callable.c
@@ -169,11 +169,9 @@ add_library(mysql SHARED
   ../src/hk_vm.c)
 
 if(MSVC)
-  target_link_libraries(sqlite PRIVATE unofficial::sqlite3::sqlite3)
   target_link_libraries(url PRIVATE CURL::libcurl)
   target_link_libraries(mysql PRIVATE ${MYSQL_LIBRARIES})
 else()
-  target_link_libraries(sqlite sqlite3)
   target_link_libraries(url curl)
   target_link_libraries(mysql mysqlclient)
 endif()
