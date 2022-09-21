@@ -5,7 +5,7 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | 'use' '{' NAME ( ',' NAME )* '}' 'from' NAME ';'
               | var_decl ';'
               | assign_call ';'
-              | 'struct' NAME '{' ( NAME ( ',' NAME )* )? '}'
+              | 'struct' NAME '{' ( STRING | NAME ( ',' STRING | NAME )* )? '}'
               | 'fn' NAME '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
                 ( '=>' expr | block )
               | 'del' NAME subscr* '[' expr ']' ';'
@@ -66,8 +66,8 @@ unary_expr  ::= ( '-' | '!' | '~' ) unary_expr | prim_expr
 
 prim_expr   ::= 'nil' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'
-              | '{' ( NAME ':' expr ( ',' NAME ':' expr )* )? '}'
-              | 'struct' '{' ( NAME ( ',' NAME )* )? '}'
+              | '{' ( STRING | NAME ':' expr ( ',' STRING | NAME ':' expr )* )? '}'
+              | 'struct' '{' ( STRING | NAME ( ',' STRING | NAME )* )? '}'
               | 'fn' '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
                 ( '=>' expr | block )
               | ( 'if' | 'if!' ) '(' expr ')' expr 'else' expr

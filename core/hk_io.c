@@ -4,7 +4,6 @@
 //
 
 #include "hk_io.h"
-#include <stdlib.h>
 #include <stdio.h>
 #ifdef _WIN32
 #include <windows.h>

@@ -1002,7 +1002,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
     hk_chunk_add_line(chunk, line);
     return;
   }
-  if (!match(scan, TOKEN_NAME))
+  if (!match(scan, TOKEN_STRING) && !match(scan, TOKEN_NAME))
     syntax_error_unexpected(comp);
   tk = scan->token;
   scanner_next_token(scan);
@@ -1014,7 +1014,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
   while (match(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
-    if (!match(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_STRING) && !match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     tk = scan->token;
     scanner_next_token(scan);
@@ -1890,7 +1890,7 @@ static void compile_struct_constructor(compiler_t *comp)
     hk_chunk_add_line(chunk, line);
     return;
   }
-  if (!match(scan, TOKEN_NAME))
+  if (!match(scan, TOKEN_STRING) && !match(scan, TOKEN_NAME))
     syntax_error_unexpected(comp);
   token_t tk = scan->token;
   scanner_next_token(scan);
@@ -1904,7 +1904,7 @@ static void compile_struct_constructor(compiler_t *comp)
   while (match(scan, TOKEN_COMMA))
   {
     scanner_next_token(scan);
-    if (!match(scan, TOKEN_NAME))
+    if (!match(scan, TOKEN_STRING) && !match(scan, TOKEN_NAME))
       syntax_error_unexpected(comp);
     tk = scan->token;
     scanner_next_token(scan);

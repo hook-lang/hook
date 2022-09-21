@@ -6,3 +6,6 @@ println(s1.baz);
 
 val s2 = {foo: {bar: 1, baz: 2}};
 println(s2.foo.baz);
+
+val s3 = {"foo": 1};
+println(s3.foo);

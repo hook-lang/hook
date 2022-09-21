@@ -8,3 +8,13 @@ val Bar = struct {
   c, d
 };
 println(Bar{3, 4});
+
+val Baz = struct {
+  "e", "f"
+};
+println(Baz{5, 6});
+
+val Qux = struct {
+  "g", "h"
+};
+println(Qux{7, 8});

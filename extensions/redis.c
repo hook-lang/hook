@@ -8,7 +8,6 @@
 #include <hiredis/hiredis.h>
 #include "hk_memory.h"
 #include "hk_status.h"
-#include "hk_utils.h"
 
 typedef struct
 {

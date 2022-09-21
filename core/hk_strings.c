@@ -4,7 +4,6 @@
 //
 
 #include "hk_strings.h"
-#include <stdlib.h>
 #include "hk_status.h"
 
 static int32_t hash_call(hk_vm_t *vm, hk_value_t *args);

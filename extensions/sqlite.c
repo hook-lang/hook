@@ -4,7 +4,6 @@
 //
 
 #include "sqlite.h"
-#include <stdlib.h>
 #include <sqlite3.h>
 #include "hk_memory.h"
 #include "hk_status.h"

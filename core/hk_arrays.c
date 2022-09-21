@@ -4,7 +4,6 @@
 //
 
 #include "hk_arrays.h"
-#include <stdlib.h>
 #include "hk_status.h"
 #include "hk_error.h"
 
