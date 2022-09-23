@@ -1,4 +1,4 @@
-name: Build for release and upload assets
+name: Build for release and upload assets with extensions
 
 jobs:
 

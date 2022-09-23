@@ -38,10 +38,19 @@ To build the extensions, you need to install some dependencies:
 sudo apt-get install -y libcurl4-openssl-dev libhiredis-dev libmysqlclient-dev
 ```
 
-So you can build with the following command:
+So you can build appending the `-DBUILD_EXTENSIONS=On` flag to the `cmake` command:
 
 ```
 cmake -B build -DBUILD_EXTENSIONS=On
+cmake --build build
+```
+
+### Building for Release
+
+To build the project for release, you need append the `-DCMAKE_BUILD_TYPE=Release` flag to the `cmake` command:
+
+```
+cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
