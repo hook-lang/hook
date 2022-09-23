@@ -1,0 +1,102 @@
+name: Build for release and upload assets
+
+jobs:
+
+  ubuntu-release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y libcurl4-openssl-dev
+        sudo apt-get install -y libmysqlclient-dev
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXTENSIONS=On
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build
+    - name: Packing
+      run: |
+        cpack --config build/CPackConfig.cmake
+    - name: Upload asset
+      uses: shogo82148/actions-upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ github.workspace }}/package/*.tar.gz
+        overwrite: true
+
+  macos-release:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        brew install mysql-connector-c
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Release -DBUILD_EXTENSIONS=On
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build
+    - name: Packing
+      run: |
+        cpack --config build/CPackConfig.cmake
+    - name: Upload asset
+      uses: shogo82148/actions-upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ github.workspace }}/package/*.tar.gz
+        overwrite: true
+
+  windows-release:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git
+        cd vcpkg
+        git checkout 96c35a683eed6695172ebe30d752654d9c0658e6
+        bootstrap-vcpkg.bat
+        vcpkg integrate install
+        vcpkg install curl:x64-windows
+        vcpkg install libmysql:x64-windows
+        cd ..
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build
+        cmake --build build --config Release
+        cmake --install build
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_EXTENSIONS=On
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build --config Release
+    - name: Packing
+      run: |
+        cpack --config build/CPackConfig.cmake
+    - name: Upload asset
+      uses: shogo82148/actions-upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ github.workspace }}/package/*.tar.gz
+        overwrite: true

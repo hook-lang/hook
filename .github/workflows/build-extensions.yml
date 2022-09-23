@@ -1,0 +1,96 @@
+name: Build and test
+
+jobs:
+
+  ubuntu-build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y libcurl4-openssl-dev
+        sudo apt-get install -y libmysqlclient-dev
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXTENSIONS=On
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build
+    - name: Running tests
+      run: |
+        ./run-tests.sh
+      env:
+        HOOK_HOME: ${{ github.workspace }}
+    - name: Code coverage
+      run: |
+        gcov src/*.c
+        bash <(curl -s https://codecov.io/bash)
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  macos-build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        brew install mysql-client
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXTENSIONS=On
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build
+    - name: Running tests
+      run: |
+        ./run-tests.sh
+      env:
+        HOOK_HOME: ${{ github.workspace }}
+
+  windows-build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git
+        cd vcpkg
+        git checkout 96c35a683eed6695172ebe30d752654d9c0658e6
+        bootstrap-vcpkg.bat
+        vcpkg integrate install
+        vcpkg install curl:x64-windows
+        vcpkg install libmysql:x64-windows
+        cd ..
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build
+        cmake --build build --config Release
+        cmake --install build
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_EXTENSIONS=On
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build --config Debug
+    - name: Running tests
+      run: |
+        ${{ github.workspace }}/run-tests.bat
+      env:
+        HOOK_HOME: ${{ github.workspace }}
