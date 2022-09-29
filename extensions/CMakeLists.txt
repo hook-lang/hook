@@ -7,6 +7,7 @@ endif()
 if(MSVC)
   find_package(CURL CONFIG REQUIRED)
   find_package(libmysql REQUIRED)
+  find_package(fastcgi REQUIRED)
 endif()
 
 if (MSVC)
@@ -19,6 +20,8 @@ if(APPLE)
   link_directories(/usr/local/opt/mysql-client/lib)
   include_directories(/opt/homebrew/opt/mysql-client/include)
   link_directories(/opt/homebrew/opt/mysql-client/lib)
+  include_directories(/opt/homebrew/Cellar/fcgi/2.4.2/include)
+  link_directories(/opt/homebrew/Cellar/fcgi/2.4.2/lib)
 endif()
 
 add_library(sqlite SHARED
@@ -148,6 +151,26 @@ add_library(secp256r1 SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
+add_library(fastcgi SHARED
+  fastcgi.c
+  ../src/hk_array.c
+  ../src/hk_builtin.c
+  ../src/hk_callable.c
+  ../src/hk_chunk.c
+  ../src/hk_utils.c
+  ../src/hk_error.c
+  ../src/hk_iterable.c
+  ../src/hk_iterator.c
+  ../src/hk_memory.c
+  ../src/hk_module.c
+  ../src/hk_range.c
+  ../src/hk_string_map.c
+  ../src/hk_string.c
+  ../src/hk_struct.c
+  ../src/hk_userdata.c
+  ../src/hk_value.c
+  ../src/hk_vm.c)
+
 add_library(mysql SHARED
   mysql.c
   ../src/hk_array.c
@@ -170,9 +193,11 @@ add_library(mysql SHARED
 
 if(MSVC)
   target_link_libraries(url PRIVATE CURL::libcurl)
+  target_link_libraries(fastcgi PRIVATE ${FCGI_LIBRARIES})
   target_link_libraries(mysql PRIVATE ${MYSQL_LIBRARIES})
 else()
   target_link_libraries(url curl)
+  target_link_libraries(fastcgi fcgi)
   target_link_libraries(mysql mysqlclient)
 endif()
 
