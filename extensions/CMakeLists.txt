@@ -7,12 +7,13 @@ endif()
 if(MSVC)
   find_package(CURL CONFIG REQUIRED)
   find_package(libmysql REQUIRED)
-  find_package(fastcgi REQUIRED)
 endif()
 
 if (MSVC)
   include_directories("C:/Program Files (x86)/hiredis/include")
   link_directories("C:/Program Files (x86)/hiredis/lib")
+  include_directories("C:/vcpkg/packages/fastcgi_x86-windows/include/fastcgi")
+  link_directories("C:/vcpkg/packages/fastcgi_x86-windows/lib")
 endif()
 
 if(APPLE)
@@ -193,12 +194,11 @@ add_library(mysql SHARED
 
 if(MSVC)
   target_link_libraries(url PRIVATE CURL::libcurl)
-  target_link_libraries(fastcgi PRIVATE ${FCGI_LIBRARIES})
   target_link_libraries(mysql PRIVATE ${MYSQL_LIBRARIES})
 else()
   target_link_libraries(url curl)
-  target_link_libraries(fastcgi fcgi)
   target_link_libraries(mysql mysqlclient)
 endif()
 
 target_link_libraries(redis hiredis)
+target_link_libraries(fastcgi fcgi)

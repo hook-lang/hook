@@ -6,7 +6,7 @@ project(hook
   LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
-set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 include_directories(/usr/local/include)
 include_directories(include)

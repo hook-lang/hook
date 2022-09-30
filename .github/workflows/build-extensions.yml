@@ -13,11 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Installing dependencies
+    - name: Installing dependencies (APT packages)
       run: |
         sudo apt-get update -y
         sudo apt-get install -y libcurl4-openssl-dev
         sudo apt-get install -y libmysqlclient-dev
+    - name: Installing dependency hiredis
+      run: |
         git clone https://github.com/redis/hiredis.git
         cd hiredis
         git fetch --all --tags
@@ -25,10 +27,11 @@ jobs:
         cmake -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build
         sudo cmake --install build
+    - name: Installing dependency fcgi2
+      run: |
         git clone https://github.com/FastCGI-Archives/fcgi2.git
         cd fcgi2
-        git fetch --all --tags
-        git checkout tags/2.4.2
+        libtoolize && aclocal && automake --add-missing && autoconf
         ./autogen.sh
         ./configure
         make
@@ -55,7 +58,11 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Installing dependencies
+    - name: Installing dependencies (Homebrew packages)
+      run: |
+        brew reinstall fcgi
+        brew install mysql-client
+    - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
         cd hiredis
@@ -64,8 +71,6 @@ jobs:
         cmake -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build
         sudo cmake --install build
-        brew reinstall fcgi
-        brew install mysql-client
     - name: Configure CMake
       run: |
         cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXTENSIONS=On
@@ -82,17 +87,20 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Installing dependencies
+    - name: Installing tool vcpkg
       run: |
         git clone https://github.com/Microsoft/vcpkg.git
         cd vcpkg
         git checkout 96c35a683eed6695172ebe30d752654d9c0658e6
         bootstrap-vcpkg.bat
         vcpkg integrate install
+    - name: Installing dependencies (vcpkg packages)
+      run: |
         vcpkg install curl:x64-windows
         vcpkg install fastcgi:x64-windows
         vcpkg install libmysql:x64-windows
-        cd ..
+    - name: Installing dependency hiredis
+      run: |
         git clone https://github.com/redis/hiredis.git
         cd hiredis
         git fetch --all --tags
@@ -102,7 +110,7 @@ jobs:
         cmake --install build
     - name: Configure CMake
       run: |
-        cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_EXTENSIONS=On
+        cmake -B ${{ github.workspace }}/build -S . -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_EXTENSIONS=On
     - name: Build
       run: |
         cmake --build ${{ github.workspace }}/build --config Debug
