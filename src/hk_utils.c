@@ -8,19 +8,20 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <errno.h>
+
 #ifdef _WIN32
-#include <windows.h>
+  #include <windows.h>
 #else
-#if defined(__APPLE__)
-#include <sys/syslimits.h>
-#else
-#include <linux/limits.h>
-#endif
+  #if defined(__APPLE__)
+    #include <sys/syslimits.h>
+  #else
+    #include <linux/limits.h>
+  #endif
 #endif
 
 #ifdef _WIN32
-#define PATH_MAX MAX_PATH
-#define mkdir _mkdir
+  #define PATH_MAX MAX_PATH
+  #define mkdir _mkdir
 #endif
 
 static void make_directory(char *path);

@@ -4,7 +4,7 @@ if(MSVC)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${LIBRARY_DIR})
 endif()
 
-add_library(math SHARED
+add_library(math_mod SHARED
   hk_math.c
   ../src/hk_array.c
   ../src/hk_builtin.c
@@ -26,7 +26,7 @@ add_library(math SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(os SHARED
+add_library(os_mod SHARED
   hk_os.c
   ../src/hk_array.c
   ../src/hk_builtin.c
@@ -48,7 +48,7 @@ add_library(os SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(io SHARED
+add_library(io_mod SHARED
   hk_io.c
   ../src/hk_array.c
   ../src/hk_builtin.c
@@ -70,7 +70,7 @@ add_library(io SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(numbers SHARED
+add_library(numbers_mod SHARED
   hk_numbers.c
   ../src/hk_array.c
   ../src/hk_builtin.c
@@ -90,7 +90,7 @@ add_library(numbers SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(strings SHARED
+add_library(strings_mod SHARED
   hk_strings.c
   ../src/hk_array.c
   ../src/hk_builtin.c
@@ -110,7 +110,7 @@ add_library(strings SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(arrays SHARED
+add_library(arrays_mod SHARED
   hk_arrays.c
   ../src/hk_array.c
   ../src/hk_builtin.c

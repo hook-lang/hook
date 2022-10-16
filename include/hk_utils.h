@@ -12,9 +12,9 @@
 #define HK_LOAD_FN_PREFIX "load_"
 
 #ifdef _WIN32
-#define HK_LOAD_FN(n) int32_t __declspec(dllexport) __stdcall load_##n(hk_vm_t *vm)
+  #define HK_LOAD_FN(n) int32_t __declspec(dllexport) __stdcall load_##n(hk_vm_t *vm)
 #else
-#define HK_LOAD_FN(n) int32_t load_##n(hk_vm_t *vm)
+  #define HK_LOAD_FN(n) int32_t load_##n(hk_vm_t *vm)
 #endif
 
 #define hk_assert(cond, msg) do \

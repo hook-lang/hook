@@ -5,11 +5,13 @@
 
 #include "hk_module.h"
 #include <stdlib.h>
+
 #ifdef _WIN32
-#include <Windows.h>
+  #include <Windows.h>
 #else
-#include <dlfcn.h>
+  #include <dlfcn.h>
 #endif
+
 #include "hk_string_map.h"
 #include "hk_status.h"
 #include "hk_error.h"
@@ -18,21 +20,21 @@
 #define HOME_VAR "HOOK_HOME"
 
 #ifdef _WIN32
-#define FILE_INFIX "\\lib\\"
-#define FILE_EXT   ".dll"
+  #define FILE_INFIX   "\\lib\\"
+  #define FILE_POSTFIX "_mod.dll"
 #else
-#define FILE_INFIX "/lib/lib"
-#ifdef __APPLE__
-#define FILE_EXT   ".dylib"
-#else
-#define FILE_EXT   ".so"
-#endif
+  #define FILE_INFIX "/lib/lib"
+  #ifdef __APPLE__
+    #define FILE_POSTFIX "_mod.dylib"
+  #else
+    #define FILE_POSTFIX "_mod.so"
+  #endif
 #endif
 
 #ifdef _WIN32
-typedef int32_t (__stdcall *load_module_t)(hk_vm_t *);
+  typedef int32_t (__stdcall *load_module_t)(hk_vm_t *);
 #else
-typedef int32_t (*load_module_t)(hk_vm_t *);
+  typedef int32_t (*load_module_t)(hk_vm_t *);
 #endif
 
 static string_map_t module_cache;
@@ -61,16 +63,16 @@ static inline const char *get_home_dir(void)
   const char *home_dir = getenv(HOME_VAR);
   if (!home_dir)
   {
-#ifdef _WIN32
+  #ifdef _WIN32
     const char *drive = getenv("SystemDrive");
     hk_assert(drive, "environment variable 'SystemDrive' not set");
     char *path[MAX_PATH + 1];
     snprintf(path, MAX_PATH, "%s\\hook", drive);
     strncpy_s(path, MAX_PATH, drive, _TRUNCATE);
     home_dir = (const char *) path;
-#else
+  #else
     home_dir = "/opt/hook";
-#endif
+  #endif
   }
   return home_dir;
 }
@@ -80,7 +82,7 @@ static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name)
   hk_string_t *file = hk_string_from_chars(-1, get_home_dir());
   hk_string_inplace_concat_chars(file, -1, FILE_INFIX);
   hk_string_inplace_concat(file, name);
-  hk_string_inplace_concat_chars(file, -1, FILE_EXT);
+  hk_string_inplace_concat_chars(file, -1, FILE_POSTFIX);
 #ifdef _WIN32
   HINSTANCE handle = LoadLibrary(file->chars);
 #else

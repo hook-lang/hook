@@ -5,17 +5,19 @@
 
 #include "hk_io.h"
 #include <stdio.h>
+
 #ifdef _WIN32
-#include <windows.h>
+  #include <windows.h>
 #else
-#include <unistd.h>
+  #include <unistd.h>
 #endif
+
 #include "hk_memory.h"
 #include "hk_status.h"
 
 #ifdef _WIN32
-#define popen _popen
-#define pclose _pclose
+  #define popen _popen
+  #define pclose _pclose
 #endif
 
 typedef struct

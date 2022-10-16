@@ -1,14 +1,14 @@
 //
 // The Hook Programming Language
-// url.h
+// curl.h
 //
 
-#ifndef URL_H
-#define URL_H
+#ifndef CURL_H
+#define CURL_H
 
 #include "hk_vm.h"
 #include "hk_utils.h"
 
-HK_LOAD_FN(url);
+HK_LOAD_FN(curl);
 
-#endif // URL_H
+#endif // CURL_H

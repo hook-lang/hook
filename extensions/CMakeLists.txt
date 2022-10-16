@@ -25,7 +25,7 @@ if(APPLE)
   link_directories(/opt/homebrew/Cellar/fcgi/2.4.2/lib)
 endif()
 
-add_library(sqlite SHARED
+add_library(sqlite_mod SHARED
   sqlite.c
   deps/sqlite3.c
   ../src/hk_array.c
@@ -46,8 +46,8 @@ add_library(sqlite SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(url SHARED
-  url.c
+add_library(curl_mod SHARED
+  curl.c
   ../src/hk_array.c
   ../src/hk_builtin.c
   ../src/hk_callable.c
@@ -66,7 +66,7 @@ add_library(url SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(redis SHARED
+add_library(redis_mod SHARED
   redis.c
   ../src/hk_array.c
   ../src/hk_builtin.c
@@ -86,7 +86,7 @@ add_library(redis SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(hashing SHARED
+add_library(hashing_mod SHARED
   hashing.c
   deps/ripemd160.c
   deps/sha2.c
@@ -108,7 +108,7 @@ add_library(hashing SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(encoding SHARED
+add_library(encoding_mod SHARED
   encoding.c
   deps/base32.c
   deps/base58.c
@@ -131,7 +131,7 @@ add_library(encoding SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(secp256r1 SHARED
+add_library(secp256r1_mod SHARED
   secp256r1.c
   deps/ecc.c
   ../src/hk_array.c
@@ -152,7 +152,7 @@ add_library(secp256r1 SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(fastcgi SHARED
+add_library(fastcgi_mod SHARED
   fastcgi.c
   ../src/hk_array.c
   ../src/hk_builtin.c
@@ -172,7 +172,7 @@ add_library(fastcgi SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(mysql SHARED
+add_library(mysql_mod SHARED
   mysql.c
   ../src/hk_array.c
   ../src/hk_builtin.c
@@ -193,12 +193,12 @@ add_library(mysql SHARED
   ../src/hk_vm.c)
 
 if(MSVC)
-  target_link_libraries(url PRIVATE CURL::libcurl)
-  target_link_libraries(mysql PRIVATE ${MYSQL_LIBRARIES})
+  target_link_libraries(curl_mod PRIVATE CURL::libcurl)
+  target_link_libraries(mysql_mod PRIVATE ${MYSQL_LIBRARIES})
 else()
-  target_link_libraries(url curl)
-  target_link_libraries(mysql mysqlclient)
+  target_link_libraries(curl_mod curl)
+  target_link_libraries(mysql_mod mysqlclient)
 endif()
 
-target_link_libraries(redis hiredis)
-target_link_libraries(fastcgi fcgi)
+target_link_libraries(redis_mod hiredis)
+target_link_libraries(fastcgi_mod fcgi)

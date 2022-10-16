@@ -9,11 +9,13 @@
 #include <float.h>
 #include <ctype.h>
 #include <limits.h>
+
 #ifdef _WIN32
-#include <Windows.h>
+  #include <Windows.h>
 #else
-#include <unistd.h>
+  #include <unistd.h>
 #endif
+
 #include "hk_struct.h"
 #include "hk_iterable.h"
 #include "hk_status.h"
@@ -21,7 +23,7 @@
 #include "hk_utils.h"
 
 #ifdef _WIN32
-#define strtok_r strtok_s
+  #define strtok_r strtok_s
 #endif
 
 static const char *globals[] = {
