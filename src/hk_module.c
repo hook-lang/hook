@@ -69,7 +69,7 @@ static inline const char *get_home_dir(void)
     strncpy_s(path, MAX_PATH, drive, _TRUNCATE);
     home_dir = (const char *) path;
 #else
-    home_dir = "/usr/local/hook";
+    home_dir = "/opt/hook";
 #endif
   }
   return home_dir;

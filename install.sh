@@ -114,7 +114,7 @@ if ! tar -xzf "$temp_file"; then
   error "Extraction failed."
 fi
 
-home_dir="/usr/local/hook"
+home_dir="/opt/hook"
 
 info "Installing to: $home_dir"
 info "Need to use 'sudo' for install"
