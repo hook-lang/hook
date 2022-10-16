@@ -1,11 +1,12 @@
 name: Build and test with extensions
 
-on:
-  push:
-    branches: [ main ]
-
-  pull_request:
-    branches: [ main ]
+# Disabled for now
+#on:
+#  push:
+#    branches: [ main ]
+#
+#  pull_request:
+#    branches: [ main ]
 
 jobs:
 
