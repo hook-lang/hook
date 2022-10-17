@@ -26,7 +26,7 @@ static int32_t perform_call(hk_vm_t *vm, hk_value_t *args);
 static inline curl_t *url_new(CURL *handle)
 {
   curl_t *curl = (curl_t *) hk_allocate(sizeof(*curl));
-  hk_userdata_init((hk_userdata_t *) handle, &url_deinit);
+  hk_userdata_init((hk_userdata_t *) curl, &url_deinit);
   curl->handle = handle;
   return curl;
 }
@@ -129,6 +129,14 @@ HK_LOAD_FN(curl)
     return HK_STATUS_ERROR;
   if (hk_vm_push_float(vm, CURLOPT_FOLLOWLOCATION) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
+  if (hk_vm_push_string_from_chars(vm, -1, "OPT_POST") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_float(vm, CURLOPT_POST) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_string_from_chars(vm, -1, "OPT_POSTFIELDS") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_float(vm, CURLOPT_POSTFIELDS) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "init") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "init", 1, &init_call) == HK_STATUS_ERROR)
@@ -145,5 +153,5 @@ HK_LOAD_FN(curl)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "perform", 1, &perform_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 6);
+  return hk_vm_construct(vm, 8);
 }
