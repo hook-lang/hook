@@ -27,7 +27,7 @@
 #define HK_FLAG_FALSEY     0x02
 #define HK_FLAG_COMPARABLE 0x04
 #define HK_FLAG_ITERABLE   0x08
-#define HK_FLAG_NATIVE     0x16
+#define HK_FLAG_NATIVE     0x10
 
 #define HK_NIL_VALUE         ((hk_value_t) {.type = HK_TYPE_NIL, .flags = HK_FLAG_FALSEY | HK_FLAG_COMPARABLE})
 #define HK_FALSE_VALUE       ((hk_value_t) {.type = HK_TYPE_BOOL, .flags = HK_FLAG_FALSEY | HK_FLAG_COMPARABLE, .as.bool_value = false})
