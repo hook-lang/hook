@@ -1,10 +1,9 @@
 name: Build for release with extensions
 
-# Disabled for now
-#on:
-#  release:
-#    types:
-#      - created
+on:
+  release:
+    types:
+      - created
 
 jobs:
 
