@@ -23,6 +23,8 @@ if(APPLE)
   link_directories(/opt/homebrew/opt/mysql-client/lib)
   include_directories(/opt/homebrew/Cellar/fcgi/2.4.2/include)
   link_directories(/opt/homebrew/Cellar/fcgi/2.4.2/lib)
+  include_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/include)
+  link_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/lib)
 endif()
 
 add_library(sqlite_mod SHARED
@@ -192,6 +194,26 @@ add_library(mysql_mod SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
+add_library(gmp_mod SHARED
+  gmp.c
+  ../src/hk_array.c
+  ../src/hk_builtin.c
+  ../src/hk_callable.c
+  ../src/hk_chunk.c
+  ../src/hk_utils.c
+  ../src/hk_error.c
+  ../src/hk_iterable.c
+  ../src/hk_iterator.c
+  ../src/hk_memory.c
+  ../src/hk_module.c
+  ../src/hk_range.c
+  ../src/hk_string_map.c
+  ../src/hk_string.c
+  ../src/hk_struct.c
+  ../src/hk_userdata.c
+  ../src/hk_value.c
+  ../src/hk_vm.c)
+
 if(MSVC)
   target_link_libraries(curl_mod PRIVATE CURL::libcurl)
   target_link_libraries(mysql_mod PRIVATE ${MYSQL_LIBRARIES})
@@ -202,3 +224,4 @@ endif()
 
 target_link_libraries(redis_mod hiredis)
 target_link_libraries(fastcgi_mod fcgi)
+target_link_libraries(gmp_mod gmp)

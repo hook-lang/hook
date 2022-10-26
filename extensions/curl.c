@@ -15,23 +15,23 @@ typedef struct
   CURL *handle;
 } curl_t;
 
-static inline curl_t *url_new(CURL *handle);
-static void url_deinit(hk_userdata_t *udata);
+static inline curl_t *curl_new(CURL *handle);
+static void curl_deinit(hk_userdata_t *udata);
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data);
 static int32_t init_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t setopt_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t cleanup_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t perform_call(hk_vm_t *vm, hk_value_t *args);
 
-static inline curl_t *url_new(CURL *handle)
+static inline curl_t *curl_new(CURL *handle)
 {
   curl_t *curl = (curl_t *) hk_allocate(sizeof(*curl));
-  hk_userdata_init((hk_userdata_t *) curl, &url_deinit);
+  hk_userdata_init((hk_userdata_t *) curl, &curl_deinit);
   curl->handle = handle;
   return curl;
 }
 
-static void url_deinit(hk_userdata_t *udata)
+static void curl_deinit(hk_userdata_t *udata)
 {
   curl_easy_cleanup(((curl_t *) udata)->handle);
 }
@@ -68,7 +68,7 @@ static int32_t init_call(hk_vm_t *vm, hk_value_t *args)
       return HK_STATUS_ERROR;
     }
   }
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) url_new(handle));
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) curl_new(handle));
 }
 
 static int32_t setopt_call(hk_vm_t *vm, hk_value_t *args)

@@ -16,6 +16,7 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install -y libcurl4-openssl-dev
         sudo apt-get install -y libmysqlclient-dev
+        sudo apt-get install -y libgmp3-dev
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
@@ -52,6 +53,7 @@ jobs:
       run: |
         brew reinstall fcgi
         brew install mysql-client
+        brew reinstall gmp
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
@@ -87,6 +89,7 @@ jobs:
         vcpkg install curl:x64-windows
         vcpkg install fastcgi:x64-windows
         vcpkg install libmysql:x64-windows
+        vcpkg install gmp:x64-windows
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
