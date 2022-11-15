@@ -194,8 +194,8 @@ add_library(mysql_mod SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(gmp_mod SHARED
-  gmp.c
+add_library(bigint_mod SHARED
+  bigint.c
   ../src/hk_array.c
   ../src/hk_builtin.c
   ../src/hk_callable.c
@@ -224,4 +224,4 @@ endif()
 
 target_link_libraries(redis_mod hiredis)
 target_link_libraries(fastcgi_mod fcgi)
-target_link_libraries(gmp_mod gmp)
+target_link_libraries(bigint_mod gmp)

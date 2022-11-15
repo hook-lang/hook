@@ -1,9 +1,9 @@
 //
 // The Hook Programming Language
-// gmp.c
+// bigint.c
 //
 
-#include "gmp.h"
+#include "bigint.h"
 #include <stdlib.h>
 #include <gmp.h>
 #include "hk_memory.h"
@@ -13,10 +13,10 @@ typedef struct
 {
   HK_USERDATA_HEADER
   mpz_t num;
-} gmp_t;
+} bigint_t;
 
-static inline gmp_t *gmp_new(mpz_t num);
-static void gmp_deinit(hk_userdata_t *udata);
+static inline bigint_t *bigint_new(mpz_t num);
+static void bigint_deinit(hk_userdata_t *udata);
 static int32_t new_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t from_hex_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t to_string_call(hk_vm_t *vm, hk_value_t *args);
@@ -29,17 +29,17 @@ static int32_t pow_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t neg_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t abs_call(hk_vm_t *vm, hk_value_t *args);
 
-static inline gmp_t *gmp_new(mpz_t num)
+static inline bigint_t *bigint_new(mpz_t num)
 {
-  gmp_t *gmp = (gmp_t *) hk_allocate(sizeof(*gmp));
-  hk_userdata_init((hk_userdata_t *) gmp, &gmp_deinit);
-  mpz_init_set(gmp->num, num);
-  return gmp;
+  bigint_t *bigint = (bigint_t *) hk_allocate(sizeof(*bigint));
+  hk_userdata_init((hk_userdata_t *) bigint, &bigint_deinit);
+  mpz_init_set(bigint->num, num);
+  return bigint;
 }
 
-static void gmp_deinit(hk_userdata_t *udata)
+static void bigint_deinit(hk_userdata_t *udata)
 {
-  mpz_clear(((gmp_t *) udata)->num);
+  mpz_clear(((bigint_t *) udata)->num);
 }
 
 static int32_t new_call(hk_vm_t *vm, hk_value_t *args)
@@ -53,8 +53,8 @@ static int32_t new_call(hk_vm_t *vm, hk_value_t *args)
     mpz_init_set_d(num, hk_as_float(val));
   else
     mpz_init_set_str(num, hk_as_string(val)->chars, 10);
-  gmp_t *gmp = gmp_new(num);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp);
+  bigint_t *bigint = bigint_new(num);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint);
 }
 
 static int32_t from_hex_call(hk_vm_t *vm, hk_value_t *args)
@@ -64,16 +64,16 @@ static int32_t from_hex_call(hk_vm_t *vm, hk_value_t *args)
   hk_string_t *str = hk_as_string(args[1]);
   mpz_t num;
   mpz_init_set_str(num, str->chars, 16);
-  gmp_t *gmp = gmp_new(num);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp);
+  bigint_t *bigint = bigint_new(num);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint);
 }
 
 static int32_t to_string_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  gmp_t *gmp = (gmp_t *) hk_as_userdata(args[1]);
-  char *chars = mpz_get_str(NULL, 10, gmp->num);
+  bigint_t *bigint = (bigint_t *) hk_as_userdata(args[1]);
+  char *chars = mpz_get_str(NULL, 10, bigint->num);
   hk_string_t *str = hk_string_from_chars(-1, chars);
   free(chars);
   return hk_vm_push_string(vm, str);
@@ -85,13 +85,13 @@ static int32_t add_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_userdata(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  gmp_t *gmp1 = (gmp_t *) hk_as_userdata(args[1]);
-  gmp_t *gmp2 = (gmp_t *) hk_as_userdata(args[2]);
+  bigint_t *bigint1 = (bigint_t *) hk_as_userdata(args[1]);
+  bigint_t *bigint2 = (bigint_t *) hk_as_userdata(args[2]);
   mpz_t result;
   mpz_init(result);
-  mpz_add(result, gmp1->num, gmp2->num);
-  gmp_t *gmp = gmp_new(result);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp);
+  mpz_add(result, bigint1->num, bigint2->num);
+  bigint_t *bigint = bigint_new(result);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint);
 }
 
 static int32_t sub_call(hk_vm_t *vm, hk_value_t *args)
@@ -100,13 +100,13 @@ static int32_t sub_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_userdata(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  gmp_t *gmp1 = (gmp_t *) hk_as_userdata(args[1]);
-  gmp_t *gmp2 = (gmp_t *) hk_as_userdata(args[2]);
+  bigint_t *bigint1 = (bigint_t *) hk_as_userdata(args[1]);
+  bigint_t *bigint2 = (bigint_t *) hk_as_userdata(args[2]);
   mpz_t result;
   mpz_init(result);
-  mpz_sub(result, gmp1->num, gmp2->num);
-  gmp_t *gmp = gmp_new(result);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp);
+  mpz_sub(result, bigint1->num, bigint2->num);
+  bigint_t *bigint = bigint_new(result);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint);
 }
 
 static int32_t mul_call(hk_vm_t *vm, hk_value_t *args)
@@ -115,13 +115,13 @@ static int32_t mul_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_userdata(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  gmp_t *gmp1 = (gmp_t *) hk_as_userdata(args[1]);
-  gmp_t *gmp2 = (gmp_t *) hk_as_userdata(args[2]);
+  bigint_t *bigint1 = (bigint_t *) hk_as_userdata(args[1]);
+  bigint_t *bigint2 = (bigint_t *) hk_as_userdata(args[2]);
   mpz_t result;
   mpz_init(result);
-  mpz_mul(result, gmp1->num, gmp2->num);
-  gmp_t *gmp = gmp_new(result);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp);
+  mpz_mul(result, bigint1->num, bigint2->num);
+  bigint_t *bigint = bigint_new(result);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint);
 }
 
 static int32_t div_call(hk_vm_t *vm, hk_value_t *args)
@@ -130,13 +130,13 @@ static int32_t div_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_userdata(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  gmp_t *gmp1 = (gmp_t *) hk_as_userdata(args[1]);
-  gmp_t *gmp2 = (gmp_t *) hk_as_userdata(args[2]);
+  bigint_t *bigint1 = (bigint_t *) hk_as_userdata(args[1]);
+  bigint_t *bigint2 = (bigint_t *) hk_as_userdata(args[2]);
   mpz_t result;
   mpz_init(result);
-  mpz_tdiv_q(result, gmp1->num, gmp2->num);
-  gmp_t *gmp = gmp_new(result);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp);
+  mpz_tdiv_q(result, bigint1->num, bigint2->num);
+  bigint_t *bigint = bigint_new(result);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint);
 }
 
 static int32_t mod_call(hk_vm_t *vm, hk_value_t *args)
@@ -145,13 +145,13 @@ static int32_t mod_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_userdata(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  gmp_t *gmp1 = (gmp_t *) hk_as_userdata(args[1]);
-  gmp_t *gmp2 = (gmp_t *) hk_as_userdata(args[2]);
+  bigint_t *bigint1 = (bigint_t *) hk_as_userdata(args[1]);
+  bigint_t *bigint2 = (bigint_t *) hk_as_userdata(args[2]);
   mpz_t result;
   mpz_init(result);
-  mpz_tdiv_r(result, gmp1->num, gmp2->num);
-  gmp_t *gmp = gmp_new(result);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp);
+  mpz_tdiv_r(result, bigint1->num, bigint2->num);
+  bigint_t *bigint = bigint_new(result);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint);
 }
 
 static int32_t pow_call(hk_vm_t *vm, hk_value_t *args)
@@ -160,42 +160,42 @@ static int32_t pow_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_userdata(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  gmp_t *gmp1 = (gmp_t *) hk_as_userdata(args[1]);
-  gmp_t *gmp2 = (gmp_t *) hk_as_userdata(args[2]);
+  bigint_t *bigint1 = (bigint_t *) hk_as_userdata(args[1]);
+  bigint_t *bigint2 = (bigint_t *) hk_as_userdata(args[2]);
   mpz_t result;
   mpz_init(result);
-  mpz_pow_ui(result, gmp1->num, mpz_get_ui(gmp2->num));
-  gmp_t *gmp = gmp_new(result);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp);
+  mpz_pow_ui(result, bigint1->num, mpz_get_ui(bigint2->num));
+  bigint_t *bigint = bigint_new(result);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint);
 }
 
 static int32_t neg_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  gmp_t *gmp = (gmp_t *) hk_as_userdata(args[1]);
+  bigint_t *bigint = (bigint_t *) hk_as_userdata(args[1]);
   mpz_t result;
   mpz_init(result);
-  mpz_neg(result, gmp->num);
-  gmp_t *gmp2 = gmp_new(result);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp2);
+  mpz_neg(result, bigint->num);
+  bigint_t *bigint2 = bigint_new(result);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint2);
 }
 
 static int32_t abs_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  gmp_t *gmp = (gmp_t *) hk_as_userdata(args[1]);
+  bigint_t *bigint = (bigint_t *) hk_as_userdata(args[1]);
   mpz_t result;
   mpz_init(result);
-  mpz_abs(result, gmp->num);
-  gmp_t *gmp2 = gmp_new(result);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) gmp2);
+  mpz_abs(result, bigint->num);
+  bigint_t *bigint2 = bigint_new(result);
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) bigint2);
 }
 
-HK_LOAD_FN(gmp)
+HK_LOAD_FN(bigint)
 {
-  if (hk_vm_push_string_from_chars(vm, -1, "gmp") == HK_STATUS_ERROR)
+  if (hk_vm_push_string_from_chars(vm, -1, "bigint") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "new") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
