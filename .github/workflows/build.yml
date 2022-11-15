@@ -21,7 +21,7 @@ jobs:
         cmake --build ${{ github.workspace }}/build
     - name: Running tests
       run: |
-        ./run-tests.sh
+        ${{ github.workspace }}/scripts/test.sh
       env:
         HOOK_HOME: ${{ github.workspace }}
     - name: Code coverage
@@ -43,7 +43,7 @@ jobs:
         cmake --build ${{ github.workspace }}/build
     - name: Running tests
       run: |
-        ./run-tests.sh
+        ${{ github.workspace }}/scripts/test.sh
       env:
         HOOK_HOME: ${{ github.workspace }}
 
@@ -61,6 +61,6 @@ jobs:
         cmake --build ${{ github.workspace }}/build --config Debug
     - name: Running tests
       run: |
-        ${{ github.workspace }}/run-tests.bat
+        ${{ github.workspace }}/scripts/test.bat
       env:
         HOOK_HOME: ${{ github.workspace }}

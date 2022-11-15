@@ -69,5 +69,5 @@ echo "export PATH=\$HOOK_HOME/bin:\$PATH" >> ~/.bashrc
 To run the tests, enter the following:
 
 ```
-./run-tests
+scripts/test.sh
 ```
