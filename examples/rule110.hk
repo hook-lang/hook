@@ -1,0 +1,63 @@
+//
+// rule110.hk
+//
+
+val size = 100;
+mut prev = [];
+mut i;
+
+i = 0;
+while (i < size - 1) {
+  prev[] = false;
+  i++;
+}
+prev[] = true;
+
+fn calc(p, i) {
+  val prev = p[i - 1];
+  val curr = p[i];
+  val next = p[i + 1];
+  if (prev && curr && next) {
+    return false;
+  }
+  if (prev && curr && !next) {
+    return true;
+  }
+  if (prev && !curr && next) {
+    return true;
+  }
+  if (prev && !curr && !next) {
+    return false;
+  }
+  if (!prev && curr && next) {
+    return true;
+  }
+  if (!prev && curr && !next) {
+    return true;
+  }
+  if (!prev && !curr && next) {
+    return true;
+  }
+  return false;
+}
+
+i = 0;
+while (i < size) {
+  mut line = [false];
+  mut j;
+  j  = 1;
+  while (j < size - 1) {
+    line[] = calc(prev, j);
+    j++;
+  }
+  line[] = false;
+  mut output = "";
+  j = 0;
+  while (j < size) {
+    output += if (line[j]) "*" else " ";
+    j++;
+  }
+  println(output);
+  prev = line;
+  i++;
+}
