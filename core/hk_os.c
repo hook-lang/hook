@@ -12,6 +12,7 @@ static int32_t clock_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t time_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t system_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t getenv_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t name_call(hk_vm_t *vm, hk_value_t *args);
 
 static int32_t clock_call(hk_vm_t *vm, hk_value_t *args)
 {
@@ -41,6 +42,26 @@ static int32_t getenv_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_string_from_chars(vm, -1, chars);
 }
 
+static int32_t name_call(hk_vm_t *vm, hk_value_t *args)
+{
+  (void) args;
+  char *result;
+#ifdef _WIN32
+  result = "windows";
+#elif __APPLE__
+  result = "macos";
+#elif __linux__
+  result = "linux";
+#elif __unix__
+  result = "unix";
+#elif __posix__
+  result = "posix";
+#else
+  result = "unknown";
+#endif
+  return hk_vm_push_string_from_chars(vm, -1, result);
+}
+
 HK_LOAD_FN(os)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "os") == HK_STATUS_ERROR)
@@ -65,5 +86,9 @@ HK_LOAD_FN(os)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "getenv", 1, &getenv_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 5);
+  if (hk_vm_push_string_from_chars(vm, -1, "name") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_new_native(vm, "name", 0, &name_call) == HK_STATUS_ERROR) 
+    return HK_STATUS_ERROR;
+  return hk_vm_construct(vm, 6);
 }
