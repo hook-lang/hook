@@ -15,6 +15,7 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | ( 'while' | 'while!' ) '(' expr ')' stmt
               | 'do' stmt ( 'while' | 'while!' ) '(' expr ')' ';'
               | 'for' '(' var_decl | assign_call? ';' expr? ';' assign_call? ')' stmt
+              | 'foreach' '(' NAME 'in' expr ')' stmt
               | 'continue' ';'
               | 'break' ';'
               | 'return' expr? ';'

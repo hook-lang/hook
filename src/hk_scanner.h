@@ -69,21 +69,23 @@
 #define TOKEN_FALSE        0x3a
 #define TOKEN_FN           0x3b
 #define TOKEN_FOR          0x3c
-#define TOKEN_FROM         0x3d
-#define TOKEN_IF           0x3e
-#define TOKEN_IFBANG       0x3f
-#define TOKEN_LOOP         0x40
-#define TOKEN_MATCH        0x41
-#define TOKEN_MUT          0x42
-#define TOKEN_NIL          0x43
-#define TOKEN_RETURN       0x44
-#define TOKEN_STRUCT       0x45
-#define TOKEN_TRUE         0x46
-#define TOKEN_USE          0x47
-#define TOKEN_VAL          0x48
-#define TOKEN_WHILE        0x49
-#define TOKEN_WHILEBANG    0x4a
-#define TOKEN_NAME         0x4b
+#define TOKEN_FOREACH      0x3d
+#define TOKEN_FROM         0x3e
+#define TOKEN_IF           0x3f
+#define TOKEN_IFBANG       0x40
+#define TOKEN_IN           0x41
+#define TOKEN_LOOP         0x42
+#define TOKEN_MATCH        0x43
+#define TOKEN_MUT          0x44
+#define TOKEN_NIL          0x45
+#define TOKEN_RETURN       0x46
+#define TOKEN_STRUCT       0x47
+#define TOKEN_TRUE         0x48
+#define TOKEN_USE          0x49
+#define TOKEN_VAL          0x4a
+#define TOKEN_WHILE        0x4b
+#define TOKEN_WHILEBANG    0x4c
+#define TOKEN_NAME         0x4d
 
 typedef struct
 {

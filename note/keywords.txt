@@ -8,9 +8,11 @@ else
 false
 fn
 for
+foreach
 from
 if
 if!
+in
 loop
 match
 mut

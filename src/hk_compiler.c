@@ -34,7 +34,7 @@
 
 #define add_placeholder(c) do \
   { \
-    ++(c)->local_index; \
+    ++(c)->next_index; \
   } while (0)
 
 typedef struct
@@ -62,7 +62,7 @@ typedef struct compiler
   scanner_t *scan;
   int32_t scope_depth;
   int32_t num_variables;
-  uint8_t local_index;
+  uint8_t next_index;
   variable_t variables[MAX_VARIABLES];
   loop_t *loop;
   hk_function_t *fn;
@@ -112,6 +112,7 @@ static void compile_loop_statement(compiler_t *comp);
 static void compile_while_statement(compiler_t *comp, bool not);
 static void compile_do_statement(compiler_t *comp);
 static void compile_for_statement(compiler_t *comp);
+static void compile_foreach_statement(compiler_t *comp);
 static void compile_continue_statement(compiler_t *comp);
 static void compile_break_statement(compiler_t *comp);
 static void compile_return_statement(compiler_t *comp);
@@ -235,6 +236,8 @@ static inline void pop_scope(compiler_t *comp)
 {
   comp->num_variables -= discard_variables(comp, comp->scope_depth);
   --comp->scope_depth;
+  int32_t index = comp->num_variables - 1;
+  comp->next_index = comp->variables[index].index + 1;
 }
 
 static inline int32_t discard_variables(compiler_t *comp, int32_t depth)
@@ -256,7 +259,7 @@ static inline bool variable_match(token_t *tk, variable_t *var)
 
 static inline void add_local(compiler_t *comp, token_t *tk, bool is_mutable)
 {
-  uint8_t index = comp->local_index++;
+  uint8_t index = comp->next_index++;
   add_variable(comp, true, index, tk, is_mutable);
 }
 
@@ -375,7 +378,7 @@ static inline void compiler_init(compiler_t *comp, compiler_t *parent, scanner_t
   comp->scan = scan;
   comp->scope_depth = 0;
   comp->num_variables = 0;
-  comp->local_index = 1;
+  comp->next_index = 1;
   comp->loop = NULL;
   comp->fn = hk_function_new(0, name, scan->file);
 }
@@ -461,6 +464,11 @@ static void compile_statement(compiler_t *comp)
   if (match(scan, TOKEN_FOR))
   {
     compile_for_statement(comp);
+    return;
+  }
+  if (match(scan, TOKEN_FOREACH))
+  {
+    compile_foreach_statement(comp);
     return;
   }
   if (match(scan, TOKEN_CONTINUE))
@@ -1377,6 +1385,40 @@ static void compile_for_statement(compiler_t *comp)
   hk_chunk_emit_word(chunk, jump2);
   if (!missing)
     patch_jump(comp, offset1);
+  end_loop(comp);
+  pop_scope(comp);
+}
+
+static void compile_foreach_statement(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  hk_chunk_t *chunk = &comp->fn->chunk;
+  scanner_next_token(scan);
+  consume(comp, TOKEN_LPAREN);
+  push_scope(comp);
+  if (!match(scan, TOKEN_NAME))
+    syntax_error_unexpected(comp);
+  token_t tk = scan->token;
+  scanner_next_token(scan);
+  add_local(comp, &tk, false);
+  hk_chunk_emit_opcode(chunk, HK_OP_NIL);
+  consume(comp, TOKEN_IN);
+  int32_t line = scan->token.line;
+  compile_expression(comp);
+  consume(comp, TOKEN_RPAREN);
+  hk_chunk_emit_opcode(chunk, HK_OP_ITERATOR);
+  hk_chunk_add_line(chunk, line);
+  uint16_t jump = (uint16_t) chunk->code_length;
+  int32_t offset = emit_jump(chunk, HK_OP_JUMP_IF_NOT_VALID);
+  hk_chunk_emit_opcode(chunk, HK_OP_CURRENT);
+  loop_t loop;
+  start_loop(comp, &loop);
+  compile_statement(comp);
+  hk_chunk_emit_opcode(chunk, HK_OP_NEXT);
+  hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
+  hk_chunk_emit_word(chunk, jump);
+  patch_jump(comp, offset);
+  hk_chunk_emit_opcode(chunk, HK_OP_POP);
   end_loop(comp);
   pop_scope(comp);
 }

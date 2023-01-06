@@ -522,6 +522,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_FN;
     return;
   }
+  if (match_chars(scan, "foreach"))
+  {
+    scan->token.type = TOKEN_FOREACH;
+    return;
+  }
   if (match_chars(scan, "for"))
   {
     scan->token.type = TOKEN_FOR;
@@ -540,6 +545,11 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "if"))
   {
     scan->token.type = TOKEN_IF;
+    return;
+  }
+  if (match_chars(scan, "in"))
+  {
+    scan->token.type = TOKEN_IN;
     return;
   }
   if (match_chars(scan, "loop"))

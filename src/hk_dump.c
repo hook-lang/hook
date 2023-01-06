@@ -58,6 +58,9 @@ void hk_dump(hk_function_t *fn, FILE *stream)
     case HK_OP_CONSTRUCT:
       fprintf(stream, "  [%05d] Construct             %d\n", j, code[i++]);
       break;
+    case HK_OP_ITERATOR:
+      fprintf(stream, "  [%05d] Iterator\n", j);
+      break;
     case HK_OP_CLOSURE:
       fprintf(stream, "  [%05d] Closure               %d\n", j, code[i++]);
       break;
@@ -124,6 +127,9 @@ void hk_dump(hk_function_t *fn, FILE *stream)
     case HK_OP_INPLACE_PUT_FIELD:
       fprintf(stream, "  [%05d] InplacePutField       %d\n", j, code[i++]);
       break;
+    case HK_OP_CURRENT:
+      fprintf(stream, "  [%05d] Current\n", j);
+      break;
     case HK_OP_JUMP:
       {
         int32_t offset = *((uint16_t*) &code[i]);
@@ -165,6 +171,16 @@ void hk_dump(hk_function_t *fn, FILE *stream)
         i += 2;
         fprintf(stream, "  [%05d] JumpIfNotEqual        %d\n", j, offset);
       }
+      break;
+    case HK_OP_JUMP_IF_NOT_VALID:
+      {
+        int32_t offset = *((uint16_t*) &code[i]);
+        i += 2;
+        fprintf(stream, "  [%05d] JumpIfNotValid        %d\n", j, offset);
+      }
+      break;
+    case HK_OP_NEXT:
+      fprintf(stream, "  [%05d] Next\n", j);
       break;
     case HK_OP_EQUAL:
       fprintf(stream, "  [%05d] Equal\n", j);

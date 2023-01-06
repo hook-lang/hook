@@ -8,6 +8,7 @@
 #include <math.h>
 #include "hk_builtin.h"
 #include "hk_struct.h"
+#include "hk_iterable.h"
 #include "hk_module.h"
 #include "hk_memory.h"
 #include "hk_status.h"
@@ -25,6 +26,7 @@ static inline int32_t do_struct(hk_vm_t *vm, int32_t length);
 static inline int32_t do_instance(hk_vm_t *vm, int32_t num_args);
 static inline int32_t adjust_instance_args(hk_vm_t *vm, int32_t length, int32_t num_args);
 static inline int32_t do_construct(hk_vm_t *vm, int32_t length);
+static inline int32_t do_iterator(hk_vm_t *vm);
 static inline int32_t do_closure(hk_vm_t *vm, hk_function_t *fn);
 static inline int32_t do_unpack(hk_vm_t *vm, int32_t n);
 static inline int32_t do_destruct(hk_vm_t *vm, int32_t n);
@@ -44,6 +46,8 @@ static inline int32_t do_fetch_field(hk_vm_t *vm, hk_string_t *name);
 static inline void do_set_field(hk_vm_t *vm);
 static inline int32_t do_put_field(hk_vm_t *vm, hk_string_t *name);
 static inline int32_t do_inplace_put_field(hk_vm_t *vm, hk_string_t *name);
+static inline void do_current(hk_vm_t *vm);
+static inline void do_next(hk_vm_t *vm);
 static inline void do_equal(hk_vm_t *vm);
 static inline int32_t do_greater(hk_vm_t *vm);
 static inline int32_t do_less(hk_vm_t *vm);
@@ -251,6 +255,24 @@ static inline int32_t do_construct(hk_vm_t *vm, int32_t length)
   slots[0] = hk_instance_value(inst);
   if (struct_name)
     hk_decr_ref(struct_name);
+  return HK_STATUS_OK;
+}
+
+static inline int32_t do_iterator(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->stack[vm->stack_top];
+  hk_value_t val = slots[0];
+  if (hk_is_iterator(val))
+    return HK_STATUS_OK;
+  hk_iterator_t *it = hk_new_iterator(val);
+  if (!it)
+  {
+    hk_runtime_error("type error: value of type %s is not iterable", hk_type_name(val.type));
+    return HK_STATUS_ERROR;
+  }
+  hk_incr_ref(it);
+  slots[0] = hk_iterator_value(it);
+  hk_value_release(val);
   return HK_STATUS_OK;
 }
 
@@ -805,6 +827,25 @@ static inline int32_t do_inplace_put_field(hk_vm_t *vm, hk_string_t *name)
   hk_instance_release(inst);
   hk_value_decr_ref(val2);
   return HK_STATUS_OK;
+}
+
+static inline void do_current(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->stack[vm->stack_top - 1];
+  hk_value_t val = slots[1];
+  hk_iterator_t *it = hk_as_iterator(val);
+  hk_value_t result = hk_iterator_get_current(it);
+  hk_value_incr_ref(result);
+  hk_value_release(slots[0]);
+  slots[0] = result;
+}
+
+static inline void do_next(hk_vm_t *vm)
+{
+  hk_value_t *slots = &vm->stack[vm->stack_top];
+  hk_value_t val = slots[0];
+  hk_iterator_t *it = hk_as_iterator(val);
+  hk_iterator_next(it);
 }
 
 static inline void do_equal(hk_vm_t *vm)
@@ -1406,6 +1447,10 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
       if (do_construct(vm, read_byte(&pc)) == HK_STATUS_ERROR)
         goto error;
       break;
+    case HK_OP_ITERATOR:
+      if (do_iterator(vm) == HK_STATUS_ERROR)
+        goto error;
+      break;
     case HK_OP_CLOSURE:
       if (do_closure(vm, functions[read_byte(&pc)]) == HK_STATUS_ERROR)
         goto error;
@@ -1508,6 +1553,9 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
       if (do_inplace_put_field(vm, hk_as_string(consts[read_byte(&pc)])) == HK_STATUS_ERROR)
         goto error;
       break;
+    case HK_OP_CURRENT:
+      do_current(vm);
+      break;
     case HK_OP_JUMP:
       pc = &code[read_word(&pc)];
       break;
@@ -1573,6 +1621,18 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
         hk_value_release(val2);
         --vm->stack_top;
       }
+      break;
+    case HK_OP_JUMP_IF_NOT_VALID:
+      {
+        int32_t offset = read_word(&pc);
+        hk_value_t val = slots[vm->stack_top];
+        hk_iterator_t *it = hk_as_iterator(val);
+        if (!hk_iterator_is_valid(it))
+          pc = &code[offset];
+      }
+      break;
+    case HK_OP_NEXT:
+      do_next(vm);
       break;
     case HK_OP_EQUAL:
       do_equal(vm);
