@@ -10,6 +10,7 @@ ord(val: string) -> int
 chr(val: int) -> string
 hex(val: string) -> string
 bin(val: string) -> string
+refcount(val: value) -> int
 cap(val: string|array) -> int
 len(val: string|array) -> int
 is_empty(val: string|array) -> bool

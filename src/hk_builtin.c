@@ -38,6 +38,7 @@ static const char *globals[] = {
   "chr",
   "hex",
   "bin",
+  "refcount",
   "cap",
   "len",
   "is_empty",
@@ -67,6 +68,7 @@ static int32_t ord_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t chr_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t hex_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t bin_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t refcount_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t cap_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t len_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t is_empty_call(hk_vm_t *vm, hk_value_t *args);
@@ -303,6 +305,12 @@ static int32_t bin_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
+static int32_t refcount_call(hk_vm_t *vm, hk_value_t *args)
+{
+  int32_t result = hk_value_ref_count(args[1]);
+  return hk_vm_push_float(vm, result);
+}
+
 static int32_t cap_call(hk_vm_t *vm, hk_value_t *args)
 {
   int32_t types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
@@ -503,19 +511,20 @@ void load_globals(hk_vm_t *vm)
   hk_vm_push_new_native(vm, globals[8], 1, &chr_call);
   hk_vm_push_new_native(vm, globals[9], 1, &hex_call);
   hk_vm_push_new_native(vm, globals[10], 1, &bin_call);
-  hk_vm_push_new_native(vm, globals[11], 1, &cap_call);
-  hk_vm_push_new_native(vm, globals[12], 1, &len_call);
-  hk_vm_push_new_native(vm, globals[13], 1, &is_empty_call);
-  hk_vm_push_new_native(vm, globals[14], 2, &compare_call);
-  hk_vm_push_new_native(vm, globals[15], 2, &split_call);
-  hk_vm_push_new_native(vm, globals[16], 2, &join_call);
-  hk_vm_push_new_native(vm, globals[17], 1, &iter_call);
-  hk_vm_push_new_native(vm, globals[18], 1, &valid_call);
-  hk_vm_push_new_native(vm, globals[19], 1, &current_call);
-  hk_vm_push_new_native(vm, globals[20], 1, &next_call);
-  hk_vm_push_new_native(vm, globals[21], 1, &sleep_call);
-  hk_vm_push_new_native(vm, globals[22], 2, &assert_call);
-  hk_vm_push_new_native(vm, globals[23], 1, &panic_call);
+  hk_vm_push_new_native(vm, globals[11], 1, &refcount_call);
+  hk_vm_push_new_native(vm, globals[12], 1, &cap_call);
+  hk_vm_push_new_native(vm, globals[13], 1, &len_call);
+  hk_vm_push_new_native(vm, globals[14], 1, &is_empty_call);
+  hk_vm_push_new_native(vm, globals[15], 2, &compare_call);
+  hk_vm_push_new_native(vm, globals[16], 2, &split_call);
+  hk_vm_push_new_native(vm, globals[17], 2, &join_call);
+  hk_vm_push_new_native(vm, globals[18], 1, &iter_call);
+  hk_vm_push_new_native(vm, globals[19], 1, &valid_call);
+  hk_vm_push_new_native(vm, globals[20], 1, &current_call);
+  hk_vm_push_new_native(vm, globals[21], 1, &next_call);
+  hk_vm_push_new_native(vm, globals[22], 1, &sleep_call);
+  hk_vm_push_new_native(vm, globals[23], 2, &assert_call);
+  hk_vm_push_new_native(vm, globals[24], 1, &panic_call);
 }
 
 int32_t num_globals(void)
