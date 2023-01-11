@@ -21,7 +21,7 @@
   { \
     if (!(cond)) \
     { \
-      fprintf(stderr, "assertion failed: %s\n  at %s() in %s:%d", \
+      fprintf(stderr, "assertion failed: %s\n  at %s() in %s:%d\n", \
         (msg), __func__, __FILE__, __LINE__); \
       exit(EXIT_FAILURE); \
     } \
