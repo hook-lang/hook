@@ -5,264 +5,290 @@
 
 #include "hk_dump.h"
 
+static inline int32_t get_line(hk_chunk_t *chunk, int32_t offset);
+
+static inline int32_t get_line(hk_chunk_t *chunk, int32_t offset)
+{
+  int32_t result = 1;
+  hk_line_t *lines = chunk->lines;
+  for (int32_t i = 0; i < chunk->lines_length; ++i)
+  {
+    hk_line_t *line = &lines[i];
+    if (line->offset > offset)
+      break;
+    result = line->no;
+  }
+  return result;
+}
+
 void hk_dump(hk_function_t *fn, FILE *stream)
 {
   hk_string_t *name = fn->name;
   hk_string_t *file = fn->file;
-  char *name_chars = name ? name->chars : "<anonymous>";
-  char *file_chars = file ? file->chars : "<srdin>";
-  fprintf(stream, "%s in %s at %p\n", name_chars, file_chars, (void *) fn);
-  fprintf(stream, "%d parameter(s), %d non-local(s), %d constant(s), %d function(s)\n", fn->arity,
-    fn->num_nonlocals, fn->chunk.consts->length, fn->functions_length);
-  uint8_t *code = fn->chunk.code;
+  char *name_chars = name ? name->chars : "; <anonymous>";
+  char *file_chars = file ? file->chars : "; <srdin>";
+  hk_chunk_t *chunk = &fn->chunk;
+  fprintf(stream, "; %s in %s at %p\n", name_chars, file_chars, (void *) fn);
+  fprintf(stream, "; %d parameter(s), %d non-local(s), %d constant(s), %d function(s)\n", fn->arity,
+    fn->num_nonlocals, chunk->consts->length, fn->functions_length);
+  uint8_t *code = chunk->code;
   int32_t i = 0;
   int32_t n = 0;
-  while (i < fn->chunk.code_length)
+  int32_t last_line = -1;
+  while (i < chunk->code_length)
   {
     int32_t op = code[i];
     int32_t j = i++;
     ++n;
+    int32_t line = get_line(chunk, j);
+    if (line != last_line)
+    {
+      fprintf(stream, "  %-5d %5d ", line, j);
+      last_line = line;
+    }
+    else
+      fprintf(stream, "        %5d ", j);
     switch (op)
     {
     case HK_OP_NIL:
-      fprintf(stream, "  [%05d] Nil\n", j);
+      fprintf(stream, "Nil\n");
       break;
     case HK_OP_FALSE:
-      fprintf(stream, "  [%05d] False\n", j);
+      fprintf(stream, "False\n");
       break;
     case HK_OP_TRUE:
-      fprintf(stream, "  [%05d] True\n", j);
+      fprintf(stream, "True\n");
       break;
     case HK_OP_INT:
       {
         int32_t data = *((uint16_t*) &code[i]);
         i += 2;
-        fprintf(stream, "  [%05d] Int                   %5d\n", j, data);
+        fprintf(stream, "Int                   %5d\n", data);
       }
       break;
     case HK_OP_CONSTANT:
-      fprintf(stream, "  [%05d] Constant              %5d\n", j, code[i++]);
+      fprintf(stream, "Constant              %5d\n", code[i++]);
       break;
     case HK_OP_RANGE:
-      fprintf(stream, "  [%05d] Range\n", j);
+      fprintf(stream, "Range\n");
       break;
     case HK_OP_ARRAY:
-      fprintf(stream, "  [%05d] Array                 %5d\n", j, code[i++]);
+      fprintf(stream, "Array                 %5d\n", code[i++]);
       break;
     case HK_OP_STRUCT:
-      fprintf(stream, "  [%05d] Struct                %5d\n", j, code[i++]);
+      fprintf(stream, "Struct                %5d\n", code[i++]);
       break;
     case HK_OP_INSTANCE:
-      fprintf(stream, "  [%05d] Instance              %5d\n", j, code[i++]);
+      fprintf(stream, "Instance              %5d\n", code[i++]);
       break;
     case HK_OP_CONSTRUCT:
-      fprintf(stream, "  [%05d] Construct             %5d\n", j, code[i++]);
+      fprintf(stream, "Construct             %5d\n", code[i++]);
       break;
     case HK_OP_ITERATOR:
-      fprintf(stream, "  [%05d] Iterator\n", j);
+      fprintf(stream, "Iterator\n");
       break;
     case HK_OP_CLOSURE:
-      fprintf(stream, "  [%05d] Closure               %5d\n", j, code[i++]);
+      fprintf(stream, "Closure               %5d\n", code[i++]);
       break;
     case HK_OP_UNPACK:
-      fprintf(stream, "  [%05d] Unpack                %5d\n", j, code[i++]);
+      fprintf(stream, "Unpack                %5d\n", code[i++]);
       break;
     case HK_OP_DESTRUCT:
-      fprintf(stream, "  [%05d] Destruct              %5d\n", j, code[i++]);
+      fprintf(stream, "Destruct              %5d\n", code[i++]);
       break;
     case HK_OP_POP:
-      fprintf(stream, "  [%05d] Pop\n", j);
+      fprintf(stream, "Pop\n");
       break;
     case HK_OP_GLOBAL:
-      fprintf(stream, "  [%05d] Global                %5d\n", j, code[i++]);
+      fprintf(stream, "Global                %5d\n", code[i++]);
       break;
     case HK_OP_NONLOCAL:
-      fprintf(stream, "  [%05d] NonLocal              %5d\n", j, code[i++]);
+      fprintf(stream, "NonLocal              %5d\n", code[i++]);
       break;
     case HK_OP_LOAD:
-      fprintf(stream, "  [%05d] Load                  %5d\n", j, code[i++]);
+      fprintf(stream, "Load                  %5d\n", code[i++]);
       break;
     case HK_OP_STORE:
-      fprintf(stream, "  [%05d] Store                 %5d\n", j, code[i++]);
+      fprintf(stream, "Store                 %5d\n", code[i++]);
       break;
     case HK_OP_ADD_ELEMENT:
-      fprintf(stream, "  [%05d] AddElement\n", j);
+      fprintf(stream, "AddElement\n");
       break;
     case HK_OP_GET_ELEMENT:
-      fprintf(stream, "  [%05d] GetElement\n", j);
+      fprintf(stream, "GetElement\n");
       break;
     case HK_OP_FETCH_ELEMENT:
-      fprintf(stream, "  [%05d] FetchElement\n", j);
+      fprintf(stream, "FetchElement\n");
       break;
     case HK_OP_SET_ELEMENT:
-      fprintf(stream, "  [%05d] SetElement\n", j);
+      fprintf(stream, "SetElement\n");
       break;
     case HK_OP_PUT_ELEMENT:
-      fprintf(stream, "  [%05d] PutElement\n", j);
+      fprintf(stream, "PutElement\n");
       break;
     case HK_OP_DELETE_ELEMENT:
-      fprintf(stream, "  [%05d] DeleteElement\n", j);
+      fprintf(stream, "DeleteElement\n");
       break;
     case HK_OP_INPLACE_ADD_ELEMENT:
-      fprintf(stream, "  [%05d] InplaceAddElement\n", j);
+      fprintf(stream, "InplaceAddElement\n");
       break;
     case HK_OP_INPLACE_PUT_ELEMENT:
-      fprintf(stream, "  [%05d] InplacePutElement\n", j);
+      fprintf(stream, "InplacePutElement\n");
       break;
     case HK_OP_INPLACE_DELETE_ELEMENT:
-      fprintf(stream, "  [%05d] InplaceDeleteElement\n", j);
+      fprintf(stream, "InplaceDeleteElement\n");
       break;
     case HK_OP_GET_FIELD:
-      fprintf(stream, "  [%05d] GetField              %5d\n", j, code[i++]);
+      fprintf(stream, "GetField              %5d\n", code[i++]);
       break;
     case HK_OP_FETCH_FIELD:
-      fprintf(stream, "  [%05d] FetchField            %5d\n", j, code[i++]);
+      fprintf(stream, "FetchField            %5d\n", code[i++]);
       break;
     case HK_OP_SET_FIELD:
-      fprintf(stream, "  [%05d] SetField\n", j);
+      fprintf(stream, "SetField\n");
       break;
     case HK_OP_PUT_FIELD:
-      fprintf(stream, "  [%05d] PutField              %5d\n", j, code[i++]);
+      fprintf(stream, "PutField              %5d\n", code[i++]);
       break;
     case HK_OP_INPLACE_PUT_FIELD:
-      fprintf(stream, "  [%05d] InplacePutField       %5d\n", j, code[i++]);
+      fprintf(stream, "InplacePutField       %5d\n", code[i++]);
       break;
     case HK_OP_CURRENT:
-      fprintf(stream, "  [%05d] Current\n", j);
+      fprintf(stream, "Current\n");
       break;
     case HK_OP_JUMP:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        fprintf(stream, "  [%05d] Jump                  %5d\n", j, offset);
+        fprintf(stream, "Jump                  %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_FALSE:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        fprintf(stream, "  [%05d] JumpIfFalse           %5d\n", j, offset);
+        fprintf(stream, "JumpIfFalse           %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_TRUE:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        fprintf(stream, "  [%05d] JumpIfTrue            %5d\n", j, offset);
+        fprintf(stream, "JumpIfTrue            %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_TRUE_OR_POP:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        fprintf(stream, "  [%05d] JumpIfTrueOrPop       %5d\n", j, offset);
+        fprintf(stream, "JumpIfTrueOrPop       %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_FALSE_OR_POP:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        fprintf(stream, "  [%05d] JumpIfFalseOrPop      %5d\n", j, offset);
+        fprintf(stream, "JumpIfFalseOrPop      %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_NOT_EQUAL:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        fprintf(stream, "  [%05d] JumpIfNotEqual        %5d\n", j, offset);
+        fprintf(stream, "JumpIfNotEqual        %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_NOT_VALID:
       {
         int32_t offset = *((uint16_t*) &code[i]);
         i += 2;
-        fprintf(stream, "  [%05d] JumpIfNotValid        %5d\n", j, offset);
+        fprintf(stream, "JumpIfNotValid        %5d\n", offset);
       }
       break;
     case HK_OP_NEXT:
-      fprintf(stream, "  [%05d] Next\n", j);
+      fprintf(stream, "Next\n");
       break;
     case HK_OP_EQUAL:
-      fprintf(stream, "  [%05d] Equal\n", j);
+      fprintf(stream, "Equal\n");
       break;
     case HK_OP_GREATER:
-      fprintf(stream, "  [%05d] Greater\n", j);
+      fprintf(stream, "Greater\n");
       break;
     case HK_OP_LESS:
-      fprintf(stream, "  [%05d] Less\n", j);
+      fprintf(stream, "Less\n");
       break;
     case HK_OP_NOT_EQUAL:
-      fprintf(stream, "  [%05d] NotEqual\n", j);
+      fprintf(stream, "NotEqual\n");
       break;
     case HK_OP_NOT_GREATER:
-      fprintf(stream, "  [%05d] NotGreater\n", j);
+      fprintf(stream, "NotGreater\n");
       break;
     case HK_OP_NOT_LESS:
-      fprintf(stream, "  [%05d] NotLess\n", j);
+      fprintf(stream, "NotLess\n");
       break;
     case HK_OP_BITWISE_OR:
-      fprintf(stream, "  [%05d] BitwiseOr\n", j);
+      fprintf(stream, "BitwiseOr\n");
       break;
     case HK_OP_BITWISE_XOR:
-      fprintf(stream, "  [%05d] BitwiseXor\n", j);
+      fprintf(stream, "BitwiseXor\n");
       break;
     case HK_OP_BITWISE_AND:
-      fprintf(stream, "  [%05d] BitwiseAnd\n", j);
+      fprintf(stream, "BitwiseAnd\n");
       break;
     case HK_OP_LEFT_SHIFT:
-      fprintf(stream, "  [%05d] LeftShift\n", j);
+      fprintf(stream, "LeftShift\n");
       break;
     case HK_OP_RIGHT_SHIFT:
-      fprintf(stream, "  [%05d] RightShift\n", j);
+      fprintf(stream, "RightShift\n");
       break;
     case HK_OP_ADD:
-      fprintf(stream, "  [%05d] Add\n", j);
+      fprintf(stream, "Add\n");
       break;
     case HK_OP_SUBTRACT:
-      fprintf(stream, "  [%05d] Subtract\n", j);
+      fprintf(stream, "Subtract\n");
       break;
     case HK_OP_MULTIPLY:
-      fprintf(stream, "  [%05d] Multiply\n", j);
+      fprintf(stream, "Multiply\n");
       break;
     case HK_OP_DIVIDE:
-      fprintf(stream, "  [%05d] Divide\n", j);
+      fprintf(stream, "Divide\n");
       break;
     case HK_OP_QUOTIENT:
-      fprintf(stream, "  [%05d] Quotient\n", j);
+      fprintf(stream, "Quotient\n");
       break;
     case HK_OP_REMAINDER:
-      fprintf(stream, "  [%05d] Remainder\n", j);
+      fprintf(stream, "Remainder\n");
       break;
     case HK_OP_NEGATE:
-      fprintf(stream, "  [%05d] Negate\n", j);
+      fprintf(stream, "Negate\n");
       break;
     case HK_OP_NOT:
-      fprintf(stream, "  [%05d] Not\n", j);
+      fprintf(stream, "Not\n");
       break;
     case HK_OP_BITWISE_NOT:
-      fprintf(stream, "  [%05d] BitwiseNot\n", j);
+      fprintf(stream, "BitwiseNot\n");
       break;
     case HK_OP_INCR:
-      fprintf(stream, "  [%05d] Incr\n", j);
+      fprintf(stream, "Incr\n");
       break;
     case HK_OP_DECR:
-      fprintf(stream, "  [%05d] Decr\n", j);
+      fprintf(stream, "Decr\n");
       break;
     case HK_OP_CALL:
-      fprintf(stream, "  [%05d] Call                  %5d\n", j, code[i++]);
+      fprintf(stream, "Call                  %5d\n", code[i++]);
       break;
     case HK_OP_LOAD_MODULE:
-      fprintf(stream, "  [%05d] LoadModule\n", j);
+      fprintf(stream, "LoadModule\n");
       break;
     case HK_OP_RETURN:
-      fprintf(stream, "  [%05d] Return\n", j);
+      fprintf(stream, "Return\n");
       break;
     case HK_OP_RETURN_NIL:
-      fprintf(stream, "  [%05d] ReturnNil\n", j);
+      fprintf(stream, "ReturnNil\n");
       break;
     }
   }
-  fprintf(stream, "%d instruction(s)\n\n", n);
+  fprintf(stream, "; %d instruction(s)\n\n", n);
   for (int32_t i = 0; i < fn->functions_length; ++i)
     hk_dump(fn->functions[i], stream);
 }
