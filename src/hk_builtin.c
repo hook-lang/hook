@@ -199,7 +199,7 @@ static int32_t to_string_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_is_float(val))
   {
     char chars[32];
-    sprintf(chars, "%g", hk_as_float(val));
+    snprintf(chars, sizeof(chars) - 1,  "%g", hk_as_float(val));
     str = hk_string_from_chars(-1, chars);
     goto end;
   }
@@ -264,7 +264,7 @@ static int32_t hex_call(hk_vm_t *vm, hk_value_t *args)
   char *chars = result->chars;
   for (int32_t i = 0; i < str->length; ++i)
   {
-    sprintf(chars, "%.2x", (unsigned char) str->chars[i]);
+    snprintf(chars, INT32_MAX, "%.2x", (unsigned char) str->chars[i]);
     chars += 2;
   }
   if (hk_vm_push_string(vm, result) == HK_STATUS_ERROR)
