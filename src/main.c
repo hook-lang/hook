@@ -11,8 +11,7 @@
 #include "hk_status.h"
 #include "hk_error.h"
 #include "hk_utils.h"
-
-#define VERSION "0.1.0"
+#include "hk_version.h"
 
 typedef struct
 {
@@ -159,7 +158,7 @@ static inline void print_help(const char *cmd)
 
 static inline void print_version(void)
 {
-  printf("hook version %s\n", VERSION);
+  printf("hook %s %s\n", HK_VERSION, HK_REVISION);
 }
 
 static inline FILE *open_file(const char *filename, const char *mode)

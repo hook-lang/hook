@@ -24,8 +24,7 @@ Use the following commands to build the binaries:
 cd ~
 git clone https://github.com/fabiosvm/hook-lang.git
 mv hook-lang hook && cd hook
-cmake -B build
-cmake --build build
+scripts/build.sh
 ```
 
 ### Building the extensions
@@ -38,20 +37,18 @@ To build the extensions, you need to install some dependencies:
 sudo apt-get install -y libcurl4-openssl-dev libhiredis-dev libmysqlclient-dev
 ```
 
-So you can build appending the `-DBUILD_EXTENSIONS=On` flag to the `cmake` command:
+So you can build the extensions with the following command:
 
 ```
-cmake -B build -DBUILD_EXTENSIONS=On
-cmake --build build
+scripts/build-extensions.sh
 ```
 
 ### Building for Release
 
-To build the project for release, you need append the `-DCMAKE_BUILD_TYPE=Release` flag to the `cmake` command:
+To build the project for release, you can use the following command:
 
 ```
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+scripts/release.sh
 ```
 
 ## Setting environment variable 
