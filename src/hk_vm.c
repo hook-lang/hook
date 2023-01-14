@@ -28,8 +28,8 @@ static inline int32_t adjust_instance_args(hk_vm_t *vm, int32_t length, int32_t 
 static inline int32_t do_construct(hk_vm_t *vm, int32_t length);
 static inline int32_t do_iterator(hk_vm_t *vm);
 static inline int32_t do_closure(hk_vm_t *vm, hk_function_t *fn);
-static inline int32_t do_unpack(hk_vm_t *vm, int32_t n);
-static inline int32_t do_destruct(hk_vm_t *vm, int32_t n);
+static inline int32_t do_unpack_array(hk_vm_t *vm, int32_t n);
+static inline int32_t do_unpack_struct(hk_vm_t *vm, int32_t n);
 static inline int32_t do_add_element(hk_vm_t *vm);
 static inline int32_t do_get_element(hk_vm_t *vm);
 static inline void slice_string(hk_vm_t *vm, hk_value_t *slot, hk_string_t *str, hk_range_t *range);
@@ -71,8 +71,8 @@ static inline int32_t do_remainder(hk_vm_t *vm);
 static inline int32_t do_negate(hk_vm_t *vm);
 static inline void do_not(hk_vm_t *vm);
 static inline int32_t do_bitwise_not(hk_vm_t *vm);
-static inline int32_t do_incr(hk_vm_t *vm);
-static inline int32_t do_decr(hk_vm_t *vm);
+static inline int32_t do_increment(hk_vm_t *vm);
+static inline int32_t do_decrement(hk_vm_t *vm);
 static inline int32_t do_call(hk_vm_t *vm, int32_t num_args);
 static inline int32_t adjust_call_args(hk_vm_t *vm, int32_t arity, int32_t num_args);
 static inline void print_trace(hk_string_t *name, hk_string_t *file, int32_t line);
@@ -293,12 +293,12 @@ static inline int32_t do_closure(hk_vm_t *vm, hk_function_t *fn)
   return HK_STATUS_OK;
 }
 
-static inline int32_t do_unpack(hk_vm_t *vm, int32_t n)
+static inline int32_t do_unpack_array(hk_vm_t *vm, int32_t n)
 {
   hk_value_t val = vm->stack[vm->stack_top];
   if (!hk_is_array(val))
   {
-    hk_runtime_error("type error: cannot unpack value of type %s",
+    hk_runtime_error("type error: value of type %s is not an array",
       hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
@@ -320,12 +320,12 @@ end:
   return status;
 }
 
-static inline int32_t do_destruct(hk_vm_t *vm, int32_t n)
+static inline int32_t do_unpack_struct(hk_vm_t *vm, int32_t n)
 {
   hk_value_t val = vm->stack[vm->stack_top];
   if (!hk_is_instance(val))
   {
-    hk_runtime_error("type error: cannot destructure value of type %s",
+    hk_runtime_error("type error: value of type %s is not an instance of struct",
       hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
@@ -711,7 +711,7 @@ static inline int32_t do_get_field(hk_vm_t *vm, hk_string_t *name)
   hk_value_t val = slots[0];
   if (!hk_is_instance(val))
   {
-    hk_runtime_error("type error: cannot use %s as an instance",
+    hk_runtime_error("type error: cannot use %s as an instance of struct",
       hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
@@ -735,7 +735,8 @@ static inline int32_t do_fetch_field(hk_vm_t *vm, hk_string_t *name)
   hk_value_t val = slots[0];
   if (!hk_is_instance(val))
   {
-    hk_runtime_error("type error: cannot use %s as an instance", hk_type_name(val.type));
+    hk_runtime_error("type error: cannot use %s as an instance of struct",
+      hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
   hk_instance_t *inst = hk_as_instance(val);
@@ -777,7 +778,8 @@ static inline int32_t do_put_field(hk_vm_t *vm, hk_string_t *name)
   hk_value_t val2 = slots[1];
   if (!hk_is_instance(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an instance", hk_type_name(val1.type));
+    hk_runtime_error("type error: cannot use %s as an instance of struct",
+      hk_type_name(val1.type));
     return HK_STATUS_ERROR;
   }
   hk_instance_t *inst = hk_as_instance(val1);
@@ -803,7 +805,8 @@ static inline int32_t do_inplace_put_field(hk_vm_t *vm, hk_string_t *name)
   hk_value_t val2 = slots[1];
   if (!hk_is_instance(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an instance", hk_type_name(val1.type));
+    hk_runtime_error("type error: cannot use %s as an instance of struct",
+      hk_type_name(val1.type));
     return HK_STATUS_ERROR;
   }
   hk_instance_t *inst = hk_as_instance(val1);
@@ -1286,7 +1289,7 @@ static inline int32_t do_bitwise_not(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int32_t do_incr(hk_vm_t *vm)
+static inline int32_t do_increment(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->stack[vm->stack_top];
   hk_value_t val = slots[0];
@@ -1300,7 +1303,7 @@ static inline int32_t do_incr(hk_vm_t *vm)
   return HK_STATUS_OK;
 }
 
-static inline int32_t do_decr(hk_vm_t *vm)
+static inline int32_t do_decrement(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->stack[vm->stack_top];
   hk_value_t val = slots[0];
@@ -1455,12 +1458,12 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
       if (do_closure(vm, functions[read_byte(&pc)]) == HK_STATUS_ERROR)
         goto error;
       break;
-    case HK_OP_UNPACK:
-      if (do_unpack(vm, read_byte(&pc)) == HK_STATUS_ERROR)
+    case HK_OP_UNPACK_ARRAY:
+      if (do_unpack_array(vm, read_byte(&pc)) == HK_STATUS_ERROR)
         goto error;
       break;
-    case HK_OP_DESTRUCT:
-      if (do_destruct(vm, read_byte(&pc)) == HK_STATUS_ERROR)
+    case HK_OP_UNPACK_STRUCT:
+      if (do_unpack_struct(vm, read_byte(&pc)) == HK_STATUS_ERROR)
         goto error;
       break;
     case HK_OP_POP:
@@ -1711,12 +1714,12 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
       if (do_bitwise_not(vm) == HK_STATUS_ERROR)
         goto error;
       break;
-    case HK_OP_INCR:
-      if (do_incr(vm) == HK_STATUS_ERROR)
+    case HK_OP_INCREMENT:
+      if (do_increment(vm) == HK_STATUS_ERROR)
         goto error;
       break;
-    case HK_OP_DECR:
-      if (do_decr(vm) == HK_STATUS_ERROR)
+    case HK_OP_DECREMENT:
+      if (do_decrement(vm) == HK_STATUS_ERROR)
         goto error;
       break;
     case HK_OP_CALL:

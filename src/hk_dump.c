@@ -90,11 +90,11 @@ void hk_dump(hk_function_t *fn, FILE *stream)
     case HK_OP_CLOSURE:
       fprintf(stream, "Closure               %5d\n", code[i++]);
       break;
-    case HK_OP_UNPACK:
-      fprintf(stream, "Unpack                %5d\n", code[i++]);
+    case HK_OP_UNPACK_ARRAY:
+      fprintf(stream, "UnpackArray           %5d\n", code[i++]);
       break;
-    case HK_OP_DESTRUCT:
-      fprintf(stream, "Destruct              %5d\n", code[i++]);
+    case HK_OP_UNPACK_STRUCT:
+      fprintf(stream, "UnpackStruct          %5d\n", code[i++]);
       break;
     case HK_OP_POP:
       fprintf(stream, "Pop\n");
@@ -268,11 +268,11 @@ void hk_dump(hk_function_t *fn, FILE *stream)
     case HK_OP_BITWISE_NOT:
       fprintf(stream, "BitwiseNot\n");
       break;
-    case HK_OP_INCR:
-      fprintf(stream, "Incr\n");
+    case HK_OP_INCREMENT:
+      fprintf(stream, "Increment\n");
       break;
-    case HK_OP_DECR:
-      fprintf(stream, "Decr\n");
+    case HK_OP_DECREMENT:
+      fprintf(stream, "Decrement\n");
       break;
     case HK_OP_CALL:
       fprintf(stream, "Call                  %5d\n", code[i++]);

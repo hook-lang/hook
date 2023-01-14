@@ -556,7 +556,7 @@ static void compile_load_module(compiler_t *comp)
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     hk_chunk_emit_opcode(chunk, HK_OP_LOAD_MODULE);
-    hk_chunk_emit_opcode(chunk, HK_OP_DESTRUCT);
+    hk_chunk_emit_opcode(chunk, HK_OP_UNPACK_STRUCT);
     hk_chunk_emit_byte(chunk, n);
     return;
   }
@@ -606,7 +606,7 @@ static void compile_constant_declaration(compiler_t *comp)
     consume(comp, TOKEN_RBRACKET);
     consume(comp, TOKEN_EQ);
     compile_expression(comp);
-    hk_chunk_emit_opcode(chunk, HK_OP_UNPACK);
+    hk_chunk_emit_opcode(chunk, HK_OP_UNPACK_ARRAY);
     hk_chunk_emit_byte(chunk, n);
     return;
   }
@@ -638,7 +638,7 @@ static void compile_constant_declaration(compiler_t *comp)
     consume(comp, TOKEN_RBRACE);
     consume(comp, TOKEN_EQ);
     compile_expression(comp);
-    hk_chunk_emit_opcode(chunk, HK_OP_DESTRUCT);
+    hk_chunk_emit_opcode(chunk, HK_OP_UNPACK_STRUCT);
     hk_chunk_emit_byte(chunk, n);
     return;
   }
@@ -693,7 +693,7 @@ static void compile_variable_declaration(compiler_t *comp)
     consume(comp, TOKEN_RBRACKET);
     consume(comp, TOKEN_EQ);
     compile_expression(comp);
-    hk_chunk_emit_opcode(chunk, HK_OP_UNPACK);
+    hk_chunk_emit_opcode(chunk, HK_OP_UNPACK_ARRAY);
     hk_chunk_emit_byte(chunk, n);
     return;
   }
@@ -725,7 +725,7 @@ static void compile_variable_declaration(compiler_t *comp)
     consume(comp, TOKEN_RBRACE);
     consume(comp, TOKEN_EQ);
     compile_expression(comp);
-    hk_chunk_emit_opcode(chunk, HK_OP_DESTRUCT);
+    hk_chunk_emit_opcode(chunk, HK_OP_UNPACK_STRUCT);
     hk_chunk_emit_byte(chunk, n);
     return;
   }
@@ -843,13 +843,13 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
   if (match(scan, TOKEN_PLUSPLUS))
   {
     scanner_next_token(scan);
-    hk_chunk_emit_opcode(chunk, HK_OP_INCR);
+    hk_chunk_emit_opcode(chunk, HK_OP_INCREMENT);
     return SYNTAX_ASSIGN;
   }
   if (match(scan, TOKEN_MINUSMINUS))
   {
     scanner_next_token(scan);
-    hk_chunk_emit_opcode(chunk, HK_OP_DECR);
+    hk_chunk_emit_opcode(chunk, HK_OP_DECREMENT);
     return SYNTAX_ASSIGN;
   }
   if (match(scan, TOKEN_LBRACKET))

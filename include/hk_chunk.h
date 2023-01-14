@@ -20,8 +20,8 @@
 #define HK_OP_CONSTRUCT              0x09
 #define HK_OP_ITERATOR               0x0a
 #define HK_OP_CLOSURE                0x0b
-#define HK_OP_UNPACK                 0x0c
-#define HK_OP_DESTRUCT               0x0d
+#define HK_OP_UNPACK_ARRAY           0x0c
+#define HK_OP_UNPACK_STRUCT          0x0d
 #define HK_OP_POP                    0x0e
 #define HK_OP_GLOBAL                 0x0f
 #define HK_OP_NONLOCAL               0x10
@@ -70,8 +70,8 @@
 #define HK_OP_NEGATE                 0x3b
 #define HK_OP_NOT                    0x3c
 #define HK_OP_BITWISE_NOT            0x3d
-#define HK_OP_INCR                   0x3e
-#define HK_OP_DECR                   0x3f
+#define HK_OP_INCREMENT              0x3e
+#define HK_OP_DECREMENT              0x3f
 #define HK_OP_CALL                   0x40
 #define HK_OP_LOAD_MODULE            0x41
 #define HK_OP_RETURN                 0x42
