@@ -84,3 +84,7 @@ arrays:
   avg(arr: array) -> float
   reverse(arr: array) -> array
   sort(arr: array) -> array
+
+utf8:
+
+  len(str: string) -> int

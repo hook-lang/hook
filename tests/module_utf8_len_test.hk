@@ -1,0 +1,6 @@
+
+use utf8;
+println(utf8.len(""));
+println(utf8.len("Hi"));
+println(utf8.len("你好"));
+println(utf8.len("こんにちは"));
