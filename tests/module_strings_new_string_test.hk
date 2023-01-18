@@ -1,0 +1,4 @@
+
+use strings;
+val str = strings.new_string(100);
+println(str);

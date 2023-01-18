@@ -66,6 +66,7 @@ numbers:
 
 strings:
 
+  new_string(min_capacity: int) -> string
   hash(str: string) -> int
   lower(str: string) -> string
   upper(str: string) -> string
