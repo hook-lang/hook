@@ -88,7 +88,7 @@ bool hk_double_from_chars(double *result, const char *chars)
   return true;
 }
 
-void hk_copy_cstring(char *dest, const char *src, int max_len)
+void hk_copy_cstring(char *dest, const char *src, int32_t max_len)
 {
 #ifdef _WIN32
   strncpy_s(dest, max_len, src, _TRUNCATE);

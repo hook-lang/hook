@@ -101,7 +101,7 @@ static int32_t avg_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_array_t *arr = hk_as_array(args[1]);
-  int length = arr->length;
+  int32_t length = arr->length;
   if (!length)
     return hk_vm_push_float(vm, 0);
   double sum = 0;

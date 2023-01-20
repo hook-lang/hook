@@ -117,12 +117,12 @@ static inline void parse_option(parsed_args_t *parsed_args, const char *arg)
 
 static inline const char *option(const char *arg, const char *opt)
 {
-  int32_t len = 0;
-  while (opt[len] && opt[len] != '=')
-    ++len;
-  if (memcmp(arg, opt, len))
+  int32_t length = 0;
+  while (opt[length] && opt[length] != '=')
+    ++length;
+  if (memcmp(arg, opt, length))
     return NULL;
-  return arg[len] == '=' ? &arg[len + 1] : &arg[len];
+  return arg[length] == '=' ? &arg[length + 1] : &arg[length];
 }
 
 static inline hk_array_t *args_array(parsed_args_t *parsed_args)
