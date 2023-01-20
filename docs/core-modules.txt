@@ -89,3 +89,4 @@ arrays:
 utf8:
 
   len(str: string) -> int
+  sub(str: string, start: int, end: int) -> string

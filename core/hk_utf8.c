@@ -8,6 +8,7 @@
 
 static inline int32_t decode_char(unsigned char c);
 static int32_t len_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sub_call(hk_vm_t *vm, hk_value_t *args);
 
 static inline int32_t decode_char(unsigned char c)
 {
@@ -39,6 +40,42 @@ static int32_t len_call(hk_vm_t *vm, hk_value_t *args)
   return hk_vm_push_float(vm, result);
 }
 
+static int32_t sub_call(hk_vm_t *vm, hk_value_t *args)
+{
+  if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_check_float(args, 2) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_check_float(args, 3) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  hk_string_t *str = hk_as_string(args[1]);
+  int32_t start = (int32_t) hk_as_float(args[2]);
+  int32_t end = (int32_t) hk_as_float(args[3]);
+  int32_t length = 0;
+  int32_t i = 0;
+  while (i < str->length)
+  {
+    int32_t n = decode_char((unsigned char) str->chars[i]);
+    if (!n || length == start)
+      break;
+    i += n;
+    ++length;
+  }
+  start = i;
+  while (i < str->length)
+  {
+    int32_t n = decode_char((unsigned char) str->chars[i]);
+    if (!n || length == end)
+      break;
+    i += n;
+    ++length;
+  }
+  end = i;
+  length = end - start;
+  char *chars = &str->chars[start];
+  return hk_vm_push_string_from_chars(vm, length, chars);
+}
+
 HK_LOAD_FN(utf8)
 {
   if (hk_vm_push_string_from_chars(vm, -1, "utf8") == HK_STATUS_ERROR)
@@ -47,5 +84,9 @@ HK_LOAD_FN(utf8)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "len", 1, &len_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 1);
+  if (hk_vm_push_string_from_chars(vm, -1, "sub") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_new_native(vm, "sub", 3, &sub_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_vm_construct(vm, 2);
 }
