@@ -90,7 +90,7 @@ static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name)
 #endif
   if (!handle)
   {
-    hk_runtime_error("cannot open module `%.*s`", name->length, name->chars);
+    hk_runtime_error("cannot open module `%.*s`", file->length, file->chars);
     hk_string_free(file);
     return HK_STATUS_ERROR;
   }
