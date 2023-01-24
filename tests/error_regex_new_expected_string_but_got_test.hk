@@ -1,0 +1,3 @@
+
+use { new } from regex;
+val a = new(nil);
