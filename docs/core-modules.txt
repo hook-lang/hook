@@ -90,3 +90,8 @@ utf8:
 
   len(str: string) -> int
   sub(str: string, start: int, end: int) -> string
+
+regex:
+  
+    new(pattern: string) -> userdata
+    is_match(regex: userdata, str: string) -> bool

@@ -1,0 +1,7 @@
+
+use regex;
+val str = "^[a-zA-Z0-9_]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$";
+mut re;
+re = regex.new(str);
+println(regex.is_match(re, "foo@domain.com"));
+println(regex.is_match(re, "bar#domain.com"));
