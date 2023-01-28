@@ -92,6 +92,7 @@ add_library(hashing_mod SHARED
   hashing.c
   deps/ripemd160.c
   deps/sha2.c
+  deps/sha3.c
   ../src/hk_array.c
   ../src/hk_builtin.c
   ../src/hk_callable.c

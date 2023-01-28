@@ -1,0 +1,5 @@
+
+use hashing;
+val expected = "76d3bc41c9f588f7fcd0d5bf4718f8f84b1c41b20882703100b9eb9413807c01";
+val x = hex(hashing.sha3("foo"));
+assert(x == expected, "x must equal expected");

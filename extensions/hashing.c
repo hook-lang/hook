@@ -5,15 +5,18 @@
 
 #include "hashing.h"
 #include "deps/sha2.h"
+#include "deps/sha3.h"
 #include "deps/ripemd160.h"
 #include "hk_status.h"
 
+#define SHA3_DIGEST_SIZE      32
 #define RIPEMD160_DIGEST_SIZE 20
 
 static int32_t sha224_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sha256_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sha384_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sha512_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t sha3_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t ripemd160_call(hk_vm_t *vm, hk_value_t *args);
 
 static int32_t sha224_call(hk_vm_t *vm, hk_value_t *args)
@@ -88,6 +91,24 @@ static int32_t sha512_call(hk_vm_t *vm, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
+static int32_t sha3_call(hk_vm_t *vm, hk_value_t *args)
+{
+  if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  hk_string_t *str = hk_as_string(args[1]);
+  int32_t length = SHA3_DIGEST_SIZE;
+  hk_string_t *digest = hk_string_new_with_capacity(length);
+  digest->length = length;
+  digest->chars[length] = '\0';
+  sha3(str->chars, str->length, digest->chars, length);
+  if (hk_vm_push_string(vm, digest) == HK_STATUS_ERROR)
+  {
+    hk_string_free(digest);
+    return HK_STATUS_ERROR;
+  }
+  return HK_STATUS_OK;
+}
+
 static int32_t ripemd160_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
@@ -126,9 +147,13 @@ HK_LOAD_FN(hashing)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "sha512", 1, &sha512_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
+  if (hk_vm_push_string_from_chars(vm, -1, "sha3") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_vm_push_new_native(vm, "sha3", 1, &sha3_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "ripemd160") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_new_native(vm, "ripemd160", 1, &ripemd160_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 5);
+  return hk_vm_construct(vm, 6);
 }
