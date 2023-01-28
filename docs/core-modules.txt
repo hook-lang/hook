@@ -104,3 +104,12 @@ hashing:
   sha512(str: string) -> string
   sha3(str: string) -> string
   ripemd160(str: string) -> string
+
+encoding:
+
+  base32_encode(str: string) -> string
+  base32_decode(str: string) -> string
+  base58_encode(str: string) -> string
+  base58_decode(str: string) -> string
+  base64_encode(str: string) -> string
+  base64_decode(str: string) -> string

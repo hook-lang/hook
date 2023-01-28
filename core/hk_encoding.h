@@ -1,14 +1,14 @@
 //
 // The Hook Programming Language
-// encoding.h
+// hk_encoding.h
 //
 
-#ifndef ENCODING_H
-#define ENCODING_H
+#ifndef HK_ENCODING_H
+#define HK_ENCODING_H
 
 #include "hk_vm.h"
 #include "hk_utils.h"
 
 HK_LOAD_FN(encoding);
 
-#endif // ENCODING_H
+#endif // HK_ENCODING_H

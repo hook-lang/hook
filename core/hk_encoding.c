@@ -1,9 +1,9 @@
 //
 // The Hook Programming Language
-// encoding.c
+// hk_encoding.c
 //
 
-#include "encoding.h"
+#include "hk_encoding.h"
 #include "deps/base32.h"
 #include "deps/base64.h"
 #include "deps/base58.h"

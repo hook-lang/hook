@@ -88,29 +88,6 @@ add_library(redis_mod SHARED
   ../src/hk_value.c
   ../src/hk_vm.c)
 
-add_library(encoding_mod SHARED
-  encoding.c
-  deps/base32.c
-  deps/base58.c
-  deps/base64.c
-  ../src/hk_array.c
-  ../src/hk_builtin.c
-  ../src/hk_callable.c
-  ../src/hk_chunk.c
-  ../src/hk_utils.c
-  ../src/hk_error.c
-  ../src/hk_iterable.c
-  ../src/hk_iterator.c
-  ../src/hk_memory.c
-  ../src/hk_module.c
-  ../src/hk_range.c
-  ../src/hk_string_map.c
-  ../src/hk_string.c
-  ../src/hk_struct.c
-  ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
-
 add_library(secp256r1_mod SHARED
   secp256r1.c
   deps/ecc.c
