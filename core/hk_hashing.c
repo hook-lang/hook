@@ -1,9 +1,9 @@
 //
 // The Hook Programming Language
-// hashing.c
+// hk_hashing.c
 //
 
-#include "hashing.h"
+#include "hk_hashing.h"
 #include "deps/sha2.h"
 #include "deps/sha3.h"
 #include "deps/ripemd160.h"

@@ -1,14 +1,14 @@
 //
 // The Hook Programming Language
-// hashing.h
+// hk_hashing.h
 //
 
-#ifndef HASHING_H
-#define HASHING_H
+#ifndef HK_HASHING_H
+#define HK_HASHING_H
 
 #include "hk_vm.h"
 #include "hk_utils.h"
 
 HK_LOAD_FN(hashing);
 
-#endif // HASHING_H
+#endif // HK_HASHING_H

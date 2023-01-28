@@ -169,3 +169,26 @@ add_library(regex_mod SHARED
   ../src/hk_userdata.c
   ../src/hk_value.c
   ../src/hk_vm.c)
+
+add_library(hashing_mod SHARED
+  hk_hashing.c
+  deps/ripemd160.c
+  deps/sha2.c
+  deps/sha3.c
+  ../src/hk_array.c
+  ../src/hk_builtin.c
+  ../src/hk_callable.c
+  ../src/hk_chunk.c
+  ../src/hk_utils.c
+  ../src/hk_error.c
+  ../src/hk_iterable.c
+  ../src/hk_iterator.c
+  ../src/hk_memory.c
+  ../src/hk_module.c
+  ../src/hk_range.c
+  ../src/hk_string_map.c
+  ../src/hk_string.c
+  ../src/hk_struct.c
+  ../src/hk_userdata.c
+  ../src/hk_value.c
+  ../src/hk_vm.c)

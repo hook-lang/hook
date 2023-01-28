@@ -95,3 +95,12 @@ regex:
   
   new(pattern: string) -> userdata
   is_match(regex: userdata, str: string) -> bool
+
+hashing:
+
+  sha224(str: string) -> string
+  sha256(str: string) -> string
+  sha384(str: string) -> string
+  sha512(str: string) -> string
+  sha3(str: string) -> string
+  ripemd160(str: string) -> string
