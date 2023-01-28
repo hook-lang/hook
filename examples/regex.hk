@@ -1,0 +1,11 @@
+//
+// regex.hk
+//
+
+use regex;
+
+val pattern = "^[a-zA-Z0-9_]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$";
+val re = regex.new(pattern);
+
+assert(regex.is_match(re, "foo@domain.com"), "must match");
+assert(!regex.is_match(re, "bar#domain.com"), "must not match");

@@ -93,5 +93,5 @@ utf8:
 
 regex:
   
-    new(pattern: string) -> userdata
-    is_match(regex: userdata, str: string) -> bool
+  new(pattern: string) -> userdata
+  is_match(regex: userdata, str: string) -> bool
