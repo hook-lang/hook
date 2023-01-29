@@ -8,7 +8,9 @@
 
 #ifdef _WIN32
   #include <Windows.h>
-#else
+#endif
+
+#ifndef _WIN32
   #include <dlfcn.h>
 #endif
 
@@ -17,18 +19,23 @@
 #include "hk_error.h"
 #include "hk_utils.h"
 
-#define HOME_VAR "HOOK_HOME"
+#define HOME_ENV_VAR "HOOK_HOME"
 
 #ifdef _WIN32
   #define FILE_INFIX   "\\lib\\"
   #define FILE_POSTFIX "_mod.dll"
-#else
+#endif
+
+#ifndef _WIN32
   #define FILE_INFIX "/lib/lib"
-  #ifdef __APPLE__
-    #define FILE_POSTFIX "_mod.dylib"
-  #else
-    #define FILE_POSTFIX "_mod.so"
-  #endif
+#endif
+
+#ifdef __linux__
+  #define FILE_POSTFIX "_mod.so"
+#endif
+
+#ifdef __APPLE__
+  #define FILE_POSTFIX "_mod.dylib"
 #endif
 
 #ifdef _WIN32
@@ -42,6 +49,8 @@ static string_map_t module_cache;
 static inline bool get_module_result(hk_string_t *name, hk_value_t *result);
 static inline void put_module_result(hk_string_t *name, hk_value_t result);
 static inline const char *get_home_dir(void);
+static inline const char *get_default_home_dir(void);
+
 static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name);
 
 static inline bool get_module_result(hk_string_t *name, hk_value_t *result)
@@ -60,21 +69,24 @@ static inline void put_module_result(hk_string_t *name, hk_value_t result)
 
 static inline const char *get_home_dir(void)
 {
-  const char *home_dir = getenv(HOME_VAR);
-  if (!home_dir)
-  {
-  #ifdef _WIN32
-    const char *drive = getenv("SystemDrive");
-    hk_assert(drive, "environment variable 'SystemDrive' not set");
-    char *path[MAX_PATH + 1];
-    snprintf(path, MAX_PATH, "%s\\hook", drive);
-    strncpy_s(path, MAX_PATH, drive, _TRUNCATE);
-    home_dir = (const char *) path;
-  #else
-    home_dir = "/opt/hook";
-  #endif
-  }
-  return home_dir;
+  const char *result = getenv(HOME_ENV_VAR);
+  if (!result)
+    result = get_default_home_dir();
+  return result;
+}
+
+static inline const char *get_default_home_dir(void)
+{
+  const char *result = "/opt/hook";
+#ifdef _WIN32
+  const char *drive = getenv("SystemDrive");
+  hk_assert(drive, "environment variable 'SystemDrive' not set");
+  char *path[MAX_PATH + 1];
+  snprintf(path, MAX_PATH, "%s\\hook", drive);
+  strncpy_s(path, MAX_PATH, drive, _TRUNCATE);
+  result = (const char *) path;
+#endif
+  return result;
 }
 
 static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name)

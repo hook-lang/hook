@@ -12,7 +12,9 @@
 
 #ifdef _WIN32
   #include <Windows.h>
-#else
+#endif
+
+#ifndef _WIN32
   #include <unistd.h>
 #endif
 

@@ -12,26 +12,26 @@
 typedef struct
 {
   HK_USERDATA_HEADER
-  redisContext *ctx;
-} redis_context_t;
+  redisContext *redis_context;
+} redis_context_wrapper_t;
 
-static inline redis_context_t *redis_context_new(redisContext *ctx);
-static void redis_context_deinit(hk_userdata_t *udata);
+static inline redis_context_wrapper_t *redis_context_wrapper_new(redisContext *redis_context);
+static void redis_context_wrapper_deinit(hk_userdata_t *udata);
 static hk_value_t redis_reply_to_value(redisReply *reply);
 static int32_t connect_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t command_call(hk_vm_t *vm, hk_value_t *args);
 
-static inline redis_context_t *redis_context_new(redisContext *ctx)
+static inline redis_context_wrapper_t *redis_context_wrapper_new(redisContext *redis_context)
 {
-  redis_context_t *redis_context = (redis_context_t *) hk_allocate(sizeof(*redis_context));
-  hk_userdata_init((hk_userdata_t *) redis_context, &redis_context_deinit);
-  redis_context->ctx = ctx;
-  return redis_context;
+  redis_context_wrapper_t *wrapper = (redis_context_wrapper_t *) hk_allocate(sizeof(*wrapper));
+  hk_userdata_init((hk_userdata_t *) wrapper, &redis_context_wrapper_deinit);
+  wrapper->redis_context = redis_context;
+  return wrapper;
 }
 
-static void redis_context_deinit(hk_userdata_t *udata)
+static void redis_context_wrapper_deinit(hk_userdata_t *udata)
 {
-  redisFree(((redis_context_t *) udata)->ctx);
+  redisFree(((redis_context_wrapper_t *) udata)->redis_context);
 }
 
 static hk_value_t redis_reply_to_value(redisReply *reply)
@@ -99,10 +99,10 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   hk_string_t *hostname = hk_as_string(args[1]);
   int32_t port = (int32_t) hk_as_float(args[2]);
-  redisContext *ctx = redisConnect(hostname->chars, port);
-  if (!ctx || ctx->err)
+  redisContext *redis_context = redisConnect(hostname->chars, port);
+  if (!redis_context || redis_context->err)
     return hk_vm_push_nil(vm);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) redis_context_new(ctx));
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) redis_context_wrapper_new(redis_context));
 }
 
 static int32_t command_call(hk_vm_t *vm, hk_value_t *args)
@@ -111,9 +111,9 @@ static int32_t command_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  redisContext *ctx = ((redis_context_t *) hk_as_userdata(args[1]))->ctx;
+  redisContext *redis_context = ((redis_context_wrapper_t *) hk_as_userdata(args[1]))->redis_context;
   hk_string_t *command = hk_as_string(args[2]);
-  redisReply *reply = redisCommand(ctx, command->chars);
+  redisReply *reply = redisCommand(redis_context, command->chars);
   hk_assert(reply, "redisCommand returned NULL");
   hk_value_t result = redis_reply_to_value(reply);
   freeReplyObject(reply);

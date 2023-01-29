@@ -11,12 +11,14 @@
 
 #ifdef _WIN32
   #include <windows.h>
-#else
-  #if defined(__APPLE__)
-    #include <sys/syslimits.h>
-  #else
-    #include <linux/limits.h>
-  #endif
+#endif
+
+#ifdef __linux__
+  #include <linux/limits.h>
+#endif
+
+#ifdef __APPLE__
+  #include <sys/syslimits.h>
 #endif
 
 #ifdef _WIN32

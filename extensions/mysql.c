@@ -13,19 +13,19 @@
 typedef struct
 {
   HK_USERDATA_HEADER
-  MYSQL *my;
-} mysql_t;
+  MYSQL *mysql;
+} mysql_wrapper_t;
 
 typedef struct
 {
   HK_USERDATA_HEADER
-  MYSQL_RES *res;
-} mysql_result_t;
+  MYSQL_RES *mysql_res;
+} mysql_result_wrapper_t;
 
-static inline mysql_t *mysql_new(MYSQL *my);
-static inline mysql_result_t *mysql_result_new(MYSQL_RES *res);
-static void mysql_deinit(hk_userdata_t *udata);
-static void mysql_result_deinit(hk_userdata_t *udata);
+static inline mysql_wrapper_t *mysql_wrapper_new(MYSQL *mysql);
+static inline mysql_result_wrapper_t *mysql_result_wrapper_new(MYSQL_RES *mysql_res);
+static void mysql_wrapper_deinit(hk_userdata_t *udata);
+static void mysql_result_wrapper_deinit(hk_userdata_t *udata);
 static int32_t connect_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t close_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t ping_call(hk_vm_t *vm, hk_value_t *args);
@@ -35,37 +35,37 @@ static int32_t query_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t affected_rows_call(hk_vm_t *vm, hk_value_t *args);
 
-static inline mysql_t *mysql_new(MYSQL *my)
+static inline mysql_wrapper_t *mysql_wrapper_new(MYSQL *mysql)
 {
-  mysql_t *mysql = (mysql_t *) hk_allocate(sizeof(*mysql));
-  hk_userdata_init((hk_userdata_t *) mysql, &mysql_deinit);
-  mysql->my = my;
-  return mysql;
+  mysql_wrapper_t *wrapper = (mysql_wrapper_t *) hk_allocate(sizeof(*wrapper));
+  hk_userdata_init((hk_userdata_t *) wrapper, &mysql_wrapper_deinit);
+  wrapper->mysql = mysql;
+  return wrapper;
 }
 
-static inline mysql_result_t *mysql_result_new(MYSQL_RES *res)
+static inline mysql_result_wrapper_t *mysql_result_wrapper_new(MYSQL_RES *mysql_res)
 {
-  mysql_result_t *mysql_result = (mysql_result_t *) hk_allocate(sizeof(*mysql_result));
-  hk_userdata_init((hk_userdata_t *) mysql_result, &mysql_result_deinit);
-  mysql_result->res = res;
-  return mysql_result;
+  mysql_result_wrapper_t *wrapper = (mysql_result_wrapper_t *) hk_allocate(sizeof(*wrapper));
+  hk_userdata_init((hk_userdata_t *) wrapper, &mysql_result_wrapper_deinit);
+  wrapper->mysql_res = mysql_res;
+  return wrapper;
 }
 
-static void mysql_deinit(hk_userdata_t *udata)
+static void mysql_wrapper_deinit(hk_userdata_t *udata)
 {
-  mysql_t *mysql = (mysql_t *) udata;
-  if (!mysql->my)
+  mysql_wrapper_t *wrapper = (mysql_wrapper_t *) udata;
+  if (!wrapper->mysql)
     return;
-  mysql_close(mysql->my);
+  mysql_close(wrapper->mysql);
   mysql_library_end();
 }
 
-static void mysql_result_deinit(hk_userdata_t *udata)
+static void mysql_result_wrapper_deinit(hk_userdata_t *udata)
 {
-  mysql_result_t *mysql_result = (mysql_result_t *) udata;
-  if (!mysql_result->res)
+  mysql_result_wrapper_t *wrapper = (mysql_result_wrapper_t *) udata;
+  if (!wrapper->mysql_res)
     return;
-  mysql_free_result(mysql_result->res);
+  mysql_free_result(wrapper->mysql_res);
 }
 
 static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
@@ -85,8 +85,8 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
     hk_runtime_error("cannot initialize MySQL client library");
     return HK_STATUS_ERROR;
   }
-  MYSQL *my = NULL;
-  my = mysql_init(my);
+  MYSQL *mysql = NULL;
+  mysql = mysql_init(mysql);
   const char *host = hk_is_nil(args[1]) ? NULL : hk_as_string(args[1])->chars;
   int32_t port = hk_is_nil(args[2]) ? 0 : (int32_t) hk_as_float(args[2]);
   const char *username = hk_is_nil(args[3]) ? NULL : hk_as_string(args[3])->chars;
@@ -94,17 +94,17 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
   const char *database = hk_is_nil(args[5]) ? NULL : hk_as_string(args[5])->chars;
   hk_array_t *result = hk_array_new_with_capacity(2);
   result->length = 2;
-  if (!mysql_real_connect(my, host, username, password, database, port, NULL, CLIENT_FOUND_ROWS))
+  if (!mysql_real_connect(mysql, host, username, password, database, port, NULL, CLIENT_FOUND_ROWS))
   {
-    hk_string_t *err = hk_string_from_chars(-1, mysql_error(my));
-    mysql_close(my);
+    hk_string_t *err = hk_string_from_chars(-1, mysql_error(mysql));
+    mysql_close(mysql);
     mysql_library_end();
     hk_incr_ref(err);
     result->elements[0] = HK_NIL_VALUE;
     result->elements[1] = hk_string_value(err);
     return hk_vm_push_array(vm, result);
   }
-  hk_userdata_t *udata = (hk_userdata_t *) mysql_new(my);
+  hk_userdata_t *udata = (hk_userdata_t *) mysql_wrapper_new(mysql);
   hk_incr_ref(udata);
   result->elements[0] = hk_userdata_value(udata);
   result->elements[1] = HK_NIL_VALUE;
@@ -115,13 +115,13 @@ static int32_t close_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  mysql_t *mysql = (mysql_t *) hk_as_userdata(args[1]);
+  mysql_wrapper_t *wrapper = (mysql_wrapper_t *) hk_as_userdata(args[1]);
   bool result = false;
-  if (mysql->my)
+  if (wrapper->mysql)
   {
-    mysql_close(mysql->my);
+    mysql_close(wrapper->mysql);
     mysql_library_end();
-    mysql->my = NULL;
+    wrapper->mysql = NULL;
     result = true;
   }
   return hk_vm_push_bool(vm, result);
@@ -131,16 +131,16 @@ static int32_t ping_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  MYSQL *my = ((mysql_t *) hk_as_userdata(args[1]))->my;
-  return hk_vm_push_bool(vm, !mysql_ping(my));
+  MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
+  return hk_vm_push_bool(vm, !mysql_ping(mysql));
 }
 
 static int32_t error_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  MYSQL *my = ((mysql_t *) hk_as_userdata(args[1]))->my;
-  return hk_vm_push_string_from_chars(vm, -1, mysql_error(my));
+  MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
+  return hk_vm_push_string_from_chars(vm, -1, mysql_error(mysql));
 }
 
 static int32_t select_db_call(hk_vm_t *vm, hk_value_t *args)
@@ -149,9 +149,9 @@ static int32_t select_db_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  MYSQL *my = ((mysql_t *) hk_as_userdata(args[1]))->my;
+  MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
   const char *database = hk_as_string(args[2])->chars;
-  return hk_vm_push_bool(vm, !mysql_select_db(my, database));
+  return hk_vm_push_bool(vm, !mysql_select_db(mysql, database));
 }
 
 static int32_t query_call(hk_vm_t *vm, hk_value_t *args)
@@ -160,26 +160,26 @@ static int32_t query_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  MYSQL *my = ((mysql_t *) hk_as_userdata(args[1]))->my;
+  MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
   const char *query = hk_as_string(args[2])->chars;
   hk_array_t *result = hk_array_new_with_capacity(2);
   result->length = 2;
-  if (mysql_query(my, query))
+  if (mysql_query(mysql, query))
   {
-    hk_string_t *err = hk_string_from_chars(-1, mysql_error(my));
+    hk_string_t *err = hk_string_from_chars(-1, mysql_error(mysql));
     hk_incr_ref(err);
     result->elements[0] = HK_NIL_VALUE;
     result->elements[1] = hk_string_value(err);
     return hk_vm_push_array(vm, result);
   }
-  MYSQL_RES *res = mysql_store_result(my);
-  if (!res)
+  MYSQL_RES *mysql_res = mysql_store_result(mysql);
+  if (!mysql_res)
   {
     result->elements[0] = HK_NIL_VALUE;
     result->elements[1] = HK_NIL_VALUE;
     return hk_vm_push_array(vm, result);
   }
-  hk_userdata_t *udata = (hk_userdata_t *) mysql_result_new(res);
+  hk_userdata_t *udata = (hk_userdata_t *) mysql_result_wrapper_new(mysql_res);
   hk_incr_ref(udata);
   result->elements[0] = hk_userdata_value(udata);
   result->elements[1] = HK_NIL_VALUE;
@@ -190,12 +190,12 @@ static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  MYSQL_RES *res = ((mysql_result_t *) hk_as_userdata(args[1]))->res;
-  MYSQL_FIELD *fields = mysql_fetch_fields(res);
-  MYSQL_ROW row = mysql_fetch_row(res);
+  MYSQL_RES *mysql_res = ((mysql_result_wrapper_t *) hk_as_userdata(args[1]))->mysql_res;
+  MYSQL_FIELD *fields = mysql_fetch_fields(mysql_res);
+  MYSQL_ROW row = mysql_fetch_row(mysql_res);
   if (!row)
     return hk_vm_push_nil(vm);
-  int32_t num_fields = mysql_num_fields(res);
+  int32_t num_fields = mysql_num_fields(mysql_res);
   hk_array_t *arr = hk_array_new_with_capacity(num_fields);
   for (int32_t i = 0; i < num_fields; ++i)
   {
@@ -253,8 +253,8 @@ static int32_t affected_rows_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  MYSQL *my = ((mysql_t *) hk_as_userdata(args[1]))->my;
-  return hk_vm_push_float(vm, (double) mysql_affected_rows(my));
+  MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
+  return hk_vm_push_float(vm, (double) mysql_affected_rows(mysql));
 }
 
 HK_LOAD_FN(mysql)

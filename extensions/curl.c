@@ -12,28 +12,28 @@
 typedef struct
 {
   HK_USERDATA_HEADER
-  CURL *handle;
-} curl_t;
+  CURL *curl;
+} curl_wrapper_t;
 
-static inline curl_t *curl_new(CURL *handle);
-static void curl_deinit(hk_userdata_t *udata);
+static inline curl_wrapper_t *curl_wrapper_new(CURL *curl);
+static void curl_wrapper_deinit(hk_userdata_t *udata);
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data);
 static int32_t init_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t setopt_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t cleanup_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t perform_call(hk_vm_t *vm, hk_value_t *args);
 
-static inline curl_t *curl_new(CURL *handle)
+static inline curl_wrapper_t *curl_wrapper_new(CURL *curl)
 {
-  curl_t *curl = (curl_t *) hk_allocate(sizeof(*curl));
-  hk_userdata_init((hk_userdata_t *) curl, &curl_deinit);
-  curl->handle = handle;
-  return curl;
+  curl_wrapper_t *wrapper = (curl_wrapper_t *) hk_allocate(sizeof(*wrapper));
+  hk_userdata_init((hk_userdata_t *) wrapper, &curl_wrapper_deinit);
+  wrapper->curl = curl;
+  return wrapper;
 }
 
-static void curl_deinit(hk_userdata_t *udata)
+static void curl_wrapper_deinit(hk_userdata_t *udata)
 {
-  curl_easy_cleanup(((curl_t *) udata)->handle);
+  curl_easy_cleanup(((curl_wrapper_t *) udata)->curl);
 }
 
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data)
@@ -50,8 +50,8 @@ static int32_t init_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
-  CURL *handle = curl_easy_init();
-  if (!handle)
+  CURL *curl = curl_easy_init();
+  if (!curl)
   {
     hk_runtime_error("cannot initialize cURL");
     return HK_STATUS_ERROR;
@@ -60,15 +60,15 @@ static int32_t init_call(hk_vm_t *vm, hk_value_t *args)
   {
     hk_string_t *str = hk_as_string(val);
     CURLcode res;
-    res = curl_easy_setopt(handle, CURLOPT_URL, str->chars);
-    res = curl_easy_setopt(handle, CURLOPT_FOLLOWLOCATION, 1L);
+    res = curl_easy_setopt(curl, CURLOPT_URL, str->chars);
+    res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     if (res != CURLE_OK)
     {
       hk_runtime_error("cannot set option: %s", curl_easy_strerror(res));
       return HK_STATUS_ERROR;
     }
   }
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) curl_new(handle));
+  return hk_vm_push_userdata(vm, (hk_userdata_t *) curl_wrapper_new(curl));
 }
 
 static int32_t setopt_call(hk_vm_t *vm, hk_value_t *args)
@@ -79,10 +79,10 @@ static int32_t setopt_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_string(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  CURL *handle = ((curl_t *) hk_as_userdata(args[1]))->handle;
+  CURL *curl = ((curl_wrapper_t *) hk_as_userdata(args[1]))->curl;
   int32_t opt = (int32_t) hk_as_float(args[2]);
   hk_string_t *value = hk_as_string(args[3]);
-  CURLcode res = curl_easy_setopt(handle, opt, value->chars);
+  CURLcode res = curl_easy_setopt(curl, opt, value->chars);
   if (res != CURLE_OK)
   {
     hk_runtime_error("cannot set option: %s", curl_easy_strerror(res));
@@ -95,7 +95,7 @@ static int32_t cleanup_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  curl_easy_cleanup(((curl_t *) hk_as_userdata(args[1]))->handle);
+  curl_easy_cleanup(((curl_wrapper_t *) hk_as_userdata(args[1]))->curl);
   return hk_vm_push_nil(vm);
 }
 
@@ -103,11 +103,11 @@ static int32_t perform_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  CURL *handle = ((curl_t *) hk_as_userdata(args[1]))->handle;
+  CURL *curl = ((curl_wrapper_t *) hk_as_userdata(args[1]))->curl;
   hk_string_t *str = hk_string_new();
-  curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, write_callback);
-  curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void *) str);
-  CURLcode res = curl_easy_perform(handle);
+  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+  curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *) str);
+  CURLcode res = curl_easy_perform(curl);
   if (res != CURLE_OK)
   {
     hk_runtime_error("cannot perform: %s", curl_easy_strerror(res));
