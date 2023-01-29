@@ -12,7 +12,7 @@ static int32_t accept_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t accept_call(hk_vm_t *vm, hk_value_t *args)
 {
   (void) args;
-  return hk_vm_push_float(vm, FCGI_Accept());
+  return hk_vm_push_number(vm, FCGI_Accept());
 }
 
 HK_LOAD_FN(fastcgi)

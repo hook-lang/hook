@@ -80,7 +80,7 @@ static int32_t setopt_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_string(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   CURL *curl = ((curl_wrapper_t *) hk_as_userdata(args[1]))->curl;
-  int32_t opt = (int32_t) hk_as_float(args[2]);
+  int32_t opt = (int32_t) hk_as_number(args[2]);
   hk_string_t *value = hk_as_string(args[3]);
   CURLcode res = curl_easy_setopt(curl, opt, value->chars);
   if (res != CURLE_OK)
@@ -123,19 +123,19 @@ HK_LOAD_FN(curl)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "OPT_URL") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, CURLOPT_URL) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, CURLOPT_URL) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "OPT_FOLLOWLOCATION") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, CURLOPT_FOLLOWLOCATION) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, CURLOPT_FOLLOWLOCATION) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "OPT_POST") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, CURLOPT_POST) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, CURLOPT_POST) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "OPT_POSTFIELDS") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, CURLOPT_POSTFIELDS) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, CURLOPT_POSTFIELDS) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "init") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

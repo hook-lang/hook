@@ -73,7 +73,7 @@ static inline void syntax_error(const char *function, const char *file, int32_t 
 static inline void syntax_error_unexpected(compiler_t *comp);
 static inline double parse_double(compiler_t *comp);
 static inline bool string_match(token_t *tk, hk_string_t *str);
-static inline uint8_t add_float_constant(compiler_t *comp, double data);
+static inline uint8_t add_number_constant(compiler_t *comp, double data);
 static inline uint8_t add_string_constant(compiler_t *comp, token_t *tk);
 static inline uint8_t add_constant(compiler_t *comp, hk_value_t val);
 static inline void push_scope(compiler_t *comp);
@@ -182,19 +182,19 @@ static inline bool string_match(token_t *tk, hk_string_t *str)
     && !memcmp(tk->start, str->chars, tk->length);
 }
 
-static inline uint8_t add_float_constant(compiler_t *comp, double data)
+static inline uint8_t add_number_constant(compiler_t *comp, double data)
 {
   hk_array_t *consts = comp->fn->chunk.consts;
   hk_value_t *elements = consts->elements;
   for (int32_t i = 0; i < consts->length; ++i)
   {
     hk_value_t elem = elements[i];
-    if (!hk_is_float(elem))
+    if (!hk_is_number(elem))
       continue;
-    if (data == hk_as_float(elem))
+    if (data == hk_as_number(elem))
       return (uint8_t) i;
   }
-  return add_constant(comp, hk_float_value(data));
+  return add_constant(comp, hk_number_value(data));
 }
 
 static inline uint8_t add_string_constant(compiler_t *comp, token_t *tk)
@@ -1720,7 +1720,7 @@ static void compile_prim_expression(compiler_t *comp)
       hk_chunk_emit_word(chunk, (uint16_t) data);
       return;
     }
-    uint8_t index = add_float_constant(comp, data);
+    uint8_t index = add_number_constant(comp, data);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     return;
@@ -1729,7 +1729,7 @@ static void compile_prim_expression(compiler_t *comp)
   {
     double data = parse_double(comp);
     scanner_next_token(scan);
-    uint8_t index = add_float_constant(comp, data);
+    uint8_t index = add_number_constant(comp, data);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     return;

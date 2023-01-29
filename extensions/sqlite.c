@@ -79,7 +79,7 @@ static int32_t close_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, sqlite3_close(((sqlite_wrapper_t *) hk_as_userdata(args[1]))->sqlite));
+  return hk_vm_push_number(vm, sqlite3_close(((sqlite_wrapper_t *) hk_as_userdata(args[1]))->sqlite));
 }
 
 static int32_t execute_call(hk_vm_t *vm, hk_value_t *args)
@@ -122,7 +122,7 @@ static int32_t finalize_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   sqlite3_stmt *sqlite_stmt = ((sqlite_stmt_wrapper_t *) hk_as_userdata(args[1]))->sqlite_stmt;
-  return hk_vm_push_float(vm, sqlite3_finalize(sqlite_stmt));
+  return hk_vm_push_number(vm, sqlite3_finalize(sqlite_stmt));
 }
 
 static int32_t bind_call(hk_vm_t *vm, hk_value_t *args)
@@ -131,25 +131,25 @@ static int32_t bind_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_FLOAT, HK_TYPE_STRING};
+  int32_t types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 3, 4, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   sqlite3_stmt *sqlite_stmt = ((sqlite_stmt_wrapper_t *) hk_as_userdata(args[1]))->sqlite_stmt;
-  int32_t index = (int32_t) hk_as_float(args[2]);
+  int32_t index = (int32_t) hk_as_number(args[2]);
   hk_value_t val = args[3];
   if (hk_is_nil(val))
-    return hk_vm_push_float(vm, sqlite3_bind_null(sqlite_stmt, index));
+    return hk_vm_push_number(vm, sqlite3_bind_null(sqlite_stmt, index));
   if (hk_is_bool(val))
-    return hk_vm_push_float(vm, sqlite3_bind_int(sqlite_stmt, index, (int32_t) hk_as_bool(val)));
-  if (hk_is_float(val))
+    return hk_vm_push_number(vm, sqlite3_bind_int(sqlite_stmt, index, (int32_t) hk_as_bool(val)));
+  if (hk_is_number(val))
   {
-    double data = hk_as_float(val);
+    double data = hk_as_number(val);
     if (hk_is_int(val))
-      return hk_vm_push_float(vm, sqlite3_bind_int64(sqlite_stmt, index, (int64_t) data));
-    return hk_vm_push_float(vm, sqlite3_bind_double(sqlite_stmt, index, data));
+      return hk_vm_push_number(vm, sqlite3_bind_int64(sqlite_stmt, index, (int64_t) data));
+    return hk_vm_push_number(vm, sqlite3_bind_double(sqlite_stmt, index, data));
   }
   hk_string_t *str = hk_as_string(val);
-  return hk_vm_push_float(vm, sqlite3_bind_text(sqlite_stmt, index, str->chars, str->length,
+  return hk_vm_push_number(vm, sqlite3_bind_text(sqlite_stmt, index, str->chars, str->length,
     NULL));
 }
 
@@ -172,10 +172,10 @@ static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args)
       case SQLITE_NULL:
         break;
       case SQLITE_INTEGER:
-        elem = hk_float_value(sqlite3_column_int(sqlite_stmt, i));
+        elem = hk_number_value(sqlite3_column_int(sqlite_stmt, i));
         break;
       case SQLITE_FLOAT:
-        elem = hk_float_value(sqlite3_column_double(sqlite_stmt, i));
+        elem = hk_number_value(sqlite3_column_double(sqlite_stmt, i));
         break;
       case SQLITE_TEXT:
         {

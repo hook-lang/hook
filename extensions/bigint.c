@@ -44,13 +44,13 @@ static void bigint_deinit(hk_userdata_t *udata)
 
 static int32_t new_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int32_t types[] = {HK_TYPE_FLOAT, HK_TYPE_STRING};
+  int32_t types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
   mpz_t num;
-  if (hk_is_float(val))
-    mpz_init_set_d(num, hk_as_float(val));
+  if (hk_is_number(val))
+    mpz_init_set_d(num, hk_as_number(val));
   else
     mpz_init_set_str(num, hk_as_string(val)->chars, 10);
   bigint_t *bigint = bigint_new(num);

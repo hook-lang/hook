@@ -17,20 +17,20 @@ static int32_t name_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t clock_call(hk_vm_t *vm, hk_value_t *args)
 {
   (void) args;
-  return hk_vm_push_float(vm, (double) clock() / CLOCKS_PER_SEC);
+  return hk_vm_push_number(vm, (double) clock() / CLOCKS_PER_SEC);
 }
 
 static int32_t time_call(hk_vm_t *vm, hk_value_t *args)
 {
   (void) args;
-  return hk_vm_push_float(vm, (double) time(NULL));
+  return hk_vm_push_number(vm, (double) time(NULL));
 }
 
 static int32_t system_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, system(hk_as_string(args[1])->chars));
+  return hk_vm_push_number(vm, system(hk_as_string(args[1])->chars));
 }
 
 static int32_t getenv_call(hk_vm_t *vm, hk_value_t *args)
@@ -68,7 +68,7 @@ HK_LOAD_FN(os)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "CLOCKS_PER_SEC") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, CLOCKS_PER_SEC) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, CLOCKS_PER_SEC) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "clock") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

@@ -25,7 +25,7 @@ void hk_vm_free(hk_vm_t *vm);
 int32_t hk_vm_push(hk_vm_t *vm, hk_value_t val);
 int32_t hk_vm_push_nil(hk_vm_t *vm);
 int32_t hk_vm_push_bool(hk_vm_t *vm, bool data);
-int32_t hk_vm_push_float(hk_vm_t *vm, double data);
+int32_t hk_vm_push_number(hk_vm_t *vm, double data);
 int32_t hk_vm_push_string(hk_vm_t *vm, hk_string_t *str);
 int32_t hk_vm_push_string_from_chars(hk_vm_t *vm, int32_t length, const char *chars);
 int32_t hk_vm_push_string_from_stream(hk_vm_t *vm, FILE *stream, const char terminal);
@@ -48,7 +48,7 @@ int32_t hk_vm_compare(hk_vm_t *vm, hk_value_t val1, hk_value_t val2, int32_t *re
 int32_t hk_vm_check_type(hk_value_t *args, int32_t index, int32_t type);
 int32_t hk_vm_check_types(hk_value_t *args, int32_t index, int32_t num_types, int32_t types[]);
 int32_t hk_vm_check_bool(hk_value_t *args, int32_t index);
-int32_t hk_vm_check_float(hk_value_t *args, int32_t index);
+int32_t hk_vm_check_number(hk_value_t *args, int32_t index);
 int32_t hk_vm_check_int(hk_value_t *args, int32_t index);
 int32_t hk_vm_check_string(hk_value_t *args, int32_t index);
 int32_t hk_vm_check_range(hk_value_t *args, int32_t index);

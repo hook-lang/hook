@@ -20,7 +20,7 @@ static int32_t new_array_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t capacity = (int32_t) hk_as_float(args[1]);
+  int32_t capacity = (int32_t) hk_as_number(args[1]);
   hk_array_t *arr = hk_array_new_with_capacity(capacity);
   if (hk_vm_push_array(vm, arr) == HK_STATUS_ERROR)
   {
@@ -34,7 +34,7 @@ static int32_t index_of_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, hk_array_index_of(hk_as_array(args[1]), args[2]));
+  return hk_vm_push_number(vm, hk_array_index_of(hk_as_array(args[1]), args[2]));
 }
 
 static int32_t min_call(hk_vm_t *vm, hk_value_t *args)
@@ -86,14 +86,14 @@ static int32_t sum_call(hk_vm_t *vm, hk_value_t *args)
   for (int32_t i = 0; i < arr->length; ++i)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
-    if (!hk_is_float(elem))
+    if (!hk_is_number(elem))
     {
       sum = 0;
       break;
     }
-    sum += hk_as_float(elem);
+    sum += hk_as_number(elem);
   }
-  return hk_vm_push_float(vm, sum);
+  return hk_vm_push_number(vm, sum);
 }
 
 static int32_t avg_call(hk_vm_t *vm, hk_value_t *args)
@@ -103,16 +103,16 @@ static int32_t avg_call(hk_vm_t *vm, hk_value_t *args)
   hk_array_t *arr = hk_as_array(args[1]);
   int32_t length = arr->length;
   if (!length)
-    return hk_vm_push_float(vm, 0);
+    return hk_vm_push_number(vm, 0);
   double sum = 0;
   for (int32_t i = 0; i < length; ++i)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
-    if (!hk_is_float(elem))
-      return hk_vm_push_float(vm, 0);
-    sum += hk_as_float(elem);
+    if (!hk_is_number(elem))
+      return hk_vm_push_number(vm, 0);
+    sum += hk_as_number(elem);
   }
-  return hk_vm_push_float(vm, sum / length);
+  return hk_vm_push_number(vm, sum / length);
 }
 
 static int32_t reverse_call(hk_vm_t *vm, hk_value_t *args)

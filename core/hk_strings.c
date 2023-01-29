@@ -19,7 +19,7 @@ static int32_t new_string_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t capacity = (int32_t) hk_as_float(args[1]);
+  int32_t capacity = (int32_t) hk_as_number(args[1]);
   hk_string_t *str = hk_string_new_with_capacity(capacity);
   if (hk_vm_push_string(vm, str) == HK_STATUS_ERROR)
   {
@@ -33,7 +33,7 @@ static int32_t hash_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, hk_string_hash(hk_as_string(args[1])));
+  return hk_vm_push_number(vm, hk_string_hash(hk_as_string(args[1])));
 }
 
 static int32_t lower_call(hk_vm_t *vm, hk_value_t *args)

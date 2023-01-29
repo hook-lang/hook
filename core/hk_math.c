@@ -30,130 +30,130 @@ static int32_t random_call(hk_vm_t *vm, hk_value_t *args);
 
 static int32_t abs_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, fabs(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, fabs(hk_as_number(args[1])));
 }
 
 static int32_t sin_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, sin(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, sin(hk_as_number(args[1])));
 }
 
 static int32_t cos_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, cos(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, cos(hk_as_number(args[1])));
 }
 
 static int32_t tan_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, tan(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, tan(hk_as_number(args[1])));
 }
 
 static int32_t asin_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, asin(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, asin(hk_as_number(args[1])));
 }
 
 static int32_t acos_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, acos(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, acos(hk_as_number(args[1])));
 }
 
 static int32_t atan_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, atan(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, atan(hk_as_number(args[1])));
 }
 
 static int32_t floor_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, floor(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, floor(hk_as_number(args[1])));
 }
 
 static int32_t ceil_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, ceil(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, ceil(hk_as_number(args[1])));
 }
 
 static int32_t round_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, round(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, round(hk_as_number(args[1])));
 }
 
 static int32_t pow_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_float(args, 2) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, pow(hk_as_float(args[1]), hk_as_float(args[2])));
+  return hk_vm_push_number(vm, pow(hk_as_number(args[1]), hk_as_number(args[2])));
 }
 
 static int32_t sqrt_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, sqrt(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, sqrt(hk_as_number(args[1])));
 }
 
 static int32_t cbrt_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, cbrt(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, cbrt(hk_as_number(args[1])));
 }
 
 static int32_t log_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, log(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, log(hk_as_number(args[1])));
 }
 
 static int32_t log2_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, log2(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, log2(hk_as_number(args[1])));
 }
 
 static int32_t log10_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, log10(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, log10(hk_as_number(args[1])));
 }
 
 static int32_t exp_call(hk_vm_t *vm, hk_value_t *args)
 {
-  if (hk_vm_check_float(args, 1) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, exp(hk_as_float(args[1])));
+  return hk_vm_push_number(vm, exp(hk_as_number(args[1])));
 }
 
 static int32_t random_call(hk_vm_t *vm, hk_value_t *args)
 {
   (void) args;
   double result = (double) rand() / RAND_MAX;
-  return hk_vm_push_float(vm, result);
+  return hk_vm_push_number(vm, result);
 }
 
 HK_LOAD_FN(math)

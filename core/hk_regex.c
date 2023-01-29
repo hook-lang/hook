@@ -75,8 +75,8 @@ static int32_t find_call(hk_vm_t *vm, hk_value_t *args)
   if (start == -1 || end == -1)
     return hk_vm_push_nil(vm);
   hk_array_t *result = hk_array_new_with_capacity(2);
-  hk_array_inplace_add_element(result, hk_float_value(start));
-  hk_array_inplace_add_element(result, hk_float_value(end));
+  hk_array_inplace_add_element(result, hk_number_value(start));
+  hk_array_inplace_add_element(result, hk_number_value(end));
   return hk_vm_push_array(vm, result);
 }
 

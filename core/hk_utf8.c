@@ -37,20 +37,20 @@ static int32_t len_call(hk_vm_t *vm, hk_value_t *args)
     i += length;
     ++result;
   }
-  return hk_vm_push_float(vm, result);
+  return hk_vm_push_number(vm, result);
 }
 
 static int32_t sub_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_float(args, 2) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_float(args, 3) == HK_STATUS_ERROR)
+  if (hk_vm_check_number(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
-  int32_t start = (int32_t) hk_as_float(args[2]);
-  int32_t end = (int32_t) hk_as_float(args[3]);
+  int32_t start = (int32_t) hk_as_number(args[2]);
+  int32_t end = (int32_t) hk_as_number(args[3]);
   int32_t length = 0;
   int32_t i = 0;
   while (i < str->length)

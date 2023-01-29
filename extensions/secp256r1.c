@@ -107,23 +107,23 @@ HK_LOAD_FN(secp256r1)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "PUBLIC_KEY_SIZE") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, PUBLIC_KEY_SIZE) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, PUBLIC_KEY_SIZE) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "PRIVATE_KEY_SIZE") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, PRIVATE_KEY_SIZE) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, PRIVATE_KEY_SIZE) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "SECRET_SIZE") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, SECRET_SIZE) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, SECRET_SIZE) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "HASH_SIZE") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, HASH_SIZE) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, HASH_SIZE) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "SIGNATURE_SIZE") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, SIGNATURE_SIZE) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, SIGNATURE_SIZE) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "new_key_pair") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

@@ -72,7 +72,7 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_types(args, 1, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_types(args, 2, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_FLOAT}) == HK_STATUS_ERROR)
+  if (hk_vm_check_types(args, 2, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_NUMBER}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_check_types(args, 3, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -88,7 +88,7 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
   MYSQL *mysql = NULL;
   mysql = mysql_init(mysql);
   const char *host = hk_is_nil(args[1]) ? NULL : hk_as_string(args[1])->chars;
-  int32_t port = hk_is_nil(args[2]) ? 0 : (int32_t) hk_as_float(args[2]);
+  int32_t port = hk_is_nil(args[2]) ? 0 : (int32_t) hk_as_number(args[2]);
   const char *username = hk_is_nil(args[3]) ? NULL : hk_as_string(args[3])->chars;
   const char *password = hk_is_nil(args[4]) ? NULL : hk_as_string(args[4])->chars;
   const char *database = hk_is_nil(args[5]) ? NULL : hk_as_string(args[5])->chars;
@@ -220,7 +220,7 @@ static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args)
     case MYSQL_TYPE_INT24:
     case MYSQL_TYPE_YEAR:
     case MYSQL_TYPE_NEWDECIMAL:
-      elem = hk_float_value(atof(chars));
+      elem = hk_number_value(atof(chars));
       break;
     case MYSQL_TYPE_TIMESTAMP:
     case MYSQL_TYPE_DATE:
@@ -254,7 +254,7 @@ static int32_t affected_rows_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
-  return hk_vm_push_float(vm, (double) mysql_affected_rows(mysql));
+  return hk_vm_push_number(vm, (double) mysql_affected_rows(mysql));
 }
 
 HK_LOAD_FN(mysql)

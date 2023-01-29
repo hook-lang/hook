@@ -1,0 +1,5 @@
+
+println(to_number(123));
+println(to_number(1.23));
+println(to_number("123"));
+println(to_number("1.23"));

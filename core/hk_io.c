@@ -79,7 +79,7 @@ static int32_t close_call(hk_vm_t *vm, hk_value_t *args)
 {
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_push_float(vm, fclose(((file_t *) hk_as_userdata(args[1]))->stream));
+  return hk_vm_push_number(vm, fclose(((file_t *) hk_as_userdata(args[1]))->stream));
 }
 
 static int32_t popen_call(hk_vm_t *vm, hk_value_t *args)
@@ -104,7 +104,7 @@ static int32_t pclose_call(hk_vm_t *vm, hk_value_t *args)
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
   int32_t status;
   status = pclose(stream);
-  return hk_vm_push_float(vm, status);
+  return hk_vm_push_number(vm, status);
 }
 
 static int32_t eof_call(hk_vm_t *vm, hk_value_t *args)
@@ -120,7 +120,7 @@ static int32_t flush_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  return hk_vm_push_float(vm, fflush(stream));
+  return hk_vm_push_number(vm, fflush(stream));
 }
 
 static int32_t sync_call(hk_vm_t *vm, hk_value_t *args)
@@ -143,7 +143,7 @@ static int32_t tell_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  return hk_vm_push_float(vm, ftell(stream));
+  return hk_vm_push_number(vm, ftell(stream));
 }
 
 static int32_t rewind_call(hk_vm_t *vm, hk_value_t *args)
@@ -164,9 +164,9 @@ static int32_t seek_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  int64_t offset = (int64_t) hk_as_float(args[2]);
-  int32_t whence = (int32_t) hk_as_float(args[3]);
-  return hk_vm_push_float(vm, fseek(stream, offset, whence));
+  int64_t offset = (int64_t) hk_as_number(args[2]);
+  int32_t whence = (int32_t) hk_as_number(args[3]);
+  return hk_vm_push_number(vm, fseek(stream, offset, whence));
 }
 
 static int32_t read_call(hk_vm_t *vm, hk_value_t *args)
@@ -176,7 +176,7 @@ static int32_t read_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  int64_t size = (int64_t) hk_as_float(args[2]);
+  int64_t size = (int64_t) hk_as_number(args[2]);
   hk_string_t *str = hk_string_new_with_capacity(size);
   int32_t length = (int32_t) fread(str->chars, 1, size, stream);
   if (length < size && !feof(stream))
@@ -205,7 +205,7 @@ static int32_t write_call(hk_vm_t *vm, hk_value_t *args)
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size)
     return hk_vm_push_nil(vm);
-  return hk_vm_push_float(vm, size);
+  return hk_vm_push_number(vm, size);
 }
 
 static int32_t readln_call(hk_vm_t *vm, hk_value_t *args)
@@ -227,7 +227,7 @@ static int32_t writeln_call(hk_vm_t *vm, hk_value_t *args)
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size || fwrite("\n", 1, 1, stream) < 1)
     return hk_vm_push_nil(vm);
-  return hk_vm_push_float(vm, size + 1);
+  return hk_vm_push_number(vm, size + 1);
 }
 
 HK_LOAD_FN(io)
@@ -248,15 +248,15 @@ HK_LOAD_FN(io)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "SEEK_SET") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, SEEK_SET) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, SEEK_SET) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "SEEK_CUR") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, SEEK_CUR) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, SEEK_CUR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "SEEK_END") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, SEEK_END) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, SEEK_END) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "open") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

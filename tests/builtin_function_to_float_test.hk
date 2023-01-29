@@ -1,5 +1,0 @@
-
-println(to_float(123));
-println(to_float(1.23));
-println(to_float("123"));
-println(to_float("1.23"));

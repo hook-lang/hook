@@ -1,2 +1,2 @@
 
-val a = to_float("4.9e-324");
+val a = to_number("4.9e-324");

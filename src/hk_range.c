@@ -36,7 +36,7 @@ static bool range_iterator_is_valid(hk_iterator_t *it)
 static hk_value_t range_iterator_get_current(hk_iterator_t *it)
 {
   range_iterator_t *range_it = (range_iterator_t *) it;
-  return hk_float_value((double) range_it->current);
+  return hk_number_value((double) range_it->current);
 }
 
 static void range_iterator_next(hk_iterator_t *it)

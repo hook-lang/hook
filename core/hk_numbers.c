@@ -22,27 +22,27 @@ HK_LOAD_FN(numbers)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "PI") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, PI) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, PI) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "TAU") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, TAU) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, TAU) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "LARGEST") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, LARGEST) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, LARGEST) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "SMALLEST") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, SMALLEST) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, SMALLEST) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "MAX_INTEGER") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, MAX_INTEGER) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, MAX_INTEGER) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_vm_push_string_from_chars(vm, -1, "MIN_INTEGER") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_float(vm, MIN_INTEGER) == HK_STATUS_ERROR)
+  if (hk_vm_push_number(vm, MIN_INTEGER) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_vm_construct(vm, 6);
 }

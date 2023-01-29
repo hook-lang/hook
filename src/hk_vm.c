@@ -129,12 +129,12 @@ static inline int32_t do_range(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: range must be of type float");
+    hk_runtime_error("type error: range must be of type number");
     return HK_STATUS_ERROR;
   }
-  hk_range_t *range = hk_range_new(hk_as_float(val1), hk_as_float(val2));
+  hk_range_t *range = hk_range_new(hk_as_number(val1), hk_as_number(val2));
   hk_incr_ref(range);
   slots[0] = hk_range_value(range);
   --vm->stack_top;
@@ -377,7 +377,7 @@ static inline int32_t do_get_element(hk_vm_t *vm)
     hk_string_t *str = hk_as_string(val1);
     if (hk_is_int(val2))
     {
-      int64_t index = (int64_t) hk_as_float(val2);
+      int64_t index = (int64_t) hk_as_number(val2);
       if (index < 0 || index >= str->length)
       {
         hk_runtime_error("range error: index %d is out of bounds for string of length %d",
@@ -407,7 +407,7 @@ static inline int32_t do_get_element(hk_vm_t *vm)
   hk_array_t *arr = hk_as_array(val1);
   if (hk_is_int(val2))
   {
-    int64_t index = (int64_t) hk_as_float(val2);
+    int64_t index = (int64_t) hk_as_number(val2);
     if (index < 0 || index >= arr->length)
     {
       hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -507,7 +507,7 @@ static inline int32_t do_fetch_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int64_t index = (int64_t) hk_as_float(val2);
+  int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -528,7 +528,7 @@ static inline void do_set_element(hk_vm_t *vm)
   hk_value_t val2 = slots[1];
   hk_value_t val3 = slots[2];
   hk_array_t *arr = hk_as_array(val1);
-  int32_t index = (int32_t) hk_as_float(val2);
+  int32_t index = (int32_t) hk_as_number(val2);
   hk_array_t *result = hk_array_set_element(arr, index, val3);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
@@ -554,7 +554,7 @@ static inline int32_t do_put_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int64_t index = (int64_t) hk_as_float(val2);
+  int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -586,7 +586,7 @@ static inline int32_t do_delete_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int64_t index = (int64_t) hk_as_float(val2);
+  int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -645,7 +645,7 @@ static inline int32_t do_inplace_put_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int64_t index = (int64_t) hk_as_float(val2);
+  int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -684,7 +684,7 @@ static inline int32_t do_inplace_delete_element(hk_vm_t *vm)
     return HK_STATUS_ERROR;
   }
   hk_array_t *arr = hk_as_array(val1);
-  int64_t index = (int64_t) hk_as_float(val2);
+  int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
     hk_runtime_error("range error: index %d is out of bounds for array of length %d",
@@ -746,7 +746,7 @@ static inline int32_t do_fetch_field(hk_vm_t *vm, hk_string_t *name)
     hk_runtime_error("no field %.*s on struct", name->length, name->chars);
     return HK_STATUS_ERROR;
   }
-  if (push(vm, hk_float_value(index)) == HK_STATUS_ERROR)
+  if (push(vm, hk_number_value(index)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t value = hk_instance_get_field(inst, index);
   if (push(vm, value) == HK_STATUS_ERROR)
@@ -762,7 +762,7 @@ static inline void do_set_field(hk_vm_t *vm)
   hk_value_t val2 = slots[1];
   hk_value_t val3 = slots[2];
   hk_instance_t *inst = hk_as_instance(val1);
-  int32_t index = (int32_t) hk_as_float(val2);
+  int32_t index = (int32_t) hk_as_number(val2);
   hk_instance_t *result = hk_instance_set_field(inst, index, val3);
   hk_incr_ref(result);
   slots[0] = hk_instance_value(result);
@@ -938,14 +938,14 @@ static inline int32_t do_bitwise_or(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
     hk_runtime_error("type error: cannot apply `bitwise or` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  int64_t data = ((int64_t) hk_as_float(val1)) | ((int64_t) hk_as_float(val2));
-  slots[0] = hk_float_value(data);
+  int64_t data = ((int64_t) hk_as_number(val1)) | ((int64_t) hk_as_number(val2));
+  slots[0] = hk_number_value(data);
   --vm->stack_top;
   return HK_STATUS_OK;
 }
@@ -955,14 +955,14 @@ static inline int32_t do_bitwise_xor(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
     hk_runtime_error("type error: cannot apply `bitwise xor` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  int64_t data = ((int64_t) hk_as_float(val1)) ^ ((int64_t) hk_as_float(val2));
-  slots[0] = hk_float_value(data);
+  int64_t data = ((int64_t) hk_as_number(val1)) ^ ((int64_t) hk_as_number(val2));
+  slots[0] = hk_number_value(data);
   --vm->stack_top;
   return HK_STATUS_OK;
 }
@@ -972,14 +972,14 @@ static inline int32_t do_bitwise_and(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
     hk_runtime_error("type error: cannot apply `bitwise and` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  int64_t data = ((int64_t) hk_as_float(val1)) & ((int64_t) hk_as_float(val2));
-  slots[0] = hk_float_value(data);
+  int64_t data = ((int64_t) hk_as_number(val1)) & ((int64_t) hk_as_number(val2));
+  slots[0] = hk_number_value(data);
   --vm->stack_top;
   return HK_STATUS_OK;
 }
@@ -989,14 +989,14 @@ static inline int32_t do_left_shift(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
     hk_runtime_error("type error: cannot apply `left shift` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  int64_t data = ((int64_t) hk_as_float(val1)) << ((int64_t) hk_as_float(val2));
-  slots[0] = hk_float_value(data);
+  int64_t data = ((int64_t) hk_as_number(val1)) << ((int64_t) hk_as_number(val2));
+  slots[0] = hk_number_value(data);
   --vm->stack_top;
   return HK_STATUS_OK;
 }
@@ -1006,14 +1006,14 @@ static inline int32_t do_right_shift(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
     hk_runtime_error("type error: cannot apply `right shift` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  int64_t data = ((int64_t) hk_as_float(val1)) >> ((int64_t) hk_as_float(val2));
-  slots[0] = hk_float_value(data);
+  int64_t data = ((int64_t) hk_as_number(val1)) >> ((int64_t) hk_as_number(val2));
+  slots[0] = hk_number_value(data);
   --vm->stack_top;
   return HK_STATUS_OK;
 }
@@ -1023,15 +1023,15 @@ static inline int32_t do_add(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (hk_is_float(val1))
+  if (hk_is_number(val1))
   {
-    if (!hk_is_float(val2))
+    if (!hk_is_number(val2))
     {
-      hk_runtime_error("type error: cannot add %s to float", hk_type_name(val2.type));
+      hk_runtime_error("type error: cannot add %s to number", hk_type_name(val2.type));
       return HK_STATUS_ERROR;
     }
-    double data = hk_as_float(val1) + hk_as_float(val2);
-    slots[0] = hk_float_value(data);
+    double data = hk_as_number(val1) + hk_as_number(val2);
+    slots[0] = hk_number_value(data);
     --vm->stack_top;
     return HK_STATUS_OK;
   }
@@ -1131,16 +1131,16 @@ static inline int32_t do_subtract(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (hk_is_float(val1))
+  if (hk_is_number(val1))
   {
-    if (!hk_is_float(val2))
+    if (!hk_is_number(val2))
     {
-      hk_runtime_error("type error: cannot subtract %s from float",
+      hk_runtime_error("type error: cannot subtract %s from number",
         hk_type_name(val2.type));
       return HK_STATUS_ERROR;
     }
-    double data = hk_as_float(val1) - hk_as_float(val2);
-    slots[0] = hk_float_value(data);
+    double data = hk_as_number(val1) - hk_as_number(val2);
+    slots[0] = hk_number_value(data);
     --vm->stack_top;
     return HK_STATUS_OK;
   }
@@ -1190,14 +1190,14 @@ static inline int32_t do_multiply(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
     hk_runtime_error("type error: cannot multiply %s to %s", hk_type_name(val2.type),
       hk_type_name(val1.type));
     return HK_STATUS_ERROR;
   }
-  double data = hk_as_float(val1) * hk_as_float(val2);
-  slots[0] = hk_float_value(data);
+  double data = hk_as_number(val1) * hk_as_number(val2);
+  slots[0] = hk_number_value(data);
   --vm->stack_top;
   return HK_STATUS_OK;
 }
@@ -1207,14 +1207,14 @@ static inline int32_t do_divide(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
     hk_runtime_error("type error: cannot divide %s by %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  double data = hk_as_float(val1) / hk_as_float(val2);
-  slots[0] = hk_float_value(data);
+  double data = hk_as_number(val1) / hk_as_number(val2);
+  slots[0] = hk_number_value(data);
   --vm->stack_top;
   return HK_STATUS_OK;
 }
@@ -1224,14 +1224,14 @@ static inline int32_t do_quotient(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
     hk_runtime_error("type error: cannot apply `quotient` between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  double data = floor(hk_as_float(val1) / hk_as_float(val2));
-  slots[0] = hk_float_value(data);
+  double data = floor(hk_as_number(val1) / hk_as_number(val2));
+  slots[0] = hk_number_value(data);
   --vm->stack_top;
   return HK_STATUS_OK;
 }
@@ -1241,14 +1241,14 @@ static inline int32_t do_remainder(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top - 1];
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
-  if (!hk_is_float(val1) || !hk_is_float(val2))
+  if (!hk_is_number(val1) || !hk_is_number(val2))
   {
     hk_runtime_error("type error: cannot apply `remainder` between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
     return HK_STATUS_ERROR;
   }
-  double data = fmod(hk_as_float(val1), hk_as_float(val2));
-  slots[0] = hk_float_value(data);
+  double data = fmod(hk_as_number(val1), hk_as_number(val2));
+  slots[0] = hk_number_value(data);
   --vm->stack_top;
   return HK_STATUS_OK;
 }
@@ -1257,13 +1257,13 @@ static inline int32_t do_negate(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->stack[vm->stack_top];
   hk_value_t val = slots[0];
-  if (!hk_is_float(val))
+  if (!hk_is_number(val))
   {
     hk_runtime_error("type error: cannot apply `negate` to %s", hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
-  double data = -hk_as_float(val);
-  slots[0] = hk_float_value(data);
+  double data = -hk_as_number(val);
+  slots[0] = hk_number_value(data);
   return HK_STATUS_OK;
 }
 
@@ -1279,13 +1279,13 @@ static inline int32_t do_bitwise_not(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->stack[vm->stack_top];
   hk_value_t val = slots[0];
-  if (!hk_is_float(val))
+  if (!hk_is_number(val))
   {
     hk_runtime_error("type error: cannot apply `bitwise not` to %s", hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
-  int64_t data = ~((int64_t) hk_as_float(val));
-  slots[0] = hk_float_value(data);
+  int64_t data = ~((int64_t) hk_as_number(val));
+  slots[0] = hk_number_value(data);
   return HK_STATUS_OK;
 }
 
@@ -1293,13 +1293,13 @@ static inline int32_t do_increment(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->stack[vm->stack_top];
   hk_value_t val = slots[0];
-  if (!hk_is_float(val))
+  if (!hk_is_number(val))
   {
     hk_runtime_error("type error: cannot increment value of type %s",
       hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
-  ++slots[0].as.float_value;
+  ++slots[0].as.number_value;
   return HK_STATUS_OK;
 }
 
@@ -1307,13 +1307,13 @@ static inline int32_t do_decrement(hk_vm_t *vm)
 {
   hk_value_t *slots = &vm->stack[vm->stack_top];
   hk_value_t val = slots[0];
-  if (!hk_is_float(val))
+  if (!hk_is_number(val))
   {
     hk_runtime_error("type error: cannot decrement value of type %s",
       hk_type_name(val.type));
     return HK_STATUS_ERROR;
   }
-  --slots[0].as.float_value;
+  --slots[0].as.number_value;
   return HK_STATUS_OK;
 }
 
@@ -1419,7 +1419,7 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
         goto error;
       break;
     case HK_OP_INT:
-      if (push(vm, hk_float_value(read_word(&pc))) == HK_STATUS_ERROR)
+      if (push(vm, hk_number_value(read_word(&pc))) == HK_STATUS_ERROR)
         goto error;
       break;
     case HK_OP_CONSTANT:
@@ -1795,9 +1795,9 @@ int32_t hk_vm_push_bool(hk_vm_t *vm, bool data)
   return push(vm, data ? HK_TRUE_VALUE : HK_FALSE_VALUE);
 }
 
-int32_t hk_vm_push_float(hk_vm_t *vm, double data)
+int32_t hk_vm_push_number(hk_vm_t *vm, double data)
 {
-  return push(vm, hk_float_value(data));
+  return push(vm, hk_number_value(data));
 }
 
 int32_t hk_vm_push_string(hk_vm_t *vm, hk_string_t *str)
@@ -1985,9 +1985,9 @@ int32_t hk_vm_check_bool(hk_value_t *args, int32_t index)
   return hk_vm_check_type(args, index, HK_TYPE_BOOL);
 }
 
-int32_t hk_vm_check_float(hk_value_t *args, int32_t index)
+int32_t hk_vm_check_number(hk_value_t *args, int32_t index)
 {
-  return hk_vm_check_type(args, index, HK_TYPE_FLOAT);
+  return hk_vm_check_type(args, index, HK_TYPE_NUMBER);
 }
 
 int32_t hk_vm_check_int(hk_value_t *args, int32_t index)

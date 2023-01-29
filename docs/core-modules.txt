@@ -1,28 +1,28 @@
 
 math:
 
-  abs(num: float) -> float
-  sin(num: float) -> float
-  cos(num: float) -> float
-  tan(num: float) -> float
-  asin(num: float) -> float
-  acos(num: float) -> float
-  atan(num: float) -> float
-  floor(num: float) -> int
-  ceil(num: float) -> int
-  round(num: float) -> int
-  pow(base: float, power: float) -> float
-  sqrt(num: float) -> float
-  cbrt(num: float) -> float
-  log(num: float) -> float
-  log2(num: float) -> float
-  log10(num: float) -> float
-  exp(num: float) -> float
-  random() -> float
+  abs(num: number) -> number
+  sin(num: number) -> number
+  cos(num: number) -> number
+  tan(num: number) -> number
+  asin(num: number) -> number
+  acos(num: number) -> number
+  atan(num: number) -> number
+  floor(num: number) -> int
+  ceil(num: number) -> int
+  round(num: number) -> int
+  pow(base: number, power: number) -> number
+  sqrt(num: number) -> number
+  cbrt(num: number) -> number
+  log(num: number) -> number
+  log2(num: number) -> number
+  log10(num: number) -> number
+  exp(num: number) -> number
+  random() -> number
 
 os:
 
-  CLOCKS_PER_SEC: float
+  CLOCKS_PER_SEC: number
 
   clock() -> int
   time() -> int
@@ -36,9 +36,9 @@ io:
   stdout: userdata
   stderr: userdata
 
-  SEEK_SET: float
-  SEEK_CUR: float
-  SEEK_END: float
+  SEEK_SET: number
+  SEEK_CUR: number
+  SEEK_END: number
 
   open(filename: string, mode: string) -> nil|userdata
   close(stream: userdata) -> int
@@ -57,10 +57,10 @@ io:
 
 numbers:
 
-  PI: float
-  TAU: float
-  LARGEST: float
-  SMALLEST: float
+  PI: number
+  TAU: number
+  LARGEST: number
+  SMALLEST: number
   MAX_INTEGER: int
   MIN_INTEGER: int
 
@@ -81,8 +81,8 @@ arrays:
   index_of(arr: array, elem: value) -> int
   min(arr: array) -> value
   max(arr: array) -> value
-  sum(arr: array) -> float
-  avg(arr: array) -> float
+  sum(arr: array) -> number
+  avg(arr: array) -> number
   reverse(arr: array) -> array
   sort(arr: array) -> array
 

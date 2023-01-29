@@ -3,9 +3,9 @@ print(val: value)
 println(val: value)
 type(val: value) -> string
 to_bool(val: value) -> bool
-to_int(val: float|string) -> int
-to_float(val: float|string) -> float
-to_string(val: nil|bool|float|string) -> string
+to_int(val: number|string) -> int
+to_number(val: number|string) -> number
+to_string(val: nil|bool|number|string) -> string
 ord(val: string) -> int
 chr(val: int) -> string
 hex(val: string) -> string

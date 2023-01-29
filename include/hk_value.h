@@ -12,7 +12,7 @@
 
 #define HK_TYPE_NIL      0x00
 #define HK_TYPE_BOOL     0x01
-#define HK_TYPE_FLOAT    0x02
+#define HK_TYPE_NUMBER   0x02
 #define HK_TYPE_STRING   0x03
 #define HK_TYPE_RANGE    0x04
 #define HK_TYPE_ARRAY    0x05
@@ -32,7 +32,7 @@
 #define HK_NIL_VALUE         ((hk_value_t) {.type = HK_TYPE_NIL, .flags = HK_FLAG_FALSEY | HK_FLAG_COMPARABLE})
 #define HK_FALSE_VALUE       ((hk_value_t) {.type = HK_TYPE_BOOL, .flags = HK_FLAG_FALSEY | HK_FLAG_COMPARABLE, .as.bool_value = false})
 #define HK_TRUE_VALUE        ((hk_value_t) {.type = HK_TYPE_BOOL, .flags = HK_FLAG_COMPARABLE, .as.bool_value = true})
-#define hk_float_value(n)    ((hk_value_t) {.type = HK_TYPE_FLOAT, .flags = HK_FLAG_COMPARABLE, .as.float_value = (n)})
+#define hk_number_value(n)   ((hk_value_t) {.type = HK_TYPE_NUMBER, .flags = HK_FLAG_COMPARABLE, .as.number_value = (n)})
 #define hk_string_value(s)   ((hk_value_t) {.type = HK_TYPE_STRING, .flags = HK_FLAG_OBJECT | HK_FLAG_COMPARABLE, .as.pointer_value = (s)})
 #define hk_range_value(r)    ((hk_value_t) {.type = HK_TYPE_RANGE, .flags = HK_FLAG_OBJECT | HK_FLAG_COMPARABLE | HK_FLAG_ITERABLE, .as.pointer_value = (r)})
 #define hk_array_value(a)    ((hk_value_t) {.type = HK_TYPE_ARRAY, .flags = HK_FLAG_OBJECT | HK_FLAG_COMPARABLE | HK_FLAG_ITERABLE, .as.pointer_value = (a)})
@@ -44,7 +44,7 @@
 #define hk_userdata_value(u) ((hk_value_t) {.type = HK_TYPE_USERDATA, .flags = HK_FLAG_OBJECT, .as.pointer_value = (u)})
 
 #define hk_as_bool(v)     ((v).as.bool_value)
-#define hk_as_float(v)    ((v).as.float_value)
+#define hk_as_number(v)   ((v).as.number_value)
 #define hk_as_string(v)   ((hk_string_t *) (v).as.pointer_value)
 #define hk_as_range(v)    ((hk_range_t *) (v).as.pointer_value)
 #define hk_as_array(v)    ((hk_array_t *) (v).as.pointer_value)
@@ -58,8 +58,8 @@
 
 #define hk_is_nil(v)        ((v).type == HK_TYPE_NIL)
 #define hk_is_bool(v)       ((v).type == HK_TYPE_BOOL)
-#define hk_is_float(v)      ((v).type == HK_TYPE_FLOAT)
-#define hk_is_int(v)        (hk_is_float(v) && hk_as_float(v) == (int64_t) hk_as_float(v))
+#define hk_is_number(v)     ((v).type == HK_TYPE_NUMBER)
+#define hk_is_int(v)        (hk_is_number(v) && hk_as_number(v) == (int64_t) hk_as_number(v))
 #define hk_is_string(v)     ((v).type == HK_TYPE_STRING)
 #define hk_is_range(v)      ((v).type == HK_TYPE_RANGE)
 #define hk_is_array(v)      ((v).type == HK_TYPE_ARRAY)
@@ -92,7 +92,7 @@ typedef struct
   union
   {
     bool bool_value;
-    double float_value;
+    double number_value;
     void *pointer_value;
   } as;
 } hk_value_t;

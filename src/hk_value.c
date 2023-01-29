@@ -21,7 +21,7 @@ static inline void value_free(hk_value_t val)
   {
   case HK_TYPE_NIL:
   case HK_TYPE_BOOL:
-  case HK_TYPE_FLOAT:
+  case HK_TYPE_NUMBER:
     break;
   case HK_TYPE_STRING:
     hk_string_free(hk_as_string(val));
@@ -67,8 +67,8 @@ const char *hk_type_name(int32_t type)
   case HK_TYPE_BOOL:
     name = "bool";
     break;
-  case HK_TYPE_FLOAT:
-    name = "float";
+  case HK_TYPE_NUMBER:
+    name = "number";
     break;
   case HK_TYPE_STRING:
     name = "string";
@@ -118,8 +118,8 @@ void hk_value_print(hk_value_t val, bool quoted)
   case HK_TYPE_BOOL:
     printf("%s", hk_as_bool(val) ? "true" : "false");
     break;
-  case HK_TYPE_FLOAT:
-    printf("%g", hk_as_float(val));
+  case HK_TYPE_NUMBER:
+    printf("%g", hk_as_number(val));
     break;
   case HK_TYPE_STRING:
     hk_string_print(hk_as_string(val), quoted);
@@ -176,8 +176,8 @@ bool hk_value_equal(hk_value_t val1, hk_value_t val2)
   case HK_TYPE_BOOL:
     result = hk_as_bool(val1) == hk_as_bool(val2);
     break;
-  case HK_TYPE_FLOAT:
-    result = hk_as_float(val1) == hk_as_float(val2);
+  case HK_TYPE_NUMBER:
+    result = hk_as_number(val1) == hk_as_number(val2);
     break;
   case HK_TYPE_STRING:
     result = hk_string_equal(hk_as_string(val1), hk_as_string(val2));
@@ -213,13 +213,13 @@ bool hk_value_compare(hk_value_t val1, hk_value_t val2, int32_t *result)
   case HK_TYPE_BOOL:
     *result = hk_as_bool(val1) - hk_as_bool(val2);
     return true;
-  case HK_TYPE_FLOAT:
-    if (hk_as_float(val1) > hk_as_float(val2))
+  case HK_TYPE_NUMBER:
+    if (hk_as_number(val1) > hk_as_number(val2))
     {
       *result = 1;
       return true;
     }
-    if (hk_as_float(val1) < hk_as_float(val2))
+    if (hk_as_number(val1) < hk_as_number(val2))
     {
       *result = -1;
       return true;
@@ -244,9 +244,9 @@ void hk_value_serialize(hk_value_t val, FILE *stream)
   int32_t flags = val.flags;
   fwrite(&type, sizeof(type), 1, stream);
   fwrite(&flags, sizeof(flags), 1, stream);
-  if (type == HK_TYPE_FLOAT)
+  if (type == HK_TYPE_NUMBER)
   {
-    fwrite(&val.as.float_value, sizeof(val.as.float_value), 1, stream);
+    fwrite(&val.as.number_value, sizeof(val.as.number_value), 1, stream);
     return;
   }
   if (type == HK_TYPE_STRING)
@@ -265,13 +265,13 @@ bool hk_value_deserialize(FILE *stream, hk_value_t *result)
     return false;
   if (fread(&flags, sizeof(flags), 1, stream) != 1)
     return false;
-  hk_assert(type == HK_TYPE_FLOAT || type == HK_TYPE_STRING, "unimplemented deserialization");
-  if (type == HK_TYPE_FLOAT)
+  hk_assert(type == HK_TYPE_NUMBER || type == HK_TYPE_STRING, "unimplemented deserialization");
+  if (type == HK_TYPE_NUMBER)
   {
     double data;
     if (fread(&data, sizeof(data), 1, stream) != 1)
       return false;
-    *result = hk_float_value(data);
+    *result = hk_number_value(data);
     return true;
   }
   hk_string_t *str = hk_string_deserialize(stream);

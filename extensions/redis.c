@@ -62,7 +62,7 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
       }
       break;
     case REDIS_REPLY_INTEGER:
-      result = hk_float_value((double) reply->integer);
+      result = hk_number_value((double) reply->integer);
       break;
     case REDIS_REPLY_NIL:
       result = HK_NIL_VALUE;
@@ -71,7 +71,7 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
       {
         double data;
         hk_double_from_chars(&data, reply->str);
-        result = hk_float_value(data);
+        result = hk_number_value(data);
       }
       break;
     case REDIS_REPLY_BOOL:
@@ -98,7 +98,7 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
   if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *hostname = hk_as_string(args[1]);
-  int32_t port = (int32_t) hk_as_float(args[2]);
+  int32_t port = (int32_t) hk_as_number(args[2]);
   redisContext *redis_context = redisConnect(hostname->chars, port);
   if (!redis_context || redis_context->err)
     return hk_vm_push_nil(vm);
