@@ -4,7 +4,7 @@
 
 use { lower } from strings;
 
-val vowels = ['a', 'e', 'i', 'o', 'u'];
+val vowels = ["a", "e", "i", "o", "u"];
 val num_vowels = len(vowels);
 
 fn pig_latin(mut word) {

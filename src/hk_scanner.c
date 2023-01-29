@@ -9,20 +9,23 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
+#include <errno.h>
 
-#define MATCH_MAX_LENGTH (1 << 3)
+#define MATCH_MAX_LENGTH          (1 << 3)
+#define INTERPOLATION_MAX_NESTING (1 << 3)
 
 #define char_at(s, i)   ((s)->pos[(i)])
 #define current_char(s) char_at(s, 0)
 
 static inline void lexical_error(scanner_t *scan, const char *fmt, ...);
+static inline double parse_double(scanner_t *scan);
 static inline void skip_shebang(scanner_t *scan);
 static inline void skip_spaces_comments(scanner_t *scan);
 static inline void next_char(scanner_t *scan);
 static inline void next_chars(scanner_t *scan, int32_t n);
 static inline bool match_char(scanner_t *scan, const char c);
 static inline bool match_chars(scanner_t *scan, const char *chars);
-static inline bool match_float(scanner_t *scan);
+static inline bool match_number(scanner_t *scan);
 static inline bool match_string(scanner_t *scan);
 static inline bool match_name(scanner_t *scan);
 
@@ -35,6 +38,16 @@ static inline void lexical_error(scanner_t *scan, const char *fmt, ...)
   va_end(args);
   fprintf(stderr, "\n  in %s:%d,%d\n", scan->file->chars, scan->line, scan->col);
   exit(EXIT_FAILURE);
+}
+
+static inline double parse_double(scanner_t *scan)
+{
+  token_t *tk = &scan->token;
+  errno = 0;
+  double result = strtod(tk->start, NULL);
+  if (errno == ERANGE)
+    lexical_error(scan, "floating point number `%.*s` out of range", tk->length, tk->start);
+  return result;
 }
 
 static inline void skip_shebang(scanner_t *scan)
@@ -121,7 +134,7 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
   return true;
 }
 
-static inline bool match_float(scanner_t *scan)
+static inline bool match_number(scanner_t *scan)
 {
   int32_t n = 0;
   if (char_at(scan, n) == '0')
@@ -134,7 +147,6 @@ static inline bool match_float(scanner_t *scan)
     while (isdigit(char_at(scan, n)))
       ++n;
   }
-  token_type_t type = TOKEN_INT;
   if (char_at(scan, n) == '.')
   {
     if (!isdigit(char_at(scan, n + 1)))
@@ -142,7 +154,6 @@ static inline bool match_float(scanner_t *scan)
     n += 2;
     while (isdigit(char_at(scan, n)))
       ++n;
-    type = TOKEN_FLOAT;
   }
   if (char_at(scan, n) == 'e' || char_at(scan, n) == 'E')
   {
@@ -158,24 +169,31 @@ static inline bool match_float(scanner_t *scan)
   if (isalnum(char_at(scan, n)) || char_at(scan, n) == '_')
     return false;
 end:
-  scan->token.type = type;
+  double data = parse_double(scan);
+  scan->token.type = TOKEN_NUMBER;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
   scan->token.length = n;
   scan->token.start = scan->pos;
+  scan->token.value = hk_number_value(data);
   next_chars(scan, n);
   return true;
 }
 
+// TODO
+/*
+string      ::= '"' ( ( CHAR - unsupported ) | escape_seq | '{' expr '}' )* '"'
+unsupported ::= '"' | '\' | '{' | '}' | 0x00 | 0x08 | 0x0c | 0x0a | 0x0d | 0x09 
+scape_seq   ::= '\"' | '\\' | '\{' | '\}' | '\b' | '\f' | '\n' | '\r' | '\t'
+*/
 static inline bool match_string(scanner_t *scan)
 {
-  char chr = current_char(scan);
-  if (chr == '\'' || chr == '\"')
+  if (current_char(scan) == '\"')
   {
     int32_t n = 1;
     for (;;)
     {
-      if (char_at(scan, n) == chr)
+      if (char_at(scan, n) == '\"')
       {
         ++n;
         break;
@@ -184,11 +202,14 @@ static inline bool match_string(scanner_t *scan)
         lexical_error(scan, "unterminated string");
       ++n;
     }
+    token_t *tk = &scan->token;
+    hk_string_t *str = hk_string_from_chars(tk->length, tk->start);
     scan->token.type = TOKEN_STRING;
     scan->token.line = scan->line;
     scan->token.col = scan->col;
     scan->token.length = n - 2;
     scan->token.start = &scan->pos[1];
+    scan->token.value = hk_string_value(str);
     next_chars(scan, n);
     return true;
   }
@@ -220,6 +241,7 @@ void scanner_init(scanner_t *scan, hk_string_t *file, hk_string_t *source)
   scan->pos = source->chars;
   scan->line = 1;
   scan->col = 1;
+  scan->token.value = HK_NIL_VALUE;
   skip_shebang(scan);
   scanner_next_token(scan);
 }
@@ -228,6 +250,7 @@ void scanner_free(scanner_t *scan)
 {
   hk_string_release(scan->file);
   hk_string_release(scan->source);
+  hk_value_release(scan->token.value);
 }
 
 void scanner_next_token(scanner_t *scan)
@@ -473,7 +496,7 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_PERCENT;
     return;
   }
-  if (match_float(scan))
+  if (match_number(scan))
     return;
   if (match_string(scan))
     return;

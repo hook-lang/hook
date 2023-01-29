@@ -6,7 +6,6 @@
 #include "hk_compiler.h"
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
 #include "hk_scanner.h"
@@ -71,11 +70,7 @@ typedef struct compiler
 static inline void syntax_error(const char *function, const char *file, int32_t line,
   int32_t col, const char *fmt, ...);
 static inline void syntax_error_unexpected(compiler_t *comp);
-static inline double parse_double(compiler_t *comp);
-static inline bool string_match(token_t *tk, hk_string_t *str);
-static inline uint8_t add_number_constant(compiler_t *comp, double data);
-static inline uint8_t add_string_constant(compiler_t *comp, token_t *tk);
-static inline uint8_t add_constant(compiler_t *comp, hk_value_t val);
+static inline uint8_t add_constant(compiler_t *comp);
 static inline void push_scope(compiler_t *comp);
 static inline void pop_scope(compiler_t *comp);
 static inline int32_t discard_variables(compiler_t *comp, int32_t depth);
@@ -164,60 +159,19 @@ static inline void syntax_error_unexpected(compiler_t *comp)
     tk->length, tk->start);
 }
 
-static inline double parse_double(compiler_t *comp)
+static inline uint8_t add_constant(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  token_t *tk = &scan->token;
-  errno = 0;
-  double result = strtod(tk->start, NULL);
-  if (errno == ERANGE)
-    syntax_error(comp->fn->name->chars, scan->file->chars, tk->line, tk->col,
-      "floating point number `%.*s` out of range", tk->length, tk->start);
-  return result;
-}
-
-static inline bool string_match(token_t *tk, hk_string_t *str)
-{
-  return tk->length == str->length
-    && !memcmp(tk->start, str->chars, tk->length);
-}
-
-static inline uint8_t add_number_constant(compiler_t *comp, double data)
-{
-  hk_array_t *consts = comp->fn->chunk.consts;
-  hk_value_t *elements = consts->elements;
-  for (int32_t i = 0; i < consts->length; ++i)
-  {
-    hk_value_t elem = elements[i];
-    if (!hk_is_number(elem))
-      continue;
-    if (data == hk_as_number(elem))
-      return (uint8_t) i;
-  }
-  return add_constant(comp, hk_number_value(data));
-}
-
-static inline uint8_t add_string_constant(compiler_t *comp, token_t *tk)
-{
-  hk_array_t *consts = comp->fn->chunk.consts;
-  hk_value_t *elements = consts->elements;
-  for (int32_t i = 0; i < consts->length; ++i)
-  {
-    hk_value_t elem = elements[i];
-    if (!hk_is_string(elem))
-      continue;
-    if (string_match(tk, hk_as_string(elem)))
-      return (uint8_t) i;
-  }
-  hk_string_t *str = hk_string_from_chars(tk->length, tk->start);
-  return add_constant(comp, hk_string_value(str));
-}
-
-static inline uint8_t add_constant(compiler_t *comp, hk_value_t val)
-{
+  hk_value_t val = scan->token.value;
   hk_function_t *fn = comp->fn;
   hk_array_t *consts = fn->chunk.consts;
-  scanner_t *scan = comp->scan;
+  hk_value_t *elements = consts->elements;
+  for (int32_t i = 0; i < consts->length; ++i)
+  {
+    hk_value_t elem = elements[i];
+    if (hk_value_equal(val, elem))
+      return (uint8_t) i;
+  }
   token_t *tk = &scan->token;
   if (consts->length == MAX_CONSTANTS)
     syntax_error(fn->name->chars, scan->file->chars, tk->line, tk->col,
@@ -502,9 +456,8 @@ static void compile_load_module(compiler_t *comp)
   scanner_next_token(scan);
   if (match(scan, TOKEN_NAME))
   {
-    token_t tk = scan->token;
+    uint8_t index = add_constant(comp);
     scanner_next_token(scan);
-    uint8_t index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     if (match(scan, TOKEN_AS))
@@ -528,7 +481,7 @@ static void compile_load_module(compiler_t *comp)
     token_t tk = scan->token;
     scanner_next_token(scan);
     define_local(comp, &tk, false);
-    uint8_t index = add_string_constant(comp, &tk);
+    uint8_t index = add_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     uint8_t n = 1;
@@ -540,7 +493,7 @@ static void compile_load_module(compiler_t *comp)
       token_t tk = scan->token;
       scanner_next_token(scan);
       define_local(comp, &tk, false);
-      uint8_t index = add_string_constant(comp, &tk);
+      uint8_t index = add_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
       hk_chunk_emit_byte(chunk, index);
       ++n;
@@ -552,7 +505,7 @@ static void compile_load_module(compiler_t *comp)
     tk = scan->token;
     scanner_next_token(scan);
     consume(comp, TOKEN_SEMICOLON);
-    index = add_string_constant(comp, &tk);
+    index = add_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     hk_chunk_emit_opcode(chunk, HK_OP_LOAD_MODULE);
@@ -618,7 +571,7 @@ static void compile_constant_declaration(compiler_t *comp)
     token_t tk = scan->token;
     scanner_next_token(scan);
     define_local(comp, &tk, false);
-    uint8_t index = add_string_constant(comp, &tk);
+    uint8_t index = add_constant(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     uint8_t n = 1;
@@ -630,7 +583,7 @@ static void compile_constant_declaration(compiler_t *comp)
       token_t tk = scan->token;
       scanner_next_token(scan);
       define_local(comp, &tk, false);
-      uint8_t index = add_string_constant(comp, &tk);
+      uint8_t index = add_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
       hk_chunk_emit_byte(chunk, index);
       ++n;
@@ -705,7 +658,7 @@ static void compile_variable_declaration(compiler_t *comp)
     token_t tk = scan->token;
     scanner_next_token(scan);
     define_local(comp, &tk, true);
-    uint8_t index = add_string_constant(comp, &tk);
+    uint8_t index = add_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     uint8_t n = 1;
@@ -717,7 +670,7 @@ static void compile_variable_declaration(compiler_t *comp)
       token_t tk = scan->token;
       scanner_next_token(scan);
       define_local(comp, &tk, true);
-      uint8_t index = add_string_constant(comp, &tk);
+      uint8_t index = add_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
       hk_chunk_emit_byte(chunk, index);
       ++n;
@@ -889,7 +842,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
-    uint8_t index = add_string_constant(comp, &tk);
+    uint8_t index = add_constant(comp, &tk);
     if (match(scan, TOKEN_EQ))
     {
       scanner_next_token(scan);
@@ -953,7 +906,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
     tk = scan->token;
     scanner_next_token(scan);
     define_local(comp, &tk, false);
-    index = add_string_constant(comp, &tk);
+    index = add_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
   }
@@ -969,7 +922,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
     syntax_error_unexpected(comp);
   tk = scan->token;
   scanner_next_token(scan);
-  index = add_string_constant(comp, &tk);
+  index = add_constant(comp, &tk);
   hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
   hk_chunk_emit_byte(chunk, index);
   uint8_t length = 1;
@@ -980,7 +933,7 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
       syntax_error_unexpected(comp);
     tk = scan->token;
     scanner_next_token(scan);
-    index = add_string_constant(comp, &tk);
+    index = add_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     ++length;
@@ -1123,7 +1076,7 @@ static void compile_delete(compiler_t *comp, bool inplace)
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
-    uint8_t index = add_string_constant(comp, &tk);
+    uint8_t index = add_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_FETCH_FIELD);
     hk_chunk_emit_byte(chunk, index);
     compile_delete(comp, false);
@@ -1710,9 +1663,12 @@ static void compile_prim_expression(compiler_t *comp)
     hk_chunk_emit_opcode(chunk, HK_OP_TRUE);
     return;
   }
-  if (match(scan, TOKEN_INT))
+
+  //TODO INT
+  if (match(scan, TOKEN_NUMBER))
   {
-    double data = parse_double(comp);
+    token_t *tk = &scan->token;
+    double data = hk_as_number(tk->value);
     scanner_next_token(scan);
     if (data <= UINT16_MAX)
     {
@@ -1720,25 +1676,27 @@ static void compile_prim_expression(compiler_t *comp)
       hk_chunk_emit_word(chunk, (uint16_t) data);
       return;
     }
-    uint8_t index = add_number_constant(comp, data);
+    uint8_t index = add_constant(comp, data);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     return;
   }
-  if (match(scan, TOKEN_FLOAT))
+  // TODO FLOAT
+  if (match(scan, TOKEN_NUMBER))
   {
     double data = parse_double(comp);
     scanner_next_token(scan);
-    uint8_t index = add_number_constant(comp, data);
+    uint8_t index = add_constant(comp, data);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     return;
   }
+
   if (match(scan, TOKEN_STRING))
   {
     token_t tk = scan->token;
     scanner_next_token(scan);
-    uint8_t index = add_string_constant(comp, &tk);
+    uint8_t index = add_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     return;
@@ -1836,7 +1794,7 @@ static void compile_struct_constructor(compiler_t *comp)
     syntax_error_unexpected(comp);
   token_t tk = scan->token;
   scanner_next_token(scan);
-  uint8_t index = add_string_constant(comp, &tk);
+  uint8_t index = add_constant(comp, &tk);
   hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
   hk_chunk_emit_byte(chunk, index);
   consume(comp, TOKEN_COLON);
@@ -1849,7 +1807,7 @@ static void compile_struct_constructor(compiler_t *comp)
       syntax_error_unexpected(comp);
     tk = scan->token;
     scanner_next_token(scan);
-    index = add_string_constant(comp, &tk);
+    index = add_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
     hk_chunk_emit_byte(chunk, index);
     consume(comp, TOKEN_COLON);
@@ -1967,7 +1925,7 @@ static void compile_subscript(compiler_t *comp)
         syntax_error_unexpected(comp);
       token_t tk = scan->token;
       scanner_next_token(scan);
-      uint8_t index = add_string_constant(comp, &tk);
+      uint8_t index = add_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_GET_FIELD);
       hk_chunk_emit_byte(chunk, index);
       continue;

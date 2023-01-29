@@ -5,7 +5,7 @@ stmt        ::= 'use' NAME ( 'as' NAME )? ';'
               | 'use' '{' NAME ( ',' NAME )* '}' 'from' NAME ';'
               | var_decl ';'
               | assign_call ';'
-              | 'struct' NAME '{' ( STRING | NAME ( ',' STRING | NAME )* )? '}'
+              | 'struct' NAME '{' ( string | NAME ( ',' string | NAME )* )? '}'
               | 'fn' NAME '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
                 ( '=>' expr | block )
               | 'del' NAME subscr* '[' expr ']' ';'
@@ -65,10 +65,10 @@ mul_expr    ::= unary_expr ( ( '*' | '/' | '~/' | '%' ) unary_expr )*
 
 unary_expr  ::= ( '-' | '!' | '~' ) unary_expr | prim_expr
 
-prim_expr   ::= 'nil' | 'false' | 'true' | INT | FLOAT | STRING
+prim_expr   ::= 'nil' | 'false' | 'true' | number | string
               | '[' ( expr ( ',' expr )* )? ']'
-              | '{' ( STRING | NAME ':' expr ( ',' STRING | NAME ':' expr )* )? '}'
-              | 'struct' '{' ( STRING | NAME ( ',' STRING | NAME )* )? '}'
+              | '{' ( string | NAME ':' expr ( ',' string | NAME ':' expr )* )? '}'
+              | 'struct' '{' ( string | NAME ( ',' string | NAME )* )? '}'
               | 'fn' '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
                 ( '=>' expr | block )
               | ( 'if' | 'if!' ) '(' expr ')' expr 'else' expr
@@ -76,3 +76,11 @@ prim_expr   ::= 'nil' | 'false' | 'true' | INT | FLOAT | STRING
                 ',' '_' '=>' expr '}'
               | NAME ( subscr | call )* ( '{' ( expr ( ',' expr )* )? '}' )?
               | '(' expr ')'
+
+number      ::= '-'? ( '0' | ( DIGIT - '0' ) DIGIT* ) ( '.' DIGIT+ )? ( 'e' '-'? DIGIT+ )? 
+
+string      ::= '"' ( ( CHAR - unsupported ) | escape_seq | '{' expr '}' )* '"'
+
+unsupported ::= '"' | '\' | '{' | '}' | 0x00 | 0x08 | 0x0c | 0x0a | 0x0d | 0x09 
+
+scape_seq   ::= '\"' | '\\' | '\{' | '\}' | '\b' | '\f' | '\n' | '\r' | '\t'
