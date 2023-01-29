@@ -155,7 +155,7 @@ static int32_t to_bool_call(hk_vm_t *vm, hk_value_t *args)
 
 static int32_t to_int_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int32_t types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  hk_type_t types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
@@ -169,7 +169,7 @@ static int32_t to_int_call(hk_vm_t *vm, hk_value_t *args)
 
 static int32_t to_number_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int32_t types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  hk_type_t types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
@@ -183,7 +183,7 @@ static int32_t to_number_call(hk_vm_t *vm, hk_value_t *args)
 
 static int32_t to_string_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int32_t types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
+  hk_type_t types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 1, 4, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
@@ -315,7 +315,7 @@ static int32_t refcount_call(hk_vm_t *vm, hk_value_t *args)
 
 static int32_t cap_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int32_t types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
+  hk_type_t types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
@@ -326,7 +326,7 @@ static int32_t cap_call(hk_vm_t *vm, hk_value_t *args)
 
 static int32_t len_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int32_t types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
+  hk_type_t types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
     HK_TYPE_STRUCT, HK_TYPE_INSTANCE};
   if (hk_vm_check_types(args, 1, 5, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -357,7 +357,7 @@ static int32_t len_call(hk_vm_t *vm, hk_value_t *args)
 
 static int32_t is_empty_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int32_t types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
+  hk_type_t types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
     HK_TYPE_STRUCT, HK_TYPE_INSTANCE};
   if (hk_vm_check_types(args, 1, 5, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -417,7 +417,7 @@ static int32_t join_call(hk_vm_t *vm, hk_value_t *args)
 
 static int32_t iter_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int32_t types[] = {HK_TYPE_ITERATOR, HK_TYPE_RANGE, HK_TYPE_ARRAY};
+  hk_type_t types[] = {HK_TYPE_ITERATOR, HK_TYPE_RANGE, HK_TYPE_ARRAY};
   if (hk_vm_check_types(args, 1, 3, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];

@@ -70,7 +70,7 @@ void hk_chunk_emit_word(hk_chunk_t *chunk, uint16_t word)
   chunk->code_length += 2;
 }
 
-void hk_chunk_emit_opcode(hk_chunk_t *chunk, int32_t op)
+void hk_chunk_emit_opcode(hk_chunk_t *chunk, hk_opcode_t op)
 {
   hk_chunk_emit_byte(chunk, (uint8_t) op);
 }

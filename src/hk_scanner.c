@@ -134,7 +134,7 @@ static inline bool match_float(scanner_t *scan)
     while (isdigit(char_at(scan, n)))
       ++n;
   }
-  int32_t type = TOKEN_INT;
+  token_type_t type = TOKEN_INT;
   if (char_at(scan, n) == '.')
   {
     if (!isdigit(char_at(scan, n + 1)))
@@ -415,17 +415,17 @@ void scanner_next_token(scanner_t *scan)
   }
   if (match_chars(scan, "-="))
   {
-    scan->token.type = TOKEN_MINUSEQ;
+    scan->token.type = TOKEN_DASHEQ;
     return;
   }
   if (match_chars(scan, "--"))
   {
-    scan->token.type = TOKEN_MINUSMINUS;
+    scan->token.type = TOKEN_DASH;
     return;
   }
   if (match_char(scan, '-'))
   {
-    scan->token.type = TOKEN_MINUS;
+    scan->token.type = TOKEN_DASH;
     return;
   }
   if (match_chars(scan, "*="))

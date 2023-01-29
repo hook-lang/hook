@@ -131,7 +131,7 @@ static int32_t bind_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
+  hk_type_t types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 3, 4, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   sqlite3_stmt *sqlite_stmt = ((sqlite_stmt_wrapper_t *) hk_as_userdata(args[1]))->sqlite_stmt;

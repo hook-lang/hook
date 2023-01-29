@@ -8,74 +8,32 @@
 
 #include "hk_array.h"
 
-#define HK_OP_NIL                    0x00
-#define HK_OP_FALSE                  0x01
-#define HK_OP_TRUE                   0x02
-#define HK_OP_INT                    0x03
-#define HK_OP_CONSTANT               0x04
-#define HK_OP_RANGE                  0x05
-#define HK_OP_ARRAY                  0x06
-#define HK_OP_STRUCT                 0x07
-#define HK_OP_INSTANCE               0x08
-#define HK_OP_CONSTRUCT              0x09
-#define HK_OP_ITERATOR               0x0a
-#define HK_OP_CLOSURE                0x0b
-#define HK_OP_UNPACK_ARRAY           0x0c
-#define HK_OP_UNPACK_STRUCT          0x0d
-#define HK_OP_POP                    0x0e
-#define HK_OP_GLOBAL                 0x0f
-#define HK_OP_NONLOCAL               0x10
-#define HK_OP_LOAD                   0x11
-#define HK_OP_STORE                  0x12
-#define HK_OP_ADD_ELEMENT            0x13
-#define HK_OP_GET_ELEMENT            0x14
-#define HK_OP_FETCH_ELEMENT          0x15
-#define HK_OP_SET_ELEMENT            0x16
-#define HK_OP_PUT_ELEMENT            0x17
-#define HK_OP_DELETE_ELEMENT         0x18
-#define HK_OP_INPLACE_ADD_ELEMENT    0x19
-#define HK_OP_INPLACE_PUT_ELEMENT    0x1a
-#define HK_OP_INPLACE_DELETE_ELEMENT 0x1b
-#define HK_OP_GET_FIELD              0x1c
-#define HK_OP_FETCH_FIELD            0x1d
-#define HK_OP_SET_FIELD              0x1e
-#define HK_OP_PUT_FIELD              0x1f
-#define HK_OP_INPLACE_PUT_FIELD      0x20
-#define HK_OP_CURRENT                0x21
-#define HK_OP_JUMP                   0x22
-#define HK_OP_JUMP_IF_FALSE          0x23
-#define HK_OP_JUMP_IF_TRUE           0x24
-#define HK_OP_JUMP_IF_TRUE_OR_POP    0x25
-#define HK_OP_JUMP_IF_FALSE_OR_POP   0x26
-#define HK_OP_JUMP_IF_NOT_EQUAL      0x27
-#define HK_OP_JUMP_IF_NOT_VALID      0x28
-#define HK_OP_NEXT                   0x29
-#define HK_OP_EQUAL                  0x2a
-#define HK_OP_GREATER                0x2b
-#define HK_OP_LESS                   0x2c  
-#define HK_OP_NOT_EQUAL              0x2d
-#define HK_OP_NOT_GREATER            0x2e
-#define HK_OP_NOT_LESS               0x2f
-#define HK_OP_BITWISE_OR             0x30
-#define HK_OP_BITWISE_XOR            0x31
-#define HK_OP_BITWISE_AND            0x32
-#define HK_OP_LEFT_SHIFT             0x33
-#define HK_OP_RIGHT_SHIFT            0x34
-#define HK_OP_ADD                    0x35
-#define HK_OP_SUBTRACT               0x36
-#define HK_OP_MULTIPLY               0x37
-#define HK_OP_DIVIDE                 0x38
-#define HK_OP_QUOTIENT               0x39
-#define HK_OP_REMAINDER              0x3a
-#define HK_OP_NEGATE                 0x3b
-#define HK_OP_NOT                    0x3c
-#define HK_OP_BITWISE_NOT            0x3d
-#define HK_OP_INCREMENT              0x3e
-#define HK_OP_DECREMENT              0x3f
-#define HK_OP_CALL                   0x40
-#define HK_OP_LOAD_MODULE            0x41
-#define HK_OP_RETURN                 0x42
-#define HK_OP_RETURN_NIL             0x43
+typedef enum
+{
+  HK_OP_NIL,                    HK_OP_FALSE,               HK_OP_TRUE,
+  HK_OP_INT,                    HK_OP_CONSTANT,            HK_OP_RANGE,
+  HK_OP_ARRAY,                  HK_OP_STRUCT,              HK_OP_INSTANCE,
+  HK_OP_CONSTRUCT,              HK_OP_ITERATOR,            HK_OP_CLOSURE,
+  HK_OP_UNPACK_ARRAY,           HK_OP_UNPACK_STRUCT,       HK_OP_POP,
+  HK_OP_GLOBAL,                 HK_OP_NONLOCAL,            HK_OP_LOAD,
+  HK_OP_STORE,                  HK_OP_ADD_ELEMENT,         HK_OP_GET_ELEMENT,
+  HK_OP_FETCH_ELEMENT,          HK_OP_SET_ELEMENT,         HK_OP_PUT_ELEMENT,
+  HK_OP_DELETE_ELEMENT,         HK_OP_INPLACE_ADD_ELEMENT, HK_OP_INPLACE_PUT_ELEMENT,
+  HK_OP_INPLACE_DELETE_ELEMENT, HK_OP_GET_FIELD,           HK_OP_FETCH_FIELD,
+  HK_OP_SET_FIELD,              HK_OP_PUT_FIELD,           HK_OP_INPLACE_PUT_FIELD,
+  HK_OP_CURRENT,                HK_OP_JUMP,                HK_OP_JUMP_IF_FALSE,
+  HK_OP_JUMP_IF_TRUE,           HK_OP_JUMP_IF_TRUE_OR_POP, HK_OP_JUMP_IF_FALSE_OR_POP,
+  HK_OP_JUMP_IF_NOT_EQUAL,      HK_OP_JUMP_IF_NOT_VALID,   HK_OP_NEXT,
+  HK_OP_EQUAL,                  HK_OP_GREATER,             HK_OP_LESS,
+  HK_OP_NOT_EQUAL,              HK_OP_NOT_GREATER,         HK_OP_NOT_LESS,
+  HK_OP_BITWISE_OR,             HK_OP_BITWISE_XOR,         HK_OP_BITWISE_AND,
+  HK_OP_LEFT_SHIFT,             HK_OP_RIGHT_SHIFT,         HK_OP_ADD,
+  HK_OP_SUBTRACT,               HK_OP_MULTIPLY,            HK_OP_DIVIDE,
+  HK_OP_QUOTIENT,               HK_OP_REMAINDER,           HK_OP_NEGATE,
+  HK_OP_NOT,                    HK_OP_BITWISE_NOT,         HK_OP_INCREMENT,
+  HK_OP_DECREMENT,              HK_OP_CALL,                HK_OP_LOAD_MODULE,
+  HK_OP_RETURN,                 HK_OP_RETURN_NIL
+} hk_opcode_t;
 
 typedef struct
 {
@@ -98,7 +56,7 @@ void hk_chunk_init(hk_chunk_t *chunk);
 void hk_chunk_free(hk_chunk_t *chunk);
 void hk_chunk_emit_byte(hk_chunk_t *chunk, uint8_t byte);
 void hk_chunk_emit_word(hk_chunk_t *chunk, uint16_t word);
-void hk_chunk_emit_opcode(hk_chunk_t *chunk, int32_t op);
+void hk_chunk_emit_opcode(hk_chunk_t *chunk, hk_opcode_t op);
 void hk_chunk_add_line(hk_chunk_t *chunk, int32_t line_no);
 int32_t hk_chunk_get_line(hk_chunk_t *chunk, int32_t offset);
 void hk_chunk_serialize(hk_chunk_t *chunk, FILE *stream);

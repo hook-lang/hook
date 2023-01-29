@@ -10,17 +10,20 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define HK_TYPE_NIL      0x00
-#define HK_TYPE_BOOL     0x01
-#define HK_TYPE_NUMBER   0x02
-#define HK_TYPE_STRING   0x03
-#define HK_TYPE_RANGE    0x04
-#define HK_TYPE_ARRAY    0x05
-#define HK_TYPE_STRUCT   0x06
-#define HK_TYPE_INSTANCE 0x07
-#define HK_TYPE_ITERATOR 0x08
-#define HK_TYPE_CALLABLE 0x09
-#define HK_TYPE_USERDATA 0x0a
+typedef enum
+{
+  HK_TYPE_NIL,
+  HK_TYPE_BOOL,
+  HK_TYPE_NUMBER,
+  HK_TYPE_STRING,
+  HK_TYPE_RANGE,
+  HK_TYPE_ARRAY,
+  HK_TYPE_STRUCT,
+  HK_TYPE_INSTANCE,
+  HK_TYPE_ITERATOR,
+  HK_TYPE_CALLABLE,
+  HK_TYPE_USERDATA
+} hk_type_t;
 
 #define HK_FLAG_NONE       0x00
 #define HK_FLAG_OBJECT     0x01
@@ -87,7 +90,7 @@
 
 typedef struct
 {
-  int32_t type;
+  hk_type_t type;
   int32_t flags;
   union
   {
@@ -102,7 +105,7 @@ typedef struct
   HK_OBJECT_HEADER
 } hk_object_t;
 
-const char *hk_type_name(int32_t type);
+const char *hk_type_name(hk_type_t type);
 void hk_value_release(hk_value_t val);
 void hk_value_print(hk_value_t val, bool quoted);
 bool hk_value_equal(hk_value_t val1, hk_value_t val2);

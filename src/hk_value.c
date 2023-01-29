@@ -57,7 +57,7 @@ static inline void value_free(hk_value_t val)
   }
 }
 
-const char *hk_type_name(int32_t type)
+const char *hk_type_name(hk_type_t type)
 {
   char *name = "nil";
   switch (type)
@@ -234,13 +234,15 @@ bool hk_value_compare(hk_value_t val1, hk_value_t val2, int32_t *result)
     return true;
   case HK_TYPE_ARRAY:
     return hk_array_compare(hk_as_array(val1), hk_as_array(val2), result);
+  default:
+    break;
   }
   return false;
 }
 
 void hk_value_serialize(hk_value_t val, FILE *stream)
 {
-  int32_t type = val.type;
+  hk_type_t type = val.type;
   int32_t flags = val.flags;
   fwrite(&type, sizeof(type), 1, stream);
   fwrite(&flags, sizeof(flags), 1, stream);
@@ -259,7 +261,7 @@ void hk_value_serialize(hk_value_t val, FILE *stream)
 
 bool hk_value_deserialize(FILE *stream, hk_value_t *result)
 {
-  int32_t type;
+  hk_type_t type;
   int32_t flags;
   if (fread(&type, sizeof(type), 1, stream) != 1)
     return false;

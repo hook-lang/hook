@@ -88,9 +88,9 @@ static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable);
 static inline variable_t resolve_variable(compiler_t *comp, token_t *tk);
 static inline variable_t *lookup_variable(compiler_t *comp, token_t *tk);
 static inline bool nonlocal_exists(compiler_t *comp, token_t *tk);
-static inline int32_t emit_jump(hk_chunk_t *chunk, int32_t op);
+static inline int32_t emit_jump(hk_chunk_t *chunk, hk_opcode_t op);
 static inline void patch_jump(compiler_t *comp, int32_t offset);
-static inline void patch_opcode(hk_chunk_t *chunk, int32_t offset, int32_t op);
+static inline void patch_opcode(hk_chunk_t *chunk, int32_t offset, hk_opcode_t op);
 static inline void start_loop(compiler_t *comp, loop_t *loop);
 static inline void end_loop(compiler_t *comp);
 static inline void compiler_init(compiler_t *comp, compiler_t *parent, scanner_t *scan,
@@ -329,7 +329,7 @@ static inline bool nonlocal_exists(compiler_t *comp, token_t *tk)
   return lookup_variable(comp, tk) || nonlocal_exists(comp->parent, tk);
 }
 
-static inline int32_t emit_jump(hk_chunk_t *chunk, int32_t op)
+static inline int32_t emit_jump(hk_chunk_t *chunk, hk_opcode_t op)
 {
   hk_chunk_emit_opcode(chunk, op);
   int32_t offset = chunk->code_length;
@@ -349,7 +349,7 @@ static inline void patch_jump(compiler_t *comp, int32_t offset)
   *((uint16_t *) &chunk->code[offset]) = (uint16_t) jump;
 }
 
-static inline void patch_opcode(hk_chunk_t *chunk, int32_t offset, int32_t op)
+static inline void patch_opcode(hk_chunk_t *chunk, int32_t offset, hk_opcode_t op)
 {
   chunk->code[offset] = (uint8_t) op;
 }
@@ -805,7 +805,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     hk_chunk_emit_opcode(chunk, HK_OP_ADD);
     return SYNTAX_ASSIGN;
   }
-  if (match(scan, TOKEN_MINUSEQ))
+  if (match(scan, TOKEN_DASHEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
@@ -846,7 +846,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     hk_chunk_emit_opcode(chunk, HK_OP_INCREMENT);
     return SYNTAX_ASSIGN;
   }
-  if (match(scan, TOKEN_MINUSMINUS))
+  if (match(scan, TOKEN_DASHDASH))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_DECREMENT);
@@ -1141,7 +1141,7 @@ static void compile_if_statement(compiler_t *comp, bool not)
   consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
-  int32_t op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
+  hk_opcode_t op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
   int32_t offset1 = emit_jump(chunk, op);
   compile_statement(comp);
   int32_t offset2 = emit_jump(chunk, HK_OP_JUMP);
@@ -1227,7 +1227,7 @@ static void compile_while_statement(compiler_t *comp, bool not)
   start_loop(comp, &loop);
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
-  int32_t op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
+  hk_opcode_t op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
   int32_t offset = emit_jump(chunk, op);
   compile_statement(comp);
   hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
@@ -1244,7 +1244,7 @@ static void compile_do_statement(compiler_t *comp)
   loop_t loop;
   start_loop(comp, &loop);
   compile_statement(comp);  
-  int32_t op = HK_OP_JUMP_IF_FALSE;
+  hk_opcode_t op = HK_OP_JUMP_IF_FALSE;
   if (match(scan, TOKEN_WHILEBANG))
   {
     scanner_next_token(scan);
@@ -1610,7 +1610,7 @@ static void compile_add_expression(compiler_t *comp)
       hk_chunk_emit_opcode(chunk, HK_OP_ADD);
       continue;
     }
-    if (match(scan, TOKEN_MINUS))
+    if (match(scan, TOKEN_DASH))
     {
       scanner_next_token(scan);
       compile_mul_expression(comp);
@@ -1664,7 +1664,7 @@ static void compile_unary_expression(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
-  if (match(scan, TOKEN_MINUS))
+  if (match(scan, TOKEN_DASH))
   {
     scanner_next_token(scan);
     compile_unary_expression(comp);
@@ -1869,7 +1869,7 @@ static void compile_if_expression(compiler_t *comp, bool not)
   consume(comp, TOKEN_LPAREN);
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
-  int32_t op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
+  hk_opcode_t op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
   int32_t offset1 = emit_jump(chunk, op);
   compile_expression(comp);
   int32_t offset2 = emit_jump(chunk, HK_OP_JUMP);
@@ -2061,7 +2061,7 @@ static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk)
   variable_t *var = lookup_variable(comp, tk);
   if (var)
   {
-    int32_t op = HK_OP_NONLOCAL;
+    hk_opcode_t op = HK_OP_NONLOCAL;
     if (var->is_local)
     {
       if (var->is_mutable)

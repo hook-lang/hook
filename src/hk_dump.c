@@ -37,7 +37,7 @@ void hk_dump(hk_function_t *fn, FILE *stream)
   int32_t last_line = -1;
   while (i < chunk->code_length)
   {
-    int32_t op = code[i];
+    hk_opcode_t op = (hk_opcode_t) code[i];
     int32_t j = i++;
     ++n;
     int32_t line = get_line(chunk, j);

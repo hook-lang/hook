@@ -15,7 +15,7 @@
 #include "hk_error.h"
 #include "hk_utils.h"
 
-static inline void type_error(int32_t index, int32_t num_types, int32_t types[], int32_t val_type);
+static inline void type_error(int32_t index, int32_t num_types, hk_type_t types[], hk_type_t val_type);
 static inline int32_t push(hk_vm_t *vm, hk_value_t val);
 static inline void pop(hk_vm_t *vm);
 static inline int32_t read_byte(uint8_t **pc);
@@ -80,7 +80,7 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
 static inline void discard_frame(hk_vm_t *vm, hk_value_t *slots);
 static inline void move_result(hk_vm_t *vm, hk_value_t *slots);
 
-static inline void type_error(int32_t index, int32_t num_types, int32_t types[], int32_t val_type)
+static inline void type_error(int32_t index, int32_t num_types, hk_type_t types[], hk_type_t val_type)
 {
   hk_assert(num_types > 0, "num_types must be greater than 0");
   fprintf(stderr, "runtime error: type error: argument #%d must be of the type %s",
@@ -1403,7 +1403,7 @@ static inline int32_t call_function(hk_vm_t *vm, hk_value_t *locals, hk_closure_
   uint8_t *pc = code;
   for (;;)
   {
-    int32_t op = read_byte(&pc);
+    hk_opcode_t op = (hk_opcode_t) read_byte(&pc);
     switch (op)
     {
     case HK_OP_NIL:
@@ -1953,9 +1953,9 @@ int32_t hk_vm_compare(hk_vm_t *vm, hk_value_t val1, hk_value_t val2, int32_t *re
   return HK_STATUS_OK; 
 }
 
-int32_t hk_vm_check_type(hk_value_t *args, int32_t index, int32_t type)
+int32_t hk_vm_check_type(hk_value_t *args, int32_t index, hk_type_t type)
 {
-  int32_t val_type = args[index].type;
+  hk_type_t val_type = args[index].type;
   if (val_type != type)
   {
     hk_runtime_error("type error: argument #%d must be of the type %s, %s given", index,
@@ -1965,9 +1965,9 @@ int32_t hk_vm_check_type(hk_value_t *args, int32_t index, int32_t type)
   return HK_STATUS_OK;
 }
 
-int32_t hk_vm_check_types(hk_value_t *args, int32_t index, int32_t num_types, int32_t types[])
+int32_t hk_vm_check_types(hk_value_t *args, int32_t index, int32_t num_types, hk_type_t types[])
 {
-  int32_t val_type = args[index].type;
+  hk_type_t val_type = args[index].type;
   bool match = false;
   for (int32_t i = 0; i < num_types; ++i)
     if ((match = (val_type == types[i])))

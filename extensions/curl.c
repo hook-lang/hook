@@ -46,7 +46,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data)
 
 static int32_t init_call(hk_vm_t *vm, hk_value_t *args)
 {
-  int32_t types[] = {HK_TYPE_NIL, HK_TYPE_STRING};
+  hk_type_t types[] = {HK_TYPE_NIL, HK_TYPE_STRING};
   if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
