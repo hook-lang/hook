@@ -1,16 +1,21 @@
 #!/usr/bin/env bash
 
-FILENAME="src/hk_version.h"
-REVISION="$(git rev-parse --short HEAD)"
+#------------------------------------------------------------------------------
+# This script is used to build a release version of Hook and pack it into a
+# tarball.
+#
+# Usage:
+#
+#   pack.sh [with_extensions]
+#
+# Examples:
+#
+#   pack.sh
+#   pack.sh with-extensions
+#------------------------------------------------------------------------------
 
-echo "#ifndef HK_VERSION_H" > $FILENAME
-echo "#define HK_VERSION_H" >> $FILENAME
-echo "#define HK_VERSION \"0.1.0\"" >> $FILENAME
-echo "#define HK_REVISION \"($REVISION)\"" >> $FILENAME
-echo "#endif" >> $FILENAME
+with_extensions="$1"
 
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-cpack --config build/CPackConfig.cmake
+source scripts/utils.sh
 
-git checkout -- src/hk_version.h
+cmake_build_and_pack Release "$with_extensions"

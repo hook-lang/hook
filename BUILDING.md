@@ -40,7 +40,7 @@ sudo apt-get install -y libcurl4-openssl-dev libhiredis-dev libmysqlclient-dev
 So you can build the extensions with the following command:
 
 ```
-scripts/build-extensions.sh
+scripts/build.sh Debug with-extensions
 ```
 
 ### Building for Release
@@ -48,7 +48,7 @@ scripts/build-extensions.sh
 To build the project for release, you can use the following command:
 
 ```
-scripts/release.sh
+scripts/build.sh Release
 ```
 
 ## Setting environment variable 
