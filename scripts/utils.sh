@@ -39,7 +39,7 @@ cmake_build() {
     build_type="$DEFAULT_BUILD_TYPE"
   fi
   if [ "$with_extensions" == "with-extensions" ]; then
-    with_extensions="-DBUILD_EXTENSIONS"
+    with_extensions="-DBUILD_EXTENSIONS=1"
   else
     with_extensions=""
   fi
