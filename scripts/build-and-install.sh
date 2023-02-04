@@ -21,4 +21,4 @@ install_prefix="$3"
 
 source scripts/utils.sh
 
-cmake_build_and_install "$build_type" "$with_extensions" "$install_prefix"
+cmake_build_and_install $build_type $with_extensions $install_prefix
