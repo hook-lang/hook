@@ -9,7 +9,7 @@ echo "#define HK_VERSION ""0.1.0""" >> $FILENAME
 echo "#define HK_REVISION ""(%REVISION%)\""" >> $FILENAME
 echo "#endif" >> $FILENAME
 
-cmake -B build -DCMAKE_TOOLCHAIN_FILE=%HOMEDRIVE%%HOMEPATH%\vcpkg\scripts\buildsystems\vcpkg.cmake -DBUILD_EXTENSIONS
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=%HOMEDRIVE%%HOMEPATH%\vcpkg\scripts\buildsystems\vcpkg.cmake -DBUILD_EXTENSIONS=1
 cmake --build build --config Release
 cpack --config build\CPackConfig.cmake
 

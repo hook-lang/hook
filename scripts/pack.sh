@@ -18,4 +18,4 @@ with_extensions="$1"
 
 source scripts/utils.sh
 
-cmake_build_and_pack Release "$with_extensions"
+cmake_build_and_pack Release $with_extensions
