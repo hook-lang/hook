@@ -173,8 +173,10 @@ add_library(regex_mod SHARED
 add_library(hashing_mod SHARED
   hk_hashing.c
   deps/ripemd160.c
+  deps/sha1.c
   deps/sha2.c
   deps/sha3.c
+  deps/md5.c
   ../src/hk_array.c
   ../src/hk_builtin.c
   ../src/hk_callable.c
