@@ -17,7 +17,7 @@
 #define MD5_DIGEST_SIZE       16
 #define RIPEMD160_DIGEST_SIZE 20
 
-static inline void md5(char *chars, int length, char *result);
+static inline void md5(char *chars, int32_t length, char *result);
 static int32_t sha224_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sha256_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t sha384_call(hk_vm_t *vm, hk_value_t *args);
@@ -27,7 +27,7 @@ static int32_t sha3_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t md5_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t ripemd160_call(hk_vm_t *vm, hk_value_t *args);
 
-static inline void md5(char *chars, int length, char *result)
+static inline void md5(char *chars, int32_t length, char *result)
 {
   MD5Context ctx;
   md5Init(&ctx);
