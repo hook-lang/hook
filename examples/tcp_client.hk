@@ -1,0 +1,31 @@
+//
+// tcp_client.hk
+//
+
+use socket;
+use { stdin, readln } from io;
+
+val { AF_INET, SOCK_STREAM, IPPROTO_TCP } = socket;
+val { SOL_SOCKET, SO_REUSEADDR } = socket;
+val { set_option, connect, send, recv, close } = socket;
+
+val host = "localhost";
+val port = 9000;
+
+val client = socket.new(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+set_option(client, SOL_SOCKET, SO_REUSEADDR, 1);
+connect(client, host, port);
+
+println("Connected to " + to_string(host) + ":" + to_string(port));
+
+loop {
+  val msg = readln(stdin);
+  send(client, msg, 0);
+  val received = recv(client, 1024, 0);
+  if (!received)
+    break;
+  println(received);
+}
+
+close(client);
+println("Server closed connection");

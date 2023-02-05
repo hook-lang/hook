@@ -1,0 +1,35 @@
+//
+// tcp_server.hk
+//
+
+use socket;
+
+val { AF_INET, SOCK_STREAM, IPPROTO_TCP } = socket;
+val { SOL_SOCKET, SO_REUSEADDR } = socket;
+val { set_option, bind, listen, accept, recv, send, close } = socket;
+
+val port = 9000;
+
+val server = socket.new(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+set_option(server, SOL_SOCKET, SO_REUSEADDR, 1);
+bind(server, "0.0.0.0", port);
+listen(server, 10);
+
+val client = accept(server);
+if (!client) {
+  panic("accept failed");
+}
+
+println("Client connected");
+
+loop {
+  val received = recv(client, 1024, 0);
+  if (!received)
+    break;
+  println("Received: " + received);
+  send(client, "reply - " + received, 0);
+}
+
+close(client);
+close(server);
+println("Client disconnected");
