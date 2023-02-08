@@ -2,8 +2,8 @@
 // distance.hk
 //
 
-use { PI } from numbers;
-use { abs, pow, sqrt, sin, asin, cos } from math;
+import { PI } from numbers;
+import { abs, pow, sqrt, sin, asin, cos } from math;
 
 val EARTH_RADIUS_KM = 6371.009;
 

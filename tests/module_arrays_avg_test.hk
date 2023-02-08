@@ -1,5 +1,5 @@
 
-use arrays;
+import arrays;
 println(arrays.avg([]));
 println(arrays.avg([1]));
 println(arrays.avg([2, 5, 10]));

@@ -2,7 +2,7 @@
 // mandelbrot.hk
 //
 
-use { floor } from math;
+import { floor } from math;
 val pixels = [" ", ".", ":", ";", "+", "=", "x", "X", "$", "&"];
 
 val y_min = -0.2;

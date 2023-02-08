@@ -2,7 +2,7 @@
 // pig_latin.hk
 //
 
-use { lower } from strings;
+import { lower } from strings;
 
 val vowels = ['a', 'e', 'i', 'o', 'u'];
 val num_vowels = len(vowels);

@@ -1,4 +1,4 @@
 
-use arrays;
+import arrays;
 val arr = arrays.new_array(100);
 println(arr);

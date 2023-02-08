@@ -1,3 +1,3 @@
 
-use arrays;
+import arrays;
 val arr = arrays.new_array("foo");

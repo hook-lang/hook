@@ -1,5 +1,5 @@
 
-use numbers;
+import numbers;
 println(numbers.PI);
 println(numbers.TAU);
 println(numbers.LARGEST);

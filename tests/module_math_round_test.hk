@@ -1,5 +1,5 @@
 
-use math;
+import math;
 println(math.round(1.4));
 println(math.round(1.49));
 println(math.round(1.5));

@@ -1,8 +1,8 @@
 
 chunk       ::= stmt* EOF
 
-stmt        ::= 'use' NAME ( 'as' NAME )? ';'
-              | 'use' '{' NAME ( ',' NAME )* '}' 'from' NAME ';'
+stmt        ::= 'import' NAME ( 'as' NAME )? ';'
+              | 'import' '{' NAME ( ',' NAME )* '}' 'from' NAME ';'
               | var_decl ';'
               | assign_call ';'
               | 'struct' NAME '{' ( STRING | NAME ( ',' STRING | NAME )* )? '}'

@@ -2,7 +2,7 @@
 // palindrome.hk
 //
 
-use { reverse } from strings;
+import { reverse } from strings;
 
 fn palindrome(str) {
 	return reverse(str) == str;

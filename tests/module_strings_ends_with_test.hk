@@ -1,5 +1,5 @@
 
-use { ends_with } from strings;
+import { ends_with } from strings;
 
 assert(ends_with("", "") == false, "ends_with('', '') == false");
 assert(ends_with("foo", "") == false, "ends_with('foo', '') == false");

@@ -96,7 +96,7 @@ static inline void end_loop(compiler_t *comp);
 static inline void compiler_init(compiler_t *comp, compiler_t *parent, scanner_t *scan,
   hk_string_t *name);
 static void compile_statement(compiler_t *comp);
-static void compile_load_module(compiler_t *comp);
+static void compile_import_statement(compiler_t *comp);
 static void compile_constant_declaration(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assign_statement(compiler_t *comp, token_t *tk);
@@ -387,9 +387,9 @@ static void compile_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   hk_chunk_add_line(&comp->fn->chunk, scan->token.line);
-  if (match(scan, TOKEN_USE))
+  if (match(scan, TOKEN_IMPORT))
   {
-    compile_load_module(comp);
+    compile_import_statement(comp);
     return;
   }
   if (match(scan, TOKEN_VAL))
@@ -495,7 +495,7 @@ static void compile_statement(compiler_t *comp)
   syntax_error_unexpected(comp);
 }
 
-static void compile_load_module(compiler_t *comp)
+static void compile_import_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;

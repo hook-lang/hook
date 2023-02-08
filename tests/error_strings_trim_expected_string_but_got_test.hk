@@ -1,3 +1,3 @@
 
-use { trim } from strings;
+import { trim } from strings;
 val a = trim(1);

@@ -2,7 +2,7 @@
 // tic_tac_toe.hk
 //
 
-use { stdin, readln } from io;
+import { stdin, readln } from io;
 
 fn grid_char(i) {
   return match (i) {

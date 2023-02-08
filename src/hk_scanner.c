@@ -547,6 +547,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_IF;
     return;
   }
+  if (match_chars(scan, "import"))
+  {
+    scan->token.type = TOKEN_IMPORT;
+    return;
+  }
   if (match_chars(scan, "in"))
   {
     scan->token.type = TOKEN_IN;
@@ -585,11 +590,6 @@ void scanner_next_token(scanner_t *scan)
   if (match_chars(scan, "true"))
   {
     scan->token.type = TOKEN_TRUE;
-    return;
-  }
-  if (match_chars(scan, "use"))
-  {
-    scan->token.type = TOKEN_USE;
     return;
   }
   if (match_chars(scan, "val"))

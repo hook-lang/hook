@@ -1,5 +1,5 @@
 
-use utf8;
+import utf8;
 println(utf8.len(""));
 println(utf8.len("Hi"));
 println(utf8.len("你好"));
