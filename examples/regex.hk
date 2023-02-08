@@ -2,7 +2,7 @@
 // regex.hk
 //
 
-use regex;
+import regex;
 
 val pattern = "^[a-zA-Z0-9_]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}$";
 val re = regex.new(pattern);

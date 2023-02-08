@@ -1,5 +1,5 @@
 
-use { reverse } from strings;
+import { reverse } from strings;
 
 assert(reverse("") == "", "reverse('') == ''");
 assert(reverse("foo") == "oof", "reverse('foo') == 'oof'");

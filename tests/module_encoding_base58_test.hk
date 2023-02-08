@@ -1,5 +1,5 @@
 
-use encoding;
+import encoding;
 val encoded = encoding.base58_encode("foo bar baz");
 assert(encoded == "SQHFQMRT97NTco3", "encoded must be 'SQHFQMRT97NTco3'");
 val decoded = encoding.base58_decode(encoded);

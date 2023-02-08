@@ -2,7 +2,7 @@
 // pythagoras.hk
 //
 
-use { sqrt, pow } from math;
+import { sqrt, pow } from math;
 
 fn hypothenuse(a, b) {
   return sqrt(pow(a, 2) + pow(b, 2));

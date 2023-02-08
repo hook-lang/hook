@@ -1,5 +1,5 @@
 
-use strings;
+import strings;
 println(strings.upper(""));
 println(strings.upper("foo"));
 println(strings.upper("Bar"));

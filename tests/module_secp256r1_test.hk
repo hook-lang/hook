@@ -1,6 +1,6 @@
 
-use secp256r1;
-use { sha256 } from hashing;
+import secp256r1;
+import { sha256 } from hashing;
 
 val key_pair = secp256r1.new_key_pair();
 assert(type(key_pair) == "array", "key_pair must be an array");

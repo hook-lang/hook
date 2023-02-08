@@ -2,7 +2,7 @@
 // bhaskara.hk
 //
 
-use { sqrt } from math;
+import { sqrt } from math;
 
 fn bhaskara(a, b, c) {
   val d = b * b - 4 * a * c;

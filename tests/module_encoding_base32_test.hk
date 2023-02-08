@@ -1,5 +1,5 @@
 
-use encoding;
+import encoding;
 val encoded = encoding.base32_encode("foo bar baz");
 assert(encoded == "MZXW6IDCMFZCAYTBPI======", "encoded must be 'MZXW6IDCMFZCAYTBPI======'");
 val decoded = encoding.base32_decode(encoded);

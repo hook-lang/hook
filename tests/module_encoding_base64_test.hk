@@ -1,5 +1,5 @@
 
-use encoding;
+import encoding;
 val encoded = encoding.base64_encode("foo bar baz");
 assert(encoded == "Zm9vIGJhciBiYXo=", "encoded must be 'Zm9vIGJhciBiYXo='");
 val decoded = encoding.base64_decode(encoded);

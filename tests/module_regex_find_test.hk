@@ -1,5 +1,5 @@
 
-use regex;
+import regex;
 val pattern = "[a-zA-Z0-9_]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}";
 val str = "foo#domain.com,bar@domain.com";
 val re = regex.new(pattern);

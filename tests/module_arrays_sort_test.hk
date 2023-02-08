@@ -1,5 +1,5 @@
 
-use { sort } from arrays;
+import { sort } from arrays;
 
 assert(sort([]) == [], "sort([]) == []");
 assert(sort([3]) == [3], "sort([3]) == [3]");

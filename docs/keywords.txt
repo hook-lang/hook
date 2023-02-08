@@ -12,6 +12,7 @@ foreach
 from
 if
 if!
+import
 in
 loop
 match
@@ -20,7 +21,6 @@ nil
 return
 struct
 true
-use
 val
 while
 while!

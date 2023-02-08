@@ -1,5 +1,5 @@
 
-use hashing;
+import hashing;
 val expected = "acbd18db4cc2f85cedef654fccc4a4d8";
 val x = hex(hashing.md5("foo"));
 assert(x == expected, "x must equal expected");

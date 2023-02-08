@@ -1,5 +1,5 @@
 
-use arrays;
+import arrays;
 println(arrays.max([]));
 println(arrays.max([1]));
 println(arrays.max([10, 5, -5]));

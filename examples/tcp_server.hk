@@ -2,15 +2,15 @@
 // tcp_server.hk
 //
 
-use socket;
+import socket;
 
-val { AF_INET, SOCK_STREAM, IPPROTO_TCP } = socket;
+val { AF_INET, SOCK_STREAM } = socket;
 val { SOL_SOCKET, SO_REUSEADDR } = socket;
 val { set_option, bind, listen, accept, recv, send, close } = socket;
 
 val port = 9000;
 
-val server = socket.new(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+val server = socket.new(AF_INET, SOCK_STREAM, 0);
 set_option(server, SOL_SOCKET, SO_REUSEADDR, 1);
 bind(server, "0.0.0.0", port);
 listen(server, 10);

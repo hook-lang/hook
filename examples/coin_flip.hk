@@ -2,7 +2,7 @@
 // coin_flip.hk
 //
 
-use { round, random } from math;
+import { round, random } from math;
 
 fn coin_flip(times) {
   mut heads = 0;

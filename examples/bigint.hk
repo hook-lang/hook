@@ -2,7 +2,7 @@
 // bigint.hk
 //
 
-use bigint;
+import bigint;
 
 val x = bigint.new("2222222222222222222222222222222222222222");
 val y = bigint.new("3333333333333333333333333333333333333333");

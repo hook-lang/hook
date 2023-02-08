@@ -1,5 +1,5 @@
 
-use socket;
+import socket;
 mut sock;
 sock = socket.new(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP);
 socket.close(sock);

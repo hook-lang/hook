@@ -2,7 +2,7 @@
 // sieve_of_eratosthenes.hk
 //
 
-use { new_array } from arrays;
+import { new_array } from arrays;
 
 fn sieve_of_eratosthenes(n) {
   mut prime = new_array(n + 1);

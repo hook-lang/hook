@@ -2,17 +2,17 @@
 // tcp_client.hk
 //
 
-use socket;
-use { stdin, readln } from io;
+import socket;
+import { stdin, readln } from io;
 
-val { AF_INET, SOCK_STREAM, IPPROTO_TCP } = socket;
+val { AF_INET, SOCK_STREAM } = socket;
 val { SOL_SOCKET, SO_REUSEADDR } = socket;
 val { set_option, connect, send, recv, close } = socket;
 
 val host = "localhost";
 val port = 9000;
 
-val client = socket.new(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+val client = socket.new(AF_INET, SOCK_STREAM, 0);
 set_option(client, SOL_SOCKET, SO_REUSEADDR, 1);
 connect(client, host, port);
 

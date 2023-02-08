@@ -1,5 +1,5 @@
 
-use { reverse } from arrays;
+import { reverse } from arrays;
 
 assert(reverse([]) == [], "reverse([]) == []");
 assert(reverse(["foo"]) == ["foo"], "reverse(['foo']) == ['foo']");
