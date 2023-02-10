@@ -68,7 +68,7 @@ typedef struct compiler
   hk_function_t *fn;
 } compiler_t;
 
-static inline void syntax_error(const char *function, const char *file, int32_t line,
+static inline void syntax_error(hk_string_t *name, const char *file, int32_t line,
   int32_t col, const char *fmt, ...);
 static inline void syntax_error_unexpected(compiler_t *comp);
 static inline double parse_double(compiler_t *comp);
@@ -140,7 +140,7 @@ static void compile_subscript(compiler_t *comp);
 static variable_t compile_variable(compiler_t *comp, token_t *tk, bool emit);
 static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk);
 
-static inline void syntax_error(const char *function, const char *file, int32_t line,
+static inline void syntax_error(hk_string_t *name, const char *file, int32_t line,
   int32_t col, const char *fmt, ...)
 {
   fprintf(stderr, "syntax error: ");
@@ -148,7 +148,8 @@ static inline void syntax_error(const char *function, const char *file, int32_t 
   va_start(args, fmt);
   vfprintf(stderr, fmt, args);
   va_end(args);
-  fprintf(stderr, "\n  at %s() in %s:%d,%d\n", function, file, line, col);
+  char *name_chars = name ? name->chars : "<anonymous>";
+  fprintf(stderr, "\n  at %s() in %s:%d,%d\n", name_chars, file, line, col);
   exit(EXIT_FAILURE);
 }
 
@@ -156,11 +157,11 @@ static inline void syntax_error_unexpected(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   token_t *tk = &scan->token;
-  char *function = comp->fn->name->chars;
+  hk_string_t *name = comp->fn->name;
   char *file = scan->file->chars;
   if (tk->type == TOKEN_EOF)
-    syntax_error(function, file, tk->line, tk->col, "unexpected end of file");
-  syntax_error(function, file, tk->line, tk->col, "unexpected token `%.*s`",
+    syntax_error(name, file, tk->line, tk->col, "unexpected end of file");
+  syntax_error(name, file, tk->line, tk->col, "unexpected token `%.*s`",
     tk->length, tk->start);
 }
 
@@ -171,7 +172,7 @@ static inline double parse_double(compiler_t *comp)
   errno = 0;
   double result = strtod(tk->start, NULL);
   if (errno == ERANGE)
-    syntax_error(comp->fn->name->chars, scan->file->chars, tk->line, tk->col,
+    syntax_error(comp->fn->name, scan->file->chars, tk->line, tk->col,
       "floating point number `%.*s` out of range", tk->length, tk->start);
   return result;
 }
@@ -220,7 +221,7 @@ static inline uint8_t add_constant(compiler_t *comp, hk_value_t val)
   scanner_t *scan = comp->scan;
   token_t *tk = &scan->token;
   if (consts->length == MAX_CONSTANTS)
-    syntax_error(fn->name->chars, scan->file->chars, tk->line, tk->col,
+    syntax_error(fn->name, scan->file->chars, tk->line, tk->col,
       "a function may only contain %d unique constants", MAX_CONSTANTS);
   uint8_t index = (uint8_t) consts->length;
   hk_array_inplace_add_element(consts, val);
@@ -274,7 +275,7 @@ static inline void add_variable(compiler_t *comp, bool is_local, uint8_t index, 
   bool is_mutable)
 {
   if (comp->num_variables == MAX_VARIABLES)
-    syntax_error(comp->fn->name->chars, comp->scan->file->chars, tk->line, tk->col,
+    syntax_error(comp->fn->name, comp->scan->file->chars, tk->line, tk->col,
       "a function may only contain %d unique variables", MAX_VARIABLES);
   variable_t *var = &comp->variables[comp->num_variables];
   var->is_local = is_local;
@@ -294,7 +295,7 @@ static inline void define_local(compiler_t *comp, token_t *tk, bool is_mutable)
     if (var->depth < comp->scope_depth)
       break;
     if (variable_match(tk, var))
-      syntax_error(comp->fn->name->chars, comp->scan->file->chars, tk->line, tk->col,
+      syntax_error(comp->fn->name, comp->scan->file->chars, tk->line, tk->col,
         "variable `%.*s` is already defined in this scope", tk->length, tk->start);
   }
   add_local(comp, tk, is_mutable);
@@ -306,7 +307,7 @@ static inline variable_t resolve_variable(compiler_t *comp, token_t *tk)
   if (var)
     return *var;
   if (!nonlocal_exists(comp->parent, tk) && lookup_global(tk->length, tk->start) == -1)
-    syntax_error(comp->fn->name->chars, comp->scan->file->chars, tk->line, tk->col,
+    syntax_error(comp->fn->name, comp->scan->file->chars, tk->line, tk->col,
       "variable `%.*s` is used but not defined", tk->length, tk->start);
   return (variable_t) {.is_mutable = false};
 }
@@ -344,7 +345,7 @@ static inline void patch_jump(compiler_t *comp, int32_t offset)
   token_t *tk = &scan->token;
   int32_t jump = chunk->code_length;
   if (jump > UINT16_MAX)
-    syntax_error(comp->fn->name->chars, scan->file->chars, tk->line, tk->col,
+    syntax_error(comp->fn->name, scan->file->chars, tk->line, tk->col,
       "code too large");
   *((uint16_t *) &chunk->code[offset]) = (uint16_t) jump;
 }
@@ -753,7 +754,7 @@ static void compile_assign_statement(compiler_t *comp, token_t *tk)
   }
 end:
   if (!var.is_mutable)
-    syntax_error(fn->name->chars, scan->file->chars, tk->line, tk->col,
+    syntax_error(fn->name, scan->file->chars, tk->line, tk->col,
       "cannot assign to immutable variable `%.*s`", tk->length, tk->start);
   hk_chunk_emit_opcode(chunk, HK_OP_STORE);
   hk_chunk_emit_byte(chunk, var.index);
@@ -1087,7 +1088,7 @@ static void compile_del_statement(compiler_t *comp)
   scanner_next_token(scan);
   variable_t var = resolve_variable(comp, &tk);
   if (!var.is_mutable)
-    syntax_error(fn->name->chars, scan->file->chars, tk.line, tk.col,
+    syntax_error(fn->name, scan->file->chars, tk.line, tk.col,
       "cannot delete element from immutable variable `%.*s`", tk.length, tk.start);
   hk_chunk_emit_opcode(chunk, HK_OP_LOAD);
   hk_chunk_emit_byte(chunk, var.index);
@@ -1373,7 +1374,7 @@ static void compile_continue_statement(compiler_t *comp)
   token_t tk = scan->token;
   scanner_next_token(scan);
   if (!comp->loop)
-    syntax_error(fn->name->chars, scan->file->chars, tk.line, tk.col,
+    syntax_error(fn->name, scan->file->chars, tk.line, tk.col,
       "cannot use continue outside of a loop");
   consume(comp, TOKEN_SEMICOLON);
   discard_variables(comp, comp->loop->scope_depth + 1);
@@ -1384,18 +1385,18 @@ static void compile_continue_statement(compiler_t *comp)
 static void compile_break_statement(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
-  char *function = comp->fn->name->chars;
+  hk_string_t *name = comp->fn->name;
   char *file = scan->file->chars;
   token_t tk = scan->token;
   scanner_next_token(scan);
   if (!comp->loop)
-    syntax_error(function, file, tk.line, tk.col,
+    syntax_error(name, file, tk.line, tk.col,
       "cannot use break outside of a loop");
   consume(comp, TOKEN_SEMICOLON);
   discard_variables(comp, comp->loop->scope_depth + 1);
   loop_t *loop = comp->loop;
   if (loop->num_offsets == MAX_BREAKS)
-    syntax_error(function, file, tk.line, tk.col,
+    syntax_error(name, file, tk.line, tk.col,
       "cannot use more than %d breaks", MAX_BREAKS);
   int32_t offset = emit_jump(&comp->fn->chunk, HK_OP_JUMP);
   loop->offsets[loop->num_offsets++] = offset;
@@ -2044,7 +2045,7 @@ static variable_t compile_variable(compiler_t *comp, token_t *tk, bool emit)
   }
   int32_t index = lookup_global(tk->length, tk->start);
   if (index == -1)
-    syntax_error(fn->name->chars, comp->scan->file->chars, tk->line, tk->col,
+    syntax_error(fn->name, comp->scan->file->chars, tk->line, tk->col,
       "variable `%.*s` is used but not defined", tk->length, tk->start);
   hk_chunk_emit_opcode(chunk, HK_OP_GLOBAL);
   hk_chunk_emit_byte(chunk, (uint8_t) index);
@@ -2065,7 +2066,7 @@ static variable_t *compile_nonlocal(compiler_t *comp, token_t *tk)
     if (var->is_local)
     {
       if (var->is_mutable)
-        syntax_error(fn->name->chars, comp->scan->file->chars, tk->line, tk->col,
+        syntax_error(fn->name, comp->scan->file->chars, tk->line, tk->col,
           "cannot capture mutable variable `%.*s`", tk->length, tk->start);
       op = HK_OP_LOAD;
     }
