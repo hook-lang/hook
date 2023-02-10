@@ -102,7 +102,9 @@ static void compile_variable_declaration(compiler_t *comp);
 static void compile_assign_statement(compiler_t *comp, token_t *tk);
 static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace);
 static void compile_struct_declaration(compiler_t *comp, bool is_anonymous);
-static void compile_function_declaration(compiler_t *comp, bool is_anonymous);
+static void compile_function_declaration(compiler_t *comp);
+static void compile_anonymous_function(compiler_t *comp);
+static void compile_anonymous_function_without_params(compiler_t *comp);
 static void compile_del_statement(compiler_t *comp);
 static void compile_delete(compiler_t *comp, bool inplace);
 static void compile_if_statement(compiler_t *comp, bool not);
@@ -420,7 +422,7 @@ static void compile_statement(compiler_t *comp)
   }
   if (match(scan, TOKEN_FN))
   {
-    compile_function_declaration(comp, false);
+    compile_function_declaration(comp);
     return;
   }
   if (match(scan, TOKEN_DEL))
@@ -991,26 +993,21 @@ static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)
   hk_chunk_emit_byte(chunk, length);
 }
 
-static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
+static void compile_function_declaration(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   hk_function_t *fn = comp->fn;
   hk_chunk_t *chunk = &fn->chunk;
   scanner_next_token(scan);
   compiler_t child_comp;
-  if (!is_anonymous)
-  {
-    if (!match(scan, TOKEN_NAME))
-      syntax_error_unexpected(comp);
-    token_t tk = scan->token;
-    scanner_next_token(scan);
-    define_local(comp, &tk, false);
-    hk_string_t *name = hk_string_from_chars(tk.length, tk.start);
-    compiler_init(&child_comp, comp, scan, name);
-    add_variable(&child_comp, true, 0, &tk, false);
-  }
-  else
-    compiler_init(&child_comp, comp, scan, NULL);
+  if (!match(scan, TOKEN_NAME))
+    syntax_error_unexpected(comp);
+  token_t tk = scan->token;
+  scanner_next_token(scan);
+  define_local(comp, &tk, false);
+  hk_string_t *name = hk_string_from_chars(tk.length, tk.start);
+  compiler_init(&child_comp, comp, scan, name);
+  add_variable(&child_comp, true, 0, &tk, false);
   hk_chunk_t *child_chunk = &child_comp.fn->chunk;
   consume(comp, TOKEN_LPAREN);
   if (match(scan, TOKEN_RPAREN))
@@ -1057,6 +1054,106 @@ static void compile_function_declaration(compiler_t *comp, bool is_anonymous)
   }
   child_comp.fn->arity = arity;
   consume(comp, TOKEN_RPAREN);
+  if (match(scan, TOKEN_ARROW))
+  {
+    scanner_next_token(scan);
+    compile_expression(&child_comp);
+    hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN);
+    goto end;
+  }
+  if (!match(scan, TOKEN_LBRACE))
+    syntax_error_unexpected(comp);
+  compile_block(&child_comp);
+  hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
+  uint8_t index;
+end:
+  index = fn->functions_length;
+  hk_function_add_child(fn, child_comp.fn);
+  hk_chunk_emit_opcode(chunk, HK_OP_CLOSURE);
+  hk_chunk_emit_byte(chunk, index);
+}
+
+static void compile_anonymous_function(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  hk_function_t *fn = comp->fn;
+  hk_chunk_t *chunk = &fn->chunk;
+  scanner_next_token(scan);
+  compiler_t child_comp;
+  compiler_init(&child_comp, comp, scan, NULL);
+  hk_chunk_t *child_chunk = &child_comp.fn->chunk;
+  if (match(scan, TOKEN_PIPE))
+  {
+    scanner_next_token(scan);
+    if (match(scan, TOKEN_ARROW))
+    {
+      scanner_next_token(scan);
+      compile_expression(&child_comp);
+      hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN);
+      goto end;
+    }
+    if (!match(scan, TOKEN_LBRACE))
+      syntax_error_unexpected(comp);
+    compile_block(&child_comp);
+    hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
+    goto end;
+  }
+  bool is_mutable = false;
+  if (match(scan, TOKEN_MUT))
+  {
+    scanner_next_token(scan);
+    is_mutable = true;
+  }
+  if (!match(scan, TOKEN_NAME))
+    syntax_error_unexpected(comp);
+  define_local(&child_comp, &scan->token, is_mutable);
+  scanner_next_token(scan);
+  int32_t arity = 1;
+  while (match(scan, TOKEN_COMMA))
+  {
+    scanner_next_token(scan);
+    bool is_mutable = false;
+    if (match(scan, TOKEN_MUT))
+    {
+      scanner_next_token(scan);
+      is_mutable = true;
+    }
+    if (!match(scan, TOKEN_NAME))
+      syntax_error_unexpected(comp);
+    define_local(&child_comp, &scan->token, is_mutable);
+    scanner_next_token(scan);
+    ++arity;
+  }
+  child_comp.fn->arity = arity;
+  consume(comp, TOKEN_PIPE);
+  if (match(scan, TOKEN_ARROW))
+  {
+    scanner_next_token(scan);
+    compile_expression(&child_comp);
+    hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN);
+    goto end;
+  }
+  if (!match(scan, TOKEN_LBRACE))
+    syntax_error_unexpected(comp);
+  compile_block(&child_comp);
+  hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
+  uint8_t index;
+end:
+  index = fn->functions_length;
+  hk_function_add_child(fn, child_comp.fn);
+  hk_chunk_emit_opcode(chunk, HK_OP_CLOSURE);
+  hk_chunk_emit_byte(chunk, index);
+}
+
+static void compile_anonymous_function_without_params(compiler_t *comp)
+{
+  scanner_t *scan = comp->scan;
+  hk_function_t *fn = comp->fn;
+  hk_chunk_t *chunk = &fn->chunk;
+  scanner_next_token(scan);
+  compiler_t child_comp;
+  compiler_init(&child_comp, comp, scan, NULL);
+  hk_chunk_t *child_chunk = &child_comp.fn->chunk;
   if (match(scan, TOKEN_ARROW))
   {
     scanner_next_token(scan);
@@ -1759,9 +1856,14 @@ static void compile_prim_expression(compiler_t *comp)
     compile_struct_declaration(comp, true);
     return;
   }
-  if (match(scan, TOKEN_FN))
+  if (match(scan, TOKEN_PIPE))
   {
-    compile_function_declaration(comp, true);
+    compile_anonymous_function(comp);
+    return;
+  }
+  if (match(scan, TOKEN_PIPEPIPE))
+  {
+    compile_anonymous_function_without_params(comp);
     return;
   }
   if (match(scan, TOKEN_IF))

@@ -4,7 +4,7 @@ fn f (x) {
   val b = 2;
   fn g (y) {
     val c = 3;
-    val h = fn (z) {
+    val h = |z| {
       return z + c + y + b * x * x;
     };
     return h;
