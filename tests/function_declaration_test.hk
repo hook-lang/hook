@@ -3,27 +3,35 @@ fn f(a, b) {
   return a + b;
 }
 
-val g = fn (a, b) {
+val g = |a, b| {
   return a - b;
 };
 
 fn h(a, b) => a + b
 
-val i = fn (a, b) => a - b;
+val i = |a, b| => a - b;
 
-fn j() {
-  fn f() {}
-  fn g() {}
-  fn h() {}
-  fn i() {}
-  fn j() {}
-  fn k() {}
-  fn l() {}
+val j = || {
+  return 1;
+};
+
+val k = || => 1;
+
+fn l() {
   fn m() {}
   fn n() {}
+  fn o() {}
+  fn p() {}
+  fn q() {}
+  fn r() {}
+  fn s() {}
+  fn t() {}
+  fn u() {}
 }
 
 println(f(1, 2));
 println(g(3, 2));
 println(h(1, 2));
 println(i(3, 2));
+println(j());
+println(k());

@@ -69,8 +69,7 @@ prim_expr   ::= 'nil' | 'false' | 'true' | INT | FLOAT | STRING
               | '[' ( expr ( ',' expr )* )? ']'
               | '{' ( STRING | NAME ':' expr ( ',' STRING | NAME ':' expr )* )? '}'
               | 'struct' '{' ( STRING | NAME ( ',' STRING | NAME )* )? '}'
-              | 'fn' '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
-                ( '=>' expr | block )
+              | '|' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? '|' ( '=>' expr | block )
               | ( 'if' | 'if!' ) '(' expr ')' expr 'else' expr
               | 'match' '(' expr ')' '{' expr '=>' expr ( ',' expr '=>' expr )*
                 ',' '_' '=>' expr '}'

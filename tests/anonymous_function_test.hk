@@ -1,5 +1,5 @@
 
-val sum = fn (a, b) {
+val sum = |a, b| {
   return a + b;
 };
 
