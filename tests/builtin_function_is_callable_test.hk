@@ -1,0 +1,4 @@
+
+println(is_callable(print));
+println(is_callable(|| {}));
+println(is_callable(nil));

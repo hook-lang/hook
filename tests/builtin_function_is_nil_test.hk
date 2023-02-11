@@ -1,0 +1,3 @@
+
+println(is_nil(nil));
+println(is_nil(false));

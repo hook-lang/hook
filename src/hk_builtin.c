@@ -32,6 +32,21 @@ static const char *globals[] = {
   "print",
   "println",
   "type",
+  "is_nil",
+  "is_bool",
+  "is_number",
+  "is_int",
+  "is_string",
+  "is_range",
+  "is_array",
+  "is_struct",
+  "is_instance",
+  "is_iterator",
+  "is_callable",
+  "is_userdata",
+  "is_object",
+  "is_comparable",
+  "is_iterable",
   "to_bool",
   "to_int",
   "to_number",
@@ -40,6 +55,7 @@ static const char *globals[] = {
   "chr",
   "hex",
   "bin",
+  "address",
   "refcount",
   "cap",
   "len",
@@ -62,6 +78,21 @@ static inline int32_t join(hk_array_t *arr, hk_string_t *separator, hk_string_t 
 static int32_t print_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t println_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t type_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_nil_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_bool_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_number_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_int_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_string_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_range_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_array_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_struct_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_instance_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_iterator_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_callable_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_userdata_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_object_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_comparable_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t is_iterable_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t to_bool_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t to_int_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t to_number_call(hk_vm_t *vm, hk_value_t *args);
@@ -70,6 +101,7 @@ static int32_t ord_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t chr_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t hex_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t bin_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t address_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t refcount_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t cap_call(hk_vm_t *vm, hk_value_t *args);
 static int32_t len_call(hk_vm_t *vm, hk_value_t *args);
@@ -146,6 +178,81 @@ static int32_t println_call(hk_vm_t *vm, hk_value_t *args)
 static int32_t type_call(hk_vm_t *vm, hk_value_t *args)
 {
   return hk_vm_push_string_from_chars(vm, -1, hk_type_name(args[1].type));
+}
+
+static int32_t is_nil_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_nil(args[1]));
+}
+
+static int32_t is_bool_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_bool(args[1]));
+}
+
+static int32_t is_number_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_number(args[1]));
+}
+
+static int32_t is_int_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_int(args[1]));
+}
+
+static int32_t is_string_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_string(args[1]));
+}
+
+static int32_t is_range_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_range(args[1]));
+}
+
+static int32_t is_array_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_array(args[1]));
+}
+
+static int32_t is_struct_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_struct(args[1]));
+}
+
+static int32_t is_instance_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_instance(args[1]));
+}
+
+static int32_t is_iterator_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_iterator(args[1]));
+}
+
+static int32_t is_callable_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_callable(args[1]));
+}
+
+static int32_t is_userdata_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_userdata(args[1]));
+}
+
+static int32_t is_object_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_object(args[1]));
+}
+
+static int32_t is_comparable_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_comparable(args[1]));
+}
+
+static int32_t is_iterable_call(hk_vm_t *vm, hk_value_t *args)
+{
+  return hk_vm_push_bool(vm, hk_is_iterable(args[1]));
 }
 
 static int32_t to_bool_call(hk_vm_t *vm, hk_value_t *args)
@@ -305,6 +412,13 @@ static int32_t bin_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   }
   return HK_STATUS_OK;
+}
+
+static int32_t address_call(hk_vm_t *vm, hk_value_t *args)
+{
+  hk_value_t val = args[1];
+  void *result = hk_is_object(val) ? val.as.pointer_value : NULL;
+  return hk_vm_push_number(vm, (int64_t) result);
 }
 
 static int32_t refcount_call(hk_vm_t *vm, hk_value_t *args)
@@ -505,28 +619,44 @@ void load_globals(hk_vm_t *vm)
   hk_vm_push_new_native(vm, globals[0], 1, &print_call);
   hk_vm_push_new_native(vm, globals[1], 1, &println_call);
   hk_vm_push_new_native(vm, globals[2], 1, &type_call);
-  hk_vm_push_new_native(vm, globals[3], 1, &to_bool_call);
-  hk_vm_push_new_native(vm, globals[4], 1, &to_int_call);
-  hk_vm_push_new_native(vm, globals[5], 1, &to_number_call);
-  hk_vm_push_new_native(vm, globals[6], 1, &to_string_call);
-  hk_vm_push_new_native(vm, globals[7], 1, &ord_call);
-  hk_vm_push_new_native(vm, globals[8], 1, &chr_call);
-  hk_vm_push_new_native(vm, globals[9], 1, &hex_call);
-  hk_vm_push_new_native(vm, globals[10], 1, &bin_call);
-  hk_vm_push_new_native(vm, globals[11], 1, &refcount_call);
-  hk_vm_push_new_native(vm, globals[12], 1, &cap_call);
-  hk_vm_push_new_native(vm, globals[13], 1, &len_call);
-  hk_vm_push_new_native(vm, globals[14], 1, &is_empty_call);
-  hk_vm_push_new_native(vm, globals[15], 2, &compare_call);
-  hk_vm_push_new_native(vm, globals[16], 2, &split_call);
-  hk_vm_push_new_native(vm, globals[17], 2, &join_call);
-  hk_vm_push_new_native(vm, globals[18], 1, &iter_call);
-  hk_vm_push_new_native(vm, globals[19], 1, &valid_call);
-  hk_vm_push_new_native(vm, globals[20], 1, &current_call);
-  hk_vm_push_new_native(vm, globals[21], 1, &next_call);
-  hk_vm_push_new_native(vm, globals[22], 1, &sleep_call);
-  hk_vm_push_new_native(vm, globals[23], 2, &assert_call);
-  hk_vm_push_new_native(vm, globals[24], 1, &panic_call);
+  hk_vm_push_new_native(vm, globals[3], 1, &is_nil_call);
+  hk_vm_push_new_native(vm, globals[4], 1, &is_bool_call);
+  hk_vm_push_new_native(vm, globals[5], 1, &is_number_call);
+  hk_vm_push_new_native(vm, globals[6], 1, &is_int_call);
+  hk_vm_push_new_native(vm, globals[7], 1, &is_string_call);
+  hk_vm_push_new_native(vm, globals[8], 1, &is_range_call);
+  hk_vm_push_new_native(vm, globals[9], 1, &is_array_call);
+  hk_vm_push_new_native(vm, globals[10], 1, &is_struct_call);
+  hk_vm_push_new_native(vm, globals[11], 1, &is_instance_call);
+  hk_vm_push_new_native(vm, globals[12], 1, &is_iterator_call);
+  hk_vm_push_new_native(vm, globals[13], 1, &is_callable_call);
+  hk_vm_push_new_native(vm, globals[14], 1, &is_userdata_call);
+  hk_vm_push_new_native(vm, globals[15], 1, &is_object_call);
+  hk_vm_push_new_native(vm, globals[16], 1, &is_comparable_call);
+  hk_vm_push_new_native(vm, globals[17], 1, &is_iterable_call);
+  hk_vm_push_new_native(vm, globals[18], 1, &to_bool_call);
+  hk_vm_push_new_native(vm, globals[19], 1, &to_int_call);
+  hk_vm_push_new_native(vm, globals[20], 1, &to_number_call);
+  hk_vm_push_new_native(vm, globals[21], 1, &to_string_call);
+  hk_vm_push_new_native(vm, globals[22], 1, &ord_call);
+  hk_vm_push_new_native(vm, globals[23], 1, &chr_call);
+  hk_vm_push_new_native(vm, globals[24], 1, &hex_call);
+  hk_vm_push_new_native(vm, globals[25], 1, &bin_call);
+  hk_vm_push_new_native(vm, globals[26], 1, &address_call);
+  hk_vm_push_new_native(vm, globals[27], 1, &refcount_call);
+  hk_vm_push_new_native(vm, globals[28], 1, &cap_call);
+  hk_vm_push_new_native(vm, globals[29], 1, &len_call);
+  hk_vm_push_new_native(vm, globals[30], 1, &is_empty_call);
+  hk_vm_push_new_native(vm, globals[31], 2, &compare_call);
+  hk_vm_push_new_native(vm, globals[32], 2, &split_call);
+  hk_vm_push_new_native(vm, globals[33], 2, &join_call);
+  hk_vm_push_new_native(vm, globals[34], 1, &iter_call);
+  hk_vm_push_new_native(vm, globals[35], 1, &valid_call);
+  hk_vm_push_new_native(vm, globals[36], 1, &current_call);
+  hk_vm_push_new_native(vm, globals[37], 1, &next_call);
+  hk_vm_push_new_native(vm, globals[38], 1, &sleep_call);
+  hk_vm_push_new_native(vm, globals[39], 2, &assert_call);
+  hk_vm_push_new_native(vm, globals[40], 1, &panic_call);
 }
 
 int32_t num_globals(void)
