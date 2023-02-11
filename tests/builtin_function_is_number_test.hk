@@ -1,0 +1,4 @@
+
+println(is_number(1));
+println(is_number(3.14));
+println(is_number(nil));

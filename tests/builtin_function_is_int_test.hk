@@ -1,0 +1,4 @@
+
+println(is_int(1));
+println(is_int(3.24));
+println(is_int(nil));
