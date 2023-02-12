@@ -22,7 +22,8 @@ static inline void next_char(scanner_t *scan);
 static inline void next_chars(scanner_t *scan, int32_t n);
 static inline bool match_char(scanner_t *scan, const char c);
 static inline bool match_chars(scanner_t *scan, const char *chars);
-static inline bool match_float(scanner_t *scan);
+static inline bool match_keyword(scanner_t *scan, const char *keyword);
+static inline bool match_number(scanner_t *scan);
 static inline bool match_string(scanner_t *scan);
 static inline bool match_name(scanner_t *scan);
 
@@ -109,7 +110,20 @@ static inline bool match_char(scanner_t *scan, const char c)
 static inline bool match_chars(scanner_t *scan, const char *chars)
 {
   int32_t n = (int32_t) strnlen(chars, MATCH_MAX_LENGTH);
-  if (strncmp(scan->pos, chars, n)
+  if (strncmp(scan->pos, chars, n))
+    return false;
+  scan->token.line = scan->line;
+  scan->token.col = scan->col;
+  scan->token.length = n;
+  scan->token.start = scan->pos;
+  next_chars(scan, n);
+  return true;
+}
+
+static inline bool match_keyword(scanner_t *scan, const char *keyword)
+{
+  int32_t n = (int32_t) strnlen(keyword, MATCH_MAX_LENGTH);
+  if (strncmp(scan->pos, keyword, n)
    || (isalnum(char_at(scan, n)))
    || (char_at(scan, n) == '_'))
     return false;
@@ -121,7 +135,7 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
   return true;
 }
 
-static inline bool match_float(scanner_t *scan)
+static inline bool match_number(scanner_t *scan)
 {
   int32_t n = 0;
   if (char_at(scan, n) == '0')
@@ -420,7 +434,7 @@ void scanner_next_token(scanner_t *scan)
   }
   if (match_chars(scan, "--"))
   {
-    scan->token.type = TOKEN_DASH;
+    scan->token.type = TOKEN_DASHDASH;
     return;
   }
   if (match_char(scan, '-'))
@@ -473,7 +487,7 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_PERCENT;
     return;
   }
-  if (match_float(scan))
+  if (match_number(scan))
     return;
   if (match_string(scan))
     return;
@@ -482,127 +496,127 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_UNDERSCORE;
     return;
   }
-  if (match_chars(scan, "as"))
+  if (match_keyword(scan, "as"))
   {
     scan->token.type = TOKEN_AS;
     return;
   }
-  if (match_chars(scan, "break"))
+  if (match_keyword(scan, "break"))
   {
     scan->token.type = TOKEN_BREAK;
     return;
   }
-  if (match_chars(scan, "continue"))
+  if (match_keyword(scan, "continue"))
   {
     scan->token.type = TOKEN_CONTINUE;
     return;
   }
-  if (match_chars(scan, "del"))
+  if (match_keyword(scan, "del"))
   {
     scan->token.type = TOKEN_DEL;
     return;
   }
-  if (match_chars(scan, "do"))
+  if (match_keyword(scan, "do"))
   {
     scan->token.type = TOKEN_DO;
     return;
   }
-  if (match_chars(scan, "else"))
+  if (match_keyword(scan, "else"))
   {
     scan->token.type = TOKEN_ELSE;
     return;
   }
-  if (match_chars(scan, "false"))
+  if (match_keyword(scan, "false"))
   {
     scan->token.type = TOKEN_FALSE;
     return;
   }
-  if (match_chars(scan, "fn"))
+  if (match_keyword(scan, "fn"))
   {
     scan->token.type = TOKEN_FN;
     return;
   }
-  if (match_chars(scan, "foreach"))
+  if (match_keyword(scan, "foreach"))
   {
     scan->token.type = TOKEN_FOREACH;
     return;
   }
-  if (match_chars(scan, "for"))
+  if (match_keyword(scan, "for"))
   {
     scan->token.type = TOKEN_FOR;
     return;
   }
-  if (match_chars(scan, "from"))
+  if (match_keyword(scan, "from"))
   {
     scan->token.type = TOKEN_FROM;
     return;
   }
-  if (match_chars(scan, "if!"))
+  if (match_keyword(scan, "if!"))
   {
     scan->token.type = TOKEN_IFBANG;
     return;
   }
-  if (match_chars(scan, "if"))
+  if (match_keyword(scan, "if"))
   {
     scan->token.type = TOKEN_IF;
     return;
   }
-  if (match_chars(scan, "import"))
+  if (match_keyword(scan, "import"))
   {
     scan->token.type = TOKEN_IMPORT;
     return;
   }
-  if (match_chars(scan, "in"))
+  if (match_keyword(scan, "in"))
   {
     scan->token.type = TOKEN_IN;
     return;
   }
-  if (match_chars(scan, "loop"))
+  if (match_keyword(scan, "loop"))
   {
     scan->token.type = TOKEN_LOOP;
     return;
   }
-  if (match_chars(scan, "match"))
+  if (match_keyword(scan, "match"))
   {
     scan->token.type = TOKEN_MATCH;
     return;
   }
-  if (match_chars(scan, "mut"))
+  if (match_keyword(scan, "mut"))
   {
     scan->token.type = TOKEN_MUT;
     return;
   }
-  if (match_chars(scan, "nil"))
+  if (match_keyword(scan, "nil"))
   {
     scan->token.type = TOKEN_NIL;
     return;
   }
-  if (match_chars(scan, "return"))
+  if (match_keyword(scan, "return"))
   {
     scan->token.type = TOKEN_RETURN;
     return;
   }
-  if (match_chars(scan, "struct"))
+  if (match_keyword(scan, "struct"))
   {
     scan->token.type = TOKEN_STRUCT;
     return;
   }
-  if (match_chars(scan, "true"))
+  if (match_keyword(scan, "true"))
   {
     scan->token.type = TOKEN_TRUE;
     return;
   }
-  if (match_chars(scan, "val"))
+  if (match_keyword(scan, "val"))
   {
     scan->token.type = TOKEN_VAL;
     return;
   }
-  if (match_chars(scan, "while!"))
+  if (match_keyword(scan, "while!"))
   {
     scan->token.type = TOKEN_WHILEBANG;
     return;
   }
-  if (match_chars(scan, "while"))
+  if (match_keyword(scan, "while"))
   {
     scan->token.type = TOKEN_WHILE;
     return;
