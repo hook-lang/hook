@@ -583,8 +583,8 @@ static int32_t next_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   hk_iterator_t *it = hk_as_iterator(args[1]);
   if (hk_iterator_is_valid(it))
-    hk_iterator_next(it);
-  return hk_vm_push_nil(vm);
+    it = hk_iterator_next(it);
+  return hk_vm_push_iterator(vm, it);
 }
 
 static int32_t sleep_call(hk_vm_t *vm, hk_value_t *args)

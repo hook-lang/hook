@@ -848,7 +848,15 @@ static inline void do_next(hk_vm_t *vm)
   hk_value_t *slots = &vm->stack[vm->stack_top];
   hk_value_t val = slots[0];
   hk_iterator_t *it = hk_as_iterator(val);
-  hk_iterator_next(it);
+  if (it->ref_count == 2)
+  {
+    hk_iterator_inplace_next(it);
+    return;
+  }
+  hk_iterator_t *result = hk_iterator_next(it);
+  hk_incr_ref(result);
+  slots[0] = hk_iterator_value(result);
+  hk_iterator_release(it);
 }
 
 static inline void do_equal(hk_vm_t *vm)

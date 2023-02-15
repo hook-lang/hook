@@ -12,15 +12,17 @@
 typedef struct
 {
   HK_ITERATOR_HEADER
-  hk_array_t *iterable;
+  hk_array_t *arr;
   int32_t current;
 } array_iterator_t;
 
 static inline hk_array_t *array_allocate(int32_t min_capacity);
+static inline array_iterator_t *array_iterator_allocate(hk_array_t *arr);
 static void array_iterator_deinit(hk_iterator_t *it);
 static bool array_iterator_is_valid(hk_iterator_t *it);
 static hk_value_t array_iterator_get_current(hk_iterator_t *it);
-static void array_iterator_next(hk_iterator_t *it);
+static hk_iterator_t *array_iterator_next(hk_iterator_t *it);
+static void array_iterator_inplace_next(hk_iterator_t *it);
 
 static inline hk_array_t *array_allocate(int32_t min_capacity)
 {
@@ -33,25 +35,44 @@ static inline hk_array_t *array_allocate(int32_t min_capacity)
   return arr;
 }
 
+static inline array_iterator_t *array_iterator_allocate(hk_array_t *arr)
+{
+  array_iterator_t *arr_it = (array_iterator_t *) hk_allocate(sizeof(*arr_it));
+  hk_iterator_init((hk_iterator_t *) arr_it, &array_iterator_deinit,
+    &array_iterator_is_valid, &array_iterator_get_current,
+    &array_iterator_next, &array_iterator_inplace_next);
+  hk_incr_ref(arr);
+  arr_it->arr = arr;
+  return arr_it;
+}
+
 static void array_iterator_deinit(hk_iterator_t *it)
 {
-  hk_array_release(((array_iterator_t *) it)->iterable);
+  hk_array_release(((array_iterator_t *) it)->arr);
 }
 
 static bool array_iterator_is_valid(hk_iterator_t *it)
 {
   array_iterator_t *arr_it = (array_iterator_t *) it;
-  hk_array_t *arr = arr_it->iterable;
+  hk_array_t *arr = arr_it->arr;
   return arr_it->current < arr->length;
 }
 
 static hk_value_t array_iterator_get_current(hk_iterator_t *it)
 {
   array_iterator_t *arr_it = (array_iterator_t *) it;
-  return arr_it->iterable->elements[arr_it->current];
+  return arr_it->arr->elements[arr_it->current];
 }
 
-static void array_iterator_next(hk_iterator_t *it)
+static hk_iterator_t *array_iterator_next(hk_iterator_t *it)
+{
+  array_iterator_t *arr_it = (array_iterator_t *) it;
+  array_iterator_t *result = array_iterator_allocate(arr_it->arr);
+  result->current = arr_it->current + 1;
+  return (hk_iterator_t *) result;
+}
+
+static void array_iterator_inplace_next(hk_iterator_t *it)
 {
   array_iterator_t *arr_it = (array_iterator_t *) it;
   ++arr_it->current;
@@ -342,14 +363,9 @@ bool hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result)
 
 hk_iterator_t *hk_array_new_iterator(hk_array_t *arr)
 {
-  array_iterator_t *it = (array_iterator_t *) hk_allocate(sizeof(*it));
-  hk_iterator_init((hk_iterator_t *) it, &array_iterator_deinit,
-    &array_iterator_is_valid, &array_iterator_get_current,
-    &array_iterator_next);
-  hk_incr_ref(arr);
-  it->iterable = arr;
-  it->current = 0;
-  return (hk_iterator_t *) it;
+  array_iterator_t *arr_it = array_iterator_allocate(arr);
+  arr_it->current = 0;
+  return (hk_iterator_t *) arr_it;
 }
 
 hk_array_t *hk_array_reverse(hk_array_t *arr)
