@@ -2,6 +2,21 @@
 print(val: value)
 println(val: value)
 type(val: value) -> string
+is_nil(val: value) -> bool
+is_bool(val: value) -> bool
+is_number(val: value) -> bool
+is_int(val: value) -> bool
+is_string(val: value) -> bool
+is_range(val: value) -> bool
+is_array(val: value) -> bool
+is_struct(val: value) -> bool
+is_instance(val: value) -> bool
+is_iterator(val: value) -> bool
+is_callable(val: value) -> bool
+is_userdata(val: value) -> bool
+is_object(val: value) -> bool
+is_comparable(val: value) -> bool
+is_iterable(val: value) -> bool
 to_bool(val: value) -> bool
 to_int(val: number|string) -> int
 to_number(val: number|string) -> number
@@ -10,6 +25,7 @@ ord(val: string) -> int
 chr(val: int) -> string
 hex(val: string) -> string
 bin(val: string) -> string
+address(val: value) -> number
 refcount(val: value) -> int
 cap(val: string|array) -> int
 len(val: string|array) -> int
