@@ -25,7 +25,7 @@ ord(val: string) -> int
 chr(val: int) -> string
 hex(val: string) -> string
 bin(val: string) -> string
-address(val: value) -> number
+address(val: value) -> string
 refcount(val: value) -> int
 cap(val: string|array) -> int
 len(val: string|array) -> int

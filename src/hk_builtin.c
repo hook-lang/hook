@@ -417,8 +417,17 @@ static int32_t bin_call(hk_vm_t *vm, hk_value_t *args)
 static int32_t address_call(hk_vm_t *vm, hk_value_t *args)
 {
   hk_value_t val = args[1];
-  void *result = hk_is_object(val) ? val.as.pointer_value : NULL;
-  return hk_vm_push_number(vm, (int64_t) result);
+  void *ptr = (int64_t) hk_is_object(val) ? val.as.pointer_value : NULL;
+  hk_string_t *result = hk_string_new_with_capacity(32);
+  char *chars = result->chars;
+  snprintf(chars, 31,  "%p", ptr);
+  result->length = (int32_t) strnlen(chars, 31);
+  if (hk_vm_push_string(vm, result) == HK_STATUS_ERROR)
+  {
+    hk_string_free(result);
+    return HK_STATUS_ERROR;
+  }
+  return HK_STATUS_OK;
 }
 
 static int32_t refcount_call(hk_vm_t *vm, hk_value_t *args)
