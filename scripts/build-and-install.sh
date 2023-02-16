@@ -5,7 +5,12 @@
 #
 # Usage:
 #
-#   build-and-install.sh [build_type] [with_extensions] [install_prefix]
+#   build-and-install.sh [build_type] [with-extensions] [install_prefix]
+#
+# build_type:
+#
+#   Debug (default)
+#   Release
 #
 # Examples:
 #

@@ -6,7 +6,7 @@
 #
 # Usage:
 #
-#   pack.sh [with_extensions]
+#   pack.sh [with-extensions]
 #
 # Examples:
 #
