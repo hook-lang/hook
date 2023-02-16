@@ -10,24 +10,37 @@
 typedef struct
 {
   HK_ITERATOR_HEADER
-  hk_range_t *iterable;
+  hk_range_t *range;
   int64_t current;
 } range_iterator_t;
 
+static inline range_iterator_t *range_iterator_allocate(hk_range_t *range);
 static void range_iterator_deinit(hk_iterator_t *it);
 static bool range_iterator_is_valid(hk_iterator_t *it);
 static hk_value_t range_iterator_get_current(hk_iterator_t *it);
-static void range_iterator_next(hk_iterator_t *it);
+static hk_iterator_t *range_iterator_next(hk_iterator_t *it);
+static void range_iterator_inplace_next(hk_iterator_t *it);
+
+static inline range_iterator_t *range_iterator_allocate(hk_range_t *range)
+{
+   range_iterator_t *range_it = (range_iterator_t *) hk_allocate(sizeof(*range_it));
+  hk_iterator_init((hk_iterator_t *) range_it, &range_iterator_deinit,
+    &range_iterator_is_valid, &range_iterator_get_current,
+    &range_iterator_next, &range_iterator_inplace_next);
+  hk_incr_ref(range);
+  range_it->range = range;
+  return range_it;
+}
 
 static void range_iterator_deinit(hk_iterator_t *it)
 {
-  hk_range_release(((range_iterator_t *) it)->iterable);
+  hk_range_release(((range_iterator_t *) it)->range);
 }
 
 static bool range_iterator_is_valid(hk_iterator_t *it)
 {
   range_iterator_t *range_it = (range_iterator_t *) it;
-  hk_range_t *range = range_it->iterable;
+  hk_range_t *range = range_it->range;
   if (range->step == 1)
     return range_it->current <= range->end;
   return range_it->current >= range->end;
@@ -39,10 +52,19 @@ static hk_value_t range_iterator_get_current(hk_iterator_t *it)
   return hk_number_value((double) range_it->current);
 }
 
-static void range_iterator_next(hk_iterator_t *it)
+static hk_iterator_t *range_iterator_next(hk_iterator_t *it)
 {
   range_iterator_t *range_it = (range_iterator_t *) it;
-  hk_range_t *range = range_it->iterable;
+  hk_range_t *range = range_it->range;
+  range_iterator_t *result = range_iterator_allocate(range);
+  result->current = range_it->current + range->step;
+  return (hk_iterator_t *) result;
+}
+
+static void range_iterator_inplace_next(hk_iterator_t *it)
+{
+  range_iterator_t *range_it = (range_iterator_t *) it;
+  hk_range_t *range = range_it->range;
   range_it->current += range->step;
 }
 
@@ -94,12 +116,7 @@ int32_t hk_range_compare(hk_range_t *range1, hk_range_t *range2)
 
 hk_iterator_t *hk_range_new_iterator(hk_range_t *range)
 {
-  range_iterator_t *it = (range_iterator_t *) hk_allocate(sizeof(*it));
-  hk_iterator_init((hk_iterator_t *) it, &range_iterator_deinit,
-    &range_iterator_is_valid, &range_iterator_get_current,
-    &range_iterator_next);
-  hk_incr_ref(range);
-  it->iterable = range;
-  it->current = range->start;
-  return (hk_iterator_t *) it;
+  range_iterator_t *range_it = range_iterator_allocate(range);
+  range_it->current = range->start;
+  return (hk_iterator_t *) range_it;
 }

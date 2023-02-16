@@ -94,6 +94,7 @@ utf8:
 regex:
   
   new(pattern: string) -> userdata
+  find(regex: userdata, str: string) -> nil|array
   is_match(regex: userdata, str: string) -> bool
 
 hashing:
@@ -102,7 +103,9 @@ hashing:
   sha256(str: string) -> string
   sha384(str: string) -> string
   sha512(str: string) -> string
+  sha1(str: string) -> string
   sha3(str: string) -> string
+  md5(str: string) -> string
   ripemd160(str: string) -> string
 
 encoding:
@@ -113,3 +116,27 @@ encoding:
   base58_decode(str: string) -> string
   base64_encode(str: string) -> string
   base64_decode(str: string) -> string
+
+socket:
+
+  AF_INET: int
+  AF_INET6: int
+  SOCK_STREAM: int
+  SOCK_DGRAM: int
+  IPPROTO_TCP: int
+  IPPROTO_UDP: int
+  SOL_SOCKET: int
+  SO_REUSEADDR: int
+
+  new(domain: int, type: int, protocol: int) -> userdata
+  close(sock: userdata)
+  connect(sock: userdata, host: string, port: int)
+  accept(sock: userdata) -> nil|userdata
+  bind(sock: userdata, host: string, port: int)
+  listen(sock: userdata, backlog: int)
+  send(sock: userdata, str: string) -> int
+  recv(sock: userdata, size: int) -> nil|string
+  set_option(sock: userdata, level: int, option: int, value: int)
+  get_option(sock: userdata, level: int, option: int) -> int
+  set_block(sock: userdata)
+  set_nonblock(sock: userdata)

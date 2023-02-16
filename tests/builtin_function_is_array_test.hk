@@ -1,0 +1,4 @@
+
+println(is_array([]));
+println(is_array([1, 2, 3]));
+println(is_array(nil));

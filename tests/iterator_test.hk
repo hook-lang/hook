@@ -1,18 +1,37 @@
 
-mut it;
+mut it1;
+mut it2;
 
 val range = 1 .. 3;
-it = iter(range);
-println(it);
+it1 = iter(range);
+it2 = it1;
 
-for (; valid(it); next(it)) {
-  println(current(it));
+it1 = next(it1);
+
+println(it1);
+println(it2);
+
+for (; valid(it1); it1 = next(it1)) {
+  println(current(it1));
+}
+
+for (; valid(it2); it2 = next(it2)) {
+  println(current(it2));
 }
 
 val arr = ["foo", "bar", "baz"];
-it = iter(arr);
-println(it);
+it1 = iter(arr);
+it2 = it1;
 
-for (; valid(it); next(it)) {
-  println(current(it));
+it1 = next(it1);
+
+println(it1);
+println(it2);
+
+for (; valid(it1); it1 = next(it1)) {
+  println(current(it1));
+}
+
+for (; valid(it2); it2 = next(it2)) {
+  println(current(it2));
 }
