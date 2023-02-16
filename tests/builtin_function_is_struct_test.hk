@@ -1,0 +1,4 @@
+
+println(is_struct(struct {}));
+println(is_struct(struct { foo, bar }));
+println(is_struct(nil));

@@ -18,10 +18,13 @@
 #define MAX_VARIABLES UINT8_MAX
 #define MAX_BREAKS    UINT8_MAX
 
-#define SYNTAX_NONE      0x00
-#define SYNTAX_ASSIGN    0x01
-#define SYNTAX_CALL      0x02
-#define SYNTAX_SUBSCRIPT 0x03
+typedef enum
+{
+  PRODUCTION_NONE,
+  PRODUCTION_ASSIGN,
+  PRODUCTION_CALL,
+  PRODUCTION_SUBSCRIPT
+} production_t;
 
 #define match(s, t) ((s)->token.type == (t))
 
@@ -101,7 +104,7 @@ static void compile_import_statement(compiler_t *comp);
 static void compile_constant_declaration(compiler_t *comp);
 static void compile_variable_declaration(compiler_t *comp);
 static void compile_assign_statement(compiler_t *comp, token_t *tk);
-static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace);
+static int32_t compile_assign(compiler_t *comp, production_t prod, bool inplace);
 static void compile_struct_declaration(compiler_t *comp, bool is_anonymous);
 static void compile_function_declaration(compiler_t *comp);
 static void compile_anonymous_function(compiler_t *comp);
@@ -750,7 +753,7 @@ static void compile_assign_statement(compiler_t *comp, token_t *tk)
     goto end;
   }
   var = compile_variable(comp, tk, true);
-  if (compile_assign(comp, SYNTAX_NONE, true) == SYNTAX_CALL)
+  if (compile_assign(comp, PRODUCTION_NONE, true) == PRODUCTION_CALL)
   {
     hk_chunk_emit_opcode(chunk, HK_OP_POP);
     return;
@@ -763,7 +766,7 @@ end:
   hk_chunk_emit_byte(chunk, var.index);
 }
 
-static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
+static int32_t compile_assign(compiler_t *comp, production_t prod, bool inplace)
 {
   scanner_t *scan = comp->scan;
   hk_chunk_t *chunk = &comp->fn->chunk;
@@ -772,89 +775,89 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_BITWISE_OR);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_CARETEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_BITWISE_XOR);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_AMPEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_BITWISE_AND);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_LTLTEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_LEFT_SHIFT);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_GTGTEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_RIGHT_SHIFT);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_PLUSEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_ADD);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_DASHEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_SUBTRACT);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_STAREQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_MULTIPLY);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_SLASHEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_DIVIDE);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_TILDESLASHEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_QUOTIENT);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_PERCENTEQ))
   {
     scanner_next_token(scan);
     compile_expression(comp);
     hk_chunk_emit_opcode(chunk, HK_OP_REMAINDER);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_PLUSPLUS))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_INCREMENT);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_DASHDASH))
   {
     scanner_next_token(scan);
     hk_chunk_emit_opcode(chunk, HK_OP_DECREMENT);
-    return SYNTAX_ASSIGN;
+    return PRODUCTION_ASSIGN;
   }
   if (match(scan, TOKEN_LBRACKET))
   {
@@ -865,7 +868,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
       consume(comp, TOKEN_EQ);
       compile_expression(comp);
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_ADD_ELEMENT : HK_OP_ADD_ELEMENT);
-      return SYNTAX_ASSIGN;
+      return PRODUCTION_ASSIGN;
     }
     compile_expression(comp);
     consume(comp, TOKEN_RBRACKET);
@@ -874,17 +877,17 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
       scanner_next_token(scan);
       compile_expression(comp);
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_PUT_ELEMENT : HK_OP_PUT_ELEMENT);
-      return SYNTAX_ASSIGN;
+      return PRODUCTION_ASSIGN;
     }
     int32_t offset = chunk->code_length;
     hk_chunk_emit_opcode(chunk, HK_OP_GET_ELEMENT);
-    int32_t syn = compile_assign(comp, SYNTAX_SUBSCRIPT, false);
-    if (syn == SYNTAX_ASSIGN)
+    production_t _prod = compile_assign(comp, PRODUCTION_SUBSCRIPT, false);
+    if (_prod == PRODUCTION_ASSIGN)
     {
       patch_opcode(chunk, offset, HK_OP_FETCH_ELEMENT);
       hk_chunk_emit_opcode(chunk, HK_OP_SET_ELEMENT);
     }
-    return syn;
+    return _prod;
   }
   if (match(scan, TOKEN_DOT))
   {
@@ -900,18 +903,18 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
       compile_expression(comp);
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_PUT_FIELD : HK_OP_PUT_FIELD);
       hk_chunk_emit_byte(chunk, index);
-      return SYNTAX_ASSIGN;
+      return PRODUCTION_ASSIGN;
     }
     int32_t offset = chunk->code_length;
     hk_chunk_emit_opcode(chunk, HK_OP_GET_FIELD);
     hk_chunk_emit_byte(chunk, index);
-    int32_t syn = compile_assign(comp, SYNTAX_SUBSCRIPT, false);
-    if (syn == SYNTAX_ASSIGN)
+    production_t _prod = compile_assign(comp, PRODUCTION_SUBSCRIPT, false);
+    if (_prod == PRODUCTION_ASSIGN)
     {
       patch_opcode(chunk, offset, HK_OP_FETCH_FIELD);
       hk_chunk_emit_opcode(chunk, HK_OP_SET_FIELD);
     }
-    return syn;
+    return _prod;
   }
   if (match(scan, TOKEN_LPAREN))
   {
@@ -921,7 +924,7 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
       scanner_next_token(scan);
       hk_chunk_emit_opcode(chunk, HK_OP_CALL);
       hk_chunk_emit_byte(chunk, 0);
-      return compile_assign(comp, SYNTAX_CALL, false);
+      return compile_assign(comp, PRODUCTION_CALL, false);
     }
     compile_expression(comp);
     uint8_t num_args = 1;
@@ -934,11 +937,11 @@ static int32_t compile_assign(compiler_t *comp, int32_t syntax, bool inplace)
     consume(comp, TOKEN_RPAREN);
     hk_chunk_emit_opcode(chunk, HK_OP_CALL);
     hk_chunk_emit_byte(chunk, num_args);
-    return compile_assign(comp, SYNTAX_CALL, false);
+    return compile_assign(comp, PRODUCTION_CALL, false);
   }
-  if (syntax == SYNTAX_NONE || syntax == SYNTAX_SUBSCRIPT)
+  if (prod == PRODUCTION_NONE || prod == PRODUCTION_SUBSCRIPT)
     syntax_error_unexpected(comp);
-  return syntax;
+  return prod;
 }
 
 static void compile_struct_declaration(compiler_t *comp, bool is_anonymous)

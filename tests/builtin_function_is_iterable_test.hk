@@ -1,0 +1,4 @@
+
+println(is_iterable(1 .. 10));
+println(is_iterable([1, 2, 3]));
+println(is_iterable(nil));

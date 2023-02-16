@@ -1,0 +1,5 @@
+
+println(address(nil));
+println(address(1));
+println(address("foo"));
+println(address([1, 2, 3]));

@@ -1,0 +1,5 @@
+
+println(is_object(1 .. 10));
+println(is_object("foo"));
+println(is_object([1, 2, 3]));
+println(is_object(nil));

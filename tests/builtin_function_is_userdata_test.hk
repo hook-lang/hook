@@ -1,0 +1,4 @@
+
+import { stdin } from io;
+println(is_userdata(stdin));
+println(is_userdata(nil));
