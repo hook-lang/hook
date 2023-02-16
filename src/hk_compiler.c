@@ -12,6 +12,7 @@
 #include "hk_scanner.h"
 #include "hk_struct.h"
 #include "hk_builtin.h"
+#include "hk_utils.h"
 
 #define MAX_CONSTANTS UINT8_MAX
 #define MAX_VARIABLES UINT8_MAX
@@ -171,9 +172,9 @@ static inline double parse_double(compiler_t *comp)
 {
   scanner_t *scan = comp->scan;
   token_t *tk = &scan->token;
+  double result;
   errno = 0;
-  double result = strtod(tk->start, NULL);
-  if (errno == ERANGE)
+  if (!hk_double_from_chars(&result, tk->start))
     syntax_error(comp->fn->name, scan->file->chars, tk->line, tk->col,
       "floating point number `%.*s` out of range", tk->length, tk->start);
   return result;
