@@ -173,7 +173,6 @@ static inline double parse_double(compiler_t *comp)
   scanner_t *scan = comp->scan;
   token_t *tk = &scan->token;
   double result;
-  errno = 0;
   if (!hk_double_from_chars(&result, tk->start))
     syntax_error(comp->fn->name, scan->file->chars, tk->line, tk->col,
       "floating point number `%.*s` out of range", tk->length, tk->start);
