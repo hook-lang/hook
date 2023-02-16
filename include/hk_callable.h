@@ -29,14 +29,14 @@ typedef struct
   hk_value_t nonlocals[1];
 } hk_closure_t;
 
-struct hk_vm;
+struct hk_state;
 
 typedef struct
 {
   HK_OBJECT_HEADER
   int32_t arity;
   hk_string_t *name;
-  int32_t (*call)(struct hk_vm *, hk_value_t *);
+  int32_t (*call)(struct hk_state *, hk_value_t *);
 } hk_native_t;
 
 hk_function_t *hk_function_new(int32_t arity, hk_string_t *name, hk_string_t *file);
@@ -48,7 +48,7 @@ hk_function_t *hk_function_deserialize(FILE *stream);
 hk_closure_t *hk_closure_new(hk_function_t *fn);
 void hk_closure_free(hk_closure_t *cl);
 void hk_closure_release(hk_closure_t *cl);
-hk_native_t *hk_native_new(hk_string_t *name, int32_t arity, int32_t (*call)(struct hk_vm *, hk_value_t *));
+hk_native_t *hk_native_new(hk_string_t *name, int32_t arity, int32_t (*call)(struct hk_state *, hk_value_t *));
 void hk_native_free(hk_native_t *native);
 void hk_native_release(hk_native_t *native);
 

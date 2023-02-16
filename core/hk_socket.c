@@ -52,18 +52,18 @@ static inline void socket_close(socket_t sock);
 static inline bool socket_resolve(int32_t domain, int32_t type, const char *host, char *address);
 static inline socket_wrapper_t *socket_wrapper_new(socket_t sock, int32_t domain, int32_t type, int32_t protocol);
 static void socket_wrapper_deinit(hk_userdata_t *udata);
-static int32_t new_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t close_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t connect_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t accept_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t bind_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t listen_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t send_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t recv_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t set_option_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t get_option_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t set_block_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t set_nonblock_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t new_call(hk_state_t *state, hk_value_t *args);
+static int32_t close_call(hk_state_t *state, hk_value_t *args);
+static int32_t connect_call(hk_state_t *state, hk_value_t *args);
+static int32_t accept_call(hk_state_t *state, hk_value_t *args);
+static int32_t bind_call(hk_state_t *state, hk_value_t *args);
+static int32_t listen_call(hk_state_t *state, hk_value_t *args);
+static int32_t send_call(hk_state_t *state, hk_value_t *args);
+static int32_t recv_call(hk_state_t *state, hk_value_t *args);
+static int32_t set_option_call(hk_state_t *state, hk_value_t *args);
+static int32_t get_option_call(hk_state_t *state, hk_value_t *args);
+static int32_t set_block_call(hk_state_t *state, hk_value_t *args);
+static int32_t set_nonblock_call(hk_state_t *state, hk_value_t *args);
 
 static inline void socket_startup(void)
 {
@@ -129,13 +129,13 @@ static void socket_wrapper_deinit(hk_userdata_t *udata)
     socket_close(sock);
 }
 
-static int32_t new_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t new_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_int(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   int32_t domain = (int32_t) hk_as_number(args[1]);
   int32_t type = (int32_t) hk_as_number(args[2]);
@@ -145,15 +145,15 @@ static int32_t new_call(hk_vm_t *vm, hk_value_t *args)
   if (sock == INVALID_SOCKET)
   {
     socket_cleanup();
-    return hk_vm_push_nil(vm);
+    return hk_state_push_nil(state);
   }
   socket_wrapper_t *wrapper = socket_wrapper_new(sock, domain, type, protocol);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) wrapper);
+  return hk_state_push_userdata(state, (hk_userdata_t *) wrapper);
 }
 
-static int32_t close_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t close_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   socket_t sock = wrapper->sock;
@@ -162,16 +162,16 @@ static int32_t close_call(hk_vm_t *vm, hk_value_t *args)
     socket_close(sock);
     wrapper->sock = INVALID_SOCKET;
   }
-  return hk_vm_push_nil(vm);
+  return hk_state_push_nil(state);
 }
 
-static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t connect_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   hk_string_t *host = hk_as_string(args[2]);
@@ -187,19 +187,19 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
   sock_addr.sin_family = AF_INET;
   sock_addr.sin_port = htons((uint16_t) port);
   if (inet_pton(AF_INET, address, &sock_addr.sin_addr) < 1)
-    return hk_vm_push_nil(vm);
+    return hk_state_push_nil(state);
   socket_t sock = wrapper->sock;
   if (connect(sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == SOCKET_ERROR)
   {
     hk_runtime_error("cannot connect to address '%s'", address);
     return HK_STATUS_ERROR;
   }
-  return hk_vm_push_nil(vm);
+  return hk_state_push_nil(state);
 }
 
-static int32_t accept_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t accept_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   socket_t sock;
@@ -217,19 +217,19 @@ static int32_t accept_call(hk_vm_t *vm, hk_value_t *args)
     if (errno == EINTR)
       continue;
   #endif
-    return hk_vm_push_nil(vm);
+    return hk_state_push_nil(state);
   }
   socket_wrapper_t *result = socket_wrapper_new(sock, wrapper->domain, wrapper->type, wrapper->protocol);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) result);
+  return hk_state_push_userdata(state, (hk_userdata_t *) result);
 }
 
-static int32_t bind_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t bind_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   hk_string_t *host = hk_as_string(args[2]);
@@ -245,20 +245,20 @@ static int32_t bind_call(hk_vm_t *vm, hk_value_t *args)
   sock_addr.sin_family = wrapper->domain;
   sock_addr.sin_port = htons((uint16_t) port);
   if (inet_pton(AF_INET, address, &sock_addr.sin_addr) < 1)
-    return hk_vm_push_nil(vm);
+    return hk_state_push_nil(state);
   if (bind(wrapper->sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == SOCKET_ERROR)
   {
     hk_runtime_error("cannot bind to address '%s'", address);
     return HK_STATUS_ERROR;
   }
-  return hk_vm_push_nil(vm);
+  return hk_state_push_nil(state);
 }
 
-static int32_t listen_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t listen_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   int32_t backlog = (int32_t) hk_as_number(args[2]);
@@ -267,31 +267,31 @@ static int32_t listen_call(hk_vm_t *vm, hk_value_t *args)
     hk_runtime_error("cannot listen on socket");
     return HK_STATUS_ERROR;
   }
-  return hk_vm_push_nil(vm);
+  return hk_state_push_nil(state);
 }
 
-static int32_t send_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t send_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   hk_string_t *str = hk_as_string(args[2]);
   int32_t flags = (int32_t) hk_as_number(args[3]);
   int32_t length = (int32_t) send(wrapper->sock, str->chars, str->length, flags);
-  return hk_vm_push_number(vm, length);
+  return hk_state_push_number(state, length);
 }
 
-static int32_t recv_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t recv_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   int32_t size = (int32_t) hk_as_number(args[2]);
@@ -299,20 +299,20 @@ static int32_t recv_call(hk_vm_t *vm, hk_value_t *args)
   hk_string_t *str = hk_string_new_with_capacity(size);
   int32_t length = (int32_t) recv(wrapper->sock, str->chars, size, flags);
   if (!length)
-    return hk_vm_push_nil(vm);
+    return hk_state_push_nil(state);
   str->length = length;
-  return hk_vm_push_string(vm, str);
+  return hk_state_push_string(state, str);
 }
 
-static int32_t set_option_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t set_option_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 4) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 4) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   int32_t level = (int32_t) hk_as_number(args[2]);
@@ -329,16 +329,16 @@ static int32_t set_option_call(hk_vm_t *vm, hk_value_t *args)
     hk_runtime_error("cannot set socket option");
     return HK_STATUS_ERROR;
   }
-  return hk_vm_push_nil(vm);
+  return hk_state_push_nil(state);
 }
 
-static int32_t get_option_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t get_option_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 3) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   int32_t level = (int32_t) hk_as_number(args[2]);
@@ -356,12 +356,12 @@ static int32_t get_option_call(hk_vm_t *vm, hk_value_t *args)
     hk_runtime_error("cannot get socket option");
     return HK_STATUS_ERROR;
   }
-  return hk_vm_push_number(vm, value);
+  return hk_state_push_number(state, value);
 }
 
-static int32_t set_block_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t set_block_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   socket_t sock = wrapper->sock;
@@ -382,12 +382,12 @@ static int32_t set_block_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   }
 #endif
-  return hk_vm_push_nil(vm);
+  return hk_state_push_nil(state);
 }
 
-static int32_t set_nonblock_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t set_nonblock_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
   socket_t sock = wrapper->sock;
@@ -408,92 +408,92 @@ static int32_t set_nonblock_call(hk_vm_t *vm, hk_value_t *args)
     return HK_STATUS_ERROR;
   }
 #endif
-  return hk_vm_push_nil(vm);
+  return hk_state_push_nil(state);
 }
 
 HK_LOAD_FN(socket)
 {
-  if (hk_vm_push_string_from_chars(vm, -1, "socket") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "socket") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "AF_INET") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "AF_INET") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, AF_INET) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, AF_INET) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "AF_INET6") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "AF_INET6") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, AF_INET6) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, AF_INET6) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "SOCK_STREAM") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "SOCK_STREAM") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, SOCK_STREAM) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, SOCK_STREAM) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "SOCK_DGRAM") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "SOCK_DGRAM") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, SOCK_DGRAM) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, SOCK_DGRAM) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "IPPROTO_TCP") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "IPPROTO_TCP") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, IPPROTO_TCP) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, IPPROTO_TCP) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "IPPROTO_UDP") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "IPPROTO_UDP") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, IPPROTO_UDP) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, IPPROTO_UDP) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "SOL_SOCKET") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "SOL_SOCKET") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, SOL_SOCKET) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, SOL_SOCKET) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "SO_REUSEADDR") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "SO_REUSEADDR") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, SO_REUSEADDR) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, SO_REUSEADDR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "new") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "new") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "new", 3, &new_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "new", 3, &new_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "close") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "close") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "close", 1, &close_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "close", 1, &close_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "connect") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "connect") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "connect", 3, &connect_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "connect", 3, &connect_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "accept") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "accept") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "accept", 1, &accept_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "accept", 1, &accept_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "bind") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "bind") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "bind", 3, &bind_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "bind", 3, &bind_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "listen") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "listen") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "listen", 2, &listen_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "listen", 2, &listen_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "send") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "send") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "send", 3, &send_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "send", 3, &send_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "recv") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "recv") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "recv", 3, &recv_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "recv", 3, &recv_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "set_option") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "set_option") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "set_option", 4, &set_option_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "set_option", 4, &set_option_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "get_option") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "get_option") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "get_option", 3, &get_option_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "get_option", 3, &get_option_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "set_block") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "set_block") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "set_block", 1, &set_block_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "set_block", 1, &set_block_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "set_nonblock") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "set_nonblock") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "set_nonblock", 1, &set_nonblock_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "set_nonblock", 1, &set_nonblock_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 20);
+  return hk_state_construct(state, 20);
 }

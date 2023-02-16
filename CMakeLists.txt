@@ -52,12 +52,12 @@ add_executable(${PROJECT_NAME}
   src/hk_module.c
   src/hk_range.c
   src/hk_scanner.c
+  src/hk_state.c
   src/hk_string_map.c
   src/hk_string.c
   src/hk_struct.c
   src/hk_userdata.c
-  src/hk_value.c
-  src/hk_vm.c)
+  src/hk_value.c)
 
 if(WIN32)
   target_link_libraries(${PROJECT_NAME} ws2_32)

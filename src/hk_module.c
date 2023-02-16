@@ -39,9 +39,9 @@
 #endif
 
 #ifdef _WIN32
-  typedef int32_t (__stdcall *load_module_t)(hk_vm_t *);
+  typedef int32_t (__stdcall *load_module_t)(hk_state_t *);
 #else
-  typedef int32_t (*load_module_t)(hk_vm_t *);
+  typedef int32_t (*load_module_t)(hk_state_t *);
 #endif
 
 static string_map_t module_cache;
@@ -51,7 +51,7 @@ static inline void put_module_result(hk_string_t *name, hk_value_t result);
 static inline const char *get_home_dir(void);
 static inline const char *get_default_home_dir(void);
 
-static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name);
+static inline int32_t load_native_module(hk_state_t *state, hk_string_t *name);
 
 static inline bool get_module_result(hk_string_t *name, hk_value_t *result)
 {
@@ -89,7 +89,7 @@ static inline const char *get_default_home_dir(void)
   return result;
 }
 
-static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name)
+static inline int32_t load_native_module(hk_state_t *state, hk_string_t *name)
 {
   hk_string_t *file = hk_string_from_chars(-1, get_home_dir());
   hk_string_inplace_concat_chars(file, -1, FILE_INFIX);
@@ -122,7 +122,7 @@ static inline int32_t load_native_module(hk_vm_t *vm, hk_string_t *name)
     return HK_STATUS_ERROR;
   }
   hk_string_free(fn_name);
-  if (load(vm) == HK_STATUS_ERROR)
+  if (load(state) == HK_STATUS_ERROR)
   {
     hk_runtime_error("cannot load module `%.*s`", name->length, name->chars);
     return HK_STATUS_ERROR;
@@ -140,9 +140,9 @@ void free_module_cache(void)
   string_map_free(&module_cache);
 }
 
-int32_t load_module(hk_vm_t *vm)
+int32_t load_module(hk_state_t *state)
 {
-  hk_value_t *slots = &vm->stack[vm->stack_top];
+  hk_value_t *slots = &state->stack[state->stack_top];
   hk_value_t val = slots[0];
   hk_assert(hk_is_string(val), "module name must be a string");
   hk_string_t *name = hk_as_string(val);
@@ -151,15 +151,15 @@ int32_t load_module(hk_vm_t *vm)
   {
     hk_value_incr_ref(result);
     slots[0] = result;
-    --vm->stack_top;
+    --state->stack_top;
     hk_string_release(name);
     return HK_STATUS_OK;
   }
-  if (load_native_module(vm, name) == HK_STATUS_ERROR)
+  if (load_native_module(state, name) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  put_module_result(name, vm->stack[vm->stack_top]);
-  slots[0] = vm->stack[vm->stack_top];
-  --vm->stack_top;
+  put_module_result(name, state->stack[state->stack_top]);
+  slots[0] = state->stack[state->stack_top];
+  --state->stack_top;
   hk_string_release(name);
   return HK_STATUS_OK;
 }

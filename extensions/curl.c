@@ -18,10 +18,10 @@ typedef struct
 static inline curl_wrapper_t *curl_wrapper_new(CURL *curl);
 static void curl_wrapper_deinit(hk_userdata_t *udata);
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data);
-static int32_t init_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t setopt_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t cleanup_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t perform_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t init_call(hk_state_t *state, hk_value_t *args);
+static int32_t setopt_call(hk_state_t *state, hk_value_t *args);
+static int32_t cleanup_call(hk_state_t *state, hk_value_t *args);
+static int32_t perform_call(hk_state_t *state, hk_value_t *args);
 
 static inline curl_wrapper_t *curl_wrapper_new(CURL *curl)
 {
@@ -44,10 +44,10 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size;
 }
 
-static int32_t init_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t init_call(hk_state_t *state, hk_value_t *args)
 {
   hk_type_t types[] = {HK_TYPE_NIL, HK_TYPE_STRING};
-  if (hk_vm_check_types(args, 1, 2, types) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_value_t val = args[1];
   CURL *curl = curl_easy_init();
@@ -68,16 +68,16 @@ static int32_t init_call(hk_vm_t *vm, hk_value_t *args)
       return HK_STATUS_ERROR;
     }
   }
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) curl_wrapper_new(curl));
+  return hk_state_push_userdata(state, (hk_userdata_t *) curl_wrapper_new(curl));
 }
 
-static int32_t setopt_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t setopt_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_string(args, 3) == HK_STATUS_ERROR)
+  if (hk_check_argument_string(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   CURL *curl = ((curl_wrapper_t *) hk_as_userdata(args[1]))->curl;
   int32_t opt = (int32_t) hk_as_number(args[2]);
@@ -88,20 +88,20 @@ static int32_t setopt_call(hk_vm_t *vm, hk_value_t *args)
     hk_runtime_error("cannot set option: %s", curl_easy_strerror(res));
     return HK_STATUS_ERROR;
   }
-  return hk_vm_push_nil(vm);
+  return hk_state_push_nil(state);
 }
 
-static int32_t cleanup_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t cleanup_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   curl_easy_cleanup(((curl_wrapper_t *) hk_as_userdata(args[1]))->curl);
-  return hk_vm_push_nil(vm);
+  return hk_state_push_nil(state);
 }
 
-static int32_t perform_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t perform_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   CURL *curl = ((curl_wrapper_t *) hk_as_userdata(args[1]))->curl;
   hk_string_t *str = hk_string_new();
@@ -114,44 +114,44 @@ static int32_t perform_call(hk_vm_t *vm, hk_value_t *args)
     hk_string_free(str);
     return HK_STATUS_ERROR;
   }
-  return hk_vm_push_string(vm, str);
+  return hk_state_push_string(state, str);
 }
 
 HK_LOAD_FN(curl)
 {
-  if (hk_vm_push_string_from_chars(vm, -1, "curl") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "curl") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "OPT_URL") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "OPT_URL") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, CURLOPT_URL) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, CURLOPT_URL) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "OPT_FOLLOWLOCATION") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "OPT_FOLLOWLOCATION") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, CURLOPT_FOLLOWLOCATION) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, CURLOPT_FOLLOWLOCATION) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "OPT_POST") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "OPT_POST") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, CURLOPT_POST) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, CURLOPT_POST) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "OPT_POSTFIELDS") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "OPT_POSTFIELDS") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_number(vm, CURLOPT_POSTFIELDS) == HK_STATUS_ERROR)
+  if (hk_state_push_number(state, CURLOPT_POSTFIELDS) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "init") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "init") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "init", 1, &init_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "init", 1, &init_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "setopt") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "setopt") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "setopt", 3, &setopt_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "setopt", 3, &setopt_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "cleanup") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "cleanup") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "cleanup", 1, &cleanup_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "cleanup", 1, &cleanup_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "perform") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "perform") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "perform", 1, &perform_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "perform", 1, &perform_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 8);
+  return hk_state_construct(state, 8);
 }

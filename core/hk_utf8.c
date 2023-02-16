@@ -7,8 +7,8 @@
 #include "hk_status.h"
 
 static inline int32_t decode_char(unsigned char c);
-static int32_t len_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t sub_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t len_call(hk_state_t *state, hk_value_t *args);
+static int32_t sub_call(hk_state_t *state, hk_value_t *args);
 
 static inline int32_t decode_char(unsigned char c)
 {
@@ -23,9 +23,9 @@ static inline int32_t decode_char(unsigned char c)
   return 1;
 }
 
-static int32_t len_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t len_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
   int32_t result = 0;
@@ -37,16 +37,16 @@ static int32_t len_call(hk_vm_t *vm, hk_value_t *args)
     i += length;
     ++result;
   }
-  return hk_vm_push_number(vm, result);
+  return hk_state_push_number(state, result);
 }
 
-static int32_t sub_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t sub_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_string(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_number(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_number(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_number(args, 3) == HK_STATUS_ERROR)
+  if (hk_check_argument_number(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *str = hk_as_string(args[1]);
   int32_t start = (int32_t) hk_as_number(args[2]);
@@ -73,20 +73,20 @@ static int32_t sub_call(hk_vm_t *vm, hk_value_t *args)
   end = i;
   length = end - start;
   char *chars = &str->chars[start];
-  return hk_vm_push_string_from_chars(vm, length, chars);
+  return hk_state_push_string_from_chars(state, length, chars);
 }
 
 HK_LOAD_FN(utf8)
 {
-  if (hk_vm_push_string_from_chars(vm, -1, "utf8") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "utf8") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "len") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "len") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "len", 1, &len_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "len", 1, &len_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "sub") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "sub") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "sub", 3, &sub_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "sub", 3, &sub_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 2);
+  return hk_state_construct(state, 2);
 }

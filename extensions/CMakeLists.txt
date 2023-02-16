@@ -41,12 +41,12 @@ add_library(sqlite_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(curl_mod SHARED
   curl.c
@@ -61,12 +61,12 @@ add_library(curl_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(redis_mod SHARED
   redis.c
@@ -81,12 +81,12 @@ add_library(redis_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(secp256r1_mod SHARED
   secp256r1.c
@@ -102,12 +102,12 @@ add_library(secp256r1_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(fastcgi_mod SHARED
   fastcgi.c
@@ -122,12 +122,12 @@ add_library(fastcgi_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(mysql_mod SHARED
   mysql.c
@@ -142,12 +142,12 @@ add_library(mysql_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(bigint_mod SHARED
   bigint.c
@@ -162,12 +162,12 @@ add_library(bigint_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 if(MSVC)
   target_link_libraries(curl_mod PRIVATE CURL::libcurl)

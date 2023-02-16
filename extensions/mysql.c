@@ -26,14 +26,14 @@ static inline mysql_wrapper_t *mysql_wrapper_new(MYSQL *mysql);
 static inline mysql_result_wrapper_t *mysql_result_wrapper_new(MYSQL_RES *mysql_res);
 static void mysql_wrapper_deinit(hk_userdata_t *udata);
 static void mysql_result_wrapper_deinit(hk_userdata_t *udata);
-static int32_t connect_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t close_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t ping_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t error_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t select_db_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t query_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t affected_rows_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t connect_call(hk_state_t *state, hk_value_t *args);
+static int32_t close_call(hk_state_t *state, hk_value_t *args);
+static int32_t ping_call(hk_state_t *state, hk_value_t *args);
+static int32_t error_call(hk_state_t *state, hk_value_t *args);
+static int32_t select_db_call(hk_state_t *state, hk_value_t *args);
+static int32_t query_call(hk_state_t *state, hk_value_t *args);
+static int32_t fetch_row_call(hk_state_t *state, hk_value_t *args);
+static int32_t affected_rows_call(hk_state_t *state, hk_value_t *args);
 
 static inline mysql_wrapper_t *mysql_wrapper_new(MYSQL *mysql)
 {
@@ -68,17 +68,17 @@ static void mysql_result_wrapper_deinit(hk_userdata_t *udata)
   mysql_free_result(wrapper->mysql_res);
 }
 
-static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t connect_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_types(args, 1, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 1, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_types(args, 2, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_NUMBER}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 2, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_NUMBER}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_types(args, 3, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 3, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_types(args, 4, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 4, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_types(args, 5, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 5, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (mysql_library_init(0, NULL, NULL))
   {
@@ -102,18 +102,18 @@ static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
     hk_incr_ref(err);
     result->elements[0] = HK_NIL_VALUE;
     result->elements[1] = hk_string_value(err);
-    return hk_vm_push_array(vm, result);
+    return hk_state_push_array(state, result);
   }
   hk_userdata_t *udata = (hk_userdata_t *) mysql_wrapper_new(mysql);
   hk_incr_ref(udata);
   result->elements[0] = hk_userdata_value(udata);
   result->elements[1] = HK_NIL_VALUE;
-  return hk_vm_push_array(vm, result);
+  return hk_state_push_array(state, result);
 }
 
-static int32_t close_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t close_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   mysql_wrapper_t *wrapper = (mysql_wrapper_t *) hk_as_userdata(args[1]);
   bool result = false;
@@ -124,41 +124,41 @@ static int32_t close_call(hk_vm_t *vm, hk_value_t *args)
     wrapper->mysql = NULL;
     result = true;
   }
-  return hk_vm_push_bool(vm, result);
+  return hk_state_push_bool(state, result);
 }
 
-static int32_t ping_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t ping_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
-  return hk_vm_push_bool(vm, !mysql_ping(mysql));
+  return hk_state_push_bool(state, !mysql_ping(mysql));
 }
 
-static int32_t error_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t error_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
-  return hk_vm_push_string_from_chars(vm, -1, mysql_error(mysql));
+  return hk_state_push_string_from_chars(state, -1, mysql_error(mysql));
 }
 
-static int32_t select_db_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t select_db_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
   const char *database = hk_as_string(args[2])->chars;
-  return hk_vm_push_bool(vm, !mysql_select_db(mysql, database));
+  return hk_state_push_bool(state, !mysql_select_db(mysql, database));
 }
 
-static int32_t query_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t query_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
   const char *query = hk_as_string(args[2])->chars;
@@ -170,31 +170,31 @@ static int32_t query_call(hk_vm_t *vm, hk_value_t *args)
     hk_incr_ref(err);
     result->elements[0] = HK_NIL_VALUE;
     result->elements[1] = hk_string_value(err);
-    return hk_vm_push_array(vm, result);
+    return hk_state_push_array(state, result);
   }
   MYSQL_RES *mysql_res = mysql_store_result(mysql);
   if (!mysql_res)
   {
     result->elements[0] = HK_NIL_VALUE;
     result->elements[1] = HK_NIL_VALUE;
-    return hk_vm_push_array(vm, result);
+    return hk_state_push_array(state, result);
   }
   hk_userdata_t *udata = (hk_userdata_t *) mysql_result_wrapper_new(mysql_res);
   hk_incr_ref(udata);
   result->elements[0] = hk_userdata_value(udata);
   result->elements[1] = HK_NIL_VALUE;
-  return hk_vm_push_array(vm, result);
+  return hk_state_push_array(state, result);
 }
 
-static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t fetch_row_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   MYSQL_RES *mysql_res = ((mysql_result_wrapper_t *) hk_as_userdata(args[1]))->mysql_res;
   MYSQL_FIELD *fields = mysql_fetch_fields(mysql_res);
   MYSQL_ROW row = mysql_fetch_row(mysql_res);
   if (!row)
-    return hk_vm_push_nil(vm);
+    return hk_state_push_nil(state);
   int32_t num_fields = mysql_num_fields(mysql_res);
   hk_array_t *arr = hk_array_new_with_capacity(num_fields);
   for (int32_t i = 0; i < num_fields; ++i)
@@ -246,52 +246,52 @@ static int32_t fetch_row_call(hk_vm_t *vm, hk_value_t *args)
     }
     hk_array_inplace_add_element(arr, elem);
   }
-  return hk_vm_push_array(vm, arr);
+  return hk_state_push_array(state, arr);
 }
 
-static int32_t affected_rows_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t affected_rows_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   MYSQL *mysql = ((mysql_wrapper_t *) hk_as_userdata(args[1]))->mysql;
-  return hk_vm_push_number(vm, (double) mysql_affected_rows(mysql));
+  return hk_state_push_number(state, (double) mysql_affected_rows(mysql));
 }
 
 HK_LOAD_FN(mysql)
 {
-  if (hk_vm_push_string_from_chars(vm, -1, "mysql") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "mysql") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "connect") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "connect") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "connect", 5, &connect_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "connect", 5, &connect_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "close") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "close") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "close", 1, &close_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "close", 1, &close_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "ping") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "ping") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "ping", 1, &ping_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "ping", 1, &ping_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "error") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "error") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "error", 1, &error_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "error", 1, &error_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "select_db") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "select_db") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "select_db", 2, &select_db_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "select_db", 2, &select_db_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "query") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "query") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "query", 2, &query_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "query", 2, &query_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "fetch_row") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "fetch_row") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "fetch_row", 1, &fetch_row_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "fetch_row", 1, &fetch_row_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "affected_rows") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "affected_rows") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "affected_rows", 1, &affected_rows_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "affected_rows", 1, &affected_rows_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 8);
+  return hk_state_construct(state, 8);
 }

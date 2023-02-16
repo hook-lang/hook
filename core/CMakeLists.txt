@@ -19,12 +19,12 @@ add_library(math_mod SHARED
   ../src/hk_module.c
   ../src/hk_range.c
   ../src/hk_scanner.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(os_mod SHARED
   hk_os.c
@@ -41,12 +41,12 @@ add_library(os_mod SHARED
   ../src/hk_module.c
   ../src/hk_range.c
   ../src/hk_scanner.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(io_mod SHARED
   hk_io.c
@@ -63,12 +63,12 @@ add_library(io_mod SHARED
   ../src/hk_module.c
   ../src/hk_range.c
   ../src/hk_scanner.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(numbers_mod SHARED
   hk_numbers.c
@@ -83,12 +83,12 @@ add_library(numbers_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(strings_mod SHARED
   hk_strings.c
@@ -103,12 +103,12 @@ add_library(strings_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(arrays_mod SHARED
   hk_arrays.c
@@ -123,12 +123,12 @@ add_library(arrays_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(utf8_mod SHARED
   hk_utf8.c
@@ -142,13 +142,13 @@ add_library(utf8_mod SHARED
   ../src/hk_iterator.c
   ../src/hk_memory.c
   ../src/hk_module.c
+  ../src/hk_state.c
   ../src/hk_range.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(regex_mod SHARED
   hk_regex.c
@@ -163,12 +163,12 @@ add_library(regex_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(hashing_mod SHARED
   hk_hashing.c
@@ -188,12 +188,12 @@ add_library(hashing_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(encoding_mod SHARED
   hk_encoding.c
@@ -211,12 +211,12 @@ add_library(encoding_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)
 
 add_library(socket_mod SHARED
   hk_socket.c
@@ -231,9 +231,9 @@ add_library(socket_mod SHARED
   ../src/hk_memory.c
   ../src/hk_module.c
   ../src/hk_range.c
+  ../src/hk_state.c
   ../src/hk_string_map.c
   ../src/hk_string.c
   ../src/hk_struct.c
   ../src/hk_userdata.c
-  ../src/hk_value.c
-  ../src/hk_vm.c)
+  ../src/hk_value.c)

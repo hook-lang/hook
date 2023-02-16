@@ -6,7 +6,7 @@
 #ifndef CURL_H
 #define CURL_H
 
-#include "hk_vm.h"
+#include "hk_state.h"
 #include "hk_utils.h"
 
 HK_LOAD_FN(curl);

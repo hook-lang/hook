@@ -7,7 +7,7 @@
 #include <string.h>
 #include "hk_compiler.h"
 #include "hk_dump.h"
-#include "hk_vm.h"
+#include "hk_state.h"
 #include "hk_status.h"
 #include "hk_error.h"
 #include "hk_utils.h"
@@ -214,19 +214,19 @@ static inline void dump_bytecode_to_file(hk_function_t *fn, const char *filename
 
 static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args)
 {
-  hk_vm_t vm;
-  hk_vm_init(&vm, parsed_args->stack_size);
-  hk_vm_push_closure(&vm, cl);
-  hk_vm_push_array(&vm, args_array(parsed_args));
-  if (hk_vm_call(&vm, 1) == HK_STATUS_ERROR)
+  hk_state_t state;
+  hk_state_init(&state, parsed_args->stack_size);
+  hk_state_push_closure(&state, cl);
+  hk_state_push_array(&state, args_array(parsed_args));
+  if (hk_state_call(&state, 1) == HK_STATUS_ERROR)
   {
-    hk_vm_free(&vm);
+    hk_state_free(&state);
     return EXIT_FAILURE;
   }
-  hk_value_t result = vm.stack[vm.stack_top];
+  hk_value_t result = state.stack[state.stack_top];
   int32_t status = hk_is_int(result) ? (int32_t) hk_as_number(result) : 0;
-  --vm.stack_top;
-  hk_vm_free(&vm);
+  --state.stack_top;
+  hk_state_free(&state);
   return status;
 }
 

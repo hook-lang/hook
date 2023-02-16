@@ -18,8 +18,8 @@ typedef struct
 static inline redis_context_wrapper_t *redis_context_wrapper_new(redisContext *redis_context);
 static void redis_context_wrapper_deinit(hk_userdata_t *udata);
 static hk_value_t redis_reply_to_value(redisReply *reply);
-static int32_t connect_call(hk_vm_t *vm, hk_value_t *args);
-static int32_t command_call(hk_vm_t *vm, hk_value_t *args);
+static int32_t connect_call(hk_state_t *state, hk_value_t *args);
+static int32_t command_call(hk_state_t *state, hk_value_t *args);
 
 static inline redis_context_wrapper_t *redis_context_wrapper_new(redisContext *redis_context)
 {
@@ -91,25 +91,25 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
   return result;
 }
 
-static int32_t connect_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t connect_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_int(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   hk_string_t *hostname = hk_as_string(args[1]);
   int32_t port = (int32_t) hk_as_number(args[2]);
   redisContext *redis_context = redisConnect(hostname->chars, port);
   if (!redis_context || redis_context->err)
-    return hk_vm_push_nil(vm);
-  return hk_vm_push_userdata(vm, (hk_userdata_t *) redis_context_wrapper_new(redis_context));
+    return hk_state_push_nil(state);
+  return hk_state_push_userdata(state, (hk_userdata_t *) redis_context_wrapper_new(redis_context));
 }
 
-static int32_t command_call(hk_vm_t *vm, hk_value_t *args)
+static int32_t command_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_vm_check_userdata(args, 1) == HK_STATUS_ERROR)
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_check_string(args, 2) == HK_STATUS_ERROR)
+  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   redisContext *redis_context = ((redis_context_wrapper_t *) hk_as_userdata(args[1]))->redis_context;
   hk_string_t *command = hk_as_string(args[2]);
@@ -117,20 +117,20 @@ static int32_t command_call(hk_vm_t *vm, hk_value_t *args)
   hk_assert(reply, "redisCommand returned NULL");
   hk_value_t result = redis_reply_to_value(reply);
   freeReplyObject(reply);
-  return hk_vm_push(vm, result);
+  return hk_state_push(state, result);
 }
 
 HK_LOAD_FN(redis)
 {
-  if (hk_vm_push_string_from_chars(vm, -1, "redis") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "redis") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "connect") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "connect") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "connect", 2, &connect_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "connect", 2, &connect_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_string_from_chars(vm, -1, "command") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "command") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_vm_push_new_native(vm, "command", 2, &command_call) == HK_STATUS_ERROR)
+  if (hk_state_push_new_native(state, "command", 2, &command_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_vm_construct(vm, 2);
+  return hk_state_construct(state, 2);
 }
