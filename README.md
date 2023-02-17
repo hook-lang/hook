@@ -30,7 +30,7 @@ Hook offers the following key features:
 * Familiar C-like syntax
 * Support for value-captured closures
 
->**Important Note**: Hook is currently in the early stages of development and should not be used in production environments at this time.
+> **Note**: Hook is currently in the early stages of development and should not be used in production environments at this time.
 
 ## Installing
 
@@ -71,6 +71,10 @@ Get hands-on with Hook by visiting the [Hook Playground](https://hook-lang.githu
 ## Editor Support
 
 Hook offers an extension for the popular code editor, Visual Studio Code. This extension provides features such as syntax highlighting, code completion, and code snippets, making your development experience more efficient. The extension can be easily installed from the  [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=fabiosvm.hook).
+
+## Contributing
+
+We welcome contributions to our project! Please refer to the guidelines in our [CONTRIBUTING](CONTRIBUTING.md) file to learn how you can help us improve our project. Thank you for your interest in contributing!
 
 ## License
 
