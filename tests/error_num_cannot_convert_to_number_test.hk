@@ -1,2 +1,2 @@
 
-val a = to_number(nil);
+let a = to_number(nil);

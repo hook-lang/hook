@@ -1,2 +1,2 @@
 
-val a = to_number("123 x");
+let a = to_number("123 x");

@@ -8,7 +8,7 @@ fn coin_flip(times) {
   mut heads = 0;
   mut tails = 0;
   for (mut i = 0; i < times; i++) {
-    val n = round(random() * 1);
+    let n = round(random() * 1);
     if (n == 0)
       heads++;
     else

@@ -12,5 +12,5 @@ fn hanoi(n, src, dest, aux) {
   hanoi(n-1, aux, dest, src);
 }
 
-val n = 4;
+let n = 4;
 hanoi(n, "A", "C", "B");

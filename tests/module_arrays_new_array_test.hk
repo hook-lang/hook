@@ -1,4 +1,4 @@
 
 import arrays;
-val arr = arrays.new_array(100);
+let arr = arrays.new_array(100);
 println(arr);

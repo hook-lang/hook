@@ -21,7 +21,7 @@ fn draw(board) {
 }
 
 fn win(board) {
-  val wins = [
+  let wins = [
     [0, 1, 2],
     [3, 4, 5],
     [6, 7, 8],
@@ -48,7 +48,7 @@ fn minimax(mut board, player) {
   for (mut i = 0; i < 9; i++) {
     if (board[i] == 0) {
         board[i] = player;
-        val this_score = - minimax(board, player * -1);
+        let this_score = - minimax(board, player * -1);
         if (this_score > score) {
           score = this_score;
           move = i;
@@ -68,7 +68,7 @@ fn cpu_move(mut board) {
   for (mut i = 0; i < 9; i++) {
     if (board[i] == 0) {
       board[i] = 1;
-      val temp_score = - minimax(board, -1);
+      let temp_score = - minimax(board, -1);
       board[i] = 0;
       if (temp_score > score) {
         score = temp_score;
@@ -95,7 +95,7 @@ mut board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 println("CPU: O, You: X");
 println("Play (1)st or (2)nd? ");
 
-val player = to_int(readln(stdin));
+let player = to_int(readln(stdin));
 
 for (mut turn = 0; turn < 9 && win(board) == 0; turn++) {
   if ((turn + player) % 2 == 0) {

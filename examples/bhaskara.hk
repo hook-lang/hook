@@ -5,12 +5,12 @@
 import { sqrt } from math;
 
 fn bhaskara(a, b, c) {
-  val d = b * b - 4 * a * c;
+  let d = b * b - 4 * a * c;
   if (d < 0)
     return nil;
-  val sd = sqrt(d);
-  val x1 = (-b + sd) / (2 * a);
-  val x2 = (-b - sd) / (2 * a);
+  let sd = sqrt(d);
+  let x1 = (-b + sd) / (2 * a);
+  let x2 = (-b - sd) / (2 * a);
   return [x1, x2];
 }
 

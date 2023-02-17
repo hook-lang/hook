@@ -4,18 +4,18 @@
 
 import socket;
 
-val { AF_INET, SOCK_STREAM } = socket;
-val { SOL_SOCKET, SO_REUSEADDR } = socket;
-val { set_option, bind, listen, accept, recv, send, close } = socket;
+let { AF_INET, SOCK_STREAM } = socket;
+let { SOL_SOCKET, SO_REUSEADDR } = socket;
+let { set_option, bind, listen, accept, recv, send, close } = socket;
 
-val port = 9000;
+let port = 9000;
 
-val server = socket.new(AF_INET, SOCK_STREAM, 0);
+let server = socket.new(AF_INET, SOCK_STREAM, 0);
 set_option(server, SOL_SOCKET, SO_REUSEADDR, 1);
 bind(server, "0.0.0.0", port);
 listen(server, 10);
 
-val client = accept(server);
+let client = accept(server);
 if (!client) {
   panic("accept failed");
 }
@@ -23,7 +23,7 @@ if (!client) {
 println("Client connected");
 
 loop {
-  val received = recv(client, 1024, 0);
+  let received = recv(client, 1024, 0);
   if (!received)
     break;
   println("Received: " + received);

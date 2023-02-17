@@ -1,2 +1,2 @@
 
-val a = to_int("123 x");
+let a = to_int("123 x");

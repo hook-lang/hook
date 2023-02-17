@@ -398,7 +398,7 @@ static void compile_statement(compiler_t *comp)
     compile_import_statement(comp);
     return;
   }
-  if (match(scan, TOKEN_VAL))
+  if (match(scan, TOKEN_LET))
   {
     compile_constant_declaration(comp);
     consume(comp, TOKEN_SEMICOLON);
@@ -1375,7 +1375,7 @@ static void compile_for_statement(compiler_t *comp)
     scanner_next_token(scan);
   else
   {
-    if (match(scan, TOKEN_VAL))
+    if (match(scan, TOKEN_LET))
     {
       compile_constant_declaration(comp);
       consume(comp, TOKEN_SEMICOLON);

@@ -1,2 +1,2 @@
 
-val a = to_int("4.9e-324");
+let a = to_int("4.9e-324");

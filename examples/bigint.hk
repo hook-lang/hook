@@ -4,9 +4,9 @@
 
 import bigint;
 
-val x = bigint.new("2222222222222222222222222222222222222222");
-val y = bigint.new("3333333333333333333333333333333333333333");
+let x = bigint.new("2222222222222222222222222222222222222222");
+let y = bigint.new("3333333333333333333333333333333333333333");
 
-val z = bigint.add(x, y);
+let z = bigint.add(x, y);
 
 println(bigint.to_string(z));

@@ -2,13 +2,13 @@
 // num_to_words.hk
 //
 
-val units = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
-val teens = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
-val tens = ["", "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+let units = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+let teens = ["ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
+let tens = ["", "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
 
-val places = ["", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth"];
-val teen_places = ["tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth"];
-val tens_places = ["", "tenth", "twentieth", "thirtieth", "fortieth", "fifthieth", "sixthieth", "seventieth", "eightieth", "ninetieth"];
+let places = ["", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth"];
+let teen_places = ["tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth"];
+let tens_places = ["", "tenth", "twentieth", "thirtieth", "fortieth", "fifthieth", "sixthieth", "seventieth", "eightieth", "ninetieth"];
 
 fn num_to_array(num) {
 	mut arr = [];
@@ -34,7 +34,7 @@ fn has_trailing_zeros(arr) {
 }
 
 fn num_to_words(num) {
-	val arr = num_to_array(num);
+	let arr = num_to_array(num);
 	mut word = "";
 	if (num == 0)
 		word = "zero";
@@ -66,7 +66,7 @@ fn num_to_words(num) {
 }
 
 fn num_to_place(num) {
-	val arr = num_to_array(num);
+	let arr = num_to_array(num);
 	mut place = "";
 	if (num == 0)
 		place = "zeroth";
@@ -107,6 +107,6 @@ fn num_to_place(num) {
 	return place;
 }
 
-val num = 1048576;
+let num = 1048576;
 println("Word: " + num_to_words(num));
 println("Place: " + num_to_place(num));

@@ -1,3 +1,3 @@
 
 import math;
-val a = math.pow("foo", 1);
+let a = math.pow("foo", 1);

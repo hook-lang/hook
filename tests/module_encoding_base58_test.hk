@@ -1,6 +1,6 @@
 
 import encoding;
-val encoded = encoding.base58_encode("foo bar baz");
+let encoded = encoding.base58_encode("foo bar baz");
 assert(encoded == "SQHFQMRT97NTco3", "encoded must be 'SQHFQMRT97NTco3'");
-val decoded = encoding.base58_decode(encoded);
+let decoded = encoding.base58_decode(encoded);
 assert(decoded == "foo bar baz", "decoded must be 'foo bar baz'");

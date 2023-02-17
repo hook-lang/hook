@@ -1,17 +1,17 @@
 
-val a = 1;
+let a = 1;
 fn f (x) {
-  val b = 2;
+  let b = 2;
   fn g (y) {
-    val c = 3;
-    val h = |z| {
+    let c = 3;
+    let h = |z| {
       return z + c + y + b * x * x;
     };
     return h;
   }
-  val h = g(a);
+  let h = g(a);
   return h;
 }
-val h = f(4);
-val r = h(5);
+let h = f(4);
+let r = h(5);
 println(r);

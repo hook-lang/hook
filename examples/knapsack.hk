@@ -4,12 +4,12 @@
 
 fn knapsack(weight_cap, weights, values) {
   mut high = 0;
-  val n = len(weights);
+  let n = len(weights);
   for (mut i = 0; i < n; i++) {
     mut cap = weights[i];
     mut value = values[i];
-    val new_cap = weights[i];
-    val new_value = values[i];
+    let new_cap = weights[i];
+    let new_value = values[i];
     for (mut j = i + 1; j < n; j++) {
       if (cap < weight_cap && cap + weights[j] <= weight_cap) {
         cap += weights[j];
@@ -24,7 +24,7 @@ fn knapsack(weight_cap, weights, values) {
   return high;
 }
 
-val weight_cap = 10;
-val weights = [3, 6, 3];
-val values = [70, 60, 100];
+let weight_cap = 10;
+let weights = [3, 6, 3];
+let values = [70, 60, 100];
 println(knapsack(weight_cap, weights, values));

@@ -2,11 +2,11 @@
 import secp256r1;
 import { sha256 } from hashing;
 
-val key_pair = secp256r1.new_key_pair();
+let key_pair = secp256r1.new_key_pair();
 assert(type(key_pair) == "array", "key_pair must be an array");
 assert(len(key_pair) == 2, "the length of key_pair must be equal to 2");
 
-val [ pub_key, priv_key ] = key_pair;
+let [ pub_key, priv_key ] = key_pair;
 assert(type(pub_key) == "string", "pub_key must be a string");
 assert(type(priv_key) == "string", "priv_key must be a string");
 assert(len(pub_key) == secp256r1.PUBLIC_KEY_SIZE, "length of pub_key must be equal to 33");
@@ -14,20 +14,20 @@ assert(len(priv_key) == secp256r1.PRIVATE_KEY_SIZE, "the length of priv_key must
 println(hex(pub_key));
 println(hex(priv_key));
 
-val secret = secp256r1.shared_secret(pub_key, priv_key);
+let secret = secp256r1.shared_secret(pub_key, priv_key);
 assert(type(secret) == "string", "secret must be a string");
 assert(len(secret) == secp256r1.SECRET_SIZE, "the length of secret must be equal to 32");
 println(hex(secret));
 
-val hash = sha256("foo bar baz");
+let hash = sha256("foo bar baz");
 assert(len(hash) == secp256r1.HASH_SIZE, "the length of hash must be equal to 32");
 println(hex(hash));
 
-val signature = secp256r1.sign_hash(priv_key, hash);
+let signature = secp256r1.sign_hash(priv_key, hash);
 assert(type(signature) == "string", "signature must be a string");
 assert(len(signature) == secp256r1.SIGNATURE_SIZE, "the length of signature must be equal to 64");
 println(hex(signature));
 
-val valid = secp256r1.verify_signature(pub_key, hash, signature);
+let valid = secp256r1.verify_signature(pub_key, hash, signature);
 assert(valid, "the signature is invalid");
 println(valid);

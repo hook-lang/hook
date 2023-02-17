@@ -2,7 +2,7 @@
 // rule110.hk
 //
 
-val size = 100;
+let size = 100;
 mut prev = [];
 mut i;
 
@@ -14,9 +14,9 @@ while (i < size - 1) {
 prev[] = true;
 
 fn calc(p, i) {
-  val prev = p[i - 1];
-  val curr = p[i];
-  val next = p[i + 1];
+  let prev = p[i - 1];
+  let curr = p[i];
+  let next = p[i + 1];
   if (prev && curr && next) {
     return false;
   }

@@ -21,10 +21,10 @@ stmt        ::= 'import' NAME ( 'as' NAME )? ';'
               | 'return' expr? ';'
               | block
 
-var_decl    ::= 'val' NAME '=' expr
+var_decl    ::= 'let' NAME '=' expr
               | 'mut' NAME ( '=' expr )?
-              | ( 'val' | 'mut' ) '[' '_' | NAME ( ',' '_' | NAME )* ']' '=' expr
-              | ( 'val' | 'mut' ) '{' NAME ( ',' NAME )* '}' '=' expr
+              | ( 'let' | 'mut' ) '[' '_' | NAME ( ',' '_' | NAME )* ']' '=' expr
+              | ( 'let' | 'mut' ) '{' NAME ( ',' NAME )* '}' '=' expr
 
 assign_call ::= NAME subscr* assign_op expr
               | NAME subscr* ( '++' | '--' )

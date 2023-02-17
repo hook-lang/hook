@@ -1,5 +1,5 @@
 
 import hashing;
-val expected = "0808f64e60d58979fcb676c96ec938270dea42445aeefcd3a4e6f8db";
-val x = hex(hashing.sha224("foo"));
+let expected = "0808f64e60d58979fcb676c96ec938270dea42445aeefcd3a4e6f8db";
+let x = hex(hashing.sha224("foo"));
 assert(x == expected, "x must equal expected");

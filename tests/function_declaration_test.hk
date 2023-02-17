@@ -3,19 +3,19 @@ fn f(a, b) {
   return a + b;
 }
 
-val g = |a, b| {
+let g = |a, b| {
   return a - b;
 };
 
 fn h(a, b) => a + b
 
-val i = |a, b| => a - b;
+let i = |a, b| => a - b;
 
-val j = || {
+let j = || {
   return 1;
 };
 
-val k = || => 1;
+let k = || => 1;
 
 fn l() {
   fn m() {}

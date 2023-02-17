@@ -1,2 +1,2 @@
 
-val a = compare(1, "foo");
+let a = compare(1, "foo");

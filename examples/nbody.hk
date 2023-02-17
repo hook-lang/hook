@@ -5,8 +5,8 @@
 import { PI } from numbers;
 import { sqrt } from math;
 
-val SOLAR_MASS = 4 * PI * PI;
-val DAYS_PER_YEAR = 365.24;
+let SOLAR_MASS = 4 * PI * PI;
+let DAYS_PER_YEAR = 365.24;
 
 struct Body {
   x,
@@ -64,11 +64,11 @@ fn offset_momentum(mut bodies) {
   mut px = 0;
   mut py = 0;
   mut pz = 0;
-  val size = len(bodies);
+  let size = len(bodies);
   mut i = 0;
   while (i < size) {
-    val body = bodies[i];
-    val mass = body.mass;
+    let body = bodies[i];
+    let mass = body.mass;
     px += body.vx * mass;
     py += body.vy * mass;
     pz += body.vz * mass;
@@ -81,7 +81,7 @@ fn offset_momentum(mut bodies) {
 }
 
 fn advance(mut bodies, dt) {
-  val size = len(bodies);
+  let size = len(bodies);
   mut i = 0;
   while (i < size) {
     mut bodyi = bodies[i];
@@ -91,16 +91,16 @@ fn advance(mut bodies, dt) {
     mut j = i + 1;
     while (j < size) {
       mut bodyj = bodies[j];
-      val dx = bodyi.x - bodyj.x;
-      val dy = bodyi.y - bodyj.y;
-      val dz = bodyi.z - bodyj.z;
-      val d2 = dx * dx + dy * dy + dz * dz;
-      val mag = dt / (d2 * sqrt(d2));
-      val massj = bodyj.mass;
+      let dx = bodyi.x - bodyj.x;
+      let dy = bodyi.y - bodyj.y;
+      let dz = bodyi.z - bodyj.z;
+      let d2 = dx * dx + dy * dy + dz * dz;
+      let mag = dt / (d2 * sqrt(d2));
+      let massj = bodyj.mass;
       vxi -= dx * massj * mag;
       vyi -= dy * massj * mag;
       vzi -= dz * massj * mag;
-      val massi = bodyi.mass;
+      let massi = bodyi.mass;
       bodyj.vx += dx * massi * mag;
       bodyj.vy += dy * massi * mag;
       bodyj.vz += dz * massi * mag;
@@ -125,19 +125,19 @@ fn advance(mut bodies, dt) {
 
 fn energy(bodies) {
   mut e = 0;
-  val size = len(bodies);
+  let size = len(bodies);
   mut i = 0;
   while (i < size) {
-    val bodyi = bodies[i];
+    let bodyi = bodies[i];
     e += 0.5 * bodyi.mass * ( bodyi.vx * bodyi.vx + 
         bodyi.vy * bodyi.vy + bodyi.vz * bodyi.vz );
     mut j = i + 1;
     while (j < size) {
-      val bodyj = bodies[j];
-      val dx = bodyi.x - bodyj.x;
-      val dy = bodyi.y - bodyj.y;
-      val dz = bodyi.z - bodyj.z;
-      val distance = sqrt(dx * dx + dy * dy + dz * dz);
+      let bodyj = bodies[j];
+      let dx = bodyi.x - bodyj.x;
+      let dy = bodyi.y - bodyj.y;
+      let dz = bodyi.z - bodyj.z;
+      let distance = sqrt(dx * dx + dy * dy + dz * dz);
       e -= (bodyi.mass * bodyj.mass) / distance;
       j++;
     }
@@ -146,7 +146,7 @@ fn energy(bodies) {
   return e;
 }
 
-val n = to_int(args[0]);
+let n = to_int(args[0]);
 mut bodies = [ sun(), jupiter(), saturn(), uranus(), neptune() ];
 bodies = offset_momentum(bodies);
 println(energy(bodies));

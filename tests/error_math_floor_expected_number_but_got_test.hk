@@ -1,3 +1,3 @@
 
 import math;
-val a = math.floor("foo");
+let a = math.floor("foo");

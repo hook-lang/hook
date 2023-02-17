@@ -1,6 +1,6 @@
 
 import utf8;
-val str = "こんにちは";
+let str = "こんにちは";
 println(utf8.sub(str, 0, 1));
 println(utf8.sub(str, 1, 2));
 println(utf8.sub(str, 0, 5));

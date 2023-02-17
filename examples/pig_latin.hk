@@ -4,12 +4,12 @@
 
 import { lower } from strings;
 
-val vowels = ['a', 'e', 'i', 'o', 'u'];
-val num_vowels = len(vowels);
+let vowels = ['a', 'e', 'i', 'o', 'u'];
+let num_vowels = len(vowels);
 
 fn pig_latin(mut word) {
   word = lower(word);
-  val first = word[0];
+  let first = word[0];
 
   for (mut i = 0; i < num_vowels; i++) {
     if (first != vowels[i])

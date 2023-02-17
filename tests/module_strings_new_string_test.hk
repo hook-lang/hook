@@ -1,4 +1,4 @@
 
 import strings;
-val str = strings.new_string(100);
+let str = strings.new_string(100);
 println(str);

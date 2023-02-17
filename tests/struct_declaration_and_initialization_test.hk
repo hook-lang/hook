@@ -4,17 +4,17 @@ struct Foo {
 }
 println(Foo{1, 2});
 
-val Bar = struct {
+let Bar = struct {
   c, d
 };
 println(Bar{3, 4});
 
-val Baz = struct {
+let Baz = struct {
   "e", "f"
 };
 println(Baz{5, 6});
 
-val Qux = struct {
+let Qux = struct {
   "g", "h"
 };
 println(Qux{7, 8});

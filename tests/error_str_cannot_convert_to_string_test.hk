@@ -1,2 +1,2 @@
 
-val a = to_string([]);
+let a = to_string([]);

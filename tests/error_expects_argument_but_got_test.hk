@@ -1,2 +1,2 @@
 
-val n = len();
+let n = len();

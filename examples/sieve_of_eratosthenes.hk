@@ -31,5 +31,5 @@ fn sieve_of_eratosthenes(n) {
   }
 }
 
-val n = 100;
+let n = 100;
 sieve_of_eratosthenes(n);

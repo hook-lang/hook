@@ -1,8 +1,8 @@
 
-val arr1 = ["foo", "bar", "baz"];
+let arr1 = ["foo", "bar", "baz"];
 println(arr1[0]);
 println(arr1[1]);
 println(arr1[2]);
 
-val arr2 = [["foo", "bar"]];
+let arr2 = [["foo", "bar"]];
 println(arr2[0][1]);

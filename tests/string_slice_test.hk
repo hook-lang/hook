@@ -1,5 +1,5 @@
 
-val str = "bar";
+let str = "bar";
 
 assert(str[0] == "b", "index 0");
 assert(str[1] == "a", "index 1");

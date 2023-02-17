@@ -1,17 +1,17 @@
 
-val a = 1;
-val [b, c] = [2, 3];
+let a = 1;
+let [b, c] = [2, 3];
 mut d;
 mut e = 4;
-val [f, g] = ["foo", "bar"];
+let [f, g] = ["foo", "bar"];
 mut [h] = ["baz"];
 mut [i, j] = ["qux", "quux"];
 
-val {k, l} = {k: "foo", l: "bar"};
+let {k, l} = {k: "foo", l: "bar"};
 mut {m} = {m: "baz"};
 mut {n, o, p} = {n: "qux", p: "quux"};
 
-val [_, q, _] = [1, 2, 3];
+let [_, q, _] = [1, 2, 3];
 mut [r, _, s] = [4, 5, 6];
 
 println(a);

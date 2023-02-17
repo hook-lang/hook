@@ -1,2 +1,2 @@
 
-val a = to_int(nil);
+let a = to_int(nil);

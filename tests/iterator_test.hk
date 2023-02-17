@@ -2,7 +2,7 @@
 mut it1;
 mut it2;
 
-val range = 1 .. 3;
+let range = 1 .. 3;
 it1 = iter(range);
 it2 = it1;
 
@@ -19,7 +19,7 @@ for (; valid(it2); it2 = next(it2)) {
   println(current(it2));
 }
 
-val arr = ["foo", "bar", "baz"];
+let arr = ["foo", "bar", "baz"];
 it1 = iter(arr);
 it2 = it1;
 

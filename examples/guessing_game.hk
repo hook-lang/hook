@@ -8,7 +8,7 @@ import { trim } from strings;
 
 println("Guess the number!");
 
-val secret_number = to_int(1 + random() * 99);
+let secret_number = to_int(1 + random() * 99);
 
 loop {
   println("Please input your guess.");
@@ -24,7 +24,7 @@ loop {
 
   println("You guessed: " + to_string(guess));
 
-  val cmp = compare(guess, secret_number);
+  let cmp = compare(guess, secret_number);
   
   if (cmp < 0)
     println("Too small!");

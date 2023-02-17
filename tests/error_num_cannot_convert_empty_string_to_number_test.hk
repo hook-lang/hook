@@ -1,2 +1,2 @@
 
-val a = to_number("");
+let a = to_number("");

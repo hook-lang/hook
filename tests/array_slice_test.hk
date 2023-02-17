@@ -1,5 +1,5 @@
 
-val arr = ["foo", "bar", "baz"];
+let arr = ["foo", "bar", "baz"];
 
 assert(arr[0 .. 0] == ["foo"], "range 0 .. 0");
 assert(arr[1 .. 1] == ["bar"], "range 1 .. 1");

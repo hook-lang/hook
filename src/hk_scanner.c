@@ -571,6 +571,11 @@ void scanner_next_token(scanner_t *scan)
     scan->token.type = TOKEN_IN;
     return;
   }
+  if (match_keyword(scan, "let"))
+  {
+    scan->token.type = TOKEN_LET;
+    return;
+  }
   if (match_keyword(scan, "loop"))
   {
     scan->token.type = TOKEN_LOOP;
@@ -604,11 +609,6 @@ void scanner_next_token(scanner_t *scan)
   if (match_keyword(scan, "true"))
   {
     scan->token.type = TOKEN_TRUE;
-    return;
-  }
-  if (match_keyword(scan, "val"))
-  {
-    scan->token.type = TOKEN_VAL;
     return;
   }
   if (match_keyword(scan, "while!"))
