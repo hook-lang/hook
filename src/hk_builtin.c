@@ -126,7 +126,7 @@ static inline int32_t string_to_double(hk_state_t *state, hk_string_t *str, doub
     hk_runtime_error("type error: argument #1 must be a non-empty string");
     return HK_STATUS_ERROR;
   }
-  if (!hk_double_from_chars(result, str->chars))
+  if (!hk_double_from_chars(result, str->chars, true))
   {
     hk_runtime_error("type error: argument #1 is not a convertible string");
     return HK_STATUS_ERROR;

@@ -77,11 +77,14 @@ bool hk_long_from_chars(long *result, const char *chars)
   return true;
 }
 
-bool hk_double_from_chars(double *result, const char *chars)
+bool hk_double_from_chars(double *result, const char *chars, bool strict)
 {
   errno = 0;
-  double _result = strtod(chars, NULL);
+  char *end;
+  double _result = strtod(chars, &end);
   if (errno == ERANGE)
+    return false;
+  if (strict && *end)
     return false;
   *result = _result;
   return true;
