@@ -80,11 +80,8 @@ bool hk_long_from_chars(long *result, const char *chars)
 bool hk_double_from_chars(double *result, const char *chars)
 {
   errno = 0;
-  char *end = (char *) chars;
-  double _result = strtod(chars, &end);
+  double _result = strtod(chars, NULL);
   if (errno == ERANGE)
-    return false;
-  if (*end)
     return false;
   *result = _result;
   return true;

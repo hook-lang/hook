@@ -70,7 +70,7 @@ static hk_value_t redis_reply_to_value(redisReply *reply)
     case REDIS_REPLY_DOUBLE:
       {
         double data;
-        hk_double_from_chars(&data, reply->str);
+        (void) hk_double_from_chars(&data, reply->str);
         result = hk_number_value(data);
       }
       break;
