@@ -124,6 +124,15 @@ hk_string_t *hk_string_concat(hk_string_t *str1, hk_string_t *str2)
   return result;
 }
 
+void hk_string_inplace_concat_char(hk_string_t *dest, char c)
+{
+  int32_t length = dest->length;
+  hk_string_ensure_capacity(dest, length + 2);
+  dest->chars[length] = c;
+  dest->chars[length + 1] = '\0';
+  dest->length += 1;
+}
+
 void hk_string_inplace_concat_chars(hk_string_t *dest, int32_t length, const char *chars)
 {
   if (length < 0)
