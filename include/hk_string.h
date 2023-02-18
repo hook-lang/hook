@@ -27,6 +27,7 @@ void hk_string_ensure_capacity(hk_string_t *str, int32_t min_capacity);
 void hk_string_free(hk_string_t *str);
 void hk_string_release(hk_string_t *str);
 hk_string_t *hk_string_concat(hk_string_t *str1, hk_string_t *str2);
+void hk_string_inplace_concat_char(hk_string_t *dest, char c);
 void hk_string_inplace_concat_chars(hk_string_t *dest, int32_t length, const char *chars);
 void hk_string_inplace_concat(hk_string_t *dest, hk_string_t *src);
 void hk_string_print(hk_string_t *str, bool quoted);
