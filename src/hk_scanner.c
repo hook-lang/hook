@@ -12,7 +12,7 @@
 
 #define MATCH_MAX_LENGTH (1 << 3)
 
-#define char_at(s, i)   ((s)->pos[(i)])
+#define char_at(s, i) ((s)->pos[(i)])
 #define current_char(s) char_at(s, 0)
 
 static inline void lexical_error(scanner_t *scan, const char *fmt, ...);
@@ -109,7 +109,7 @@ static inline bool match_char(scanner_t *scan, const char c)
 
 static inline bool match_chars(scanner_t *scan, const char *chars)
 {
-  int32_t n = (int32_t) strnlen(chars, MATCH_MAX_LENGTH);
+  int32_t n = (int32_t)strnlen(chars, MATCH_MAX_LENGTH);
   if (strncmp(scan->pos, chars, n))
     return false;
   scan->token.line = scan->line;
@@ -122,10 +122,8 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
 
 static inline bool match_keyword(scanner_t *scan, const char *keyword)
 {
-  int32_t n = (int32_t) strnlen(keyword, MATCH_MAX_LENGTH);
-  if (strncmp(scan->pos, keyword, n)
-   || (isalnum(char_at(scan, n)))
-   || (char_at(scan, n) == '_'))
+  int32_t n = (int32_t)strnlen(keyword, MATCH_MAX_LENGTH);
+  if (strncmp(scan->pos, keyword, n) || (isalnum(char_at(scan, n))) || (char_at(scan, n) == '_'))
     return false;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
@@ -186,15 +184,21 @@ static inline char render_escape_char(scanner_t *scan, int32_t n)
   char escaped_chr = char_at(scan, n + 1);
   switch (escaped_chr)
   {
-    case 'n': return '\n';
-    case 'r': return '\r';
-    case 't': return '\t';
-    case '\\': return '\\';
-    case '\'': return '\'';
-    case '\"': return '\"';
-    default:
-      lexical_error(scan, "invalid escape sequence");
-      return '\0';
+  case 'n':
+    return '\n';
+  case 'r':
+    return '\r';
+  case 't':
+    return '\t';
+  case '\\':
+    return '\\';
+  case '\'':
+    return '\'';
+  case '\"':
+    return '\"';
+  default:
+    lexical_error(scan, "invalid escape sequence");
+    return '\0';
   }
 }
 
@@ -203,7 +207,7 @@ static inline bool match_string(scanner_t *scan)
   char string_delimiter = current_char(scan);
   if (string_delimiter == '\'' || string_delimiter == '\"')
   {
-    hk_string_t * literal_string = hk_string_new();
+    hk_string_t *literal_string = hk_string_new();
     char literal_char = '\0';
     int32_t n = 1;
     for (;;)
