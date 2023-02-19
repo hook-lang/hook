@@ -8,9 +8,9 @@ math:
   asin(num: number) -> number
   acos(num: number) -> number
   atan(num: number) -> number
-  floor(num: number) -> int
-  ceil(num: number) -> int
-  round(num: number) -> int
+  floor(num: number) -> number
+  ceil(num: number) -> number
+  round(num: number) -> number
   pow(base: number, power: number) -> number
   sqrt(num: number) -> number
   cbrt(num: number) -> number
@@ -24,10 +24,10 @@ os:
 
   CLOCKS_PER_SEC: number
 
-  clock() -> int
-  time() -> int
-  system(cmd: string) -> int
-  getenv(var: string) -> string
+  clock() -> number
+  time() -> number
+  system(cmd: string) -> number
+  getenv(str: string) -> string
   name() -> string
 
 io:
@@ -41,19 +41,19 @@ io:
   SEEK_END: number
 
   open(filename: string, mode: string) -> nil|userdata
-  close(stream: userdata) -> int
+  close(stream: userdata) -> number
   popen(command: string, mode: string) -> nil|userdata
-  pclose(stream: userdata) -> int
+  pclose(stream: userdata) -> number
   eof(stream: userdata) -> bool
-  flush(stream: userdata) -> int
+  flush(stream: userdata) -> number
   sync(stream: userdata) -> bool
-  tell(stream: userdata) -> int
+  tell(stream: userdata) -> number
   rewind(stream: userdata)
-  seek(stream: userdata, offset: int, whence: int) -> int
-  read(stream: userdata, size: int) -> nil|string
-  write(stream: userdata, str: string) -> nil|int
+  seek(stream: userdata, offset: number, whence: number) -> number
+  read(stream: userdata, size: number) -> nil|string
+  write(stream: userdata, str: string) -> nil|number
   readln(stream: userdata) -> string
-  writeln(stream: userdata, str: string) -> nil|int
+  writeln(stream: userdata, str: string) -> nil|number
 
 numbers:
 
@@ -61,13 +61,13 @@ numbers:
   TAU: number
   LARGEST: number
   SMALLEST: number
-  MAX_INTEGER: int
-  MIN_INTEGER: int
+  MAX_INTEGER: number
+  MIN_INTEGER: number
 
 strings:
 
-  new_string(min_capacity: int) -> string
-  hash(str: string) -> int
+  new_string(min_capacity: number) -> string
+  hash(str: string) -> number
   lower(str: string) -> string
   upper(str: string) -> string
   trim(str: string) -> string
@@ -77,10 +77,10 @@ strings:
 
 arrays:
 
-  new_array(min_capacity: int) -> array
-  index_of(arr: array, elem: value) -> int
-  min(arr: array) -> value
-  max(arr: array) -> value
+  new_array(min_capacity: number) -> array
+  index_of(arr: array, elem) -> number
+  min(arr: array) -> any
+  max(arr: array) -> any
   sum(arr: array) -> number
   avg(arr: array) -> number
   reverse(arr: array) -> array
@@ -88,8 +88,8 @@ arrays:
 
 utf8:
 
-  len(str: string) -> int
-  sub(str: string, start: int, end: int) -> string
+  len(str: string) -> number
+  sub(str: string, start: number, end: number) -> string
 
 regex:
   
@@ -119,24 +119,24 @@ encoding:
 
 socket:
 
-  AF_INET: int
-  AF_INET6: int
-  SOCK_STREAM: int
-  SOCK_DGRAM: int
-  IPPROTO_TCP: int
-  IPPROTO_UDP: int
-  SOL_SOCKET: int
-  SO_REUSEADDR: int
+  AF_INET: number
+  AF_INET6: number
+  SOCK_STREAM: number
+  SOCK_DGRAM: number
+  IPPROTO_TCP: number
+  IPPROTO_UDP: number
+  SOL_SOCKET: number
+  SO_REUSEADDR: number
 
-  new(domain: int, type: int, protocol: int) -> userdata
+  new(domain: number, type: number, protocol: number) -> userdata
   close(sock: userdata)
-  connect(sock: userdata, host: string, port: int)
+  connect(sock: userdata, host: string, port: number)
   accept(sock: userdata) -> nil|userdata
-  bind(sock: userdata, host: string, port: int)
-  listen(sock: userdata, backlog: int)
-  send(sock: userdata, str: string) -> int
-  recv(sock: userdata, size: int) -> nil|string
-  set_option(sock: userdata, level: int, option: int, value: int)
-  get_option(sock: userdata, level: int, option: int) -> int
+  bind(sock: userdata, host: string, port: number)
+  listen(sock: userdata, backlog: number)
+  send(sock: userdata, str: string) -> number
+  recv(sock: userdata, size: number) -> nil|string
+  set_option(sock: userdata, level: number, option: number, value: number)
+  get_option(sock: userdata, level: number, option: number) -> number
   set_block(sock: userdata)
   set_nonblock(sock: userdata)
