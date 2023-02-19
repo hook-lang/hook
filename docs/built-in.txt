@@ -1,42 +1,42 @@
 
-print(val: value)
-println(val: value)
-type(val: value) -> string
-is_nil(val: value) -> bool
-is_bool(val: value) -> bool
-is_number(val: value) -> bool
-is_int(val: value) -> bool
-is_string(val: value) -> bool
-is_range(val: value) -> bool
-is_array(val: value) -> bool
-is_struct(val: value) -> bool
-is_instance(val: value) -> bool
-is_iterator(val: value) -> bool
-is_callable(val: value) -> bool
-is_userdata(val: value) -> bool
-is_object(val: value) -> bool
-is_comparable(val: value) -> bool
-is_iterable(val: value) -> bool
-to_bool(val: value) -> bool
-to_int(val: number|string) -> int
-to_number(val: number|string) -> number
-to_string(val: nil|bool|number|string) -> string
-ord(val: string) -> int
-chr(val: int) -> string
-hex(val: string) -> string
-bin(val: string) -> string
-address(val: value) -> string
-refcount(val: value) -> int
-cap(val: string|array) -> int
-len(val: string|array) -> int
-is_empty(val: string|array) -> bool
-compare(val1: value, val2: value) -> int
-split(src: string, separator: string) -> array
+print(value)
+println(value)
+type(value) -> string
+is_nil(value) -> bool
+is_bool(value) -> bool
+is_number(value) -> bool
+is_int(value) -> bool
+is_string(value) -> bool
+is_range(value) -> bool
+is_array(value) -> bool
+is_struct(value) -> bool
+is_instance(value) -> bool
+is_iterator(value) -> bool
+is_callable(value) -> bool
+is_userdata(value) -> bool
+is_object(value) -> bool
+is_comparable(value) -> bool
+is_iterable(value) -> bool
+to_bool(value) -> bool
+to_int(value: number|string) -> number
+to_number(value: number|string) -> number
+to_string(value: nil|bool|number|string) -> string
+ord(value: string) -> number
+chr(value: number) -> string
+hex(value: string) -> string
+bin(value: string) -> string
+address(value) -> string
+refcount(value) -> number
+cap(value: string|array) -> number
+len(value: string|array) -> number
+is_empty(value: string|array) -> bool
+compare(value1, value2) -> number
+split(str: string, separator: string) -> array
 join(arr: array, separator: string) -> string
 iter(val: iterator|range|array) -> iterator
 valid(it: iterator) -> bool
-current(it: iterator) -> value
-next(it: iterator)
-sleep(ms: int)
-assert(assertion: value, msg: string)
+current(it: iterator) -> any
+next(it: iterator) -> iterator
+sleep(ms: number)
+assert(assertion, msg: string)
 panic(msg: string)
