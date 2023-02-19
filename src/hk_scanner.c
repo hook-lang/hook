@@ -181,21 +181,49 @@ end:
   return true;
 }
 
+static inline char render_escape_char(scanner_t *scan, int32_t n)
+{
+  char escaped_chr = char_at(scan, n + 1);
+  switch (escaped_chr)
+  {
+    case 'n': return '\n';
+    case 'r': return '\r';
+    case 't': return '\t';
+    case '\\': return '\\';
+    case '\'': return '\'';
+    case '\"': return '\"';
+    default:
+      lexical_error(scan, "invalid escape sequence");
+      return '\0';
+  }
+}
+
 static inline bool match_string(scanner_t *scan)
 {
-  char chr = current_char(scan);
-  if (chr == '\'' || chr == '\"')
+  char string_delimiter = current_char(scan);
+  if (string_delimiter == '\'' || string_delimiter == '\"')
   {
+    hk_string_t * literal_string = hk_string_new();
+    char literal_char = '\0';
     int32_t n = 1;
     for (;;)
     {
-      if (char_at(scan, n) == chr)
+      char scanned_char = char_at(scan, n);
+      if (scanned_char == string_delimiter)
       {
         ++n;
         break;
       }
-      if (char_at(scan, n) == '\0')
+      if (scanned_char == '\\')
+      {
+        literal_char = render_escape_char(scan, n);
+        hk_string_inplace_concat_char(literal_string, literal_char);
+        n += 2;
+        continue;
+      }
+      if (scanned_char == '\0')
         lexical_error(scan, "unterminated string");
+      hk_string_inplace_concat_char(literal_string, scanned_char);
       ++n;
     }
     scan->token.type = TOKEN_STRING;
@@ -203,6 +231,7 @@ static inline bool match_string(scanner_t *scan)
     scan->token.col = scan->col;
     scan->token.length = n - 2;
     scan->token.start = &scan->pos[1];
+    scan->token.value = literal_string;
     next_chars(scan, n);
     return true;
   }
@@ -242,6 +271,7 @@ void scanner_free(scanner_t *scan)
 {
   hk_string_release(scan->file);
   hk_string_release(scan->source);
+  hk_string_release(scan->token.value);
 }
 
 void scanner_next_token(scanner_t *scan)
