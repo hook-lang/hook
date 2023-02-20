@@ -179,9 +179,8 @@ end:
   return true;
 }
 
-static inline char render_escape_char(scanner_t *scan, int32_t n)
+static inline char process_escape_char(char escaped_chr)
 {
-  char escaped_chr = char_at(scan, n + 1);
   switch (escaped_chr)
   {
   case 'n':
@@ -197,9 +196,62 @@ static inline char render_escape_char(scanner_t *scan, int32_t n)
   case '\"':
     return '\"';
   default:
-    lexical_error(scan, "invalid escape sequence");
-    return '\0';
+    return 0;
   }
+}
+
+static inline void check_invalid_string_char(
+    scanner_t *scan,
+    char string_delimiter,
+    char scanned_char)
+{
+  char *error_msg = NULL;
+  switch (scanned_char)
+  {
+  case '\0':
+    error_msg = "unexpected string termination (\\0)";
+    lexical_error(scan, error_msg);
+    break;
+  case '\n':
+    error_msg = "invalid raw line feed (\\n) inside string";
+    lexical_error(scan, error_msg);
+    break;
+  case '\r':
+    error_msg = "invalid raw carriage return (\\r) inside string";
+    lexical_error(scan, error_msg);
+    break;
+  }
+}
+
+static inline int32_t process_string_content(
+    scanner_t *scan,
+    char string_delimiter,
+    hk_string_t *literal_string)
+{
+  int32_t n = 1;
+  char literal_char = '\0';
+  for (;;)
+  {
+    char scanned_char = char_at(scan, n);
+    if (scanned_char == string_delimiter)
+    {
+      ++n;
+      break;
+    }
+    if (scanned_char == '\\')
+    {
+      literal_char = process_escape_char(char_at(scan, n + 1));
+      if (literal_char == 0)
+        lexical_error(scan, "invalid escape sequence");
+      hk_string_inplace_concat_char(literal_string, literal_char);
+      n += 2;
+      continue;
+    }
+    check_invalid_string_char(scan, string_delimiter, scanned_char);
+    hk_string_inplace_concat_char(literal_string, scanned_char);
+    ++n;
+  }
+  return n;
 }
 
 static inline bool match_string(scanner_t *scan)
@@ -208,28 +260,10 @@ static inline bool match_string(scanner_t *scan)
   if (string_delimiter == '\'' || string_delimiter == '\"')
   {
     hk_string_t *literal_string = hk_string_new();
-    char literal_char = '\0';
-    int32_t n = 1;
-    for (;;)
-    {
-      char scanned_char = char_at(scan, n);
-      if (scanned_char == string_delimiter)
-      {
-        ++n;
-        break;
-      }
-      if (scanned_char == '\\')
-      {
-        literal_char = render_escape_char(scan, n);
-        hk_string_inplace_concat_char(literal_string, literal_char);
-        n += 2;
-        continue;
-      }
-      if (scanned_char == '\0')
-        lexical_error(scan, "unterminated string");
-      hk_string_inplace_concat_char(literal_string, scanned_char);
-      ++n;
-    }
+    int32_t n = process_string_content(
+        scan,
+        string_delimiter,
+        literal_string);
     scan->token.type = TOKEN_STRING;
     scan->token.line = scan->line;
     scan->token.col = scan->col;
