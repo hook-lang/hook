@@ -31,7 +31,6 @@ typedef struct
   int32_t col;
   int32_t length;
   char *start;
-  hk_string_t *value;
 } token_t;
 
 typedef struct
