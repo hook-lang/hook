@@ -12,7 +12,7 @@
 
 #define MATCH_MAX_LENGTH (1 << 3)
 
-#define char_at(s, i)   ((s)->pos[(i)])
+#define char_at(s, i) ((s)->pos[(i)])
 #define current_char(s) char_at(s, 0)
 
 static inline void lexical_error(scanner_t *scan, const char *fmt, ...);
@@ -109,7 +109,7 @@ static inline bool match_char(scanner_t *scan, const char c)
 
 static inline bool match_chars(scanner_t *scan, const char *chars)
 {
-  int32_t n = (int32_t) strnlen(chars, MATCH_MAX_LENGTH);
+  int32_t n = (int32_t)strnlen(chars, MATCH_MAX_LENGTH);
   if (strncmp(scan->pos, chars, n))
     return false;
   scan->token.line = scan->line;
@@ -122,10 +122,8 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
 
 static inline bool match_keyword(scanner_t *scan, const char *keyword)
 {
-  int32_t n = (int32_t) strnlen(keyword, MATCH_MAX_LENGTH);
-  if (strncmp(scan->pos, keyword, n)
-   || (isalnum(char_at(scan, n)))
-   || (char_at(scan, n) == '_'))
+  int32_t n = (int32_t)strnlen(keyword, MATCH_MAX_LENGTH);
+  if (strncmp(scan->pos, keyword, n) || (isalnum(char_at(scan, n))) || (char_at(scan, n) == '_'))
     return false;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
@@ -181,28 +179,97 @@ end:
   return true;
 }
 
+static inline char process_escape_char(char escaped_chr)
+{
+  switch (escaped_chr)
+  {
+  case 'n':
+    return '\n';
+  case 'r':
+    return '\r';
+  case 't':
+    return '\t';
+  case '\\':
+    return '\\';
+  case '\'':
+    return '\'';
+  case '\"':
+    return '\"';
+  default:
+    return 0;
+  }
+}
+
+static inline void check_invalid_string_char(
+    scanner_t *scan,
+    char string_delimiter,
+    char scanned_char)
+{
+  char *error_msg = NULL;
+  switch (scanned_char)
+  {
+  case '\0':
+    error_msg = "unexpected string termination (\\0)";
+    lexical_error(scan, error_msg);
+    break;
+  case '\n':
+    error_msg = "invalid raw line feed (\\n) inside string";
+    lexical_error(scan, error_msg);
+    break;
+  case '\r':
+    error_msg = "invalid raw carriage return (\\r) inside string";
+    lexical_error(scan, error_msg);
+    break;
+  }
+}
+
+static inline int32_t process_string_content(
+    scanner_t *scan,
+    char string_delimiter,
+    hk_string_t *literal_string)
+{
+  int32_t n = 1;
+  char literal_char = '\0';
+  for (;;)
+  {
+    char scanned_char = char_at(scan, n);
+    if (scanned_char == string_delimiter)
+    {
+      ++n;
+      break;
+    }
+    if (scanned_char == '\\')
+    {
+      literal_char = process_escape_char(char_at(scan, n + 1));
+      if (literal_char == 0)
+        lexical_error(scan, "invalid escape sequence");
+      hk_string_inplace_concat_char(literal_string, literal_char);
+      n += 2;
+      continue;
+    }
+    check_invalid_string_char(scan, string_delimiter, scanned_char);
+    hk_string_inplace_concat_char(literal_string, scanned_char);
+    ++n;
+  }
+  return n;
+}
+
 static inline bool match_string(scanner_t *scan)
 {
-  char chr = current_char(scan);
-  if (chr == '\'' || chr == '\"')
+  char string_delimiter = current_char(scan);
+  if (string_delimiter == '\'' || string_delimiter == '\"')
   {
-    int32_t n = 1;
-    for (;;)
-    {
-      if (char_at(scan, n) == chr)
-      {
-        ++n;
-        break;
-      }
-      if (char_at(scan, n) == '\0')
-        lexical_error(scan, "unterminated string");
-      ++n;
-    }
+    hk_string_t *literal_string = hk_string_new();
+    int32_t n = process_string_content(
+        scan,
+        string_delimiter,
+        literal_string);
     scan->token.type = TOKEN_STRING;
     scan->token.line = scan->line;
     scan->token.col = scan->col;
     scan->token.length = n - 2;
     scan->token.start = &scan->pos[1];
+    scan->token.value = literal_string;
     next_chars(scan, n);
     return true;
   }
@@ -242,6 +309,7 @@ void scanner_free(scanner_t *scan)
 {
   hk_string_release(scan->file);
   hk_string_release(scan->source);
+  hk_string_release(scan->token.value);
 }
 
 void scanner_next_token(scanner_t *scan)

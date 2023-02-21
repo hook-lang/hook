@@ -59,6 +59,15 @@ add_executable(${PROJECT_NAME}
   src/hk_userdata.c
   src/hk_value.c)
 
+  add_executable("${PROJECT_NAME}_test_adhoc"
+  src/hk_error.c
+  src/hk_memory.c
+  src/hk_scanner.c
+  src/hk_string.c
+  src/hk_utils.c
+  experimental/c_tests_adhoc/main.c
+  )
+
 if(WIN32)
   target_link_libraries(${PROJECT_NAME} ws2_32)
 endif()
