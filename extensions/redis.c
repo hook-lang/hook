@@ -6,8 +6,9 @@
 #include "redis.h"
 #include <stdlib.h>
 #include <hiredis/hiredis.h>
-#include "hk_memory.h"
-#include "hk_status.h"
+#include <hook/memory.h>
+#include <hook/check.h>
+#include <hook/status.h>
 
 typedef struct
 {
