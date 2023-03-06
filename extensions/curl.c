@@ -5,9 +5,10 @@
 
 #include "curl.h"
 #include <curl/curl.h>
-#include "hk_memory.h"
-#include "hk_status.h"
-#include "hk_error.h"
+#include <hook/memory.h>
+#include <hook/check.h>
+#include <hook/status.h>
+#include <hook/error.h>
 
 typedef struct
 {

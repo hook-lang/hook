@@ -37,27 +37,28 @@ else()
 endif()
 
 add_executable(${PROJECT_NAME}
-  src/hk_array.c
-  src/hk_builtin.c
-  src/hk_callable.c
-  src/hk_chunk.c
-  src/hk_utils.c
-  src/hk_compiler.c
-  src/hk_dump.c
-  src/hk_error.c
-  src/hk_iterable.c
-  src/hk_iterator.c
+  src/array.c
+  src/builtin.c
+  src/callable.c
+  src/check.c
+  src/chunk.c
+  src/utils.c
+  src/compiler.c
+  src/dump.c
+  src/error.c
+  src/iterable.c
+  src/iterator.c
   src/main.c
-  src/hk_memory.c
-  src/hk_module.c
-  src/hk_range.c
-  src/hk_scanner.c
-  src/hk_state.c
-  src/hk_string_map.c
-  src/hk_string.c
-  src/hk_struct.c
-  src/hk_userdata.c
-  src/hk_value.c)
+  src/memory.c
+  src/module.c
+  src/range.c
+  src/scanner.c
+  src/state.c
+  src/string_map.c
+  src/string.c
+  src/struct.c
+  src/userdata.c
+  src/value.c)
 
 if(WIN32)
   target_link_libraries(${PROJECT_NAME} ws2_32)

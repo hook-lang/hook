@@ -5,7 +5,7 @@
 
 #include "fastcgi.h"
 #include <fcgi_stdio.h>
-#include "hk_status.h"
+#include <hook/status.h>
 
 static int32_t accept_call(hk_state_t *state, hk_value_t *args);
 

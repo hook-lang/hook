@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-VERSION_FILENAME="src/hk_version.h"
+VERSION_FILENAME="src/version.h"
 DEFAULT_BUILD_TYPE="Debug"
 
 update_revision() {
   revision="$(git rev-parse --short HEAD)"
-  echo "#ifndef HK_VERSION_H" > $VERSION_FILENAME
-  echo "#define HK_VERSION_H" >> $VERSION_FILENAME
-  echo "#define HK_VERSION \"0.1.0\"" >> $VERSION_FILENAME
-  echo "#define HK_REVISION \"($revision)\"" >> $VERSION_FILENAME
+  echo "#ifndef VERSION_H" > $VERSION_FILENAME
+  echo "#define VERSION_H" >> $VERSION_FILENAME
+  echo "#define VERSION \"0.1.0\"" >> $VERSION_FILENAME
+  echo "#define REVISION \"($revision)\"" >> $VERSION_FILENAME
   echo "#endif" >> $VERSION_FILENAME
 }
 

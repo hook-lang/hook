@@ -5,13 +5,13 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "hk_compiler.h"
-#include "hk_dump.h"
-#include "hk_state.h"
-#include "hk_status.h"
-#include "hk_error.h"
-#include "hk_utils.h"
-#include "hk_version.h"
+#include <hook/compiler.h>
+#include <hook/dump.h>
+#include <hook/state.h>
+#include <hook/status.h>
+#include <hook/error.h>
+#include <hook/utils.h>
+#include "version.h"
 
 typedef struct
 {
@@ -158,7 +158,7 @@ static inline void print_help(const char *cmd)
 
 static inline void print_version(void)
 {
-  printf("hook %s %s\n", HK_VERSION, HK_REVISION);
+  printf("hook %s %s\n", VERSION, REVISION);
 }
 
 static inline FILE *open_file(const char *filename, const char *mode)

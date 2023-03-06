@@ -6,7 +6,8 @@
 #include "secp256r1.h"
 #define ECC_CURVE 32
 #include "deps/ecc.h"
-#include "hk_status.h"
+#include <hook/check.h>
+#include <hook/status.h>
 
 #define PUBLIC_KEY_SIZE  (ECC_BYTES + 1)
 #define PRIVATE_KEY_SIZE ECC_BYTES
