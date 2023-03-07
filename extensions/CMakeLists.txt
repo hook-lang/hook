@@ -29,6 +29,8 @@ if(APPLE)
     link_directories(/opt/homebrew/Cellar/fcgi/2.4.2/lib)
     include_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/include)
     link_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/lib)
+    include_directories(/opt/homebrew/Cellar/zeromq/4.3.4/include)
+    link_directories(/opt/homebrew/Cellar/zeromq/4.3.4/lib)
   else()
     include_directories(/usr/local/opt/mysql-client/include)
     link_directories(/usr/local/opt/mysql-client/lib)
@@ -184,12 +186,35 @@ add_library(bigint_mod SHARED
   ../src/userdata.c
   ../src/value.c)
 
+add_library(zeromq_mod SHARED
+  zeromq.c
+  ../src/array.c
+  ../src/builtin.c
+  ../src/callable.c
+  ../src/check.c
+  ../src/chunk.c
+  ../src/utils.c
+  ../src/error.c
+  ../src/iterable.c
+  ../src/iterator.c
+  ../src/memory.c
+  ../src/module.c
+  ../src/range.c
+  ../src/state.c
+  ../src/string_map.c
+  ../src/string.c
+  ../src/struct.c
+  ../src/userdata.c
+  ../src/value.c)
+
 if(MSVC)
   target_link_libraries(curl_mod PRIVATE CURL::libcurl)
   target_link_libraries(mysql_mod PRIVATE ${MYSQL_LIBRARIES})
+  target_link_libraries(zeromq_mod PRIVATE ${ZEROMQ_LIBRARIES})
 else()
   target_link_libraries(curl_mod curl)
   target_link_libraries(mysql_mod mysqlclient)
+  target_link_libraries(zeromq_mod zmq)
 endif()
 
 target_link_libraries(redis_mod hiredis)
