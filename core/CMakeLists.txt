@@ -9,6 +9,7 @@ add_library(math_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/compiler.c
@@ -31,6 +32,7 @@ add_library(os_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/compiler.c
@@ -53,6 +55,7 @@ add_library(io_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/compiler.c
@@ -75,6 +78,7 @@ add_library(numbers_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+ ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -95,6 +99,7 @@ add_library(strings_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -115,6 +120,7 @@ add_library(arrays_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -135,6 +141,7 @@ add_library(utf8_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -155,6 +162,7 @@ add_library(regex_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -180,6 +188,7 @@ add_library(hashing_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -203,6 +212,7 @@ add_library(encoding_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -223,6 +233,7 @@ add_library(socket_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c

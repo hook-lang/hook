@@ -71,15 +71,15 @@ static void mysql_result_wrapper_deinit(hk_userdata_t *udata)
 
 static int32_t connect_call(hk_state_t *state, hk_value_t *args)
 {
-  if (hk_check_argument_types(args, 1, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 1, 2, (hk_type_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_check_argument_types(args, 2, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_NUMBER}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 2, 2, (hk_type_t[]) {HK_TYPE_NIL, HK_TYPE_NUMBER}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_check_argument_types(args, 3, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 3, 2, (hk_type_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_check_argument_types(args, 4, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 4, 2, (hk_type_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_check_argument_types(args, 5, 2, (int32_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
+  if (hk_check_argument_types(args, 5, 2, (hk_type_t[]) {HK_TYPE_NIL, HK_TYPE_STRING}) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (mysql_library_init(0, NULL, NULL))
   {

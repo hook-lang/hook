@@ -61,9 +61,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Installing dependencies (Homebrew packages)
       run: |
-        brew reinstall fcgi
+        brew install fcgi
         brew install mysql-client
-        brew reinstall gmp
+        brew install gmp
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git

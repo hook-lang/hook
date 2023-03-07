@@ -17,14 +17,22 @@ if (MSVC)
 endif()
 
 if(APPLE)
-  include_directories(/usr/local/opt/mysql-client/include)
-  link_directories(/usr/local/opt/mysql-client/lib)
-  include_directories(/opt/homebrew/opt/mysql-client/include)
-  link_directories(/opt/homebrew/opt/mysql-client/lib)
-  include_directories(/opt/homebrew/Cellar/fcgi/2.4.2/include)
-  link_directories(/opt/homebrew/Cellar/fcgi/2.4.2/lib)
-  include_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/include)
-  link_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/lib)
+  execute_process(
+    COMMAND arch
+    OUTPUT_VARIABLE ARCHITECTURE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if(${ARCHITECTURE} STREQUAL "arm64")
+    include_directories(/opt/homebrew/opt/mysql-client/include)
+    link_directories(/opt/homebrew/opt/mysql-client/lib)
+    include_directories(/opt/homebrew/Cellar/fcgi/2.4.2/include)
+    link_directories(/opt/homebrew/Cellar/fcgi/2.4.2/lib)
+    include_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/include)
+    link_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/lib)
+  else()
+    include_directories(/usr/local/opt/mysql-client/include)
+    link_directories(/usr/local/opt/mysql-client/lib)
+  endif()
 endif()
 
 add_library(sqlite_mod SHARED
@@ -33,6 +41,7 @@ add_library(sqlite_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -53,6 +62,7 @@ add_library(curl_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -73,6 +83,7 @@ add_library(redis_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -94,6 +105,7 @@ add_library(secp256r1_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -114,6 +126,7 @@ add_library(fastcgi_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -134,6 +147,7 @@ add_library(mysql_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -154,6 +168,7 @@ add_library(bigint_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
+  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
