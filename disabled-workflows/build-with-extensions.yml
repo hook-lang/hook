@@ -19,6 +19,7 @@ jobs:
         sudo apt-get install -y libcurl4-openssl-dev
         sudo apt-get install -y libmysqlclient-dev
         sudo apt-get install -y libgmp3-dev
+        sudo apt-get install libzmq3-dev
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
@@ -64,6 +65,7 @@ jobs:
         brew install fcgi
         brew install mysql-client
         brew install gmp
+        brew install zmq
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
@@ -102,6 +104,7 @@ jobs:
         vcpkg install fastcgi:x64-windows
         vcpkg install libmysql:x64-windows
         vcpkg install gmp:x64-windows
+        vcpkg install zeromq:x64-windows
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
