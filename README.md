@@ -5,7 +5,9 @@
 
 # The Hook Programming Language
 
-Hook is an imperative, cross-platform, dynamically typed scripting language that utilizes a mutable value semantics approach. It was developed from scratch using C and employs clear and simple techniques such as recursive descent parsing, stack-based virtual machine, and reference counting.
+Hook is a simple, cross-platform, dynamically typed scripting language that utilizes a mutable value semantics approach. It was developed from scratch using C and employs clear and simple techniques such as recursive descent parsing, stack-based virtual machine, and reference counting.
+
+> **Note**: Hook is currently in the early stages of development and should not be used in production environments at this time.
 
 ## What does it look like
 
@@ -23,18 +25,16 @@ fn factorial(n) {
 
 Hook offers the following key features:
 
-* Imperative programming paradigm
+* Imperative and functional programming paradigms
 * Cross-platform compatibility
 * Dynamic typing
 * Mutable value semantics approach
 * Familiar C-like syntax
 * Support for value-captured closures
 
-> **Note**: Hook is currently in the early stages of development and should not be used in production environments at this time.
-
 ## Installing
 
-The following command can be used to install Hook on Linux (x64) and macOS (x64, arm64) systems
+The following command can be used to install Hook on Linux (x64) and macOS (x64, arm64) systems:
 
 ```
 curl -sSL https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.sh | sh
