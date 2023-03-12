@@ -25,12 +25,14 @@ if(APPLE)
   if(${ARCHITECTURE} STREQUAL "arm64")
     include_directories(/opt/homebrew/opt/mysql-client/include)
     link_directories(/opt/homebrew/opt/mysql-client/lib)
-    include_directories(/opt/homebrew/Cellar/fcgi/2.4.2/include)
-    link_directories(/opt/homebrew/Cellar/fcgi/2.4.2/lib)
-    include_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/include)
-    link_directories(/opt/homebrew/Cellar/gmp/6.2.1_1/lib)
-    include_directories(/opt/homebrew/Cellar/zeromq/4.3.4/include)
-    link_directories(/opt/homebrew/Cellar/zeromq/4.3.4/lib)
+    include_directories(/opt/homebrew/opt/fcgi/include)
+    link_directories(/opt/homebrew/opt/fcgi/lib)
+    include_directories(/opt/homebrew/opt/gmp/include)
+    link_directories(/opt/homebrew/opt/gmp/lib)
+    include_directories(/opt/homebrew/opt/zeromq/include)
+    link_directories(/opt/homebrew/opt/zeromq/lib)
+    include_directories(/opt/homebrew/opt/leveldb/include)
+    link_directories(/opt/homebrew/opt/leveldb/lib)
   else()
     include_directories(/usr/local/opt/mysql-client/include)
     link_directories(/usr/local/opt/mysql-client/lib)
@@ -207,14 +209,37 @@ add_library(zeromq_mod SHARED
   ../src/userdata.c
   ../src/value.c)
 
+add_library(leveldb_mod SHARED
+  leveldb.c
+  ../src/array.c
+  ../src/builtin.c
+  ../src/callable.c
+  ../src/check.c
+  ../src/chunk.c
+  ../src/utils.c
+  ../src/error.c
+  ../src/iterable.c
+  ../src/iterator.c
+  ../src/memory.c
+  ../src/module.c
+  ../src/range.c
+  ../src/state.c
+  ../src/string_map.c
+  ../src/string.c
+  ../src/struct.c
+  ../src/userdata.c
+  ../src/value.c)
+
 if(MSVC)
   target_link_libraries(curl_mod PRIVATE CURL::libcurl)
   target_link_libraries(mysql_mod PRIVATE ${MYSQL_LIBRARIES})
   target_link_libraries(zeromq_mod PRIVATE ${ZEROMQ_LIBRARIES})
+  target_link_libraries(leveldb_mod PRIVATE ${LEVELDB_LIBRARIES})
 else()
   target_link_libraries(curl_mod curl)
   target_link_libraries(mysql_mod mysqlclient)
   target_link_libraries(zeromq_mod zmq)
+  target_link_libraries(leveldb_mod leveldb)
 endif()
 
 target_link_libraries(redis_mod hiredis)

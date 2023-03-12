@@ -18,6 +18,7 @@ jobs:
         sudo apt-get install -y libmysqlclient-dev
         sudo apt-get install -y libgmp3-dev
         sudo apt-get install libzmq3-dev
+        sudo apt-get install libleveldb-dev
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
@@ -56,6 +57,7 @@ jobs:
         brew install mysql-client
         brew install gmp
         brew install zmq
+        brew install leveldb
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
@@ -93,6 +95,7 @@ jobs:
         vcpkg install libmysql:x64-windows
         vcpkg install gmp:x64-windows
         vcpkg install zeromq:x64-windows
+        vcpkg install leveldb:x64-windows
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
