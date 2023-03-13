@@ -27,8 +27,10 @@ static int32_t mul_call(hk_state_t *state, hk_value_t *args);
 static int32_t div_call(hk_state_t *state, hk_value_t *args);
 static int32_t mod_call(hk_state_t *state, hk_value_t *args);
 static int32_t pow_call(hk_state_t *state, hk_value_t *args);
+static int32_t sqrt_call(hk_state_t *state, hk_value_t *args);
 static int32_t neg_call(hk_state_t *state, hk_value_t *args);
 static int32_t abs_call(hk_state_t *state, hk_value_t *args);
+static int32_t compare_call(hk_state_t *state, hk_value_t *args);
 
 static inline bigint_t *bigint_new(mpz_t num)
 {
@@ -170,6 +172,18 @@ static int32_t pow_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_userdata(state, (hk_userdata_t *) bigint);
 }
 
+static int32_t sqrt_call(hk_state_t *state, hk_value_t *args)
+{
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  bigint_t *bigint = (bigint_t *) hk_as_userdata(args[1]);
+  mpz_t result;
+  mpz_init(result);
+  mpz_sqrt(result, bigint->num);
+  bigint_t *bigint2 = bigint_new(result);
+  return hk_state_push_userdata(state, (hk_userdata_t *) bigint2);
+}
+
 static int32_t neg_call(hk_state_t *state, hk_value_t *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
@@ -192,6 +206,18 @@ static int32_t abs_call(hk_state_t *state, hk_value_t *args)
   mpz_abs(result, bigint->num);
   bigint_t *bigint2 = bigint_new(result);
   return hk_state_push_userdata(state, (hk_userdata_t *) bigint2);
+}
+
+static int32_t compare_call(hk_state_t *state, hk_value_t *args)
+{
+  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_check_argument_userdata(args, 2) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  bigint_t *bigint1 = (bigint_t *) hk_as_userdata(args[1]);
+  bigint_t *bigint2 = (bigint_t *) hk_as_userdata(args[2]);
+  int32_t result = mpz_cmp(bigint1->num, bigint2->num);
+  return hk_state_push_number(state, result);
 }
 
 HK_LOAD_FN(bigint)
@@ -234,6 +260,10 @@ HK_LOAD_FN(bigint)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "pow", 2, &pow_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
+  if (hk_state_push_string_from_chars(state, -1, "sqrt") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_new_native(state, "sqrt", 1, &sqrt_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "neg") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "neg", 1, &neg_call) == HK_STATUS_ERROR)
@@ -242,5 +272,9 @@ HK_LOAD_FN(bigint)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "abs", 1, &abs_call) == HK_STATUS_ERROR)  
     return HK_STATUS_ERROR;
-  return hk_state_construct(state, 11);
+  if (hk_state_push_string_from_chars(state, -1, "compare") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_new_native(state, "compare", 2, &compare_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_state_construct(state, 13);
 }
