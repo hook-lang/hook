@@ -84,7 +84,7 @@ The `math` module provides a wide range of functions for mathematical calculatio
       <td><a href="#log2">log2</a></td>
       <td><a href="#log10">log10</a></td>
       <td><a href="#exp">exp</a></td>
-      <td><a href="#random">random</a></td>
+      <td></td>
     </tr>
   </tbody>
 </table>
@@ -349,21 +349,6 @@ Example:
 println(math.exp(0));  // 1
 println(math.exp(1));  // 2.71828
 println(math.exp(10)); // 22026.5
-```
-
-#### random
-
-Returns a random number between 0 and 1.
-
-```rust
-fn random() -> number;
-```
-
-Example:
-
-```rust
-println(math.random()); // 0.123456
-println(math.random()); // 0.654321
 ```
 
 ### os
@@ -782,11 +767,13 @@ The `numbers` module provides mathematical constants and limits, such as the max
       <td><a href="#pi-tau">PI</a></td>
       <td><a href="#pi-tau">TAU</a></td>
       <td><a href="#largest-smallest">LARGEST</a></td>
+      <td><a href="#largest-smallest">SMALLEST</a></td>
     </tr>
     <tr>
-      <td><a href="#largest-smallest">SMALLEST</a></td>
       <td><a href="#max_integer-min_integer">MAX_INTEGER</a></td>
       <td><a href="#max_integer-min_integer">MIN_INTEGER</a></td>
+      <td><a href="#srand">srand</a></td>
+      <td><a href="#rand">rand</a></td>
     </tr>
   </tbody>
 </table>
@@ -838,6 +825,36 @@ Example:
 ```rust
 println(numbers.MAX_INTEGER); // 9.0072e+15
 println(numbers.MIN_INTEGER); // -9.0072e+15
+```
+
+#### srand
+
+Sets the seed for the random number generator.
+
+```rust
+fn srand(seed: number);
+```
+
+Example:
+
+```rust
+numbers.srand(123);
+println(numbers.rand());
+```
+
+#### rand
+
+Returns a random number between 0 and 1.
+
+```rust
+fn rand() -> number;
+```
+
+Example:
+
+```rust
+println(numbers.rand());
+println(numbers.rand());
 ```
 
 ### strings

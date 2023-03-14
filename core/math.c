@@ -4,8 +4,6 @@
 //
 
 #include "math.h"
-#include <stdlib.h>
-#include <time.h>
 #include <math.h>
 #include <hook/check.h>
 #include <hook/status.h>
@@ -27,7 +25,6 @@ static int32_t log_call(hk_state_t *state, hk_value_t *args);
 static int32_t log2_call(hk_state_t *state, hk_value_t *args);
 static int32_t log10_call(hk_state_t *state, hk_value_t *args);
 static int32_t exp_call(hk_state_t *state, hk_value_t *args);
-static int32_t random_call(hk_state_t *state, hk_value_t *args);
 
 static int32_t abs_call(hk_state_t *state, hk_value_t *args)
 {
@@ -150,16 +147,8 @@ static int32_t exp_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, exp(hk_as_number(args[1])));
 }
 
-static int32_t random_call(hk_state_t *state, hk_value_t *args)
-{
-  (void) args;
-  double result = (double) rand() / RAND_MAX;
-  return hk_state_push_number(state, result);
-}
-
 HK_LOAD_FN(math)
 {
-  srand((uint32_t) time(NULL));
   if (hk_state_push_string_from_chars(state, -1, "math") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "abs") == HK_STATUS_ERROR)
@@ -230,9 +219,5 @@ HK_LOAD_FN(math)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "exp", 0, &exp_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "random") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "random", 0, &random_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_construct(state, 18);
+  return hk_state_construct(state, 17);
 }

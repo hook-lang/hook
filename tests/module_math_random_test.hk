@@ -1,3 +1,0 @@
-
-import math;
-println(math.random());

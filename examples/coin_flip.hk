@@ -2,13 +2,17 @@
 // coin_flip.hk
 //
 
-import { round, random } from math;
+import { srand, rand } from numbers;
+import { time } from os;
+import { round } from math;
+
+srand(time());
 
 fn coin_flip(times) {
   mut heads = 0;
   mut tails = 0;
   for (mut i = 0; i < times; i++) {
-    let n = round(random() * 1);
+    let n = round(rand() * 1);
     if (n == 0)
       heads++;
     else

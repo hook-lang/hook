@@ -2,12 +2,15 @@
 // knuth_shuffle.hk
 //
 
-import { random } from math;
+import { srand, rand } from numbers;
+import { time } from os;
+
+srand(time());
 
 fn shuffle(mut arr) {
   let n = len(arr);
   for (mut i = n - 1; i >= 0; i--) {
-    let j = to_int(random() * (i - 1));
+    let j = to_int(rand() * (i - 1));
     let tmp = arr[i];
     arr[i] = arr[j]; 
     arr[j] = tmp;

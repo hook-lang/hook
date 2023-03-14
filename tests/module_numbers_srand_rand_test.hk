@@ -1,0 +1,5 @@
+
+import numbers;
+import { time } from os;
+numbers.srand(time());
+println(numbers.rand());

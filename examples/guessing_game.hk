@@ -2,13 +2,15 @@
 // guessing_game.hk
 //
 
-import { random } from math;
+import { srand, rand } from numbers;
+import { time } from os;
 import { stdin, readln } from io;
 import { trim } from strings;
 
 println("Guess the number!");
 
-let secret_number = to_int(1 + random() * 99);
+srand(time());
+let secret_number = to_int(1 + rand() * 99);
 
 loop {
   println("Please input your guess.");
