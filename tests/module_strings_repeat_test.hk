@@ -1,0 +1,4 @@
+
+import strings;
+let str = strings.repeat("foo", 3);
+println(str);

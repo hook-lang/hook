@@ -9,6 +9,7 @@
 #include <hook/error.h>
 
 static int32_t new_array_call(hk_state_t *state, hk_value_t *args);
+static int32_t fill_call(hk_state_t *state, hk_value_t *args);
 static int32_t index_of_call(hk_state_t *state, hk_value_t *args);
 static int32_t min_call(hk_state_t *state, hk_value_t *args);
 static int32_t max_call(hk_state_t *state, hk_value_t *args);
@@ -23,6 +24,28 @@ static int32_t new_array_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   int32_t capacity = (int32_t) hk_as_number(args[1]);
   hk_array_t *arr = hk_array_new_with_capacity(capacity);
+  if (hk_state_push_array(state, arr) == HK_STATUS_ERROR)
+  {
+    hk_array_free(arr);
+    return HK_STATUS_ERROR;
+  }
+  return HK_STATUS_OK;
+}
+
+static int32_t fill_call(hk_state_t *state, hk_value_t *args)
+{
+  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  hk_value_t elem = args[1];
+  int32_t count = (int32_t) hk_as_number(args[2]);
+  count = count < 0 ? 0 : count;
+  hk_array_t *arr = hk_array_new_with_capacity(count);
+  for (int32_t i = 0; i < count; ++i)
+  {
+    hk_value_incr_ref(elem);
+    arr->elements[i] = elem;
+  }
+  arr->length = count;
   if (hk_state_push_array(state, arr) == HK_STATUS_ERROR)
   {
     hk_array_free(arr);
@@ -155,6 +178,10 @@ HK_LOAD_FN(arrays)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "new_array", 1, &new_array_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
+  if (hk_state_push_string_from_chars(state, -1, "fill") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_new_native(state, "fill", 2, &fill_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "index_of") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "index_of", 2, &index_of_call) == HK_STATUS_ERROR)
@@ -183,5 +210,5 @@ HK_LOAD_FN(arrays)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "sort", 1, &sort_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_state_construct(state, 8);
+  return hk_state_construct(state, 9);
 }

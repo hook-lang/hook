@@ -1,0 +1,4 @@
+
+import arrays;
+let arr = arrays.fill("foo", 3);
+println(arr);

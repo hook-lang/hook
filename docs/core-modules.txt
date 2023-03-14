@@ -69,6 +69,7 @@ numbers:
 strings:
 
   new_string(min_capacity: number) -> string
+  repeat(str: string, count: number) -> string
   hash(str: string) -> number
   lower(str: string) -> string
   upper(str: string) -> string
@@ -80,6 +81,7 @@ strings:
 arrays:
 
   new_array(min_capacity: number) -> array
+  fill(elem: any, length: number) -> array
   index_of(arr: array, elem) -> number
   min(arr: array) -> any
   max(arr: array) -> any

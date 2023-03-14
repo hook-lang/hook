@@ -865,6 +865,7 @@ The `strings` module provides functions for working with strings.
   <tbody>
     <tr>
       <td><a href="#new_string">new_string</a></td>
+      <td><a href="#repeat">repeat</a></td>
       <td><a href="#hash">hash</a></td>
       <td><a href="#lower">lower</a></td>
       <td><a href="#upper">upper</a></td>
@@ -874,6 +875,7 @@ The `strings` module provides functions for working with strings.
       <td><a href="#starts_with">starts_with</a></td>
       <td><a href="#ends_with">ends_with</a></td>
       <td><a href="#reverse">reverse</a></td>
+      <td></td>
     </tr>
   </tbody>
 </table>
@@ -894,6 +896,21 @@ Example:
 let str = strings.new_string(10);
 str += "Hello, world!";
 println(str);                     // Hello, world!
+```
+
+#### repeat
+
+Returns a new string that is a copy of the given string repeated the given number of times.
+
+```rust
+fn repeat(str: string, count: number) -> string;
+```
+
+Example:
+
+```rust
+let str = strings.repeat("foo", 3);
+println(str);                       // foofoofoo
 ```
 
 #### hash
@@ -1004,6 +1021,7 @@ The `arrays` module provides functions for working with arrays.
   <tbody>
     <tr>
       <td><a href="#new_array">new_array</a></td>
+      <td><a href="#fill">fill</a></td>
       <td><a href="#index_of">index_of</a></td>
       <td><a href="#min">min</a></td>
       <td><a href="#max">max</a></td>
@@ -1013,6 +1031,7 @@ The `arrays` module provides functions for working with arrays.
       <td><a href="#avg">avg</a></td>
       <td><a href="#reverse">reverse</a></td>
       <td><a href="#sort">sort</a></td>
+      <td></td>
     </tr>
   </tbody>
 </table>
@@ -1035,6 +1054,21 @@ arr[] = 1;
 arr[] = 2;
 arr[] = 3;
 println(arr); // [1, 2, 3]
+```
+
+#### fill
+
+Returns a new array filled with the given value repeated the given number of times.
+
+```rust
+fn fill(elem, count: number) -> array;
+```
+
+Example:
+
+```rust
+let arr = arrays.fill(1, 3);
+println(arr); // [1, 1, 1]
 ```
 
 #### index_of
