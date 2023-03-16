@@ -53,6 +53,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: Installing dependencies (Homebrew packages)
       run: |
+        brew install openssl
         brew install fcgi
         brew install mysql-client
         brew install gmp
@@ -90,6 +91,7 @@ jobs:
         vcpkg integrate install
     - name: Installing dependencies (vcpkg packages)
       run: |
+        vcpgk install openssl:x64-windows
         vcpkg install curl:x64-windows
         vcpkg install fastcgi:x64-windows
         vcpkg install libmysql:x64-windows
