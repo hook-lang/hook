@@ -7,6 +7,8 @@
 #include <hook/check.h>
 #include <hook/status.h>
 #include <string.h>
+#include "deps/crc32.h"
+#include "deps/crc64.h"
 #include "deps/sha1.h"
 #include "deps/sha2.h"
 #include "deps/sha3.h"
@@ -19,6 +21,8 @@
 #define RIPEMD160_DIGEST_SIZE 20
 
 static inline void md5(char *chars, int32_t length, char *result);
+static int32_t crc32_call(hk_state_t *state, hk_value_t *args);
+static int32_t crc64_call(hk_state_t *state, hk_value_t *args);
 static int32_t sha224_call(hk_state_t *state, hk_value_t *args);
 static int32_t sha256_call(hk_state_t *state, hk_value_t *args);
 static int32_t sha384_call(hk_state_t *state, hk_value_t *args);
@@ -35,6 +39,28 @@ static inline void md5(char *chars, int32_t length, char *result)
   md5Update(&ctx, (uint8_t *) chars, length);
   md5Finalize(&ctx);
   memcpy(result, ctx.digest, MD5_DIGEST_SIZE);
+}
+
+static int32_t crc32_call(hk_state_t *state, hk_value_t *args)
+{
+  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  hk_string_t *str = hk_as_string(args[1]);
+  uint32_t result = crc32(str->chars, str->length);
+  if (hk_state_push_number(state, (double) result) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return HK_STATUS_OK;
+}
+
+static int32_t crc64_call(hk_state_t *state, hk_value_t *args)
+{
+  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  hk_string_t *str = hk_as_string(args[1]);
+  uint64_t result = crc64(str->chars, str->length);
+  if (hk_state_push_number(state, (double) result) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return HK_STATUS_OK;
 }
 
 static int32_t sha224_call(hk_state_t *state, hk_value_t *args)
@@ -186,6 +212,14 @@ HK_LOAD_FN(hashing)
 {
   if (hk_state_push_string_from_chars(state, -1, "hashing") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
+  if (hk_state_push_string_from_chars(state, -1, "crc32") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_new_native(state, "crc32", 1, &crc32_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_string_from_chars(state, -1, "crc64") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_new_native(state, "crc64", 1, &crc64_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "sha224") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "sha224", 1, &sha224_call) == HK_STATUS_ERROR)
@@ -218,5 +252,5 @@ HK_LOAD_FN(hashing)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "ripemd160", 1, &ripemd160_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_state_construct(state, 8);
+  return hk_state_construct(state, 10);
 }

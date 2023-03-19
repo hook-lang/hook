@@ -1,0 +1,5 @@
+
+import hashing;
+let x = hashing.crc32("foo");
+println(x);
+assert(x == 2356372769, "x must equal expected");
