@@ -1,0 +1,5 @@
+
+import hashing;
+let x = hashing.crc64("foo");
+println(x);
+assert(x == 12626267673720558670, "x must equal expected");

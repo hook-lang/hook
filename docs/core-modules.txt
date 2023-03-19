@@ -103,6 +103,8 @@ regex:
 
 hashing:
 
+  crc32(str: string) -> number
+  crc64(str: string) -> number
   sha224(str: string) -> string
   sha256(str: string) -> string
   sha384(str: string) -> string

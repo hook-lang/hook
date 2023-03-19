@@ -1291,12 +1291,14 @@ The `hashing` module provides functions for computing cryptographic hashes.
 <table>
   <tboby>
     <tr>
+      <td><a href="#crc32">crc32</a></td>
+      <td><a href="#crc64">crc64</a></td>
       <td><a href="#sha224">sha224</a></td>
       <td><a href="#sha256">sha256</a></td>
       <td><a href="#sha384">sha384</a></td>
-      <td><a href="#sha512">sha512</a></td>
     </tr>
     <tr>
+      <td><a href="#sha512">sha512</a></td>
       <td><a href="#sha1">sha1</a></td>
       <td><a href="#sha3">sha3</a></td>
       <td><a href="#md5">md5</a></td>
@@ -1304,6 +1306,34 @@ The `hashing` module provides functions for computing cryptographic hashes.
     </tr>
   </tbody>
 </table>
+
+#### crc32
+
+Computes the CRC-32 hash of the given string and returns the result as a integer number.
+
+```rust
+fn crc32(str: string) -> number;
+```
+
+Example:
+
+```rust
+println(hashing.crc32("Hello, world!")); // 2.35637e+09
+```
+
+#### crc64
+
+Computes the CRC-64 hash of the given string and returns the result as a integer number.
+
+```rust
+fn crc64(str: string) -> number;
+```
+
+Example:
+
+```rust
+println(hashing.crc64("Hello, world!")); // 1.26263e+19
+```
 
 #### sha224
 

@@ -180,11 +180,13 @@ add_library(regex_mod SHARED
 
 add_library(hashing_mod SHARED
   hashing.c
+  deps/crc32.c
+  deps/crc64.c
+  deps/md5.c
   deps/ripemd160.c
   deps/sha1.c
   deps/sha2.c
   deps/sha3.c
-  deps/md5.c
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
