@@ -1,9 +1,9 @@
 //
 // The Hook Programming Language
-// random.c
+// crypto.c
 //
 
-#include "random.h"
+#include "crypto.h"
 #include <openssl/rand.h>
 #include <hook/check.h>
 #include <hook/status.h>
@@ -27,9 +27,9 @@ static int32_t random_bytes_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-HK_LOAD_FN(random)
+HK_LOAD_FN(crypto)
 {
-  if (hk_state_push_string_from_chars(state, -1, "random") == HK_STATUS_ERROR)
+  if (hk_state_push_string_from_chars(state, -1, "crypto") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "random_bytes") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

@@ -1,14 +1,14 @@
 //
 // The Hook Programming Language
-// random.h
+// crypto.h
 //
 
-#ifndef RANDOM_H
-#define RANDOM_H
+#ifndef CRYPTO_H
+#define CRYPTO_H
 
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(random);
+HK_LOAD_FN(crypto);
 
-#endif // RANDOM_H
+#endif // CRYPTO_H

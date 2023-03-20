@@ -232,8 +232,8 @@ add_library(leveldb_mod SHARED
   ../src/userdata.c
   ../src/value.c)
 
-add_library(random_mod SHARED
-  random.c
+add_library(crypto_mod SHARED
+  crypto.c
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
@@ -258,13 +258,13 @@ if(MSVC)
   target_link_libraries(mysql_mod PRIVATE ${MYSQL_LIBRARIES})
   target_link_libraries(zeromq_mod PRIVATE ${ZEROMQ_LIBRARIES})
   target_link_libraries(leveldb_mod PRIVATE ${LEVELDB_LIBRARIES})
-  target_link_libraries(random_mod PRIVATE ${OPENSSL_LIBRARIES})
+  target_link_libraries(crypto_mod PRIVATE ${OPENSSL_LIBRARIES})
 else()
   target_link_libraries(curl_mod curl)
   target_link_libraries(mysql_mod mysqlclient)
   target_link_libraries(zeromq_mod zmq)
   target_link_libraries(leveldb_mod leveldb)
-  target_link_libraries(random_mod crypto)
+  target_link_libraries(crypto_mod crypto)
 endif()
 
 target_link_libraries(redis_mod hiredis)
