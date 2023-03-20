@@ -576,10 +576,11 @@ static void compile_constant_declaration(compiler_t *comp)
   scanner_next_token(scan);
   if (match(scan, TOKEN_NAME))
   {
-    define_local(comp, &scan->token, false);
+    token_t tk = scan->token;
     scanner_next_token(scan);
     consume(comp, TOKEN_EQ);
     compile_expression(comp);
+    define_local(comp, &tk, false);
     return;
   }
   if (match(scan, TOKEN_LBRACKET))
@@ -604,6 +605,7 @@ static void compile_constant_declaration(compiler_t *comp)
       {
         if (!match(scan, TOKEN_NAME))
           syntax_error_unexpected(comp);
+        // FIX: This is a bug, we should not define the local here
         define_local(comp, &scan->token, false);
       }
       scanner_next_token(scan);
@@ -623,6 +625,7 @@ static void compile_constant_declaration(compiler_t *comp)
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
+    // FIX: This is a bug, we should not define the local here
     define_local(comp, &tk, false);
     uint8_t index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
@@ -635,6 +638,7 @@ static void compile_constant_declaration(compiler_t *comp)
         syntax_error_unexpected(comp);
       token_t tk = scan->token;
       scanner_next_token(scan);
+      // FIX: This is a bug, we should not define the local here
       define_local(comp, &tk, false);
       uint8_t index = add_string_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
@@ -658,15 +662,17 @@ static void compile_variable_declaration(compiler_t *comp)
   scanner_next_token(scan);
   if (match(scan, TOKEN_NAME))
   {
-    define_local(comp, &scan->token, true);
+    token_t tk = scan->token;
     scanner_next_token(scan);
     if (match(scan, TOKEN_EQ))
     {
       scanner_next_token(scan);
       compile_expression(comp);
+      define_local(comp, &tk, true);
       return;  
     }
     hk_chunk_emit_opcode(chunk, HK_OP_NIL);
+    define_local(comp, &tk, true);
     return;
   }
   if (match(scan, TOKEN_LBRACKET))
@@ -678,6 +684,7 @@ static void compile_variable_declaration(compiler_t *comp)
     {
       if (!match(scan, TOKEN_NAME))
         syntax_error_unexpected(comp);
+      // FIX: This is a bug, we should not define the local here
       define_local(comp, &scan->token, false);
     }
     scanner_next_token(scan);
@@ -691,6 +698,7 @@ static void compile_variable_declaration(compiler_t *comp)
       {
         if (!match(scan, TOKEN_NAME))
           syntax_error_unexpected(comp);
+        // FIX: This is a bug, we should not define the local here
         define_local(comp, &scan->token, false);
       }
       scanner_next_token(scan);
@@ -710,6 +718,7 @@ static void compile_variable_declaration(compiler_t *comp)
       syntax_error_unexpected(comp);
     token_t tk = scan->token;
     scanner_next_token(scan);
+    // FIX: This is a bug, we should not define the local here
     define_local(comp, &tk, true);
     uint8_t index = add_string_constant(comp, &tk);
     hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
@@ -722,6 +731,7 @@ static void compile_variable_declaration(compiler_t *comp)
         syntax_error_unexpected(comp);
       token_t tk = scan->token;
       scanner_next_token(scan);
+      // FIX: This is a bug, we should not define the local here
       define_local(comp, &tk, true);
       uint8_t index = add_string_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
