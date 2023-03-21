@@ -234,6 +234,7 @@ add_library(leveldb_mod SHARED
 
 add_library(crypto_mod SHARED
   crypto.c
+  deps/rc4.c
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
