@@ -146,3 +146,8 @@ socket:
   get_option(sock: userdata, level: number, option: number) -> number
   set_block(sock: userdata)
   set_nonblock(sock: userdata)
+
+json:
+
+  encode(value: any) -> string
+  decode(str: string) -> any

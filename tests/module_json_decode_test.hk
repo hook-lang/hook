@@ -1,0 +1,9 @@
+
+import json;
+println(json.decode("1"));
+println(json.decode('"hello"'));
+println(json.decode("true"));
+println(json.decode("false"));
+println(json.decode("null"));
+println(json.decode("[1, 2, 3]"));
+println(json.decode('{"a": 1, "b": 2, "c": 3}'));

@@ -1,0 +1,9 @@
+
+import json;
+println(json.encode(1));
+println(json.encode("hello"));
+println(json.encode(true));
+println(json.encode(false));
+println(json.encode(nil));
+println(json.encode([1, 2, 3]));
+println(json.encode({a: 1, b: 2, c: 3}));

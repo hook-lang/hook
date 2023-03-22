@@ -42,14 +42,14 @@ Below is a comprehensive list of all the modules available. Click on any module 
     <tr>
       <td><a href="#strings">strings</a></td>
       <td><a href="#arrays">arrays</a></td>
-      <td><a href="#utd8">utd8</a></td>
+      <td><a href="#utf8">utf8</a></td>
       <td><a href="#regex">regex</a></td>
     </tr>
     <tr>
       <td><a href="#hashing">hashing</a></td>
       <td><a href="#encoding">encoding</a></td>
       <td><a href="#socket">socket</a></td>
-      <td></td>
+      <td><a href="#json">json</a></td>
     </tr>
   </tbody>
 </table>
@@ -1177,9 +1177,9 @@ let arr = [2, 3, 1];
 println(arrays.sort(arr)); // [1, 2, 3]
 ```
 
-### utd8
+### utf8
 
-The `utd8` module provides functions for working with UTd-8 strings. In Hook, strings are represented as arrays of bytes, making the functions in this module useful for working with strings that contain non-ASCII characters.
+The `utf8` module provides functions for working with UTF-8 strings. In Hook, strings are represented as arrays of bytes, making the functions in this module useful for working with strings that contain non-ASCII characters.
 
 <table>
   <tbody>
@@ -1203,8 +1203,8 @@ fn len(str: string) -> number;
 Example:
 
 ```rust
-println(utd8.len("Hello, world!")); // 13
-println(utd8.len("こんにちは世界"));  // 7
+println(utf8.len("Hello, world!")); // 13
+println(utf8.len("こんにちは世界"));   // 7
 ```
 
 #### sub
@@ -1218,7 +1218,7 @@ fn sub(str: string, start: number, end: number) -> string;
 Example:
 
 ```rust
-println(utd8.sub("Hello, world!", 7, 12)); // world
+println(utf8.sub("Hello, world!", 7, 12)); // world
 ```
 
 ### regex
@@ -1846,7 +1846,7 @@ Example:
 let sock = socket.new(socket.AF_INET, socket.SOCK_STREAM, 0);
 socket.set_option(sock, socket.SOL_SOCKET, socket.SO_REUSEADDR, 1);
 let value = socket.get_option(sock, socket.SOL_SOCKET, socket.SO_REUSEADDR);
-print(value); // 1
+println(value); // 1
 ```
   set_block(sock: userdata)
   set_nonblock(sock: userdata)
@@ -1879,4 +1879,49 @@ Example:
 ```rust
 let sock = socket.new(socket.AF_INET, socket.SOCK_STREAM, 0);
 socket.set_nonblock(sock);
+```
+
+### json
+
+The `json` module provides functions for encoding and decoding JSON.
+
+<table>
+  <tbody>
+    <tr>
+      <td><a href="#encode">encode</a></td>
+    </tr>
+    <tr>
+      <td><a href="#decode">decode</a></td>
+    </tr>
+  </tbody>
+</table>
+
+#### encode
+
+Encodes the given value to JSON.
+
+```rust
+fn encode(value: any) -> string;
+```
+
+Example:
+
+```rust
+let json = json.encode({ hello: "world" });
+println(json); // {"hello":"world"}
+```
+
+#### decode
+
+Decodes the given JSON string to a value.
+
+```rust
+fn decode(json: string) -> any;
+```
+
+Example:
+
+```rust
+let value = json.decode('{"hello":"world"}');
+println(value.hello); // world
 ```

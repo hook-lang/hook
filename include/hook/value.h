@@ -106,6 +106,7 @@ typedef struct
 } hk_object_t;
 
 const char *hk_type_name(hk_type_t type);
+void hk_value_free(hk_value_t val);
 void hk_value_release(hk_value_t val);
 void hk_value_print(hk_value_t val, bool quoted);
 bool hk_value_equal(hk_value_t val1, hk_value_t val2);
