@@ -13,9 +13,7 @@
 #include <hook/error.h>
 #include <hook/utils.h>
 
-static inline void value_free(hk_value_t val);
-
-static inline void value_free(hk_value_t val)
+void hk_value_free(hk_value_t val)
 {
   switch (val.type)
   {
@@ -105,7 +103,7 @@ void hk_value_release(hk_value_t val)
   hk_object_t *obj = hk_as_object(val);
   hk_decr_ref(obj);
   if (hk_is_unreachable(obj))
-    value_free(val);
+    hk_value_free(val);
 }
 
 void hk_value_print(hk_value_t val, bool quoted)
