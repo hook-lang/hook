@@ -1,0 +1,6 @@
+
+import encoding;
+let encoded = encoding.ascii85_encode("foo bar baz");
+assert(encoded == 'AoDT1@UX:"@UXQ', 'encoded must be AoDT1@UX:"@UXQ');
+let decoded = encoding.ascii85_decode(encoded);
+assert(decoded == "foo bar baz", "decoded must be 'foo bar baz'");

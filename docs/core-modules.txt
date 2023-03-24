@@ -122,6 +122,8 @@ encoding:
   base58_decode(str: string) -> string
   base64_encode(str: string) -> string
   base64_decode(str: string) -> string
+  ascii85_encode(str: string) -> string
+  ascii85_decode(str: string) -> string
 
 socket:
 

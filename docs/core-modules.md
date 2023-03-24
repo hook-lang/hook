@@ -1457,11 +1457,13 @@ The `encoding` module provides functions for encoding and decoding data.
       <td><a href="#base32_encode">base32_encode</a></td>
       <td><a href="#base32_decode">base32_decode</a></td>
       <td><a href="#base58_encode">base58_encode</a></td>
+      <td><a href="#base58_decode">base58_decode</a></td>
     </tr>
     <tr>
-      <td><a href="#base58_decode">base58_decode</a></td>
       <td><a href="#base64_encode">base64_encode</a></td>
       <td><a href="#base64_decode">base64_decode</a></td>
+      <td><a href="#ascii85_encode">ascii85_encode</a></td>
+      <td><a href="#ascii85_decode">ascii85_decode</a></td>
     </tr>
   </tbody>
 </table>
@@ -1548,6 +1550,34 @@ Example:
 
 ```rust
 println(encoding.base64_decode("SGVsbG8sIHdvcmxkIQ==")); // Hello, world!
+```
+
+#### ascii85_encode
+
+Encodes the given string using the Ascii85 encoding.
+
+```rust
+fn ascii85_encode(str: string) -> string;
+```
+
+Example:
+
+```rust
+println(encoding.ascii85_encode("Hello, world!")); // 87cURD_*#TDfTZ)+T
+```
+
+#### ascii85_decode
+
+Decodes the given string using the Ascii85 encoding.
+
+```rust
+fn ascii85_decode(str: string) -> string;
+```
+
+Example:
+
+```rust
+println(encoding.ascii85_decode("87cURD_*#TDfTZ)+T")); // Hello, world!
 ```
 
 ### socket

@@ -6,6 +6,7 @@
 #include "encoding.h"
 #include <hook/check.h>
 #include <hook/status.h>
+#include "deps/ascii85.h"
 #include "deps/base32.h"
 #include "deps/base64.h"
 #include "deps/base58.h"
@@ -19,6 +20,8 @@ static int32_t base58_encode_call(hk_state_t *state, hk_value_t *args);
 static int32_t base58_decode_call(hk_state_t *state, hk_value_t *args);
 static int32_t base64_encode_call(hk_state_t *state, hk_value_t *args);
 static int32_t base64_decode_call(hk_state_t *state, hk_value_t *args);
+static int32_t ascii85_encode_call(hk_state_t *state, hk_value_t *args);
+static int32_t ascii85_decode_call(hk_state_t *state, hk_value_t *args);
 
 static int32_t base32_encode_call(hk_state_t *state, hk_value_t *args)
 {
@@ -128,6 +131,42 @@ static int32_t base64_decode_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
+static int32_t ascii85_encode_call(hk_state_t *state, hk_value_t *args)
+{
+  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  hk_string_t *str = hk_as_string(args[1]);
+  int32_t max_length = ascii85_get_max_encoded_length(str->length);
+  hk_string_t *result = hk_string_new_with_capacity(max_length);
+  int32_t length = encode_ascii85((const uint8_t *) str->chars, str->length, (uint8_t *) result->chars, max_length);
+  result->length = length;
+  result->chars[length] = '\0';
+  if (hk_state_push_string(state, result) == HK_STATUS_ERROR)
+  {
+    hk_string_free(result);
+    return HK_STATUS_ERROR;
+  }
+  return HK_STATUS_OK;
+}
+
+static int32_t ascii85_decode_call(hk_state_t *state, hk_value_t *args)
+{
+  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  hk_string_t *str = hk_as_string(args[1]);
+  int32_t max_length = ascii85_get_max_decoded_length(str->length);
+  hk_string_t *result = hk_string_new_with_capacity(max_length);
+  int32_t length = decode_ascii85((const uint8_t *) str->chars, str->length, (uint8_t *) result->chars, max_length);
+  result->length = length;
+  result->chars[length] = '\0';
+  if (hk_state_push_string(state, result) == HK_STATUS_ERROR)
+  {
+    hk_string_free(result);
+    return HK_STATUS_ERROR;
+  }
+  return HK_STATUS_OK;
+}
+
 HK_LOAD_FN(encoding)
 {
   if (hk_state_push_string_from_chars(state, -1, "encoding") == HK_STATUS_ERROR)
@@ -156,5 +195,13 @@ HK_LOAD_FN(encoding)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "base64_decode", 1, &base64_decode_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_state_construct(state, 6);
+  if (hk_state_push_string_from_chars(state, -1, "ascii85_encode") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_new_native(state, "ascii85_encode", 1, &ascii85_encode_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_string_from_chars(state, -1, "ascii85_decode") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_new_native(state, "ascii85_decode", 1, &ascii85_decode_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  return hk_state_construct(state, 8);
 }

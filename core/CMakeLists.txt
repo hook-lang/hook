@@ -208,6 +208,7 @@ add_library(hashing_mod SHARED
 
 add_library(encoding_mod SHARED
   encoding.c
+  deps/ascii85.c
   deps/base32.c
   deps/base58.c
   deps/base64.c
