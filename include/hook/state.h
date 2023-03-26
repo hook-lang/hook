@@ -44,6 +44,6 @@ int32_t hk_state_instance(hk_state_t *state, int32_t num_args);
 int32_t hk_state_construct(hk_state_t *state, int32_t length);
 void hk_state_pop(hk_state_t *state);
 int32_t hk_state_call(hk_state_t *state, int32_t num_args);
-int32_t hk_state_compare(hk_state_t *state, hk_value_t val1, hk_value_t val2, int32_t *result);
+int32_t hk_state_compare(hk_value_t val1, hk_value_t val2, int32_t *result);
 
 #endif // HK_STATE_H

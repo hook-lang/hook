@@ -865,7 +865,7 @@ static inline int32_t do_greater(hk_state_t *state)
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
   int32_t result;
-  if (hk_state_compare(state, val1, val2, &result) == HK_STATUS_ERROR)
+  if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result > 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
   --state->stack_top;
@@ -880,7 +880,7 @@ static inline int32_t do_less(hk_state_t *state)
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
   int32_t result;
-  if (hk_state_compare(state, val1, val2, &result) == HK_STATUS_ERROR)
+  if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result < 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
   --state->stack_top;
@@ -906,7 +906,7 @@ static inline int32_t do_not_greater(hk_state_t *state)
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
   int32_t result;
-  if (hk_state_compare(state, val1, val2, &result) == HK_STATUS_ERROR)
+  if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result > 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
   --state->stack_top;
@@ -921,7 +921,7 @@ static inline int32_t do_not_less(hk_state_t *state)
   hk_value_t val1 = slots[0];
   hk_value_t val2 = slots[1];
   int32_t result;
-  if (hk_state_compare(state, val1, val2, &result) == HK_STATUS_ERROR)
+  if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   slots[0] = result < 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
   --state->stack_top;
@@ -1932,10 +1932,8 @@ int32_t hk_state_call(hk_state_t *state, int32_t num_args)
   return do_call(state, num_args);
 }
 
-int32_t hk_state_compare(hk_state_t *state, hk_value_t val1, hk_value_t val2, int32_t *result)
+int32_t hk_state_compare(hk_value_t val1, hk_value_t val2, int32_t *result)
 {
-  // TODO: Remove this parameter from this function if it is not needed
-  (void) state;
   if (!hk_is_comparable(val1))
   {
     hk_runtime_error("type error: value of type %s is not comparable", hk_type_name(val1.type));

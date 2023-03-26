@@ -74,7 +74,7 @@ static int32_t min_call(hk_state_t *state, hk_value_t *args)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
     int32_t result;
-    if (hk_state_compare(state, elem, min, &result) == HK_STATUS_ERROR)
+    if (hk_state_compare(elem, min, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     min = result < 0 ? elem : min;
   }
@@ -94,7 +94,7 @@ static int32_t max_call(hk_state_t *state, hk_value_t *args)
   {
     hk_value_t elem = hk_array_get_element(arr, i);
     int32_t result;
-    if (hk_state_compare(state, elem, max, &result) == HK_STATUS_ERROR)
+    if (hk_state_compare(elem, max, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     max = result > 0 ? elem : max;
   }
