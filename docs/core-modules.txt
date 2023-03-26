@@ -27,6 +27,7 @@ os:
   time() -> number
   system(cmd: string) -> number
   getenv(str: string) -> string
+  getcwd() -> string
   name() -> string
 
 io:

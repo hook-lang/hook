@@ -361,10 +361,12 @@ The `os` module provides a variety of functions and constants that allow you to 
       <td><a href="#clocks_per_sec">CLOCKS_PER_SEC</a></td>
       <td><a href="#clock">clock</a></td>
       <td><a href="#time">time</a></td>
-    <tr>
       <td><a href="#system">system</a></td>
+    <tr>
       <td><a href="#getenv">getenv</a></td>
+      <td><a href="#getcwd">getcwd</a></td>
       <td><a href="#name">name</a></td>
+      <td></td>
     </tr>
   </tbody>
 </table>
@@ -437,6 +439,20 @@ Example:
 
 ```rust
 println(os.getenv("HOME")); // /home/username
+```
+
+#### getcwd
+
+Returns the current working directory.
+
+```rust
+fn getcwd() -> string;
+```
+
+Example:
+
+```rust
+println(os.getcwd()); // /home/username
 ```
 
 #### name

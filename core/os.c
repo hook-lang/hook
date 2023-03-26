@@ -9,10 +9,20 @@
 #include <hook/check.h>
 #include <hook/status.h>
 
+#ifdef _WIN32
+  #include <windows.h>
+#endif
+
+#ifndef _WIN32
+  #include <unistd.h>
+  #include <limits.h>
+#endif
+
 static int32_t clock_call(hk_state_t *state, hk_value_t *args);
 static int32_t time_call(hk_state_t *state, hk_value_t *args);
 static int32_t system_call(hk_state_t *state, hk_value_t *args);
 static int32_t getenv_call(hk_state_t *state, hk_value_t *args);
+static int32_t getcwd_call(hk_state_t *state, hk_value_t *args);
 static int32_t name_call(hk_state_t *state, hk_value_t *args);
 
 static int32_t clock_call(hk_state_t *state, hk_value_t *args)
@@ -41,6 +51,33 @@ static int32_t getenv_call(hk_state_t *state, hk_value_t *args)
   const char *chars = getenv(hk_as_string(args[1])->chars);
   chars = chars ? chars : "";
   return hk_state_push_string_from_chars(state, -1, chars);
+}
+
+static int32_t getcwd_call(hk_state_t *state, hk_value_t *args)
+{
+  (void) args;
+  hk_string_t *result = NULL;
+#ifdef _WIN32
+  TCHAR path[MAX_PATH];
+  DWORD length = GetCurrentDirectory(MAX_PATH, path);
+  if (!length)
+    goto end;
+  result = hk_string_from_chars(length, path);
+#else
+  char path[PATH_MAX];
+  if (!getcwd(path, PATH_MAX))
+    goto end;
+  result = hk_string_from_chars(-1, path);
+#endif
+end:
+  if (!result)
+    return hk_state_push_nil(state);
+  if (hk_state_push_string(state, result) == HK_STATUS_ERROR)
+  {
+    hk_string_free(result);
+    return HK_STATUS_ERROR;
+  }
+  return HK_STATUS_OK;
 }
 
 static int32_t name_call(hk_state_t *state, hk_value_t *args)
@@ -87,9 +124,13 @@ HK_LOAD_FN(os)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "getenv", 1, &getenv_call) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
+  if (hk_state_push_string_from_chars(state, -1, "getcwd") == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
+  if (hk_state_push_new_native(state, "getcwd", 1, &getcwd_call) == HK_STATUS_ERROR)
+    return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "name") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_new_native(state, "name", 0, &name_call) == HK_STATUS_ERROR) 
     return HK_STATUS_ERROR;
-  return hk_state_construct(state, 6);
+  return hk_state_construct(state, 7);
 }
