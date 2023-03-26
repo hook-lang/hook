@@ -72,7 +72,7 @@ static const char *globals[] = {
   "panic"
 };
 
-static inline int32_t string_to_double(hk_state_t *state, hk_string_t *str, double *result);
+static inline int32_t string_to_double(hk_string_t *str, double *result);
 static inline hk_array_t *split(hk_string_t *str, hk_string_t *separator);
 static inline int32_t join(hk_array_t *arr, hk_string_t *separator, hk_string_t **result);
 static int32_t print_call(hk_state_t *state, hk_value_t *args);
@@ -117,10 +117,8 @@ static int32_t sleep_call(hk_state_t *state, hk_value_t *args);
 static int32_t assert_call(hk_state_t *state, hk_value_t *args);
 static int32_t panic_call(hk_state_t *state, hk_value_t *args);
 
-static inline int32_t string_to_double(hk_state_t *state, hk_string_t *str, double *result)
+static inline int32_t string_to_double(hk_string_t *str, double *result)
 {
-  // TODO: Remove this parameter from this function if it is not needed
-  (void) state;
   if (!str->length)
   {
     hk_runtime_error("type error: argument #1 must be a non-empty string");
@@ -270,7 +268,7 @@ static int32_t to_int_call(hk_state_t *state, hk_value_t *args)
   if (hk_is_number(val))
     return hk_state_push_number(state, (int64_t) hk_as_number(val));
   double result;
-  if (string_to_double(state, hk_as_string(val), &result) == HK_STATUS_ERROR)
+  if (string_to_double(hk_as_string(val), &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, (int64_t) result);
 }
@@ -284,7 +282,7 @@ static int32_t to_number_call(hk_state_t *state, hk_value_t *args)
   if (hk_is_number(val))
     return HK_STATUS_OK;
   double result;
-  if (string_to_double(state, hk_as_string(args[1]), &result) == HK_STATUS_ERROR)
+  if (string_to_double(hk_as_string(args[1]), &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, result);
 }
@@ -502,7 +500,7 @@ static int32_t compare_call(hk_state_t *state, hk_value_t *args)
   hk_value_t val1 = args[1];
   hk_value_t val2 = args[2];
   int32_t result;
-  if (hk_state_compare(state, val1, val2, &result) == HK_STATUS_ERROR)
+  if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, result);
 }
