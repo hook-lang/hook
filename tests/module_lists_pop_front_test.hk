@@ -1,0 +1,8 @@
+
+import lists;
+mut list = lists.new_linked_list();
+list = lists.push_back(list, 1);
+list = lists.push_back(list, 2);
+list = lists.push_back(list, 3);
+list = lists.pop_front(list);
+println(lists.front(list));

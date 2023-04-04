@@ -38,18 +38,21 @@ Below is a comprehensive list of all the modules available. Click on any module 
       <td><a href="#os">os</a></td>
       <td><a href="#io">io</a></td>
       <td><a href="#numbers">numbers</a></td>
+      <td><a href="#strings">strings</a></td>
     </tr>
     <tr>
-      <td><a href="#strings">strings</a></td>
       <td><a href="#arrays">arrays</a></td>
       <td><a href="#utf8">utf8</a></td>
       <td><a href="#regex">regex</a></td>
-    </tr>
-    <tr>
       <td><a href="#hashing">hashing</a></td>
       <td><a href="#encoding">encoding</a></td>
+    </tr>
+    <tr>
       <td><a href="#socket">socket</a></td>
       <td><a href="#json">json</a></td>
+      <td><a href="#lists">lists</a></td>
+      <td></td>
+      <td></td>
     </tr>
   </tbody>
 </table>
@@ -1970,4 +1973,181 @@ Example:
 ```rust
 let value = json.decode('{"hello":"world"}');
 println(value.hello); // world
+```
+
+### lists
+
+The `lists` module provides functions for working with lists.
+
+<table>
+  <tbody>
+    <tr>
+      <td><a href="#new_linked_list">new_linked_list</a></td>
+      <td><a href="#len">len</a></td>
+      <td><a href="#is_empty">is_empty</a></td>
+      <td><a href="#push_front">push_front</a></td>
+      <td><a href="#push_back">push_back</a></td>
+    </tr>
+    <tr>
+      <td><a href="#pop_front">pop_front</a></td>
+      <td><a href="#pop_back">pop_back</a></td>
+      <td><a href="#front">front</a></td>
+      <td><a href="#back">back</a></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+#### new_linked_list
+
+Creates a new linked list.
+
+```rust
+fn new_linked_list() -> userdata;
+```
+
+Example:
+
+```rust
+let list = lists.new_linked_list();
+```
+
+#### len
+
+Returns the length of the given list.
+
+```rust
+fn len(list: userdata) -> number;
+```
+
+Example:
+
+```rust
+mut list = lists.new_linked_list();
+list = lists.push_back(list, 1);
+list = lists.push_back(list, 2);
+list = lists.push_back(list, 3);
+println(lists.len(list)); // 3
+```
+
+#### is_empty
+
+Returns `true` if the given list is empty.
+
+```rust
+fn is_empty(list: userdata) -> bool;
+```
+
+Example:
+
+```rust
+let list = lists.new_linked_list();
+println(lists.is_empty(list)); // true
+```
+
+#### push_front
+
+Pushes the given value to the front of the given list and returns the new list.
+
+```rust
+fn push_front(list: userdata, value: any) -> userdata;
+```
+
+Example:
+
+```rust
+mut list = lists.new_linked_list();
+list = lists.push_front(list, 1);
+list = lists.push_front(list, 2);
+println(lists.front(list)); // 2
+println(lists.back(list));  // 1
+```
+```
+
+#### push_back
+
+Pushes the given value to the back of the given list and returns the new list.
+
+```rust
+fn push_back(list: userdata, value: any) -> userdata;
+```
+
+Example:
+
+```rust
+mut list = lists.new_linked_list();
+list = lists.push_back(list, 1);
+list = lists.push_back(list, 2);
+println(lists.front(list)); // 1
+println(lists.back(list));  // 2
+```
+
+#### pop_front
+
+Pops the first value from the given list and returns the new list.
+
+```rust
+fn pop_front(list: userdata) -> userdata;
+```
+
+Example:
+
+```rust
+mut list1 = lists.new_linked_list();
+list1 = lists.push_back(list1, 1);
+list1 = lists.push_back(list1, 2);
+let list2 = lists.pop_front(list1);
+println(lists.front(list2)); // 2
+```
+
+#### pop_back
+
+Pops the last value from the given list and returns the new list.
+
+```rust
+fn pop_back(list: userdata) -> userdata;
+```
+
+Example:
+
+```rust
+mut list1 = lists.new_linked_list();
+list1 = lists.push_back(list1, 1);
+list1 = lists.push_back(list1, 2);
+let list2 = lists.pop_back(list1);
+println(lists.back(list2)); // 1
+```
+
+#### front
+
+Returns the first value from the given list.
+
+```rust
+fn front(list: userdata) -> any;
+```
+
+Example:
+
+```rust
+mut list = lists.new_linked_list();
+list = lists.push_back(list, 1);
+list = lists.push_back(list, 2);
+println(lists.front(list)); // 1
+```
+
+#### back
+
+Returns the last value from the given list.
+
+```rust
+fn back(list: userdata) -> any;
+```
+
+Example:
+
+```rust
+mut list = lists.new_linked_list();
+list = lists.push_back(list, 1);
+list = lists.push_back(list, 2);
+println(lists.back(list)); // 2
 ```

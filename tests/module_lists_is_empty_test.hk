@@ -1,0 +1,4 @@
+
+import lists;
+let list = lists.new_linked_list();
+println(lists.is_empty(list));

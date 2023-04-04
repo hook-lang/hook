@@ -154,3 +154,15 @@ json:
 
   encode(value: any) -> string
   decode(str: string) -> any
+
+lists:
+
+  new_linked_list() -> userdata
+  len(list: userdata) -> number
+  is_empty(list: userdata) -> bool
+  push_front(list: userdata, value: any) -> userdata
+  push_back(list: userdata, value: any) -> userdata
+  pop_front(list: userdata) -> userdata
+  pop_back(list: userdata) -> userdata
+  front(list: userdata) -> any
+  back(list: userdata) -> any

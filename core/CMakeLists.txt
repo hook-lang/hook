@@ -273,3 +273,24 @@ add_library(json_mod SHARED
   ../src/struct.c
   ../src/userdata.c
   ../src/value.c)
+
+add_library(lists_mod SHARED
+  lists.c
+  ../src/array.c
+  ../src/builtin.c
+  ../src/callable.c
+  ../src/check.c
+  ../src/chunk.c
+  ../src/utils.c
+  ../src/error.c
+  ../src/iterable.c
+  ../src/iterator.c
+  ../src/memory.c
+  ../src/module.c
+  ../src/range.c
+  ../src/state.c
+  ../src/string_map.c
+  ../src/string.c
+  ../src/struct.c
+  ../src/userdata.c
+  ../src/value.c)
