@@ -1,20 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION_FILENAME="src/version.h"
 DEFAULT_BUILD_TYPE="Debug"
-
-update_revision() {
-  revision="$(git rev-parse --short HEAD)"
-  echo "#ifndef VERSION_H" > $VERSION_FILENAME
-  echo "#define VERSION_H" >> $VERSION_FILENAME
-  echo "#define VERSION \"0.1.0\"" >> $VERSION_FILENAME
-  echo "#define REVISION \"($revision)\"" >> $VERSION_FILENAME
-  echo "#endif" >> $VERSION_FILENAME
-}
-
-discard_changes() {
-  git checkout -- "$VERSION_FILENAME"
-}
 
 cmake_build() {
   build_type="$1"
@@ -30,8 +16,6 @@ cmake_build() {
     with_extensions=""
   fi
 
-  update_revision
-
   if [ -z "$install_prefix" ]; then
     cmake -B build -DCMAKE_BUILD_TYPE=$build_type $with_extensions
   else
@@ -39,8 +23,6 @@ cmake_build() {
   fi
 
   cmake --build build
-
-  discard_changes "$FILENAME"
 }
 
 cmake_build_and_install() {

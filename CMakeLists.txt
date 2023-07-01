@@ -60,10 +60,6 @@ add_executable(${PROJECT_NAME}
   src/userdata.c
   src/value.c)
 
-if(WIN32)
-  target_link_libraries(${PROJECT_NAME} ws2_32)
-endif()
-
 if(NOT MSVC)
   target_link_libraries(${PROJECT_NAME} m)
   target_link_libraries(${PROJECT_NAME} dl)
