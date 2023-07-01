@@ -23,7 +23,8 @@
 #endif
 
 #ifdef _WIN32
-  #define socket_t SOCKET
+  #define socket_t  SOCKET
+  #define socklen_t int32_t
 #endif
 
 #ifndef _WIN32

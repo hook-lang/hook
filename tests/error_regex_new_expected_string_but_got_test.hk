@@ -1,3 +1,0 @@
-
-import { new } from regex;
-let a = new(nil);

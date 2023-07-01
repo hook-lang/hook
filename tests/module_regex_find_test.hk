@@ -1,7 +1,0 @@
-
-import regex;
-let pattern = "[a-zA-Z0-9_]+@[a-zA-Z0-9]+\.[a-zA-Z]{2,}";
-let str = "foo#domain.com,bar@domain.com";
-let re = regex.new(pattern);
-let [start, end] = regex.find(re, str);
-println(str[start .. end]);

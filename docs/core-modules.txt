@@ -96,12 +96,6 @@ utf8:
   len(str: string) -> number
   sub(str: string, start: number, end: number) -> string
 
-regex:
-  
-  new(pattern: string) -> userdata
-  find(regex: userdata, str: string) -> nil|array
-  is_match(regex: userdata, str: string) -> bool
-
 hashing:
 
   crc32(str: string) -> number

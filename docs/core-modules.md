@@ -39,20 +39,15 @@ Below is a comprehensive list of all the modules available. Click on any module 
       <td><a href="#io">io</a></td>
       <td><a href="#numbers">numbers</a></td>
       <td><a href="#strings">strings</a></td>
+      <td><a href="#arrays">arrays</a></td>
     </tr>
     <tr>
-      <td><a href="#arrays">arrays</a></td>
       <td><a href="#utf8">utf8</a></td>
-      <td><a href="#regex">regex</a></td>
       <td><a href="#hashing">hashing</a></td>
       <td><a href="#encoding">encoding</a></td>
-    </tr>
-    <tr>
       <td><a href="#socket">socket</a></td>
       <td><a href="#json">json</a></td>
       <td><a href="#lists">lists</a></td>
-      <td></td>
-      <td></td>
     </tr>
   </tbody>
 </table>
@@ -1238,69 +1233,6 @@ Example:
 
 ```rust
 println(utf8.sub("Hello, world!", 7, 12)); // world
-```
-
-### regex
-
-The `regex` module provides functions for working with regular expressions.
-
-<table>
-  <tbody>
-    <tr>
-      <td><a href="#new">new</a></td>
-    </tr>
-    <tr>
-      <td><a href="#find">find</a></td>
-    </tr>
-    <tr>
-      <td><a href="#is_match">is_match</a></td>
-    </tr>
-  </tbody>
-</table
-
-#### new
-
-Creates a new regular expression with the given pattern.
-
-```rust
-fn new(pattern: string) -> userdata;
-```
-
-Example:
-
-```rust
-let regex = regex.new("^[a-z]+$");
-```
-
-#### find
-
-Returns the start and end indices of the first match of the given regular expression in the given string, or `nil` if no match is found.
-
-```rust
-fn find(regex: userdata, str: string) -> nil|array;
-```
-
-Example:
-
-```rust
-let r = regex.new(",");
-println(regex.find(r, "Hello, world!")); // [5, 6]
-```
-
-#### is_match
-
-Returns `true` if the given regular expression matches the given string, or `false` otherwise.
-
-```rust
-fn is_match(regex: userdata, str: string) -> bool;
-```
-
-Example:
-
-```rust
-let r = regex.new("^[a-z]+$");
-println(regex.is_match(r, "Hello"));         // true
-println(regex.is_match(r, "Hello, world!")); // false
 ```
 
 ### hashing

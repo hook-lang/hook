@@ -157,27 +157,6 @@ add_library(utf8_mod SHARED
   ../src/userdata.c
   ../src/value.c)
 
-add_library(regex_mod SHARED
-  regex.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/check.c
-  ../src/chunk.c
-  ../src/utils.c
-  ../src/error.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
-
 add_library(hashing_mod SHARED
   hashing.c
   deps/crc32.c
@@ -294,3 +273,7 @@ add_library(lists_mod SHARED
   ../src/struct.c
   ../src/userdata.c
   ../src/value.c)
+
+if(WIN32)
+  target_link_libraries(socket_mod ws2_32)
+endif()
