@@ -40,6 +40,7 @@ static int32_t rc4_encrypt_call(hk_state_t *state, hk_value_t *args)
   hk_string_t *input = hk_as_string(args[2]);
   int32_t key_length = key->length;
   hk_string_t *err = NULL;
+  hk_string_t *output = NULL;
   if (key_length < 1)
   {
     err = hk_string_from_chars(-1, "key length must be greater than 0");
@@ -51,7 +52,7 @@ static int32_t rc4_encrypt_call(hk_state_t *state, hk_value_t *args)
     goto end;
   }
   int32_t length = input->length;
-  hk_string_t *output = hk_string_new_with_capacity(length);
+  output = hk_string_new_with_capacity(length);
   rc4_ctx ctx;
   rc4_ks(&ctx, (uint8 *) key->chars, (uint32) key_length);
   rc4_encrypt(&ctx, (uint8 *) input->chars, (uint8 *) output->chars, (uint32) length);
@@ -59,6 +60,7 @@ static int32_t rc4_encrypt_call(hk_state_t *state, hk_value_t *args)
   output->chars[length] = '\0';
   hk_array_t *arr;
 end:
+  hk_assert(err || output, "err or output must be non-NULL");
   arr = hk_array_new_with_capacity(2);
   hk_array_inplace_add_element(arr, err ? HK_NIL_VALUE : hk_string_value(output));
   hk_array_inplace_add_element(arr, err ? hk_string_value(err) : HK_NIL_VALUE);
@@ -80,6 +82,7 @@ static int32_t rc4_decrypt_call(hk_state_t *state, hk_value_t *args)
   hk_string_t *input = hk_as_string(args[2]);
   int32_t key_length = key->length;
   hk_string_t *err = NULL;
+  hk_string_t *output = NULL;
   if (key_length < 1)
   {
     err = hk_string_from_chars(-1, "key length must be greater than 0");
@@ -91,7 +94,7 @@ static int32_t rc4_decrypt_call(hk_state_t *state, hk_value_t *args)
     goto end;
   }
   int32_t length = input->length;
-  hk_string_t *output = hk_string_new_with_capacity(length);
+  output = hk_string_new_with_capacity(length);
   rc4_ctx ctx;
   rc4_ks(&ctx, (uint8 *) key->chars, (uint32) key_length);
   rc4_decrypt(&ctx, (uint8 *) input->chars, (uint8 *) output->chars, (uint32) length);
@@ -99,6 +102,7 @@ static int32_t rc4_decrypt_call(hk_state_t *state, hk_value_t *args)
   output->chars[length] = '\0';
   hk_array_t *arr;
 end:
+  hk_assert(err || output, "err or output must be non-NULL");
   arr = hk_array_new_with_capacity(2);
   hk_array_inplace_add_element(arr, err ? HK_NIL_VALUE : hk_string_value(output));
   hk_array_inplace_add_element(arr, err ? hk_string_value(err) : HK_NIL_VALUE);

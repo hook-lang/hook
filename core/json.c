@@ -17,7 +17,7 @@ static int32_t decode_call(hk_state_t *state, hk_value_t *args);
 
 static inline cJSON *value_to_json(hk_value_t val)
 {
-  cJSON *json;
+  cJSON *json = NULL;
   switch (val.type)
   {
   case HK_TYPE_NIL:
@@ -67,6 +67,7 @@ static inline cJSON *value_to_json(hk_value_t val)
     }
     break;
   }
+  hk_assert(json, "json is NULL");
   return json;
 }
 

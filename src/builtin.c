@@ -337,10 +337,9 @@ static int32_t ord_call(hk_state_t *state, hk_value_t *args)
 
 static int32_t chr_call(hk_state_t *state, hk_value_t *args)
 {
-  hk_value_t val = args[1];
   if (hk_check_argument_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t data = (int32_t) hk_as_number(val);
+  int32_t data = (int32_t) hk_as_number(args[1]);
   if (data < 0 || data > UCHAR_MAX)
   {
     hk_runtime_error("range error: argument #1 must be between 0 and %d", UCHAR_MAX);

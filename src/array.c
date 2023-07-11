@@ -128,7 +128,7 @@ hk_array_t *hk_array_add_element(hk_array_t *arr, hk_value_t elem)
   int32_t length = arr->length;
   hk_array_t *result = array_allocate(length + 1);
   result->length = length + 1;
-  for (int32_t i = 0; i < length; i++)
+  for (int32_t i = 0; i < length; ++i)
   {
     hk_value_t val = arr->elements[i];
     hk_value_incr_ref(val);
@@ -188,13 +188,13 @@ hk_array_t *hk_array_delete_element(hk_array_t *arr, int32_t index)
   int32_t length = arr->length;
   hk_array_t *result = array_allocate(length - 1);
   result->length = length - 1;
-  for (int32_t i = 0; i < index; i++)
+  for (int32_t i = 0; i < index; ++i)
   {
     hk_value_t elem = arr->elements[i];
     hk_value_incr_ref(elem);
     result->elements[i] = elem;
   }
-  for (int32_t i = index + 1; i < length; i++)
+  for (int32_t i = index + 1; i < length; ++i)
   {
     hk_value_t elem = arr->elements[i];
     hk_value_incr_ref(elem);
