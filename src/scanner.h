@@ -22,29 +22,29 @@ typedef enum
   TOKEN_IF,     TOKEN_IFBANG,       TOKEN_IMPORT,     TOKEN_IN,     TOKEN_LET,       TOKEN_LOOP,      TOKEN_MATCH,
   TOKEN_MUT,    TOKEN_NIL,          TOKEN_RETURN,     TOKEN_STRUCT, TOKEN_TRUE,      TOKEN_WHILE,     TOKEN_WHILEBANG,
   TOKEN_NAME
-} token_type_t;
+} TokenType;
 
 typedef struct
 {
-  token_type_t type;
-  int32_t line;
-  int32_t col;
-  int32_t length;
+  TokenType type;
+  int line;
+  int col;
+  int length;
   char *start;
-} token_t;
+} Token;
 
 typedef struct
 {
-  hk_string_t *file;
-  hk_string_t *source;
+  HkString *file;
+  HkString *source;
   char *pos;
-  int32_t line;
-  int32_t col;
-  token_t token;
-} scanner_t;
+  int line;
+  int col;
+  Token token;
+} Scanner;
 
-void scanner_init(scanner_t *scan, hk_string_t *file, hk_string_t *source);
-void scanner_free(scanner_t *scan);
-void scanner_next_token(scanner_t *scan);
+void scanner_init(Scanner *scan, HkString *file, HkString *source);
+void scanner_free(Scanner *scan);
+void scanner_next_token(Scanner *scan);
 
 #endif // SCANNER_H

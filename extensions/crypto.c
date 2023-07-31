@@ -9,16 +9,16 @@
 #include <hook/check.h>
 #include <hook/status.h>
 
-static int32_t random_bytes_call(hk_state_t *state, hk_value_t *args);
-static int32_t rc4_encrypt_call(hk_state_t *state, hk_value_t *args);
-static int32_t rc4_decrypt_call(hk_state_t *state, hk_value_t *args);
+static int random_bytes_call(HkState *state, HkValue *args);
+static int rc4_encrypt_call(HkState *state, HkValue *args);
+static int rc4_decrypt_call(HkState *state, HkValue *args);
 
-static int32_t random_bytes_call(hk_state_t *state, hk_value_t *args)
+static int random_bytes_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t length = (int32_t) (int32_t) hk_as_number(args[1]);
-  hk_string_t *str = hk_string_new_with_capacity(length);
+  int length = (int) (int) hk_as_number(args[1]);
+  HkString *str = hk_string_new_with_capacity(length);
   if (!RAND_bytes((unsigned char *) str->chars, length))
     return hk_state_push_nil(state);
   str->length = length;
@@ -30,17 +30,17 @@ static int32_t random_bytes_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t rc4_encrypt_call(hk_state_t *state, hk_value_t *args)
+static int rc4_encrypt_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *key = hk_as_string(args[1]);
-  hk_string_t *input = hk_as_string(args[2]);
-  int32_t key_length = key->length;
-  hk_string_t *err = NULL;
-  hk_string_t *output = NULL;
+  HkString *key = hk_as_string(args[1]);
+  HkString *input = hk_as_string(args[2]);
+  int key_length = key->length;
+  HkString *err = NULL;
+  HkString *output = NULL;
   if (key_length < 1)
   {
     err = hk_string_from_chars(-1, "key length must be greater than 0");
@@ -51,14 +51,14 @@ static int32_t rc4_encrypt_call(hk_state_t *state, hk_value_t *args)
     err = hk_string_from_chars(-1, "key length must be less than or equal to 256");
     goto end;
   }
-  int32_t length = input->length;
+  int length = input->length;
   output = hk_string_new_with_capacity(length);
   rc4_ctx ctx;
   rc4_ks(&ctx, (uint8 *) key->chars, (uint32) key_length);
   rc4_encrypt(&ctx, (uint8 *) input->chars, (uint8 *) output->chars, (uint32) length);
   output->length = length;
   output->chars[length] = '\0';
-  hk_array_t *arr;
+  HkArray *arr;
 end:
   hk_assert(err || output, "err or output must be non-NULL");
   arr = hk_array_new_with_capacity(2);
@@ -72,17 +72,17 @@ end:
   return HK_STATUS_OK;
 }
 
-static int32_t rc4_decrypt_call(hk_state_t *state, hk_value_t *args)
+static int rc4_decrypt_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *key = hk_as_string(args[1]);
-  hk_string_t *input = hk_as_string(args[2]);
-  int32_t key_length = key->length;
-  hk_string_t *err = NULL;
-  hk_string_t *output = NULL;
+  HkString *key = hk_as_string(args[1]);
+  HkString *input = hk_as_string(args[2]);
+  int key_length = key->length;
+  HkString *err = NULL;
+  HkString *output = NULL;
   if (key_length < 1)
   {
     err = hk_string_from_chars(-1, "key length must be greater than 0");
@@ -93,14 +93,14 @@ static int32_t rc4_decrypt_call(hk_state_t *state, hk_value_t *args)
     err = hk_string_from_chars(-1, "key length must be less than or equal to 256");
     goto end;
   }
-  int32_t length = input->length;
+  int length = input->length;
   output = hk_string_new_with_capacity(length);
   rc4_ctx ctx;
   rc4_ks(&ctx, (uint8 *) key->chars, (uint32) key_length);
   rc4_decrypt(&ctx, (uint8 *) input->chars, (uint8 *) output->chars, (uint32) length);
   output->length = length;
   output->chars[length] = '\0';
-  hk_array_t *arr;
+  HkArray *arr;
 end:
   hk_assert(err || output, "err or output must be non-NULL");
   arr = hk_array_new_with_capacity(2);

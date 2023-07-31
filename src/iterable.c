@@ -7,7 +7,7 @@
 #include <hook/range.h>
 #include <hook/array.h>
 
-hk_iterator_t *hk_new_iterator(hk_value_t val)
+HkIterator *hk_new_iterator(HkValue val)
 {
   if (!hk_is_iterable(val))
     return NULL;

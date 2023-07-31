@@ -12,44 +12,44 @@
 typedef struct hk_function
 {
   HK_OBJECT_HEADER
-  int32_t arity;
-  hk_string_t *name;
-  hk_string_t *file;
-  hk_chunk_t chunk;
+  int arity;
+  HkString *name;
+  HkString *file;
+  HkChunk chunk;
   uint8_t functions_capacity;
   uint8_t functions_length;
   struct hk_function **functions;
   uint8_t num_nonlocals;
-} hk_function_t;
+} HkFunction;
 
 typedef struct
 {
   HK_OBJECT_HEADER
-  hk_function_t *fn;
-  hk_value_t nonlocals[1];
-} hk_closure_t;
+  HkFunction *fn;
+  HkValue nonlocals[1];
+} HkClosure;
 
 struct hk_state;
 
 typedef struct
 {
   HK_OBJECT_HEADER
-  int32_t arity;
-  hk_string_t *name;
-  int32_t (*call)(struct hk_state *, hk_value_t *);
-} hk_native_t;
+  int arity;
+  HkString *name;
+  int (*call)(struct hk_state *, HkValue *);
+} HkNative;
 
-hk_function_t *hk_function_new(int32_t arity, hk_string_t *name, hk_string_t *file);
-void hk_function_free(hk_function_t *fn);
-void hk_function_release(hk_function_t *fn);
-void hk_function_add_child(hk_function_t *fn, hk_function_t *child);
-void hk_function_serialize(hk_function_t *fn, FILE *stream);
-hk_function_t *hk_function_deserialize(FILE *stream);
-hk_closure_t *hk_closure_new(hk_function_t *fn);
-void hk_closure_free(hk_closure_t *cl);
-void hk_closure_release(hk_closure_t *cl);
-hk_native_t *hk_native_new(hk_string_t *name, int32_t arity, int32_t (*call)(struct hk_state *, hk_value_t *));
-void hk_native_free(hk_native_t *native);
-void hk_native_release(hk_native_t *native);
+HkFunction *hk_function_new(int arity, HkString *name, HkString *file);
+void hk_function_free(HkFunction *fn);
+void hk_function_release(HkFunction *fn);
+void hk_function_add_child(HkFunction *fn, HkFunction *child);
+void hk_function_serialize(HkFunction *fn, FILE *stream);
+HkFunction *hk_function_deserialize(FILE *stream);
+HkClosure *hk_closure_new(HkFunction *fn);
+void hk_closure_free(HkClosure *cl);
+void hk_closure_release(HkClosure *cl);
+HkNative *hk_native_new(HkString *name, int arity, int (*call)(struct hk_state *, HkValue *));
+void hk_native_free(HkNative *native);
+void hk_native_release(HkNative *native);
 
 #endif // HK_CALLABLE_H

@@ -23,28 +23,28 @@ typedef struct
   bool opt_dump;
   bool opt_compile;
   bool opt_run;
-  int32_t stack_size; 
+  int stack_size; 
   const char *input;
   const char *output;
   const char **args;
-  int32_t num_args;
-} parsed_args_t;
+  int num_args;
+} ParsedArgs;
 
-static inline void parse_args(parsed_args_t *parsed_args, int32_t argc, const char **argv);
-static inline void parse_option(parsed_args_t *parsed_args, const char *arg);
+static inline void parse_args(ParsedArgs *parsed_args, int argc, const char **argv);
+static inline void parse_option(ParsedArgs *parsed_args, const char *arg);
 static inline const char *option(const char *arg, const char *opt);
-static inline hk_array_t *args_array(parsed_args_t *parsed_args);
+static inline HkArray *args_array(ParsedArgs *parsed_args);
 static inline void print_help(const char *cmd);
 static inline void print_version(void);
 static inline FILE *open_file(const char *filename, const char *mode);
-static inline hk_string_t *load_source_from_file(const char *filename);
-static inline hk_closure_t *load_bytecode_from_file(const char *filename);
-static inline hk_closure_t *load_bytecode_from_stream(FILE *stream);
-static inline void save_bytecode_to_file(hk_closure_t *cl, const char *filename);
-static inline void dump_bytecode_to_file(hk_function_t *fn, const char *filename);
-static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args);
+static inline HkString *load_source_from_file(const char *filename);
+static inline HkClosure *load_bytecode_from_file(const char *filename);
+static inline HkClosure *load_bytecode_from_stream(FILE *stream);
+static inline void save_bytecode_to_file(HkClosure *cl, const char *filename);
+static inline void dump_bytecode_to_file(HkFunction *fn, const char *filename);
+static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsed_args);
 
-static inline void parse_args(parsed_args_t *parsed_args, int32_t argc, const char **argv)
+static inline void parse_args(ParsedArgs *parsed_args, int argc, const char **argv)
 {
   parsed_args->cmd = argv[0];
   parsed_args->opt_help = false;
@@ -56,7 +56,7 @@ static inline void parse_args(parsed_args_t *parsed_args, int32_t argc, const ch
   parsed_args->stack_size = 0;
   parsed_args->input = NULL;
   parsed_args->output = NULL;
-  int32_t i = 1;
+  int i = 1;
   for (; i < argc; ++i)
   {
     const char *arg = argv[i];
@@ -75,7 +75,7 @@ static inline void parse_args(parsed_args_t *parsed_args, int32_t argc, const ch
   parsed_args->num_args = argc - i;
 }
 
-static inline void parse_option(parsed_args_t *parsed_args, const char *arg)
+static inline void parse_option(ParsedArgs *parsed_args, const char *arg)
 {
   if (option(arg, "-h") || option(arg, "--help"))
   {
@@ -118,7 +118,7 @@ static inline void parse_option(parsed_args_t *parsed_args, const char *arg)
 
 static inline const char *option(const char *arg, const char *opt)
 {
-  int32_t length = 0;
+  int length = 0;
   while (opt[length] && opt[length] != '=')
     ++length;
   if (memcmp(arg, opt, length))
@@ -126,14 +126,14 @@ static inline const char *option(const char *arg, const char *opt)
   return arg[length] == '=' ? &arg[length + 1] : &arg[length];
 }
 
-static inline hk_array_t *args_array(parsed_args_t *parsed_args)
+static inline HkArray *args_array(ParsedArgs *parsed_args)
 {
-  int32_t length = parsed_args->num_args;
-  hk_array_t *args = hk_array_new_with_capacity(length);
+  int length = parsed_args->num_args;
+  HkArray *args = hk_array_new_with_capacity(length);
   args->length = length;
-  for (int32_t i = 0; i < length; ++i)
+  for (int i = 0; i < length; ++i)
   {
-    hk_string_t *arg = hk_string_from_chars(-1, parsed_args->args[i]);
+    HkString *arg = hk_string_from_chars(-1, parsed_args->args[i]);
     hk_incr_ref(arg);
     args->elements[i] = hk_string_value(arg);
   }
@@ -170,33 +170,33 @@ static inline FILE *open_file(const char *filename, const char *mode)
   return stream;
 }
 
-static inline hk_string_t *load_source_from_file(const char *filename)
+static inline HkString *load_source_from_file(const char *filename)
 {
   FILE *stream = open_file(filename, "r");
-  hk_string_t *source = hk_string_from_stream(stream, '\0');
+  HkString *source = hk_string_from_stream(stream, '\0');
   fclose(stream);
   return source;
 }
 
-static inline hk_closure_t *load_bytecode_from_file(const char *filename)
+static inline HkClosure *load_bytecode_from_file(const char *filename)
 {
   FILE *stream = open_file(filename, "rb");
-  hk_closure_t *cl = load_bytecode_from_stream(stream);
+  HkClosure *cl = load_bytecode_from_stream(stream);
   if (!cl)
     hk_fatal_error("unable to load file `%s`", filename);
   fclose(stream);
   return cl;
 }
 
-static inline hk_closure_t *load_bytecode_from_stream(FILE *stream)
+static inline HkClosure *load_bytecode_from_stream(FILE *stream)
 {
-  hk_function_t *fn = hk_function_deserialize(stream);
+  HkFunction *fn = hk_function_deserialize(stream);
   if (!fn)
     return NULL;
   return hk_closure_new(fn);
 }
 
-static inline void save_bytecode_to_file(hk_closure_t *cl, const char *filename)
+static inline void save_bytecode_to_file(HkClosure *cl, const char *filename)
 {
   filename = filename ? filename : "a.out";
   hk_ensure_path(filename);
@@ -205,7 +205,7 @@ static inline void save_bytecode_to_file(hk_closure_t *cl, const char *filename)
   fclose(stream);
 }
 
-static inline void dump_bytecode_to_file(hk_function_t *fn, const char *filename)
+static inline void dump_bytecode_to_file(HkFunction *fn, const char *filename)
 {
   hk_ensure_path(filename);
   FILE *stream = open_file(filename, "w");
@@ -213,9 +213,9 @@ static inline void dump_bytecode_to_file(hk_function_t *fn, const char *filename
   fclose(stream);
 }
 
-static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args)
+static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsed_args)
 {
-  hk_state_t state;
+  HkState state;
   hk_state_init(&state, parsed_args->stack_size);
   hk_state_push_closure(&state, cl);
   hk_state_push_array(&state, args_array(parsed_args));
@@ -224,16 +224,16 @@ static inline int32_t run_bytecode(hk_closure_t *cl, parsed_args_t *parsed_args)
     hk_state_free(&state);
     return EXIT_FAILURE;
   }
-  hk_value_t result = state.stack[state.stack_top];
-  int32_t status = hk_is_int(result) ? (int32_t) hk_as_number(result) : 0;
-  --state.stack_top;
+  HkValue result = state.stackSlots[state.stackTop];
+  int status = hk_is_int(result) ? (int) hk_as_number(result) : 0;
+  --state.stackTop;
   hk_state_free(&state);
   return status;
 }
 
-int32_t main(int32_t argc, const char **argv)
+int main(int argc, const char **argv)
 {
-  parsed_args_t parsed_args;
+  ParsedArgs parsed_args;
   parse_args(&parsed_args, argc, argv);
   if (parsed_args.opt_help)
   {
@@ -250,26 +250,26 @@ int32_t main(int32_t argc, const char **argv)
   {
     if (!input)
       hk_fatal_error("no input string");
-    hk_string_t *file = hk_string_from_chars(-1, "<terminal>");
-    hk_string_t *source = hk_string_from_chars(-1, input);
-    hk_closure_t *cl = hk_compile(file, source);
+    HkString *file = hk_string_from_chars(-1, "<terminal>");
+    HkString *source = hk_string_from_chars(-1, input);
+    HkClosure *cl = hk_compile(file, source);
     return run_bytecode(cl, &parsed_args);
   }
   if (parsed_args.opt_run)
   {
     if (input)
     {
-      hk_closure_t *cl = load_bytecode_from_file(input);
+      HkClosure *cl = load_bytecode_from_file(input);
       return run_bytecode(cl, &parsed_args);
     }
-    hk_closure_t *cl = load_bytecode_from_stream(stdin);
+    HkClosure *cl = load_bytecode_from_stream(stdin);
     if (!cl)
       hk_fatal_error("unable to load bytecode");
     return run_bytecode(cl, &parsed_args);
   }
-  hk_string_t *file = hk_string_from_chars(-1, input ? input : "<stdin>");
-  hk_string_t *source = input ? load_source_from_file(input) : hk_string_from_stream(stdin, '\0');
-  hk_closure_t *cl = hk_compile(file, source);
+  HkString *file = hk_string_from_chars(-1, input ? input : "<stdin>");
+  HkString *source = input ? load_source_from_file(input) : hk_string_from_stream(stdin, '\0');
+  HkClosure *cl = hk_compile(file, source);
   const char *output = parsed_args.output;
   if (parsed_args.opt_dump)
   {

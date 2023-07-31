@@ -18,10 +18,10 @@
 #define MAX_INTEGER 9007199254740991.0
 #define MIN_INTEGER -9007199254740991.0
 
-static int32_t srand_call(hk_state_t *state, hk_value_t *args);
-static int32_t rand_call(hk_state_t *state, hk_value_t *args);
+static int srand_call(HkState *state, HkValue *args);
+static int rand_call(HkState *state, HkValue *args);
 
-static int32_t srand_call(hk_state_t *state, hk_value_t *args)
+static int srand_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -29,7 +29,7 @@ static int32_t srand_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t rand_call(hk_state_t *state, hk_value_t *args)
+static int rand_call(HkState *state, HkValue *args)
 {
   (void) args;
   double result = (double) rand() / RAND_MAX;

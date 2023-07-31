@@ -26,109 +26,109 @@ typedef struct
 {
   HK_USERDATA_HEADER
   FILE *stream;
-} file_t;
+} File;
 
-static inline file_t *file_new(FILE *stream);
-static void file_deinit(hk_userdata_t *udata);
-static int32_t open_call(hk_state_t *state, hk_value_t *args);
-static int32_t close_call(hk_state_t *state, hk_value_t *args);
-static int32_t popen_call(hk_state_t *state, hk_value_t *args);
-static int32_t pclose_call(hk_state_t *state, hk_value_t *args);
-static int32_t eof_call(hk_state_t *state, hk_value_t *args);
-static int32_t flush_call(hk_state_t *state, hk_value_t *args);
-static int32_t sync_call(hk_state_t *state, hk_value_t *args);
-static int32_t tell_call(hk_state_t *state, hk_value_t *args);
-static int32_t rewind_call(hk_state_t *state, hk_value_t *args);
-static int32_t seek_call(hk_state_t *state, hk_value_t *args);
-static int32_t read_call(hk_state_t *state, hk_value_t *args);
-static int32_t write_call(hk_state_t *state, hk_value_t *args);
-static int32_t readln_call(hk_state_t *state, hk_value_t *args);
-static int32_t writeln_call(hk_state_t *state, hk_value_t *args);
+static inline File *file_new(FILE *stream);
+static void file_deinit(HkUserdata *udata);
+static int open_call(HkState *state, HkValue *args);
+static int close_call(HkState *state, HkValue *args);
+static int popen_call(HkState *state, HkValue *args);
+static int pclose_call(HkState *state, HkValue *args);
+static int eof_call(HkState *state, HkValue *args);
+static int flush_call(HkState *state, HkValue *args);
+static int sync_call(HkState *state, HkValue *args);
+static int tell_call(HkState *state, HkValue *args);
+static int rewind_call(HkState *state, HkValue *args);
+static int seek_call(HkState *state, HkValue *args);
+static int read_call(HkState *state, HkValue *args);
+static int write_call(HkState *state, HkValue *args);
+static int readln_call(HkState *state, HkValue *args);
+static int writeln_call(HkState *state, HkValue *args);
 
-static inline file_t *file_new(FILE *stream)
+static inline File *file_new(FILE *stream)
 {
-  file_t *file = (file_t *) hk_allocate(sizeof(*file));
-  hk_userdata_init((hk_userdata_t *) file, &file_deinit);
+  File *file = (File *) hk_allocate(sizeof(*file));
+  hk_userdata_init((HkUserdata *) file, &file_deinit);
   file->stream = stream;
   return file;
 }
 
-static void file_deinit(hk_userdata_t *udata)
+static void file_deinit(HkUserdata *udata)
 {
-  FILE *stream = ((file_t *) udata)->stream;
+  FILE *stream = ((File *) udata)->stream;
   if (stream == stdin || stream == stdout || stream == stderr)
     return;
   fclose(stream);
 }
 
-static int32_t open_call(hk_state_t *state, hk_value_t *args)
+static int open_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *filename = hk_as_string(args[1]);
-  hk_string_t *mode = hk_as_string(args[2]);
+  HkString *filename = hk_as_string(args[1]);
+  HkString *mode = hk_as_string(args[2]);
   FILE *stream = fopen(filename->chars, mode->chars);
   if (!stream)
     return hk_state_push_nil(state);
-  return hk_state_push_userdata(state, (hk_userdata_t *) file_new(stream));
+  return hk_state_push_userdata(state, (HkUserdata *) file_new(stream));
 }
 
-static int32_t close_call(hk_state_t *state, hk_value_t *args)
+static int close_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  return hk_state_push_number(state, fclose(((file_t *) hk_as_userdata(args[1]))->stream));
+  return hk_state_push_number(state, fclose(((File *) hk_as_userdata(args[1]))->stream));
 }
 
-static int32_t popen_call(hk_state_t *state, hk_value_t *args)
+static int popen_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *command = hk_as_string(args[1]);
-  hk_string_t *mode = hk_as_string(args[2]);
+  HkString *command = hk_as_string(args[1]);
+  HkString *mode = hk_as_string(args[2]);
   FILE *stream;
   stream = popen(command->chars, mode->chars);
   if (!stream)
     return hk_state_push_nil(state);
-  return hk_state_push_userdata(state, (hk_userdata_t *) file_new(stream));
+  return hk_state_push_userdata(state, (HkUserdata *) file_new(stream));
 }
 
-static int32_t pclose_call(hk_state_t *state, hk_value_t *args)
+static int pclose_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  int32_t status;
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
+  int status;
   status = pclose(stream);
   return hk_state_push_number(state, status);
 }
 
-static int32_t eof_call(hk_state_t *state, hk_value_t *args)
+static int eof_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   return hk_state_push_bool(state, (bool) feof(stream));
 }
 
-static int32_t flush_call(hk_state_t *state, hk_value_t *args)
+static int flush_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   return hk_state_push_number(state, fflush(stream));
 }
 
-static int32_t sync_call(hk_state_t *state, hk_value_t *args)
+static int sync_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  int32_t fd = fileno(stream);
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
+  int fd = fileno(stream);
   bool result;
 #ifdef _WIN32
   result = FlushFileBuffers(fd);
@@ -138,24 +138,24 @@ static int32_t sync_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_bool(state, result);
 }
 
-static int32_t tell_call(hk_state_t *state, hk_value_t *args)
+static int tell_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   return hk_state_push_number(state, ftell(stream));
 }
 
-static int32_t rewind_call(hk_state_t *state, hk_value_t *args)
+static int rewind_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   rewind(stream);
   return hk_state_push_nil(state);
 }
 
-static int32_t seek_call(hk_state_t *state, hk_value_t *args)
+static int seek_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -163,22 +163,22 @@ static int32_t seek_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   int64_t offset = (int64_t) hk_as_number(args[2]);
-  int32_t whence = (int32_t) hk_as_number(args[3]);
+  int whence = (int) hk_as_number(args[3]);
   return hk_state_push_number(state, fseek(stream, offset, whence));
 }
 
-static int32_t read_call(hk_state_t *state, hk_value_t *args)
+static int read_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   int64_t size = (int64_t) hk_as_number(args[2]);
-  hk_string_t *str = hk_string_new_with_capacity(size);
-  int32_t length = (int32_t) fread(str->chars, 1, size, stream);
+  HkString *str = hk_string_new_with_capacity(size);
+  int length = (int) fread(str->chars, 1, size, stream);
   if (length < size && !feof(stream))
   {
     hk_string_free(str);
@@ -194,36 +194,36 @@ static int32_t read_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t write_call(hk_state_t *state, hk_value_t *args)
+static int write_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  hk_string_t *str = hk_as_string(args[2]);
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
+  HkString *str = hk_as_string(args[2]);
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size)
     return hk_state_push_nil(state);
   return hk_state_push_number(state, size);
 }
 
-static int32_t readln_call(hk_state_t *state, hk_value_t *args)
+static int readln_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   return hk_state_push_string_from_stream(state, stream, '\n');
 }
 
-static int32_t writeln_call(hk_state_t *state, hk_value_t *args)
+static int writeln_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  FILE *stream = ((file_t *) hk_as_userdata(args[1]))->stream;
-  hk_string_t *str = hk_as_string(args[2]);
+  FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
+  HkString *str = hk_as_string(args[2]);
   size_t size = str->length;
   if (fwrite(str->chars, 1, size, stream) < size || fwrite("\n", 1, 1, stream) < 1)
     return hk_state_push_nil(state);
@@ -236,15 +236,15 @@ HK_LOAD_FN(io)
     return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "stdin") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_state_push_userdata(state, (hk_userdata_t *) file_new(stdin)) == HK_STATUS_ERROR)
+  if (hk_state_push_userdata(state, (HkUserdata *) file_new(stdin)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "stdout") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_state_push_userdata(state, (hk_userdata_t *) file_new(stdout)) == HK_STATUS_ERROR)
+  if (hk_state_push_userdata(state, (HkUserdata *) file_new(stdout)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "stderr") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  if (hk_state_push_userdata(state, (hk_userdata_t *) file_new(stderr)) == HK_STATUS_ERROR)
+  if (hk_state_push_userdata(state, (HkUserdata *) file_new(stderr)) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_string_from_chars(state, -1, "SEEK_SET") == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

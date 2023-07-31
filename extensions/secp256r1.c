@@ -15,22 +15,22 @@
 #define HASH_SIZE        ECC_BYTES
 #define SIGNATURE_SIZE   (ECC_BYTES << 1)
 
-static int32_t new_key_pair_call(hk_state_t *state, hk_value_t *args);
-static int32_t shared_secret_call(hk_state_t *state, hk_value_t *args);
-static int32_t sign_hash_call(hk_state_t *state, hk_value_t *args);
-static int32_t verify_signature_call(hk_state_t *state, hk_value_t *args);
+static int new_key_pair_call(HkState *state, HkValue *args);
+static int shared_secret_call(HkState *state, HkValue *args);
+static int sign_hash_call(HkState *state, HkValue *args);
+static int verify_signature_call(HkState *state, HkValue *args);
 
-static int32_t new_key_pair_call(hk_state_t *state, hk_value_t *args)
+static int new_key_pair_call(HkState *state, HkValue *args)
 {
   (void) args;
-  hk_string_t *pub_key = hk_string_new_with_capacity(PUBLIC_KEY_SIZE);
+  HkString *pub_key = hk_string_new_with_capacity(PUBLIC_KEY_SIZE);
   pub_key->length = PUBLIC_KEY_SIZE;
   pub_key->chars[PUBLIC_KEY_SIZE] = '\0';
-  hk_string_t *priv_key = hk_string_new_with_capacity(PRIVATE_KEY_SIZE);
+  HkString *priv_key = hk_string_new_with_capacity(PRIVATE_KEY_SIZE);
   priv_key->length = PRIVATE_KEY_SIZE;
   priv_key->chars[PRIVATE_KEY_SIZE] = '\0';
   (void) ecc_make_key((uint8_t *) pub_key->chars, (uint8_t *) priv_key->chars);
-  hk_array_t *arr = hk_array_new_with_capacity(2);
+  HkArray *arr = hk_array_new_with_capacity(2);
   arr->length = 2;
   hk_incr_ref(pub_key);
   hk_incr_ref(priv_key);
@@ -44,15 +44,15 @@ static int32_t new_key_pair_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t shared_secret_call(hk_state_t *state, hk_value_t *args)
+static int shared_secret_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *pub_key = hk_as_string(args[1]);
-  hk_string_t *priv_key = hk_as_string(args[2]);
-  hk_string_t *secret = hk_string_new_with_capacity(SECRET_SIZE);
+  HkString *pub_key = hk_as_string(args[1]);
+  HkString *priv_key = hk_as_string(args[2]);
+  HkString *secret = hk_string_new_with_capacity(SECRET_SIZE);
   secret->length = SECRET_SIZE;
   secret->chars[SECRET_SIZE] = '\0';
   (void) ecdh_shared_secret((uint8_t *) pub_key->chars, (uint8_t *) priv_key->chars,
@@ -65,15 +65,15 @@ static int32_t shared_secret_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t sign_hash_call(hk_state_t *state, hk_value_t *args)
+static int sign_hash_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *priv_key = hk_as_string(args[1]);
-  hk_string_t *hash = hk_as_string(args[2]);
-  hk_string_t *signature = hk_string_new_with_capacity(SIGNATURE_SIZE);
+  HkString *priv_key = hk_as_string(args[1]);
+  HkString *hash = hk_as_string(args[2]);
+  HkString *signature = hk_string_new_with_capacity(SIGNATURE_SIZE);
   signature->length = SIGNATURE_SIZE;
   signature->chars[SIGNATURE_SIZE] = '\0';
   (void) ecdsa_sign((uint8_t *) priv_key->chars, (uint8_t *) hash->chars,
@@ -86,7 +86,7 @@ static int32_t sign_hash_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t verify_signature_call(hk_state_t *state, hk_value_t *args)
+static int verify_signature_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -94,9 +94,9 @@ static int32_t verify_signature_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *pub_key = hk_as_string(args[1]);
-  hk_string_t *hash = hk_as_string(args[2]);
-  hk_string_t *signature = hk_as_string(args[3]);
+  HkString *pub_key = hk_as_string(args[1]);
+  HkString *hash = hk_as_string(args[2]);
+  HkString *signature = hk_as_string(args[3]);
   bool valid = (bool) ecdsa_verify((uint8_t *) pub_key->chars, (uint8_t *) hash->chars,
     (uint8_t *) signature->chars);
   return hk_state_push_bool(state, valid);

@@ -5,15 +5,15 @@
 
 #include <hook/dump.h>
 
-static inline int32_t get_line(hk_chunk_t *chunk, int32_t offset);
+static inline int get_line(HkChunk *chunk, int offset);
 
-static inline int32_t get_line(hk_chunk_t *chunk, int32_t offset)
+static inline int get_line(HkChunk *chunk, int offset)
 {
-  int32_t result = 1;
-  hk_line_t *lines = chunk->lines;
-  for (int32_t i = 0; i < chunk->lines_length; ++i)
+  int result = 1;
+  HkLine *lines = chunk->lines;
+  for (int i = 0; i < chunk->lines_length; ++i)
   {
-    hk_line_t *line = &lines[i];
+    HkLine *line = &lines[i];
     if (line->offset > offset)
       break;
     result = line->no;
@@ -21,26 +21,26 @@ static inline int32_t get_line(hk_chunk_t *chunk, int32_t offset)
   return result;
 }
 
-void hk_dump(hk_function_t *fn, FILE *stream)
+void hk_dump(HkFunction *fn, FILE *stream)
 {
-  hk_string_t *name = fn->name;
-  hk_string_t *file = fn->file;
+  HkString *name = fn->name;
+  HkString *file = fn->file;
   char *name_chars = name ? name->chars : "; <anonymous>";
   char *file_chars = file ? file->chars : "; <srdin>";
-  hk_chunk_t *chunk = &fn->chunk;
+  HkChunk *chunk = &fn->chunk;
   fprintf(stream, "; %s in %s at %p\n", name_chars, file_chars, (void *) fn);
   fprintf(stream, "; %d parameter(s), %d non-local(s), %d constant(s), %d function(s)\n", fn->arity,
     fn->num_nonlocals, chunk->consts->length, fn->functions_length);
   uint8_t *code = chunk->code;
-  int32_t i = 0;
-  int32_t n = 0;
-  int32_t last_line = -1;
+  int i = 0;
+  int n = 0;
+  int last_line = -1;
   while (i < chunk->code_length)
   {
-    hk_opcode_t op = (hk_opcode_t) code[i];
-    int32_t j = i++;
+    HkOpCode op = (HkOpCode) code[i];
+    int j = i++;
     ++n;
-    int32_t line = get_line(chunk, j);
+    int line = get_line(chunk, j);
     if (line != last_line)
     {
       fprintf(stream, "  %-5d %5d ", line, j);
@@ -61,7 +61,7 @@ void hk_dump(hk_function_t *fn, FILE *stream)
       break;
     case HK_OP_INT:
       {
-        int32_t data = *((uint16_t*) &code[i]);
+        int data = *((uint16_t*) &code[i]);
         i += 2;
         fprintf(stream, "Int                   %5d\n", data);
       }
@@ -158,49 +158,49 @@ void hk_dump(hk_function_t *fn, FILE *stream)
       break;
     case HK_OP_JUMP:
       {
-        int32_t offset = *((uint16_t*) &code[i]);
+        int offset = *((uint16_t*) &code[i]);
         i += 2;
         fprintf(stream, "Jump                  %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_FALSE:
       {
-        int32_t offset = *((uint16_t*) &code[i]);
+        int offset = *((uint16_t*) &code[i]);
         i += 2;
         fprintf(stream, "JumpIfFalse           %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_TRUE:
       {
-        int32_t offset = *((uint16_t*) &code[i]);
+        int offset = *((uint16_t*) &code[i]);
         i += 2;
         fprintf(stream, "JumpIfTrue            %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_TRUE_OR_POP:
       {
-        int32_t offset = *((uint16_t*) &code[i]);
+        int offset = *((uint16_t*) &code[i]);
         i += 2;
         fprintf(stream, "JumpIfTrueOrPop       %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_FALSE_OR_POP:
       {
-        int32_t offset = *((uint16_t*) &code[i]);
+        int offset = *((uint16_t*) &code[i]);
         i += 2;
         fprintf(stream, "JumpIfFalseOrPop      %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_NOT_EQUAL:
       {
-        int32_t offset = *((uint16_t*) &code[i]);
+        int offset = *((uint16_t*) &code[i]);
         i += 2;
         fprintf(stream, "JumpIfNotEqual        %5d\n", offset);
       }
       break;
     case HK_OP_JUMP_IF_NOT_VALID:
       {
-        int32_t offset = *((uint16_t*) &code[i]);
+        int offset = *((uint16_t*) &code[i]);
         i += 2;
         fprintf(stream, "JumpIfNotValid        %5d\n", offset);
       }
@@ -289,6 +289,6 @@ void hk_dump(hk_function_t *fn, FILE *stream)
     }
   }
   fprintf(stream, "; %d instruction(s)\n\n", n);
-  for (int32_t i = 0; i < fn->functions_length; ++i)
+  for (int i = 0; i < fn->functions_length; ++i)
     hk_dump(fn->functions[i], stream);
 }

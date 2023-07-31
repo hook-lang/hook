@@ -8,95 +8,95 @@
 #include <hook/check.h>
 #include <hook/status.h>
 
-static int32_t abs_call(hk_state_t *state, hk_value_t *args);
-static int32_t sin_call(hk_state_t *state, hk_value_t *args);
-static int32_t cos_call(hk_state_t *state, hk_value_t *args);
-static int32_t tan_call(hk_state_t *state, hk_value_t *args);
-static int32_t asin_call(hk_state_t *state, hk_value_t *args);
-static int32_t acos_call(hk_state_t *state, hk_value_t *args);
-static int32_t atan_call(hk_state_t *state, hk_value_t *args);
-static int32_t floor_call(hk_state_t *state, hk_value_t *args);
-static int32_t ceil_call(hk_state_t *state, hk_value_t *args);
-static int32_t round_call(hk_state_t *state, hk_value_t *args);
-static int32_t pow_call(hk_state_t *state, hk_value_t *args);
-static int32_t sqrt_call(hk_state_t *state, hk_value_t *args);
-static int32_t cbrt_call(hk_state_t *state, hk_value_t *args);
-static int32_t log_call(hk_state_t *state, hk_value_t *args);
-static int32_t log2_call(hk_state_t *state, hk_value_t *args);
-static int32_t log10_call(hk_state_t *state, hk_value_t *args);
-static int32_t exp_call(hk_state_t *state, hk_value_t *args);
+static int abs_call(HkState *state, HkValue *args);
+static int sin_call(HkState *state, HkValue *args);
+static int cos_call(HkState *state, HkValue *args);
+static int tan_call(HkState *state, HkValue *args);
+static int asin_call(HkState *state, HkValue *args);
+static int acos_call(HkState *state, HkValue *args);
+static int atan_call(HkState *state, HkValue *args);
+static int floor_call(HkState *state, HkValue *args);
+static int ceil_call(HkState *state, HkValue *args);
+static int round_call(HkState *state, HkValue *args);
+static int pow_call(HkState *state, HkValue *args);
+static int sqrt_call(HkState *state, HkValue *args);
+static int cbrt_call(HkState *state, HkValue *args);
+static int log_call(HkState *state, HkValue *args);
+static int log2_call(HkState *state, HkValue *args);
+static int log10_call(HkState *state, HkValue *args);
+static int exp_call(HkState *state, HkValue *args);
 
-static int32_t abs_call(hk_state_t *state, hk_value_t *args)
+static int abs_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, fabs(hk_as_number(args[1])));
 }
 
-static int32_t sin_call(hk_state_t *state, hk_value_t *args)
+static int sin_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, sin(hk_as_number(args[1])));
 }
 
-static int32_t cos_call(hk_state_t *state, hk_value_t *args)
+static int cos_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, cos(hk_as_number(args[1])));
 }
 
-static int32_t tan_call(hk_state_t *state, hk_value_t *args)
+static int tan_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, tan(hk_as_number(args[1])));
 }
 
-static int32_t asin_call(hk_state_t *state, hk_value_t *args)
+static int asin_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, asin(hk_as_number(args[1])));
 }
 
-static int32_t acos_call(hk_state_t *state, hk_value_t *args)
+static int acos_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, acos(hk_as_number(args[1])));
 }
 
-static int32_t atan_call(hk_state_t *state, hk_value_t *args)
+static int atan_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, atan(hk_as_number(args[1])));
 }
 
-static int32_t floor_call(hk_state_t *state, hk_value_t *args)
+static int floor_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, floor(hk_as_number(args[1])));
 }
 
-static int32_t ceil_call(hk_state_t *state, hk_value_t *args)
+static int ceil_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, ceil(hk_as_number(args[1])));
 }
 
-static int32_t round_call(hk_state_t *state, hk_value_t *args)
+static int round_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, round(hk_as_number(args[1])));
 }
 
-static int32_t pow_call(hk_state_t *state, hk_value_t *args)
+static int pow_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -105,42 +105,42 @@ static int32_t pow_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, pow(hk_as_number(args[1]), hk_as_number(args[2])));
 }
 
-static int32_t sqrt_call(hk_state_t *state, hk_value_t *args)
+static int sqrt_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, sqrt(hk_as_number(args[1])));
 }
 
-static int32_t cbrt_call(hk_state_t *state, hk_value_t *args)
+static int cbrt_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, cbrt(hk_as_number(args[1])));
 }
 
-static int32_t log_call(hk_state_t *state, hk_value_t *args)
+static int log_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, log(hk_as_number(args[1])));
 }
 
-static int32_t log2_call(hk_state_t *state, hk_value_t *args)
+static int log2_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, log2(hk_as_number(args[1])));
 }
 
-static int32_t log10_call(hk_state_t *state, hk_value_t *args)
+static int log10_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, log10(hk_as_number(args[1])));
 }
 
-static int32_t exp_call(hk_state_t *state, hk_value_t *args)
+static int exp_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_number(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;

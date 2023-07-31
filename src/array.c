@@ -12,33 +12,33 @@
 typedef struct
 {
   HK_ITERATOR_HEADER
-  hk_array_t *arr;
-  int32_t current;
-} array_iterator_t;
+  HkArray *arr;
+  int current;
+} ArrayIterator;
 
-static inline hk_array_t *array_allocate(int32_t min_capacity);
-static inline array_iterator_t *array_iterator_allocate(hk_array_t *arr);
-static void array_iterator_deinit(hk_iterator_t *it);
-static bool array_iterator_is_valid(hk_iterator_t *it);
-static hk_value_t array_iterator_get_current(hk_iterator_t *it);
-static hk_iterator_t *array_iterator_next(hk_iterator_t *it);
-static void array_iterator_inplace_next(hk_iterator_t *it);
+static inline HkArray *array_allocate(int minCapacity);
+static inline ArrayIterator *array_iterator_allocate(HkArray *arr);
+static void array_iterator_deinit(HkIterator *it);
+static bool array_iterator_is_valid(HkIterator *it);
+static HkValue array_iterator_get_current(HkIterator *it);
+static HkIterator *array_iterator_next(HkIterator *it);
+static void array_iterator_inplace_next(HkIterator *it);
 
-static inline hk_array_t *array_allocate(int32_t min_capacity)
+static inline HkArray *array_allocate(int minCapacity)
 {
-  hk_array_t *arr = (hk_array_t *) hk_allocate(sizeof(*arr));
-  int32_t capacity = min_capacity < HK_ARRAY_MIN_CAPACITY ? HK_ARRAY_MIN_CAPACITY : min_capacity;
+  HkArray *arr = (HkArray *) hk_allocate(sizeof(*arr));
+  int capacity = minCapacity < HK_ARRAY_MIN_CAPACITY ? HK_ARRAY_MIN_CAPACITY : minCapacity;
   capacity = hk_power_of_two_ceil(capacity);
   arr->ref_count = 0;
   arr->capacity = capacity;
-  arr->elements = (hk_value_t *) hk_allocate(sizeof(*arr->elements) * capacity);
+  arr->elements = (HkValue *) hk_allocate(sizeof(*arr->elements) * capacity);
   return arr;
 }
 
-static inline array_iterator_t *array_iterator_allocate(hk_array_t *arr)
+static inline ArrayIterator *array_iterator_allocate(HkArray *arr)
 {
-  array_iterator_t *arr_it = (array_iterator_t *) hk_allocate(sizeof(*arr_it));
-  hk_iterator_init((hk_iterator_t *) arr_it, &array_iterator_deinit,
+  ArrayIterator *arr_it = (ArrayIterator *) hk_allocate(sizeof(*arr_it));
+  hk_iterator_init((HkIterator *) arr_it, &array_iterator_deinit,
     &array_iterator_is_valid, &array_iterator_get_current,
     &array_iterator_next, &array_iterator_inplace_next);
   hk_incr_ref(arr);
@@ -46,91 +46,91 @@ static inline array_iterator_t *array_iterator_allocate(hk_array_t *arr)
   return arr_it;
 }
 
-static void array_iterator_deinit(hk_iterator_t *it)
+static void array_iterator_deinit(HkIterator *it)
 {
-  hk_array_release(((array_iterator_t *) it)->arr);
+  hk_array_release(((ArrayIterator *) it)->arr);
 }
 
-static bool array_iterator_is_valid(hk_iterator_t *it)
+static bool array_iterator_is_valid(HkIterator *it)
 {
-  array_iterator_t *arr_it = (array_iterator_t *) it;
-  hk_array_t *arr = arr_it->arr;
+  ArrayIterator *arr_it = (ArrayIterator *) it;
+  HkArray *arr = arr_it->arr;
   return arr_it->current < arr->length;
 }
 
-static hk_value_t array_iterator_get_current(hk_iterator_t *it)
+static HkValue array_iterator_get_current(HkIterator *it)
 {
-  array_iterator_t *arr_it = (array_iterator_t *) it;
+  ArrayIterator *arr_it = (ArrayIterator *) it;
   return arr_it->arr->elements[arr_it->current];
 }
 
-static hk_iterator_t *array_iterator_next(hk_iterator_t *it)
+static HkIterator *array_iterator_next(HkIterator *it)
 {
-  array_iterator_t *arr_it = (array_iterator_t *) it;
-  array_iterator_t *result = array_iterator_allocate(arr_it->arr);
+  ArrayIterator *arr_it = (ArrayIterator *) it;
+  ArrayIterator *result = array_iterator_allocate(arr_it->arr);
   result->current = arr_it->current + 1;
-  return (hk_iterator_t *) result;
+  return (HkIterator *) result;
 }
 
-static void array_iterator_inplace_next(hk_iterator_t *it)
+static void array_iterator_inplace_next(HkIterator *it)
 {
-  array_iterator_t *arr_it = (array_iterator_t *) it;
+  ArrayIterator *arr_it = (ArrayIterator *) it;
   ++arr_it->current;
 }
 
-hk_array_t *hk_array_new(void)
+HkArray *hk_array_new(void)
 {
   return hk_array_new_with_capacity(0);
 }
 
-hk_array_t *hk_array_new_with_capacity(int32_t min_capacity)
+HkArray *hk_array_new_with_capacity(int minCapacity)
 {
-  hk_array_t *arr = array_allocate(min_capacity);
+  HkArray *arr = array_allocate(minCapacity);
   arr->length = 0;
   return arr;
 }
 
-void hk_array_ensure_capacity(hk_array_t *arr, int32_t min_capacity)
+void hk_array_ensure_capacity(HkArray *arr, int minCapacity)
 {
-  if (min_capacity <= arr->capacity)
+  if (minCapacity <= arr->capacity)
     return;
-  int32_t capacity = hk_power_of_two_ceil(min_capacity);
+  int capacity = hk_power_of_two_ceil(minCapacity);
   arr->capacity = capacity;
-  arr->elements = (hk_value_t *) hk_reallocate(arr->elements,
+  arr->elements = (HkValue *) hk_reallocate(arr->elements,
     sizeof(*arr->elements) * capacity);
 }
 
-void hk_array_free(hk_array_t *arr)
+void hk_array_free(HkArray *arr)
 {
-  for (int32_t i = 0; i < arr->length; ++i)
+  for (int i = 0; i < arr->length; ++i)
     hk_value_release(arr->elements[i]);
   free(arr->elements);
   free(arr);
 }
 
-void hk_array_release(hk_array_t *arr)
+void hk_array_release(HkArray *arr)
 {
   hk_decr_ref(arr);
   if (hk_is_unreachable(arr))
     hk_array_free(arr);
 }
 
-int32_t hk_array_index_of(hk_array_t *arr, hk_value_t elem)
+int hk_array_index_of(HkArray *arr, HkValue elem)
 {
-  for (int32_t i = 0; i < arr->length; ++i)
+  for (int i = 0; i < arr->length; ++i)
     if (hk_value_equal(arr->elements[i], elem))
       return i;
   return -1;
 }
 
-hk_array_t *hk_array_add_element(hk_array_t *arr, hk_value_t elem)
+HkArray *hk_array_add_element(HkArray *arr, HkValue elem)
 {
-  int32_t length = arr->length;
-  hk_array_t *result = array_allocate(length + 1);
+  int length = arr->length;
+  HkArray *result = array_allocate(length + 1);
   result->length = length + 1;
-  for (int32_t i = 0; i < length; ++i)
+  for (int i = 0; i < length; ++i)
   {
-    hk_value_t val = arr->elements[i];
+    HkValue val = arr->elements[i];
     hk_value_incr_ref(val);
     result->elements[i] = val;
   }
@@ -139,105 +139,105 @@ hk_array_t *hk_array_add_element(hk_array_t *arr, hk_value_t elem)
   return result;
 }
 
-hk_array_t *hk_array_set_element(hk_array_t *arr, int32_t index, hk_value_t elem)
+HkArray *hk_array_set_element(HkArray *arr, int index, HkValue elem)
 {
-  int32_t length = arr->length;
-  hk_array_t *result = array_allocate(length);
+  int length = arr->length;
+  HkArray *result = array_allocate(length);
   result->length = length;
-  for (int32_t i = 0; i < index; ++i)
+  for (int i = 0; i < index; ++i)
   {
-    hk_value_t val = arr->elements[i];
+    HkValue val = arr->elements[i];
     hk_value_incr_ref(val);
     result->elements[i] = val;
   }
   hk_value_incr_ref(elem);
   result->elements[index] = elem;
-  for (int32_t i = index + 1; i < length; ++i)
+  for (int i = index + 1; i < length; ++i)
   {
-    hk_value_t val = arr->elements[i];
+    HkValue val = arr->elements[i];
     hk_value_incr_ref(val);
     result->elements[i] = val;
   }
   return result;
 }
 
-hk_array_t *hk_array_insert_element(hk_array_t *arr, int32_t index, hk_value_t elem)
+HkArray *hk_array_insert_element(HkArray *arr, int index, HkValue elem)
 {
-  int32_t length = arr->length;
-  hk_array_t *result = array_allocate(length + 1);
+  int length = arr->length;
+  HkArray *result = array_allocate(length + 1);
   result->length = length + 1;
-  for (int32_t i = 0; i < index; ++i)
+  for (int i = 0; i < index; ++i)
   {
-    hk_value_t val = arr->elements[i];
+    HkValue val = arr->elements[i];
     hk_value_incr_ref(val);
     result->elements[i] = val;
   }
   hk_value_incr_ref(elem);
   result->elements[index] = elem;
-  for (int32_t i = index; i < length; ++i)
+  for (int i = index; i < length; ++i)
   {
-    hk_value_t val = arr->elements[i];
+    HkValue val = arr->elements[i];
     hk_value_incr_ref(val);
     result->elements[i + 1] = val;
   }
   return result;
 }
 
-hk_array_t *hk_array_delete_element(hk_array_t *arr, int32_t index)
+HkArray *hk_array_delete_element(HkArray *arr, int index)
 {
-  int32_t length = arr->length;
-  hk_array_t *result = array_allocate(length - 1);
+  int length = arr->length;
+  HkArray *result = array_allocate(length - 1);
   result->length = length - 1;
-  for (int32_t i = 0; i < index; ++i)
+  for (int i = 0; i < index; ++i)
   {
-    hk_value_t elem = arr->elements[i];
+    HkValue elem = arr->elements[i];
     hk_value_incr_ref(elem);
     result->elements[i] = elem;
   }
-  for (int32_t i = index + 1; i < length; ++i)
+  for (int i = index + 1; i < length; ++i)
   {
-    hk_value_t elem = arr->elements[i];
+    HkValue elem = arr->elements[i];
     hk_value_incr_ref(elem);
     result->elements[i - 1] = elem;
   }
   return result;
 }
 
-hk_array_t *hk_array_concat(hk_array_t *arr1, hk_array_t *arr2)
+HkArray *hk_array_concat(HkArray *arr1, HkArray *arr2)
 {
-  int32_t length = arr1->length + arr2->length;
-  hk_array_t *result = array_allocate(length);
+  int length = arr1->length + arr2->length;
+  HkArray *result = array_allocate(length);
   result->length = length;
-  int32_t j = 0;
-  for (int32_t i = 0; i < arr1->length; ++i, ++j)
+  int j = 0;
+  for (int i = 0; i < arr1->length; ++i, ++j)
   {
-    hk_value_t elem = arr1->elements[i];
+    HkValue elem = arr1->elements[i];
     hk_value_incr_ref(elem);
     result->elements[j] = elem;
   }
-  for (int32_t i = 0; i < arr2->length; ++i, ++j)
+  for (int i = 0; i < arr2->length; ++i, ++j)
   {
-    hk_value_t elem = arr2->elements[i];
+    HkValue elem = arr2->elements[i];
     hk_value_incr_ref(elem);
     result->elements[j] = elem;
   }
   return result;
 }
 
-hk_array_t *hk_array_diff(hk_array_t *arr1, hk_array_t *arr2)
+HkArray *hk_array_diff(HkArray *arr1, HkArray *arr2)
 {
-  hk_array_t *result = array_allocate(0);
+  HkArray *result = array_allocate(0);
   result->length = 0;
-  for (int32_t i = 0; i < arr1->length; ++i)
+  for (int i = 0; i < arr1->length; ++i)
   {
-    hk_value_t elem = arr1->elements[i];
+    HkValue elem = arr1->elements[i];
     if (hk_array_index_of(arr2, elem) == -1)
       hk_array_inplace_add_element(result, elem);
   }
   return result;
 }
 
-void hk_array_inplace_add_element(hk_array_t *arr, hk_value_t elem)
+void hk_array_inplace_add_element(HkArray *arr, HkValue elem)
 {
   hk_array_ensure_capacity(arr, arr->length + 1);
   hk_value_incr_ref(elem);
@@ -245,51 +245,51 @@ void hk_array_inplace_add_element(hk_array_t *arr, hk_value_t elem)
   ++arr->length;
 }
 
-void hk_array_inplace_set_element(hk_array_t *arr, int32_t index, hk_value_t elem)
+void hk_array_inplace_set_element(HkArray *arr, int index, HkValue elem)
 {
   hk_value_incr_ref(elem);
   hk_value_release(arr->elements[index]);
   arr->elements[index] = elem;
 }
 
-void hk_array_inplace_insert_element(hk_array_t *arr, int32_t index, hk_value_t elem)
+void hk_array_inplace_insert_element(HkArray *arr, int index, HkValue elem)
 {
   hk_array_ensure_capacity(arr, arr->length + 1);
   hk_value_incr_ref(elem);
-  for (int32_t i = arr->length; i > index; --i)
+  for (int i = arr->length; i > index; --i)
     arr->elements[i] = arr->elements[i - 1];
   arr->elements[index] = elem;
   ++arr->length;
 }
 
-void hk_array_inplace_delete_element(hk_array_t *arr, int32_t index)
+void hk_array_inplace_delete_element(HkArray *arr, int index)
 {
   hk_value_release(arr->elements[index]);
-  for (int32_t i = index; i < arr->length - 1; ++i)
+  for (int i = index; i < arr->length - 1; ++i)
     arr->elements[i] = arr->elements[i + 1];
   --arr->length;
 }
 
-void hk_array_inplace_concat(hk_array_t *dest, hk_array_t *src)
+void hk_array_inplace_concat(HkArray *dest, HkArray *src)
 {
-  int32_t length = dest->length + src->length;
+  int length = dest->length + src->length;
   hk_array_ensure_capacity(dest, length);
-  for (int32_t i = 0; i < src->length; ++i)
+  for (int i = 0; i < src->length; ++i)
   {
-    hk_value_t elem = src->elements[i];
+    HkValue elem = src->elements[i];
     hk_value_incr_ref(elem);
     dest->elements[dest->length] = elem;
     ++dest->length;
   }
 }
 
-void hk_array_inplace_diff(hk_array_t *dest, hk_array_t *src)
+void hk_array_inplace_diff(HkArray *dest, HkArray *src)
 {
-  for (int32_t i = 0; i < src->length; ++i)
+  for (int i = 0; i < src->length; ++i)
   {
-    hk_value_t elem = src->elements[i];
-    int32_t n = dest->length;
-    for (int32_t j = 0; j < n; ++j)
+    HkValue elem = src->elements[i];
+    int n = dest->length;
+    for (int j = 0; j < n; ++j)
     {
       if (!hk_value_equal(elem, dest->elements[j]))
         continue;
@@ -299,18 +299,18 @@ void hk_array_inplace_diff(hk_array_t *dest, hk_array_t *src)
   }
 }
 
-void hk_array_print(hk_array_t *arr)
+void hk_array_print(HkArray *arr)
 {
   printf("[");
-  int32_t length = arr->length;
+  int length = arr->length;
   if (!length)
   {
     printf("]");
     return;
   }
-  hk_value_t *elements = arr->elements;
+  HkValue *elements = arr->elements;
   hk_value_print(elements[0], true);
-  for (int32_t i = 1; i < length; ++i)
+  for (int i = 1; i < length; ++i)
   {
     printf(", ");
     hk_value_print(elements[i], true);
@@ -318,28 +318,28 @@ void hk_array_print(hk_array_t *arr)
   printf("]");
 }
 
-bool hk_array_equal(hk_array_t *arr1, hk_array_t *arr2)
+bool hk_array_equal(HkArray *arr1, HkArray *arr2)
 {
   if (arr1 == arr2)
     return true;
   if (arr1->length != arr2->length)
     return false;
-  for (int32_t i = 0; i < arr1->length; ++i)
+  for (int i = 0; i < arr1->length; ++i)
     if (!hk_value_equal(arr1->elements[i], arr2->elements[i]))
       return false;  
   return true;
 }
 
-bool hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result)
+bool hk_array_compare(HkArray *arr1, HkArray *arr2, int *result)
 {
   if (arr1 == arr2)
   {
     *result = 0;
     return true;
   }
-  for (int32_t i = 0; i < arr1->length && i < arr2->length; ++i)
+  for (int i = 0; i < arr1->length && i < arr2->length; ++i)
   {
-    int32_t comp;
+    int comp;
     if (!hk_value_compare(arr1->elements[i], arr2->elements[i], &comp))
       return false;
     if (!comp)
@@ -361,40 +361,40 @@ bool hk_array_compare(hk_array_t *arr1, hk_array_t *arr2, int32_t *result)
   return true;
 }
 
-hk_iterator_t *hk_array_new_iterator(hk_array_t *arr)
+HkIterator *hk_array_new_iterator(HkArray *arr)
 {
-  array_iterator_t *arr_it = array_iterator_allocate(arr);
+  ArrayIterator *arr_it = array_iterator_allocate(arr);
   arr_it->current = 0;
-  return (hk_iterator_t *) arr_it;
+  return (HkIterator *) arr_it;
 }
 
-hk_array_t *hk_array_reverse(hk_array_t *arr)
+HkArray *hk_array_reverse(HkArray *arr)
 {
-  int32_t length = arr->length;
-  hk_array_t *result = array_allocate(length);
+  int length = arr->length;
+  HkArray *result = array_allocate(length);
   result->length = length;
-  for (int32_t i = 0; i < length; ++i)
+  for (int i = 0; i < length; ++i)
   {
-    hk_value_t elem = arr->elements[length - i - 1];
+    HkValue elem = arr->elements[length - i - 1];
     hk_value_incr_ref(elem);
     result->elements[i] = elem;
   }
   return result;
 }
 
-bool hk_array_sort(hk_array_t *arr, hk_array_t **result)
+bool hk_array_sort(HkArray *arr, HkArray **result)
 {
-  int32_t length = arr->length;
-  hk_array_t *_result = array_allocate(length);
+  int length = arr->length;
+  HkArray *_result = array_allocate(length);
   _result->length = 0;
-  for (int32_t i = 0; i < length; ++i)
+  for (int i = 0; i < length; ++i)
   {
-    hk_value_t elem1 = arr->elements[i];
-    int32_t index = 0;
+    HkValue elem1 = arr->elements[i];
+    int index = 0;
     for (; index < _result->length; ++index)
     {
-      hk_value_t elem2 = _result->elements[index];
-      int32_t comp;
+      HkValue elem2 = _result->elements[index];
+      int comp;
       if (!hk_value_compare(elem1, elem2, &comp))
       {
         hk_array_free(_result);
@@ -409,28 +409,28 @@ bool hk_array_sort(hk_array_t *arr, hk_array_t **result)
   return true;
 }
 
-void hk_array_serialize(hk_array_t *arr, FILE *stream)
+void hk_array_serialize(HkArray *arr, FILE *stream)
 {
   fwrite(&arr->capacity, sizeof(arr->capacity), 1, stream);
   fwrite(&arr->length, sizeof(arr->length), 1, stream);
-  hk_value_t *elements = arr->elements;
-  for (int32_t i = 0; i < arr->length; ++i)
+  HkValue *elements = arr->elements;
+  for (int i = 0; i < arr->length; ++i)
     hk_value_serialize(elements[i], stream);
 }
 
-hk_array_t *hk_array_deserialize(FILE *stream)
+HkArray *hk_array_deserialize(FILE *stream)
 {
-  int32_t capacity;
-  int32_t length;
+  int capacity;
+  int length;
   if (fread(&capacity, sizeof(capacity), 1, stream) != 1)
     return NULL;
   if (fread(&length, sizeof(length), 1, stream) != 1)
     return NULL;
-  hk_array_t *arr = array_allocate(capacity);
+  HkArray *arr = array_allocate(capacity);
   arr->length = length;
-  for (int32_t i = 0; i < length; ++i)
+  for (int i = 0; i < length; ++i)
   {
-    hk_value_t elem;
+    HkValue elem;
     if (!hk_value_deserialize(stream, &elem))
       return NULL;
     hk_value_incr_ref(elem);

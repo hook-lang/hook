@@ -8,8 +8,8 @@
 
 #include <hook/state.h>
 
-void load_globals(hk_state_t *state);
-int32_t num_globals(void);
-int32_t lookup_global(int32_t length, char *chars);
+void load_globals(HkState *state);
+int num_globals(void);
+int lookup_global(int length, char *chars);
 
 #endif // BUILTIN_H

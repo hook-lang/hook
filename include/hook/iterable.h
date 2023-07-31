@@ -8,6 +8,6 @@
 
 #include <hook/iterator.h>
 
-hk_iterator_t *hk_new_iterator(hk_value_t val);
+HkIterator *hk_new_iterator(HkValue val);
 
 #endif // HK_ITERABLE_H

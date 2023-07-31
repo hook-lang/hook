@@ -10,12 +10,12 @@
 #include <hook/error.h>
 #include "deps/cJSON.h"
 
-static inline cJSON *value_to_json(hk_value_t val);
-static inline hk_value_t json_to_value(hk_state_t *state, cJSON *json);
-static int32_t encode_call(hk_state_t *state, hk_value_t *args);
-static int32_t decode_call(hk_state_t *state, hk_value_t *args);
+static inline cJSON *value_to_json(HkValue val);
+static inline HkValue json_to_value(HkState *state, cJSON *json);
+static int encode_call(HkState *state, HkValue *args);
+static int decode_call(HkState *state, HkValue *args);
 
-static inline cJSON *value_to_json(hk_value_t val)
+static inline cJSON *value_to_json(HkValue val)
 {
   cJSON *json = NULL;
   switch (val.type)
@@ -41,11 +41,11 @@ static inline cJSON *value_to_json(hk_value_t val)
     break;
   case HK_TYPE_ARRAY:
     {
-      hk_array_t *arr = hk_as_array(val);
+      HkArray *arr = hk_as_array(val);
       json = cJSON_CreateArray();
-      for (int32_t i = 0; i < arr->length; ++i)
+      for (int i = 0; i < arr->length; ++i)
       {
-        hk_value_t elem = arr->elements[i];
+        HkValue elem = arr->elements[i];
         cJSON *json_elem = value_to_json(elem);
         hk_assert(cJSON_AddItemToArray(json, json_elem), "Failed to add item to array.");
       }
@@ -53,14 +53,14 @@ static inline cJSON *value_to_json(hk_value_t val)
     break;
   case HK_TYPE_INSTANCE:
     {
-      hk_instance_t *inst = hk_as_instance(val);
+      HkInstance *inst = hk_as_instance(val);
       json = cJSON_CreateObject();
-      hk_struct_t *ztruct = inst->ztruct;
-      hk_field_t *fields = ztruct->fields;
-      for (int32_t i = 0; i < ztruct->length; ++i)
+      HkStruct *ztruct = inst->ztruct;
+      HkField *fields = ztruct->fields;
+      for (int i = 0; i < ztruct->length; ++i)
       {
-        hk_field_t field = fields[i];
-        hk_value_t val = inst->values[i];
+        HkField field = fields[i];
+        HkValue val = inst->values[i];
         cJSON *json_val = value_to_json(val);
         hk_assert(cJSON_AddItemToObject(json, field.name->chars, json_val), "Failed to add item to object.");
       }
@@ -71,9 +71,9 @@ static inline cJSON *value_to_json(hk_value_t val)
   return json;
 }
 
-static inline hk_value_t json_to_value(hk_state_t *state, cJSON *json)
+static inline HkValue json_to_value(HkState *state, cJSON *json)
 {
-  hk_value_t val;
+  HkValue val;
   switch (json->type)
   {
   case cJSON_False:    
@@ -94,11 +94,11 @@ static inline hk_value_t json_to_value(hk_state_t *state, cJSON *json)
     break;
   case cJSON_Array:
     {
-      hk_array_t *arr = hk_array_new();
+      HkArray *arr = hk_array_new();
       cJSON *json_elem = json->child;
       while (json_elem)
       {
-        hk_value_t elem = json_to_value(state, json_elem);
+        HkValue elem = json_to_value(state, json_elem);
         hk_array_inplace_add_element(arr, elem);
         json_elem = json_elem->next;
       }
@@ -109,18 +109,18 @@ static inline hk_value_t json_to_value(hk_state_t *state, cJSON *json)
     {
       hk_state_push_nil(state);
       cJSON *json_field = json->child;
-      int32_t length = 0;
+      int length = 0;
       while (json_field)
       {
-        hk_string_t *field_name = hk_string_from_chars(-1, json_field->string);
-        hk_value_t value = json_to_value(state, json_field);
+        HkString *field_name = hk_string_from_chars(-1, json_field->string);
+        HkValue value = json_to_value(state, json_field);
         hk_state_push_string(state, field_name);
         hk_state_push(state, value);
         ++length;
         json_field = json_field->next;
       }
       hk_state_construct(state, length);
-      hk_instance_t *inst = hk_as_instance(state->stack[state->stack_top]);
+      HkInstance *inst = hk_as_instance(state->stackSlots[state->stackTop]);
       hk_incr_ref(inst);
       hk_state_pop(state);
       hk_decr_ref(inst);
@@ -134,13 +134,13 @@ static inline hk_value_t json_to_value(hk_state_t *state, cJSON *json)
   return val;
 }
 
-static int32_t encode_call(hk_state_t *state, hk_value_t *args)
+static int encode_call(HkState *state, HkValue *args)
 {
-  hk_value_t val = args[1];
+  HkValue val = args[1];
   cJSON *json = value_to_json(val);
   char *chars = cJSON_Print(json);
   cJSON_Delete(json);
-  hk_string_t *str = hk_string_from_chars(-1, chars);
+  HkString *str = hk_string_from_chars(-1, chars);
   free(chars);
   if (hk_state_push_string(state, str) == HK_STATUS_ERROR)
   {
@@ -150,18 +150,18 @@ static int32_t encode_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t decode_call(hk_state_t *state, hk_value_t *args)
+static int decode_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *str = hk_as_string(args[1]);
+  HkString *str = hk_as_string(args[1]);
   cJSON *json = cJSON_ParseWithLength(str->chars, str->length);
   if (!json)
   {
     hk_runtime_error("cannot parse json");
     return HK_STATUS_ERROR;
   }
-  hk_value_t val = json_to_value(state, json);
+  HkValue val = json_to_value(state, json);
   cJSON_Delete(json);
   if (hk_state_push(state, val) == HK_STATUS_ERROR)
   {

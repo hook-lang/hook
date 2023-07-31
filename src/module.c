@@ -38,30 +38,30 @@
 #endif
 
 #ifdef _WIN32
-  typedef int32_t (__stdcall *load_module_t)(hk_state_t *);
+  typedef int (__stdcall *load_module_t)(HkState *);
 #else
-  typedef int32_t (*load_module_t)(hk_state_t *);
+  typedef int (*load_module_t)(HkState *);
 #endif
 
-static string_map_t module_cache;
+static StringMap module_cache;
 
-static inline bool get_module_result(hk_string_t *name, hk_value_t *result);
-static inline void put_module_result(hk_string_t *name, hk_value_t result);
+static inline bool get_module_result(HkString *name, HkValue *result);
+static inline void put_module_result(HkString *name, HkValue result);
 static inline const char *get_home_dir(void);
 static inline const char *get_default_home_dir(void);
 
-static inline int32_t load_native_module(hk_state_t *state, hk_string_t *name);
+static inline int load_native_module(HkState *state, HkString *name);
 
-static inline bool get_module_result(hk_string_t *name, hk_value_t *result)
+static inline bool get_module_result(HkString *name, HkValue *result)
 {
-  string_map_entry_t *entry = string_map_get_entry(&module_cache, name);
+  StringMapEntry *entry = string_map_get_entry(&module_cache, name);
   if (!entry)
     return false;
   *result = entry->value;
   return true;
 }
 
-static inline void put_module_result(hk_string_t *name, hk_value_t result)
+static inline void put_module_result(HkString *name, HkValue result)
 {
   string_map_inplace_put(&module_cache, name, result);
 }
@@ -88,9 +88,9 @@ static inline const char *get_default_home_dir(void)
   return result;
 }
 
-static inline int32_t load_native_module(hk_state_t *state, hk_string_t *name)
+static inline int load_native_module(HkState *state, HkString *name)
 {
-  hk_string_t *file = hk_string_from_chars(-1, get_home_dir());
+  HkString *file = hk_string_from_chars(-1, get_home_dir());
   hk_string_inplace_concat_chars(file, -1, FILE_INFIX);
   hk_string_inplace_concat(file, name);
   hk_string_inplace_concat_chars(file, -1, FILE_POSTFIX);
@@ -106,7 +106,7 @@ static inline int32_t load_native_module(hk_state_t *state, hk_string_t *name)
     return HK_STATUS_ERROR;
   }
   hk_string_free(file);
-  hk_string_t *fn_name = hk_string_from_chars(-1, HK_LOAD_FN_PREFIX);
+  HkString *fn_name = hk_string_from_chars(-1, HK_LOAD_FN_PREFIX);
   hk_string_inplace_concat(fn_name, name);
   load_module_t load;
 #ifdef _WIN32
@@ -139,26 +139,26 @@ void free_module_cache(void)
   string_map_free(&module_cache);
 }
 
-int32_t load_module(hk_state_t *state)
+int load_module(HkState *state)
 {
-  hk_value_t *slots = &state->stack[state->stack_top];
-  hk_value_t val = slots[0];
+  HkValue *slots = &state->stackSlots[state->stackTop];
+  HkValue val = slots[0];
   hk_assert(hk_is_string(val), "module name must be a string");
-  hk_string_t *name = hk_as_string(val);
-  hk_value_t result;
+  HkString *name = hk_as_string(val);
+  HkValue result;
   if (get_module_result(name, &result))
   {
     hk_value_incr_ref(result);
     slots[0] = result;
-    --state->stack_top;
+    --state->stackTop;
     hk_string_release(name);
     return HK_STATUS_OK;
   }
   if (load_native_module(state, name) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  put_module_result(name, state->stack[state->stack_top]);
-  slots[0] = state->stack[state->stack_top];
-  --state->stack_top;
+  put_module_result(name, state->stackSlots[state->stackTop]);
+  slots[0] = state->stackSlots[state->stackTop];
+  --state->stackTop;
   hk_string_release(name);
   return HK_STATUS_OK;
 }

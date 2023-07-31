@@ -18,33 +18,33 @@
   #include <limits.h>
 #endif
 
-static int32_t clock_call(hk_state_t *state, hk_value_t *args);
-static int32_t time_call(hk_state_t *state, hk_value_t *args);
-static int32_t system_call(hk_state_t *state, hk_value_t *args);
-static int32_t getenv_call(hk_state_t *state, hk_value_t *args);
-static int32_t getcwd_call(hk_state_t *state, hk_value_t *args);
-static int32_t name_call(hk_state_t *state, hk_value_t *args);
+static int clock_call(HkState *state, HkValue *args);
+static int time_call(HkState *state, HkValue *args);
+static int system_call(HkState *state, HkValue *args);
+static int getenv_call(HkState *state, HkValue *args);
+static int getcwd_call(HkState *state, HkValue *args);
+static int name_call(HkState *state, HkValue *args);
 
-static int32_t clock_call(hk_state_t *state, hk_value_t *args)
+static int clock_call(HkState *state, HkValue *args)
 {
   (void) args;
   return hk_state_push_number(state, (double) clock() / CLOCKS_PER_SEC);
 }
 
-static int32_t time_call(hk_state_t *state, hk_value_t *args)
+static int time_call(HkState *state, HkValue *args)
 {
   (void) args;
   return hk_state_push_number(state, (double) time(NULL));
 }
 
-static int32_t system_call(hk_state_t *state, hk_value_t *args)
+static int system_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, system(hk_as_string(args[1])->chars));
 }
 
-static int32_t getenv_call(hk_state_t *state, hk_value_t *args)
+static int getenv_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -53,10 +53,10 @@ static int32_t getenv_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_string_from_chars(state, -1, chars);
 }
 
-static int32_t getcwd_call(hk_state_t *state, hk_value_t *args)
+static int getcwd_call(HkState *state, HkValue *args)
 {
   (void) args;
-  hk_string_t *result = NULL;
+  HkString *result = NULL;
 #ifdef _WIN32
   TCHAR path[MAX_PATH];
   DWORD length = GetCurrentDirectory(MAX_PATH, path);
@@ -80,7 +80,7 @@ end:
   return HK_STATUS_OK;
 }
 
-static int32_t name_call(hk_state_t *state, hk_value_t *args)
+static int name_call(HkState *state, HkValue *args)
 {
   (void) args;
   char *result;

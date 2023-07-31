@@ -40,7 +40,7 @@ static void make_directory(char *path)
   mkdir(path, 0777); 
 }
 
-int32_t hk_power_of_two_ceil(int32_t n)
+int hk_power_of_two_ceil(int n)
 {
   --n;
   n |= n >> 1;
@@ -90,7 +90,7 @@ bool hk_double_from_chars(double *result, const char *chars, bool strict)
   return true;
 }
 
-void hk_copy_cstring(char *dest, const char *src, int32_t max_len)
+void hk_copy_cstring(char *dest, const char *src, int max_len)
 {
 #ifdef _WIN32
   strncpy_s(dest, max_len, src, _TRUNCATE);

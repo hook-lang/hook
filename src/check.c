@@ -9,21 +9,21 @@
 #include <hook/error.h>
 #include <hook/utils.h>
 
-static inline void type_error(int32_t index, int32_t num_types, hk_type_t types[], hk_type_t val_type);
+static inline void type_error(int index, int numTypes, HkType types[], HkType val_type);
 
-static inline void type_error(int32_t index, int32_t num_types, hk_type_t types[], hk_type_t val_type)
+static inline void type_error(int index, int numTypes, HkType types[], HkType val_type)
 {
-  hk_assert(num_types > 0, "num_types must be greater than 0");
+  hk_assert(numTypes > 0, "numTypes must be greater than 0");
   fprintf(stderr, "runtime error: type error: argument #%d must be of the type %s",
     index, hk_type_name(types[0]));
-  for (int32_t i = 1; i < num_types; ++i)
+  for (int i = 1; i < numTypes; ++i)
     fprintf(stderr, "|%s", hk_type_name(types[i]));
   fprintf(stderr, ", %s given\n", hk_type_name(val_type));
 }
 
-int32_t hk_check_argument_type(hk_value_t *args, int32_t index, hk_type_t type)
+int hk_check_argument_type(HkValue *args, int index, HkType type)
 {
-  hk_type_t val_type = args[index].type;
+  HkType val_type = args[index].type;
   if (val_type != type)
   {
     hk_runtime_error("type error: argument #%d must be of the type %s, %s given", index,
@@ -33,34 +33,34 @@ int32_t hk_check_argument_type(hk_value_t *args, int32_t index, hk_type_t type)
   return HK_STATUS_OK;
 }
 
-int32_t hk_check_argument_types(hk_value_t *args, int32_t index, int32_t num_types, hk_type_t types[])
+int hk_check_argument_types(HkValue *args, int index, int numTypes, HkType types[])
 {
-  hk_type_t val_type = args[index].type;
+  HkType val_type = args[index].type;
   bool match = false;
-  for (int32_t i = 0; i < num_types; ++i)
+  for (int i = 0; i < numTypes; ++i)
     if ((match = (val_type == types[i])))
       break;
   if (!match)
   {
-    type_error(index, num_types, types, val_type);
+    type_error(index, numTypes, types, val_type);
     return HK_STATUS_ERROR;
   }
   return HK_STATUS_OK;
 }
 
-int32_t hk_check_argument_bool(hk_value_t *args, int32_t index)
+int hk_check_argument_bool(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_BOOL);
 }
 
-int32_t hk_check_argument_number(hk_value_t *args, int32_t index)
+int hk_check_argument_number(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_NUMBER);
 }
 
-int32_t hk_check_argument_int(hk_value_t *args, int32_t index)
+int hk_check_argument_int(HkValue *args, int index)
 {
-  hk_value_t val = args[index];
+  HkValue val = args[index];
   if (!hk_is_int(val))
   {
     hk_runtime_error("type error: argument #%d must be of the type int, %s given",
@@ -70,42 +70,42 @@ int32_t hk_check_argument_int(hk_value_t *args, int32_t index)
   return HK_STATUS_OK;
 }
 
-int32_t hk_check_argument_string(hk_value_t *args, int32_t index)
+int hk_check_argument_string(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_STRING);
 }
 
-int32_t hk_check_argument_range(hk_value_t *args, int32_t index)
+int hk_check_argument_range(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_RANGE);
 }
 
-int32_t hk_check_argument_array(hk_value_t *args, int32_t index)
+int hk_check_argument_array(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_ARRAY);
 }
 
-int32_t hk_check_argument_struct(hk_value_t *args, int32_t index)
+int hk_check_argument_struct(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_STRUCT);
 }
 
-int32_t hk_check_argument_instance(hk_value_t *args, int32_t index)
+int hk_check_argument_instance(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_INSTANCE);
 }
 
-int32_t hk_check_argument_iterator(hk_value_t *args, int32_t index)
+int hk_check_argument_iterator(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_ITERATOR);
 }
 
-int32_t hk_check_argument_callable(hk_value_t *args, int32_t index)
+int hk_check_argument_callable(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_CALLABLE);
 }
 
-int32_t hk_check_argument_userdata(hk_value_t *args, int32_t index)
+int hk_check_argument_userdata(HkValue *args, int index)
 {
   return hk_check_argument_type(args, index, HK_TYPE_USERDATA);
 }

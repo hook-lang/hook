@@ -15,19 +15,19 @@
 #define char_at(s, i)   ((s)->pos[(i)])
 #define current_char(s) char_at(s, 0)
 
-static inline void lexical_error(scanner_t *scan, const char *fmt, ...);
-static inline void skip_shebang(scanner_t *scan);
-static inline void skip_spaces_comments(scanner_t *scan);
-static inline void next_char(scanner_t *scan);
-static inline void next_chars(scanner_t *scan, int32_t n);
-static inline bool match_char(scanner_t *scan, const char c);
-static inline bool match_chars(scanner_t *scan, const char *chars);
-static inline bool match_keyword(scanner_t *scan, const char *keyword);
-static inline bool match_number(scanner_t *scan);
-static inline bool match_string(scanner_t *scan);
-static inline bool match_name(scanner_t *scan);
+static inline void lexical_error(Scanner *scan, const char *fmt, ...);
+static inline void skip_shebang(Scanner *scan);
+static inline void skip_spaces_comments(Scanner *scan);
+static inline void next_char(Scanner *scan);
+static inline void next_chars(Scanner *scan, int n);
+static inline bool match_char(Scanner *scan, const char c);
+static inline bool match_chars(Scanner *scan, const char *chars);
+static inline bool match_keyword(Scanner *scan, const char *keyword);
+static inline bool match_number(Scanner *scan);
+static inline bool match_string(Scanner *scan);
+static inline bool match_name(Scanner *scan);
 
-static inline void lexical_error(scanner_t *scan, const char *fmt, ...)
+static inline void lexical_error(Scanner *scan, const char *fmt, ...)
 {
   fprintf(stderr, "lexical error: ");
   va_list args;
@@ -38,7 +38,7 @@ static inline void lexical_error(scanner_t *scan, const char *fmt, ...)
   exit(EXIT_FAILURE);
 }
 
-static inline void skip_shebang(scanner_t *scan)
+static inline void skip_shebang(Scanner *scan)
 {
   if (char_at(scan, 0) != '#' || char_at(scan, 1) != '!')
     return;
@@ -54,7 +54,7 @@ static inline void skip_shebang(scanner_t *scan)
   }
 }
 
-static inline void skip_spaces_comments(scanner_t *scan)
+static inline void skip_spaces_comments(Scanner *scan)
 {
 begin:
   while (isspace(current_char(scan)))
@@ -76,7 +76,7 @@ begin:
   }
 }
 
-static inline void next_char(scanner_t *scan)
+static inline void next_char(Scanner *scan)
 {
   if (current_char(scan) == '\n')
   {
@@ -89,13 +89,13 @@ static inline void next_char(scanner_t *scan)
   ++scan->pos;
 }
 
-static inline void next_chars(scanner_t *scan, int32_t n)
+static inline void next_chars(Scanner *scan, int n)
 {
-  for (int32_t i = 0; i < n; ++i)
+  for (int i = 0; i < n; ++i)
     next_char(scan);
 }
 
-static inline bool match_char(scanner_t *scan, const char c)
+static inline bool match_char(Scanner *scan, const char c)
 {
   if (current_char(scan) != c)
     return false;
@@ -107,9 +107,9 @@ static inline bool match_char(scanner_t *scan, const char c)
   return true;
 }
 
-static inline bool match_chars(scanner_t *scan, const char *chars)
+static inline bool match_chars(Scanner *scan, const char *chars)
 {
-  int32_t n = (int32_t) strnlen(chars, MATCH_MAX_LENGTH);
+  int n = (int) strnlen(chars, MATCH_MAX_LENGTH);
   if (strncmp(scan->pos, chars, n))
     return false;
   scan->token.line = scan->line;
@@ -120,9 +120,9 @@ static inline bool match_chars(scanner_t *scan, const char *chars)
   return true;
 }
 
-static inline bool match_keyword(scanner_t *scan, const char *keyword)
+static inline bool match_keyword(Scanner *scan, const char *keyword)
 {
-  int32_t n = (int32_t) strnlen(keyword, MATCH_MAX_LENGTH);
+  int n = (int) strnlen(keyword, MATCH_MAX_LENGTH);
   if (strncmp(scan->pos, keyword, n)
    || (isalnum(char_at(scan, n)))
    || (char_at(scan, n) == '_'))
@@ -135,9 +135,9 @@ static inline bool match_keyword(scanner_t *scan, const char *keyword)
   return true;
 }
 
-static inline bool match_number(scanner_t *scan)
+static inline bool match_number(Scanner *scan)
 {
-  int32_t n = 0;
+  int n = 0;
   if (char_at(scan, n) == '0')
     ++n;
   else
@@ -148,7 +148,7 @@ static inline bool match_number(scanner_t *scan)
     while (isdigit(char_at(scan, n)))
       ++n;
   }
-  token_type_t type = TOKEN_INT;
+  TokenType type = TOKEN_INT;
   if (char_at(scan, n) == '.')
   {
     if (!isdigit(char_at(scan, n + 1)))
@@ -181,12 +181,12 @@ end:
   return true;
 }
 
-static inline bool match_string(scanner_t *scan)
+static inline bool match_string(Scanner *scan)
 {
   char chr = current_char(scan);
   if (chr == '\'' || chr == '\"')
   {
-    int32_t n = 1;
+    int n = 1;
     for (;;)
     {
       if (char_at(scan, n) == chr)
@@ -209,11 +209,11 @@ static inline bool match_string(scanner_t *scan)
   return false;
 }
 
-static inline bool match_name(scanner_t *scan)
+static inline bool match_name(Scanner *scan)
 {
   if (current_char(scan) != '_' && !isalpha(current_char(scan)))
     return false;
-  int32_t n = 1;
+  int n = 1;
   while (char_at(scan, n) == '_' || isalnum(char_at(scan, n)))
     ++n;
   scan->token.type = TOKEN_NAME;
@@ -225,7 +225,7 @@ static inline bool match_name(scanner_t *scan)
   return true;
 }
 
-void scanner_init(scanner_t *scan, hk_string_t *file, hk_string_t *source)
+void scanner_init(Scanner *scan, HkString *file, HkString *source)
 {
   hk_incr_ref(file);
   scan->file = file;
@@ -238,13 +238,13 @@ void scanner_init(scanner_t *scan, hk_string_t *file, hk_string_t *source)
   scanner_next_token(scan);
 }
 
-void scanner_free(scanner_t *scan)
+void scanner_free(Scanner *scan)
 {
   hk_string_release(scan->file);
   hk_string_release(scan->source);
 }
 
-void scanner_next_token(scanner_t *scan)
+void scanner_next_token(Scanner *scan)
 {
   skip_spaces_comments(scan);
   if (match_char(scan, '\0'))

@@ -13,7 +13,7 @@
 #include <hook/error.h>
 #include <hook/utils.h>
 
-void hk_value_free(hk_value_t val)
+void hk_value_free(HkValue val)
 {
   switch (val.type)
   {
@@ -55,7 +55,7 @@ void hk_value_free(hk_value_t val)
   }
 }
 
-const char *hk_type_name(hk_type_t type)
+const char *hk_type_name(HkType type)
 {
   char *name = "nil";
   switch (type)
@@ -96,17 +96,17 @@ const char *hk_type_name(hk_type_t type)
   return name;
 }
 
-void hk_value_release(hk_value_t val)
+void hk_value_release(HkValue val)
 {
   if (!hk_is_object(val))
     return;
-  hk_object_t *obj = hk_as_object(val);
+  HkObject *obj = hk_as_object(val);
   hk_decr_ref(obj);
   if (hk_is_unreachable(obj))
     hk_value_free(val);
 }
 
-void hk_value_print(hk_value_t val, bool quoted)
+void hk_value_print(HkValue val, bool quoted)
 {
   switch (val.type)
   {
@@ -130,39 +130,39 @@ void hk_value_print(hk_value_t val, bool quoted)
     break;
   case HK_TYPE_STRUCT:
     {
-      hk_string_t *name = hk_as_struct(val)->name;
+      HkString *name = hk_as_struct(val)->name;
       if (name)
       {
-        printf("<struct %.*s at %p>", name->length, name->chars, val.as.pointer_value);
+        printf("<struct %.*s at %p>", name->length, name->chars, val.as.pointer);
         break;
       }
-      printf("<struct at %p>", val.as.pointer_value);
+      printf("<struct at %p>", val.as.pointer);
     }
     break;
   case HK_TYPE_INSTANCE:
     hk_instance_print(hk_as_instance(val));
     break;
   case HK_TYPE_ITERATOR:
-    printf("<iterator at %p>", val.as.pointer_value);
+    printf("<iterator at %p>", val.as.pointer);
     break;
   case HK_TYPE_CALLABLE:
     {
-      hk_string_t *name = hk_is_native(val) ? hk_as_native(val)->name : hk_as_closure(val)->fn->name;
+      HkString *name = hk_is_native(val) ? hk_as_native(val)->name : hk_as_closure(val)->fn->name;
       if (name)
       {
-        printf("<callable %.*s at %p>", name->length, name->chars, val.as.pointer_value);
+        printf("<callable %.*s at %p>", name->length, name->chars, val.as.pointer);
         break;
       }
-      printf("<callable at %p>", val.as.pointer_value);
+      printf("<callable at %p>", val.as.pointer);
     }
     break;
   case HK_TYPE_USERDATA:
-    printf("<userdata at %p>", val.as.pointer_value);
+    printf("<userdata at %p>", val.as.pointer);
     break;
   }
 }
 
-bool hk_value_equal(hk_value_t val1, hk_value_t val2)
+bool hk_value_equal(HkValue val1, HkValue val2)
 {
   if (val1.type != val2.type)
     return false;
@@ -193,13 +193,13 @@ bool hk_value_equal(hk_value_t val1, hk_value_t val2)
     result = hk_instance_equal(hk_as_instance(val1), hk_as_instance(val2));
     break;
   default:
-    result = val1.as.pointer_value == val2.as.pointer_value;
+    result = val1.as.pointer == val2.as.pointer;
     break;
   }
   return result;
 }
 
-bool hk_value_compare(hk_value_t val1, hk_value_t val2, int32_t *result)
+bool hk_value_compare(HkValue val1, HkValue val2, int *result)
 {
   if (val1.type != val2.type)
     return false;
@@ -238,15 +238,15 @@ bool hk_value_compare(hk_value_t val1, hk_value_t val2, int32_t *result)
   return false;
 }
 
-void hk_value_serialize(hk_value_t val, FILE *stream)
+void hk_value_serialize(HkValue val, FILE *stream)
 {
-  hk_type_t type = val.type;
-  int32_t flags = val.flags;
+  HkType type = val.type;
+  int flags = val.flags;
   fwrite(&type, sizeof(type), 1, stream);
   fwrite(&flags, sizeof(flags), 1, stream);
   if (type == HK_TYPE_NUMBER)
   {
-    fwrite(&val.as.number_value, sizeof(val.as.number_value), 1, stream);
+    fwrite(&val.as.number, sizeof(val.as.number), 1, stream);
     return;
   }
   if (type == HK_TYPE_STRING)
@@ -257,10 +257,10 @@ void hk_value_serialize(hk_value_t val, FILE *stream)
   hk_assert(false, "unimplemented serialization");
 }
 
-bool hk_value_deserialize(FILE *stream, hk_value_t *result)
+bool hk_value_deserialize(FILE *stream, HkValue *result)
 {
-  hk_type_t type;
-  int32_t flags;
+  HkType type;
+  int flags;
   if (fread(&type, sizeof(type), 1, stream) != 1)
     return false;
   if (fread(&flags, sizeof(flags), 1, stream) != 1)
@@ -274,7 +274,7 @@ bool hk_value_deserialize(FILE *stream, hk_value_t *result)
     *result = hk_number_value(data);
     return true;
   }
-  hk_string_t *str = hk_string_deserialize(stream);
+  HkString *str = hk_string_deserialize(stream);
   if (!str)
     return false;
   *result = hk_string_value(str);

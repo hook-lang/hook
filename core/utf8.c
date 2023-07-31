@@ -7,11 +7,11 @@
 #include <hook/check.h>
 #include <hook/status.h>
 
-static inline int32_t decode_char(unsigned char c);
-static int32_t len_call(hk_state_t *state, hk_value_t *args);
-static int32_t sub_call(hk_state_t *state, hk_value_t *args);
+static inline int decode_char(unsigned char c);
+static int len_call(HkState *state, HkValue *args);
+static int sub_call(HkState *state, HkValue *args);
 
-static inline int32_t decode_char(unsigned char c)
+static inline int decode_char(unsigned char c)
 {
   if ((c & 0xc0) == 0x80)
     return 0;
@@ -24,15 +24,15 @@ static inline int32_t decode_char(unsigned char c)
   return 1;
 }
 
-static int32_t len_call(hk_state_t *state, hk_value_t *args)
+static int len_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *str = hk_as_string(args[1]);
-  int32_t result = 0;
-  for (int32_t i = 0; i < str->length;)
+  HkString *str = hk_as_string(args[1]);
+  int result = 0;
+  for (int i = 0; i < str->length;)
   {
-    int32_t length = decode_char((unsigned char) str->chars[i]);
+    int length = decode_char((unsigned char) str->chars[i]);
     if (!length)
       break;
     i += length;
@@ -41,7 +41,7 @@ static int32_t len_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, result);
 }
 
-static int32_t sub_call(hk_state_t *state, hk_value_t *args)
+static int sub_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -49,14 +49,14 @@ static int32_t sub_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_number(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *str = hk_as_string(args[1]);
-  int32_t start = (int32_t) hk_as_number(args[2]);
-  int32_t end = (int32_t) hk_as_number(args[3]);
-  int32_t length = 0;
-  int32_t i = 0;
+  HkString *str = hk_as_string(args[1]);
+  int start = (int) hk_as_number(args[2]);
+  int end = (int) hk_as_number(args[3]);
+  int length = 0;
+  int i = 0;
   while (i < str->length)
   {
-    int32_t n = decode_char((unsigned char) str->chars[i]);
+    int n = decode_char((unsigned char) str->chars[i]);
     if (!n || length == start)
       break;
     i += n;
@@ -65,7 +65,7 @@ static int32_t sub_call(hk_state_t *state, hk_value_t *args)
   start = i;
   while (i < str->length)
   {
-    int32_t n = decode_char((unsigned char) str->chars[i]);
+    int n = decode_char((unsigned char) str->chars[i]);
     if (!n || length == end)
       break;
     i += n;

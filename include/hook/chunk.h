@@ -33,33 +33,33 @@ typedef enum
   HK_OP_NOT,                    HK_OP_BITWISE_NOT,         HK_OP_INCREMENT,
   HK_OP_DECREMENT,              HK_OP_CALL,                HK_OP_LOAD_MODULE,
   HK_OP_RETURN,                 HK_OP_RETURN_NIL
-} hk_opcode_t;
+} HkOpCode;
 
 typedef struct
 {
-  int32_t no;
-  int32_t offset;
-} hk_line_t;
+  int no;
+  int offset;
+} HkLine;
 
 typedef struct
 {
-  int32_t code_capacity;
-  int32_t code_length;
+  int code_capacity;
+  int code_length;
   uint8_t *code;
-  int32_t lines_capacity;
-  int32_t lines_length;
-  hk_line_t *lines;
-  hk_array_t *consts;
-} hk_chunk_t;
+  int lines_capacity;
+  int lines_length;
+  HkLine *lines;
+  HkArray *consts;
+} HkChunk;
 
-void hk_chunk_init(hk_chunk_t *chunk);
-void hk_chunk_free(hk_chunk_t *chunk);
-void hk_chunk_emit_byte(hk_chunk_t *chunk, uint8_t byte);
-void hk_chunk_emit_word(hk_chunk_t *chunk, uint16_t word);
-void hk_chunk_emit_opcode(hk_chunk_t *chunk, hk_opcode_t op);
-void hk_chunk_add_line(hk_chunk_t *chunk, int32_t line_no);
-int32_t hk_chunk_get_line(hk_chunk_t *chunk, int32_t offset);
-void hk_chunk_serialize(hk_chunk_t *chunk, FILE *stream);
-bool hk_chunk_deserialize(hk_chunk_t *chunk, FILE *stream);
+void hk_chunk_init(HkChunk *chunk);
+void hk_chunk_free(HkChunk *chunk);
+void hk_chunk_emit_byte(HkChunk *chunk, uint8_t byte);
+void hk_chunk_emit_word(HkChunk *chunk, uint16_t word);
+void hk_chunk_emit_opcode(HkChunk *chunk, HkOpCode op);
+void hk_chunk_add_line(HkChunk *chunk, int line_no);
+int hk_chunk_get_line(HkChunk *chunk, int offset);
+void hk_chunk_serialize(HkChunk *chunk, FILE *stream);
+bool hk_chunk_deserialize(HkChunk *chunk, FILE *stream);
 
 #endif // HK_CHUNK_H

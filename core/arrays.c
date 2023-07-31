@@ -8,22 +8,22 @@
 #include <hook/status.h>
 #include <hook/error.h>
 
-static int32_t new_array_call(hk_state_t *state, hk_value_t *args);
-static int32_t fill_call(hk_state_t *state, hk_value_t *args);
-static int32_t index_of_call(hk_state_t *state, hk_value_t *args);
-static int32_t min_call(hk_state_t *state, hk_value_t *args);
-static int32_t max_call(hk_state_t *state, hk_value_t *args);
-static int32_t sum_call(hk_state_t *state, hk_value_t *args);
-static int32_t avg_call(hk_state_t *state, hk_value_t *args);
-static int32_t reverse_call(hk_state_t *state, hk_value_t *args);
-static int32_t sort_call(hk_state_t *state, hk_value_t *args);
+static int new_array_call(HkState *state, HkValue *args);
+static int fill_call(HkState *state, HkValue *args);
+static int index_of_call(HkState *state, HkValue *args);
+static int min_call(HkState *state, HkValue *args);
+static int max_call(HkState *state, HkValue *args);
+static int sum_call(HkState *state, HkValue *args);
+static int avg_call(HkState *state, HkValue *args);
+static int reverse_call(HkState *state, HkValue *args);
+static int sort_call(HkState *state, HkValue *args);
 
-static int32_t new_array_call(hk_state_t *state, hk_value_t *args)
+static int new_array_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t capacity = (int32_t) hk_as_number(args[1]);
-  hk_array_t *arr = hk_array_new_with_capacity(capacity);
+  int capacity = (int) hk_as_number(args[1]);
+  HkArray *arr = hk_array_new_with_capacity(capacity);
   if (hk_state_push_array(state, arr) == HK_STATUS_ERROR)
   {
     hk_array_free(arr);
@@ -32,15 +32,15 @@ static int32_t new_array_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t fill_call(hk_state_t *state, hk_value_t *args)
+static int fill_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t elem = args[1];
-  int32_t count = (int32_t) hk_as_number(args[2]);
+  HkValue elem = args[1];
+  int count = (int) hk_as_number(args[2]);
   count = count < 0 ? 0 : count;
-  hk_array_t *arr = hk_array_new_with_capacity(count);
-  for (int32_t i = 0; i < count; ++i)
+  HkArray *arr = hk_array_new_with_capacity(count);
+  for (int i = 0; i < count; ++i)
   {
     hk_value_incr_ref(elem);
     arr->elements[i] = elem;
@@ -54,26 +54,26 @@ static int32_t fill_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t index_of_call(hk_state_t *state, hk_value_t *args)
+static int index_of_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, hk_array_index_of(hk_as_array(args[1]), args[2]));
 }
 
-static int32_t min_call(hk_state_t *state, hk_value_t *args)
+static int min_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_array_t *arr = hk_as_array(args[1]);
-  int32_t length = arr->length;
+  HkArray *arr = hk_as_array(args[1]);
+  int length = arr->length;
   if (!length)
     return hk_state_push_nil(state);
-  hk_value_t min = hk_array_get_element(arr, 0);
-  for (int32_t i = 1; i < length; ++i)
+  HkValue min = hk_array_get_element(arr, 0);
+  for (int i = 1; i < length; ++i)
   {
-    hk_value_t elem = hk_array_get_element(arr, i);
-    int32_t result;
+    HkValue elem = hk_array_get_element(arr, i);
+    int result;
     if (hk_state_compare(elem, min, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     min = result < 0 ? elem : min;
@@ -81,19 +81,19 @@ static int32_t min_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push(state, min);
 }
 
-static int32_t max_call(hk_state_t *state, hk_value_t *args)
+static int max_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_array_t *arr = hk_as_array(args[1]);
-  int32_t length = arr->length;
+  HkArray *arr = hk_as_array(args[1]);
+  int length = arr->length;
   if (!length)
     return hk_state_push_nil(state);
-  hk_value_t max = hk_array_get_element(arr, 0);
-  for (int32_t i = 1; i < length; ++i)
+  HkValue max = hk_array_get_element(arr, 0);
+  for (int i = 1; i < length; ++i)
   {
-    hk_value_t elem = hk_array_get_element(arr, i);
-    int32_t result;
+    HkValue elem = hk_array_get_element(arr, i);
+    int result;
     if (hk_state_compare(elem, max, &result) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     max = result > 0 ? elem : max;
@@ -101,15 +101,15 @@ static int32_t max_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push(state, max);
 }
 
-static int32_t sum_call(hk_state_t *state, hk_value_t *args)
+static int sum_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_array_t *arr = hk_as_array(args[1]);
+  HkArray *arr = hk_as_array(args[1]);
   double sum = 0;
-  for (int32_t i = 0; i < arr->length; ++i)
+  for (int i = 0; i < arr->length; ++i)
   {
-    hk_value_t elem = hk_array_get_element(arr, i);
+    HkValue elem = hk_array_get_element(arr, i);
     if (!hk_is_number(elem))
     {
       sum = 0;
@@ -120,18 +120,18 @@ static int32_t sum_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, sum);
 }
 
-static int32_t avg_call(hk_state_t *state, hk_value_t *args)
+static int avg_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_array_t *arr = hk_as_array(args[1]);
-  int32_t length = arr->length;
+  HkArray *arr = hk_as_array(args[1]);
+  int length = arr->length;
   if (!length)
     return hk_state_push_number(state, 0);
   double sum = 0;
-  for (int32_t i = 0; i < length; ++i)
+  for (int i = 0; i < length; ++i)
   {
-    hk_value_t elem = hk_array_get_element(arr, i);
+    HkValue elem = hk_array_get_element(arr, i);
     if (!hk_is_number(elem))
       return hk_state_push_number(state, 0);
     sum += hk_as_number(elem);
@@ -139,11 +139,11 @@ static int32_t avg_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, sum / length);
 }
 
-static int32_t reverse_call(hk_state_t *state, hk_value_t *args)
+static int reverse_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_array_t *arr = hk_array_reverse(hk_as_array(args[1]));
+  HkArray *arr = hk_array_reverse(hk_as_array(args[1]));
   if (hk_state_push_array(state, arr) == HK_STATUS_ERROR)
   {
     hk_array_free(arr);
@@ -152,11 +152,11 @@ static int32_t reverse_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t sort_call(hk_state_t *state, hk_value_t *args)
+static int sort_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_array(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_array_t *arr;
+  HkArray *arr;
   if (!hk_array_sort(hk_as_array(args[1]), &arr))
   {
     hk_runtime_error("cannot compare elements of array");

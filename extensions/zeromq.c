@@ -15,87 +15,87 @@ typedef struct
 {
   HK_USERDATA_HEADER
   void *ctx;
-} zeromq_context_wrapper_t;
+} ZeroMQContextWrapper;
 
 typedef struct
 {
   HK_USERDATA_HEADER
   void *sock;
-} zeromq_socket_wrapper_t;
+} ZeroMQWocketWrapper;
 
-static inline zeromq_context_wrapper_t *zeromq_context_wrapper_new(void *ctx);
-static inline zeromq_socket_wrapper_t *zeromq_socket_wrapper_new(void *sock);
-static void zeromq_context_wrapper_deinit(hk_userdata_t *udata);
-static void zeromq_socket_wrapper_deinit(hk_userdata_t *udata);
-static int32_t new_context_call(hk_state_t *state, hk_value_t *args);
-static int32_t new_socket_call(hk_state_t *state, hk_value_t *args);
-static int32_t close_call(hk_state_t *state, hk_value_t *args);
-static int32_t connect_call(hk_state_t *state, hk_value_t *args);
-static int32_t bind_call(hk_state_t *state, hk_value_t *args);
-static int32_t send_call(hk_state_t *state, hk_value_t *args);
-static int32_t recv_call(hk_state_t *state, hk_value_t *args);
+static inline ZeroMQContextWrapper *zeromq_context_wrapper_new(void *ctx);
+static inline ZeroMQWocketWrapper *zeromq_socket_wrapper_new(void *sock);
+static void zeromq_context_wrapper_deinit(HkUserdata *udata);
+static void zeromq_socket_wrapper_deinit(HkUserdata *udata);
+static int new_context_call(HkState *state, HkValue *args);
+static int new_socket_call(HkState *state, HkValue *args);
+static int close_call(HkState *state, HkValue *args);
+static int connect_call(HkState *state, HkValue *args);
+static int bind_call(HkState *state, HkValue *args);
+static int send_call(HkState *state, HkValue *args);
+static int recv_call(HkState *state, HkValue *args);
 
-static inline zeromq_context_wrapper_t *zeromq_context_wrapper_new(void *ctx)
+static inline ZeroMQContextWrapper *zeromq_context_wrapper_new(void *ctx)
 {
-  zeromq_context_wrapper_t *wrapper = (zeromq_context_wrapper_t *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((hk_userdata_t *) wrapper, &zeromq_context_wrapper_deinit);
+  ZeroMQContextWrapper *wrapper = (ZeroMQContextWrapper *) hk_allocate(sizeof(*wrapper));
+  hk_userdata_init((HkUserdata *) wrapper, &zeromq_context_wrapper_deinit);
   wrapper->ctx = ctx;
   return wrapper;
 }
 
-static inline zeromq_socket_wrapper_t *zeromq_socket_wrapper_new(void *sock)
+static inline ZeroMQWocketWrapper *zeromq_socket_wrapper_new(void *sock)
 {
-  zeromq_socket_wrapper_t *wrapper = (zeromq_socket_wrapper_t *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((hk_userdata_t *) wrapper, &zeromq_socket_wrapper_deinit);
+  ZeroMQWocketWrapper *wrapper = (ZeroMQWocketWrapper *) hk_allocate(sizeof(*wrapper));
+  hk_userdata_init((HkUserdata *) wrapper, &zeromq_socket_wrapper_deinit);
   wrapper->sock = sock;
   return wrapper;
 }
 
-static void zeromq_context_wrapper_deinit(hk_userdata_t *udata)
+static void zeromq_context_wrapper_deinit(HkUserdata *udata)
 {
-  void *ctx = ((zeromq_context_wrapper_t *) udata)->ctx;
+  void *ctx = ((ZeroMQContextWrapper *) udata)->ctx;
   hk_assert(ctx, "context is NULL");
   (void) zmq_ctx_destroy(ctx);
 }
 
-static void zeromq_socket_wrapper_deinit(hk_userdata_t *udata)
+static void zeromq_socket_wrapper_deinit(HkUserdata *udata)
 {
-  void *sock = ((zeromq_socket_wrapper_t *) udata)->sock;
+  void *sock = ((ZeroMQWocketWrapper *) udata)->sock;
   if (!sock)
     return;
   (void) zmq_close(sock);
 }
 
-static int32_t new_context_call(hk_state_t *state, hk_value_t *args)
+static int new_context_call(HkState *state, HkValue *args)
 {
   (void) args;
   void *ctx = zmq_ctx_new();
   if (!ctx)
     return hk_state_push_nil(state);
-  zeromq_context_wrapper_t *wrapper = zeromq_context_wrapper_new(ctx);
-  return hk_state_push_userdata(state, (hk_userdata_t *) wrapper);
+  ZeroMQContextWrapper *wrapper = zeromq_context_wrapper_new(ctx);
+  return hk_state_push_userdata(state, (HkUserdata *) wrapper);
 }
 
-static int32_t new_socket_call(hk_state_t *state, hk_value_t *args)
+static int new_socket_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  zeromq_context_wrapper_t *wrapper = (zeromq_context_wrapper_t *) hk_as_userdata(args[1]);
-  int32_t type = (int32_t) hk_as_number(args[2]);
+  ZeroMQContextWrapper *wrapper = (ZeroMQContextWrapper *) hk_as_userdata(args[1]);
+  int type = (int) hk_as_number(args[2]);
   void *ctx = wrapper->ctx;
   void *sock = zmq_socket(ctx, type);
   if (!sock)
     return hk_state_push_nil(state);
-  return hk_state_push_userdata(state, (hk_userdata_t *) zeromq_socket_wrapper_new(sock));
+  return hk_state_push_userdata(state, (HkUserdata *) zeromq_socket_wrapper_new(sock));
 }
 
-static int32_t close_call(hk_state_t *state, hk_value_t *args)
+static int close_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  zeromq_socket_wrapper_t *wrapper = (zeromq_socket_wrapper_t *) hk_as_userdata(args[1]);
+  ZeroMQWocketWrapper *wrapper = (ZeroMQWocketWrapper *) hk_as_userdata(args[1]);
   void *sock = wrapper->sock;
   if (!sock)
   {
@@ -105,14 +105,14 @@ static int32_t close_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t connect_call(hk_state_t *state, hk_value_t *args)
+static int connect_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  zeromq_socket_wrapper_t *wrapper = (zeromq_socket_wrapper_t *) hk_as_userdata(args[1]);
-  hk_string_t *host = hk_as_string(args[2]);
+  ZeroMQWocketWrapper *wrapper = (ZeroMQWocketWrapper *) hk_as_userdata(args[1]);
+  HkString *host = hk_as_string(args[2]);
   void *sock = wrapper->sock;
   if (zmq_connect(sock, host->chars))
   {
@@ -122,14 +122,14 @@ static int32_t connect_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t bind_call(hk_state_t *state, hk_value_t *args)
+static int bind_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  zeromq_socket_wrapper_t *wrapper = (zeromq_socket_wrapper_t *) hk_as_userdata(args[1]);
-  hk_string_t *host = hk_as_string(args[2]);
+  ZeroMQWocketWrapper *wrapper = (ZeroMQWocketWrapper *) hk_as_userdata(args[1]);
+  HkString *host = hk_as_string(args[2]);
   void *sock = wrapper->sock;
   if (zmq_bind(sock, host->chars))
   {
@@ -139,7 +139,7 @@ static int32_t bind_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t send_call(hk_state_t *state, hk_value_t *args)
+static int send_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -147,14 +147,14 @@ static int32_t send_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  zeromq_socket_wrapper_t *wrapper = (zeromq_socket_wrapper_t *) hk_as_userdata(args[1]);
-  hk_string_t *str = hk_as_string(args[2]);
-  int32_t flags = (int32_t) hk_as_number(args[3]);
-  int32_t length = (int32_t) zmq_send(wrapper->sock, str->chars, str->length, flags);
+  ZeroMQWocketWrapper *wrapper = (ZeroMQWocketWrapper *) hk_as_userdata(args[1]);
+  HkString *str = hk_as_string(args[2]);
+  int flags = (int) hk_as_number(args[3]);
+  int length = (int) zmq_send(wrapper->sock, str->chars, str->length, flags);
   return hk_state_push_number(state, length);
 }
 
-static int32_t recv_call(hk_state_t *state, hk_value_t *args)
+static int recv_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -162,11 +162,11 @@ static int32_t recv_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  zeromq_socket_wrapper_t *wrapper = (zeromq_socket_wrapper_t *) hk_as_userdata(args[1]);
-  int32_t size = (int32_t) hk_as_number(args[2]);
-  int32_t flags = (int32_t) hk_as_number(args[3]);
-  hk_string_t *str = hk_string_new_with_capacity(size);
-  int32_t length = (int32_t) zmq_recv(wrapper->sock, str->chars, size, flags);
+  ZeroMQWocketWrapper *wrapper = (ZeroMQWocketWrapper *) hk_as_userdata(args[1]);
+  int size = (int) hk_as_number(args[2]);
+  int flags = (int) hk_as_number(args[3]);
+  HkString *str = hk_string_new_with_capacity(size);
+  int length = (int) zmq_recv(wrapper->sock, str->chars, size, flags);
   if (!length)
     return hk_state_push_nil(state);
   str->length = length;

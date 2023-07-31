@@ -8,6 +8,6 @@
 
 #include <hook/callable.h>
 
-hk_closure_t *hk_compile(hk_string_t *file, hk_string_t *source);
+HkClosure *hk_compile(HkString *file, HkString *source);
 
 #endif // HK_COMPILER_H

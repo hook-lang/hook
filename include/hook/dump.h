@@ -8,6 +8,6 @@
 
 #include <hook/callable.h>
 
-void hk_dump(hk_function_t *fn, FILE *stream);
+void hk_dump(HkFunction *fn, FILE *stream);
 
 #endif // HK_DUMP_H

@@ -9,41 +9,41 @@
 #include <hook/check.h>
 #include <hook/status.h>
 
-typedef struct linked_list_node
+typedef struct LinkedListNode
 {
-  struct linked_list_node *next;
-  struct linked_list_node *prev;
-  hk_value_t elem;
-} linked_list_node_t;
+  struct LinkedListNode *next;
+  struct LinkedListNode *prev;
+  HkValue elem;
+} LinkedListNode;
 
 typedef struct
 {
   HK_USERDATA_HEADER
-  int32_t length;
-  linked_list_node_t *head;
-  linked_list_node_t *tail;
-} linked_list_t;
+  int length;
+  LinkedListNode *head;
+  LinkedListNode *tail;
+} LinkedList;
 
-static inline linked_list_node_t *linked_list_node_new(hk_value_t elem);
-static inline void linked_list_node_free(linked_list_node_t *node);
-static inline linked_list_t *linked_list_new(void);
-static inline linked_list_t *linked_list_copy(linked_list_t *list);
-static inline void linked_list_inplace_push_front(linked_list_t *list, hk_value_t elem);
-static inline void linked_list_inplace_push_back(linked_list_t *list, hk_value_t elem);
-static void linked_list_deinit(hk_userdata_t *udata);
-static int32_t new_linked_list_call(hk_state_t *state, hk_value_t *args);
-static int32_t len_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_empty_call(hk_state_t *state, hk_value_t *args);
-static int32_t push_front_call(hk_state_t *state, hk_value_t *args);
-static int32_t push_back_call(hk_state_t *state, hk_value_t *args);
-static int32_t pop_front_call(hk_state_t *state, hk_value_t *args);
-static int32_t pop_back_call(hk_state_t *state, hk_value_t *args);
-static int32_t front_call(hk_state_t *state, hk_value_t *args);
-static int32_t back_call(hk_state_t *state, hk_value_t *args);
+static inline LinkedListNode *LinkedListNode_new(HkValue elem);
+static inline void LinkedListNode_free(LinkedListNode *node);
+static inline LinkedList *linked_list_new(void);
+static inline LinkedList *linked_list_copy(LinkedList *list);
+static inline void linked_list_inplace_push_front(LinkedList *list, HkValue elem);
+static inline void linked_list_inplace_push_back(LinkedList *list, HkValue elem);
+static void linked_list_deinit(HkUserdata *udata);
+static int new_linked_list_call(HkState *state, HkValue *args);
+static int len_call(HkState *state, HkValue *args);
+static int is_empty_call(HkState *state, HkValue *args);
+static int push_front_call(HkState *state, HkValue *args);
+static int push_back_call(HkState *state, HkValue *args);
+static int pop_front_call(HkState *state, HkValue *args);
+static int pop_back_call(HkState *state, HkValue *args);
+static int front_call(HkState *state, HkValue *args);
+static int back_call(HkState *state, HkValue *args);
 
-static inline linked_list_node_t *linked_list_node_new(hk_value_t elem)
+static inline LinkedListNode *LinkedListNode_new(HkValue elem)
 {
-  linked_list_node_t *node = (linked_list_node_t *) hk_allocate(sizeof(*node));
+  LinkedListNode *node = (LinkedListNode *) hk_allocate(sizeof(*node));
   hk_value_incr_ref(elem);
   node->next = NULL;
   node->prev = NULL;
@@ -51,26 +51,26 @@ static inline linked_list_node_t *linked_list_node_new(hk_value_t elem)
   return node;
 }
 
-static inline void linked_list_node_free(linked_list_node_t *node)
+static inline void LinkedListNode_free(LinkedListNode *node)
 {
   hk_value_release(node->elem);
   free(node);
 }
 
-static inline linked_list_t *linked_list_new(void)
+static inline LinkedList *linked_list_new(void)
 {
-  linked_list_t *list = (linked_list_t *) hk_allocate(sizeof(*list));
-  hk_userdata_init((hk_userdata_t *) list, &linked_list_deinit);
+  LinkedList *list = (LinkedList *) hk_allocate(sizeof(*list));
+  hk_userdata_init((HkUserdata *) list, &linked_list_deinit);
   list->length = 0;
   list->head = NULL;
   list->tail = NULL;
   return list;
 }
 
-static inline linked_list_t *linked_list_copy(linked_list_t *list)
+static inline LinkedList *linked_list_copy(LinkedList *list)
 {
-  linked_list_t *result = linked_list_new();
-  linked_list_node_t *node = list->head;
+  LinkedList *result = linked_list_new();
+  LinkedListNode *node = list->head;
   while (node)
   {
     linked_list_inplace_push_back(result, node->elem);
@@ -79,9 +79,9 @@ static inline linked_list_t *linked_list_copy(linked_list_t *list)
   return result;
 }
 
-static inline void linked_list_inplace_push_front(linked_list_t *list, hk_value_t elem)
+static inline void linked_list_inplace_push_front(LinkedList *list, HkValue elem)
 {
-  linked_list_node_t *node = linked_list_node_new(elem);
+  LinkedListNode *node = LinkedListNode_new(elem);
   if (!list->head)
   {
     list->length = 1;
@@ -95,9 +95,9 @@ static inline void linked_list_inplace_push_front(linked_list_t *list, hk_value_
   list->head = node;
 }
 
-static inline void linked_list_inplace_push_back(linked_list_t *list, hk_value_t elem)
+static inline void linked_list_inplace_push_back(LinkedList *list, HkValue elem)
 {
-  linked_list_node_t *node = linked_list_node_new(elem);
+  LinkedListNode *node = LinkedListNode_new(elem);
   if (!list->tail)
   {
     list->length = 1;
@@ -111,113 +111,113 @@ static inline void linked_list_inplace_push_back(linked_list_t *list, hk_value_t
   list->tail = node;
 }
 
-static void linked_list_deinit(hk_userdata_t *udata)
+static void linked_list_deinit(HkUserdata *udata)
 {
-  linked_list_t *list = (linked_list_t *) udata;
-  linked_list_node_t *node = list->head;
+  LinkedList *list = (LinkedList *) udata;
+  LinkedListNode *node = list->head;
   while (node)
   {
-    linked_list_node_t *next = node->next;
-    linked_list_node_free(node);
+    LinkedListNode *next = node->next;
+    LinkedListNode_free(node);
     node = next;
   }
 }
 
-static int32_t new_linked_list_call(hk_state_t *state, hk_value_t *args)
+static int new_linked_list_call(HkState *state, HkValue *args)
 {
   (void) args;
-  return hk_state_push_userdata(state, (hk_userdata_t *) linked_list_new());
+  return hk_state_push_userdata(state, (HkUserdata *) linked_list_new());
 }
 
-static int32_t len_call(hk_state_t *state, hk_value_t *args)
+static int len_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  linked_list_t *list = (linked_list_t *) hk_as_userdata(args[1]);
+  LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
   return hk_state_push_number(state, list->length);
 }
 
-static int32_t is_empty_call(hk_state_t *state, hk_value_t *args)
+static int is_empty_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  linked_list_t *list = (linked_list_t *) hk_as_userdata(args[1]);
+  LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
   return hk_state_push_bool(state, !list->length);
 }
 
-static int32_t push_front_call(hk_state_t *state, hk_value_t *args)
+static int push_front_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  linked_list_t *list = (linked_list_t *) hk_as_userdata(args[1]);
-  hk_value_t elem = args[2];
-  linked_list_t *result = linked_list_copy(list);
+  LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
+  HkValue elem = args[2];
+  LinkedList *result = linked_list_copy(list);
   linked_list_inplace_push_front(result, elem);
-  return hk_state_push_userdata(state, (hk_userdata_t *) result);
+  return hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int32_t push_back_call(hk_state_t *state, hk_value_t *args)
+static int push_back_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  linked_list_t *list = (linked_list_t *) hk_as_userdata(args[1]);
-  hk_value_t elem = args[2];
-  linked_list_t *result = linked_list_copy(list);
+  LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
+  HkValue elem = args[2];
+  LinkedList *result = linked_list_copy(list);
   linked_list_inplace_push_back(result, elem);
-  return hk_state_push_userdata(state, (hk_userdata_t *) result);
+  return hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int32_t pop_front_call(hk_state_t *state, hk_value_t *args)
+static int pop_front_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  linked_list_t *list = (linked_list_t *) hk_as_userdata(args[1]);
-  linked_list_t *result = linked_list_new();
+  LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
+  LinkedList *result = linked_list_new();
   if (!list->head)
     goto end;
-  linked_list_node_t *node = list->head->next;
+  LinkedListNode *node = list->head->next;
   while (node)
   {
     linked_list_inplace_push_back(result, node->elem);
     node = node->next;
   }
 end:
-  return hk_state_push_userdata(state, (hk_userdata_t *) result);
+  return hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int32_t pop_back_call(hk_state_t *state, hk_value_t *args)
+static int pop_back_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  linked_list_t *list = (linked_list_t *) hk_as_userdata(args[1]);
-  linked_list_t *result = linked_list_new();
+  LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
+  LinkedList *result = linked_list_new();
   if (!list->tail)
     goto end;
-  linked_list_node_t *node = list->tail->prev;
+  LinkedListNode *node = list->tail->prev;
   while (node)
   {
     linked_list_inplace_push_front(result, node->elem);
     node = node->prev;
   }
 end:
-  return hk_state_push_userdata(state, (hk_userdata_t *) result);
+  return hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int32_t front_call(hk_state_t *state, hk_value_t *args)
+static int front_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  linked_list_t *list = (linked_list_t *) hk_as_userdata(args[1]);
-  hk_value_t elem = list->head ? list->head->elem : HK_NIL_VALUE;
+  LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
+  HkValue elem = list->head ? list->head->elem : HK_NIL_VALUE;
   return hk_state_push(state, elem);
 }
 
-static int32_t back_call(hk_state_t *state, hk_value_t *args)
+static int back_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  linked_list_t *list = (linked_list_t *) hk_as_userdata(args[1]);
-  hk_value_t elem = list->tail ? list->tail->elem : HK_NIL_VALUE;
+  LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
+  HkValue elem = list->tail ? list->tail->elem : HK_NIL_VALUE;
   return hk_state_push(state, elem);
 }
 

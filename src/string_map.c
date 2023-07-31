@@ -8,29 +8,29 @@
 #include <hook/memory.h>
 #include <hook/utils.h>
 
-static inline string_map_entry_t *allocate_entries(int32_t capacity);
-static inline void grow(string_map_t *map);
+static inline StringMapEntry *allocate_entries(int capacity);
+static inline void grow(StringMap *map);
 
-static inline string_map_entry_t *allocate_entries(int32_t capacity)
+static inline StringMapEntry *allocate_entries(int capacity)
 {
-  string_map_entry_t *entries = (string_map_entry_t *) hk_allocate(sizeof(*entries) * capacity);
-  for (int32_t i = 0; i < capacity; ++i)
+  StringMapEntry *entries = (StringMapEntry *) hk_allocate(sizeof(*entries) * capacity);
+  for (int i = 0; i < capacity; ++i)
     entries[i].key = NULL;
   return entries;
 }
 
-static inline void grow(string_map_t *map)
+static inline void grow(StringMap *map)
 {
-  int32_t length = map->length;
+  int length = map->length;
   if (length / STRING_MAP_MAX_LOAD_FACTOR <= map->capacity)
     return;
-  int32_t capacity = map->capacity << 1;
-  int32_t mask = capacity - 1;
-  string_map_entry_t *entries = allocate_entries(capacity);
-  for (int32_t i = 0, j = 0; i < map->capacity && j < length; ++i)
+  int capacity = map->capacity << 1;
+  int mask = capacity - 1;
+  StringMapEntry *entries = allocate_entries(capacity);
+  for (int i = 0, j = 0; i < map->capacity && j < length; ++i)
   {
-    string_map_entry_t *entry = &map->entries[i];
-    hk_string_t *key = entry->key;
+    StringMapEntry *entry = &map->entries[i];
+    HkString *key = entry->key;
     if (!key)
       continue;
     entries[key->hash & mask] = map->entries[i];
@@ -42,9 +42,9 @@ static inline void grow(string_map_t *map)
   map->mask = mask;
 }
 
-void string_map_init(string_map_t *map, int32_t min_capacity)
+void string_map_init(StringMap *map, int minCapacity)
 {
-  int32_t capacity = min_capacity < STRING_MAP_MIN_CAPACITY ? STRING_MAP_MIN_CAPACITY : min_capacity;
+  int capacity = minCapacity < STRING_MAP_MIN_CAPACITY ? STRING_MAP_MIN_CAPACITY : minCapacity;
   capacity = hk_power_of_two_ceil(capacity);
   map->capacity = capacity;
   map->mask = capacity - 1;
@@ -52,13 +52,13 @@ void string_map_init(string_map_t *map, int32_t min_capacity)
   map->entries = allocate_entries(capacity);
 }
 
-void string_map_free(string_map_t *map)
+void string_map_free(StringMap *map)
 {
-  string_map_entry_t *entries = map->entries;
-  for (int32_t i = 0, j = 0; i < map->capacity && j < map->length; ++i)
+  StringMapEntry *entries = map->entries;
+  for (int i = 0, j = 0; i < map->capacity && j < map->length; ++i)
   {
-    string_map_entry_t *entry = &entries[i];
-    hk_string_t *key = entry->key;
+    StringMapEntry *entry = &entries[i];
+    HkString *key = entry->key;
     if (!key)
       continue;
     hk_string_release(key);
@@ -68,14 +68,14 @@ void string_map_free(string_map_t *map)
   free(map->entries);
 }
 
-string_map_entry_t *string_map_get_entry(string_map_t *map, hk_string_t *key)
+StringMapEntry *string_map_get_entry(StringMap *map, HkString *key)
 {
-  int32_t mask = map->mask;
-  string_map_entry_t *entries = map->entries;
-  int32_t index = hk_string_hash(key) & mask;
+  int mask = map->mask;
+  StringMapEntry *entries = map->entries;
+  int index = hk_string_hash(key) & mask;
   for (;;)
   {
-    string_map_entry_t *entry = &entries[index];
+    StringMapEntry *entry = &entries[index];
     if (!entry->key)
       break;
     if (hk_string_equal(key, entry->key))
@@ -85,14 +85,14 @@ string_map_entry_t *string_map_get_entry(string_map_t *map, hk_string_t *key)
   return NULL;
 }
 
-void string_map_inplace_put(string_map_t *map, hk_string_t *key, hk_value_t value)
+void string_map_inplace_put(StringMap *map, HkString *key, HkValue value)
 {
-  int32_t mask = map->mask;
-  string_map_entry_t *entries = map->entries;
-  int32_t index = hk_string_hash(key) & mask;
+  int mask = map->mask;
+  StringMapEntry *entries = map->entries;
+  int index = hk_string_hash(key) & mask;
   for (;;)
   {
-    string_map_entry_t *entry = &entries[index];
+    StringMapEntry *entry = &entries[index];
     if (!entry->key)
     {
       hk_incr_ref(key);

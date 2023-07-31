@@ -23,12 +23,12 @@
 #endif
 
 #ifdef _WIN32
-  #define socket_t  SOCKET
-  #define socklen_t int32_t
+  #define Socket    SOCKET
+  #define socklen_t int
 #endif
 
 #ifndef _WIN32
-  #define socket_t       int32_t
+  #define Socket         int
   #define INVALID_SOCKET -1
   #define SOCKET_ERROR   -1
 #endif
@@ -38,34 +38,34 @@
 typedef struct
 {
   HK_USERDATA_HEADER
-  int32_t domain;
-  int32_t type;
-  int32_t protocol;
-  socket_t sock;
-} socket_wrapper_t;
+  int domain;
+  int type;
+  int protocol;
+  Socket sock;
+} SocketWrapper;
 
 #ifdef _WIN32
-  static int32_t socket_count = 0;
+  static int socket_count = 0;
 #endif
 
 static inline void socket_startup(void);
 static inline void socket_cleanup(void);
-static inline void socket_close(socket_t sock);
-static inline bool socket_resolve(int32_t domain, int32_t type, const char *host, char *address);
-static inline socket_wrapper_t *socket_wrapper_new(socket_t sock, int32_t domain, int32_t type, int32_t protocol);
-static void socket_wrapper_deinit(hk_userdata_t *udata);
-static int32_t new_call(hk_state_t *state, hk_value_t *args);
-static int32_t close_call(hk_state_t *state, hk_value_t *args);
-static int32_t connect_call(hk_state_t *state, hk_value_t *args);
-static int32_t accept_call(hk_state_t *state, hk_value_t *args);
-static int32_t bind_call(hk_state_t *state, hk_value_t *args);
-static int32_t listen_call(hk_state_t *state, hk_value_t *args);
-static int32_t send_call(hk_state_t *state, hk_value_t *args);
-static int32_t recv_call(hk_state_t *state, hk_value_t *args);
-static int32_t set_option_call(hk_state_t *state, hk_value_t *args);
-static int32_t get_option_call(hk_state_t *state, hk_value_t *args);
-static int32_t set_block_call(hk_state_t *state, hk_value_t *args);
-static int32_t set_nonblock_call(hk_state_t *state, hk_value_t *args);
+static inline void socket_close(Socket sock);
+static inline bool socket_resolve(int domain, int type, const char *host, char *address);
+static inline SocketWrapper *socket_wrapper_new(Socket sock, int domain, int type, int protocol);
+static void socket_wrapper_deinit(HkUserdata *udata);
+static int new_call(HkState *state, HkValue *args);
+static int close_call(HkState *state, HkValue *args);
+static int connect_call(HkState *state, HkValue *args);
+static int accept_call(HkState *state, HkValue *args);
+static int bind_call(HkState *state, HkValue *args);
+static int listen_call(HkState *state, HkValue *args);
+static int send_call(HkState *state, HkValue *args);
+static int recv_call(HkState *state, HkValue *args);
+static int set_option_call(HkState *state, HkValue *args);
+static int get_option_call(HkState *state, HkValue *args);
+static int set_block_call(HkState *state, HkValue *args);
+static int set_nonblock_call(HkState *state, HkValue *args);
 
 static inline void socket_startup(void)
 {
@@ -88,7 +88,7 @@ static inline void socket_cleanup(void)
 #endif
 }
 
-static inline void socket_close(socket_t sock)
+static inline void socket_close(Socket sock)
 {
 #ifdef _WIN32
   closesocket(sock);
@@ -98,7 +98,7 @@ static inline void socket_close(socket_t sock)
 #endif
 }
 
-static inline bool socket_resolve(int32_t domain, int32_t type, const char *host, char *address)
+static inline bool socket_resolve(int domain, int type, const char *host, char *address)
 {
   struct addrinfo hints, *res;
   memset(&hints, 0, sizeof hints);
@@ -113,10 +113,10 @@ static inline bool socket_resolve(int32_t domain, int32_t type, const char *host
   return true;
 }
 
-static inline socket_wrapper_t *socket_wrapper_new(socket_t sock, int32_t domain, int32_t type, int32_t protocol)
+static inline SocketWrapper *socket_wrapper_new(Socket sock, int domain, int type, int protocol)
 {
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((hk_userdata_t *) wrapper, &socket_wrapper_deinit);
+  SocketWrapper *wrapper = (SocketWrapper *) hk_allocate(sizeof(*wrapper));
+  hk_userdata_init((HkUserdata *) wrapper, &socket_wrapper_deinit);
   wrapper->domain = domain;
   wrapper->type = type;
   wrapper->protocol = protocol;
@@ -124,15 +124,15 @@ static inline socket_wrapper_t *socket_wrapper_new(socket_t sock, int32_t domain
   return wrapper;
 }
 
-static void socket_wrapper_deinit(hk_userdata_t *udata)
+static void socket_wrapper_deinit(HkUserdata *udata)
 {
-  socket_t sock = ((socket_wrapper_t *) udata)->sock;
+  Socket sock = ((SocketWrapper *) udata)->sock;
   if (sock == INVALID_SOCKET)
     return;
   socket_close(sock);
 }
 
-static int32_t new_call(hk_state_t *state, hk_value_t *args)
+static int new_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -140,26 +140,26 @@ static int32_t new_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t domain = (int32_t) hk_as_number(args[1]);
-  int32_t type = (int32_t) hk_as_number(args[2]);
-  int32_t protocol = (int32_t) hk_as_number(args[3]);
+  int domain = (int) hk_as_number(args[1]);
+  int type = (int) hk_as_number(args[2]);
+  int protocol = (int) hk_as_number(args[3]);
   socket_startup();
-  socket_t sock = socket(domain, type, protocol);
+  Socket sock = socket(domain, type, protocol);
   if (sock == INVALID_SOCKET)
   {
     socket_cleanup();
     return hk_state_push_nil(state);
   }
-  socket_wrapper_t *wrapper = socket_wrapper_new(sock, domain, type, protocol);
-  return hk_state_push_userdata(state, (hk_userdata_t *) wrapper);
+  SocketWrapper *wrapper = socket_wrapper_new(sock, domain, type, protocol);
+  return hk_state_push_userdata(state, (HkUserdata *) wrapper);
 }
 
-static int32_t close_call(hk_state_t *state, hk_value_t *args)
+static int close_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  socket_t sock = wrapper->sock;
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  Socket sock = wrapper->sock;
   if (sock != INVALID_SOCKET)
   {
     socket_close(sock);
@@ -168,7 +168,7 @@ static int32_t close_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t connect_call(hk_state_t *state, hk_value_t *args)
+static int connect_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -176,9 +176,9 @@ static int32_t connect_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  hk_string_t *host = hk_as_string(args[2]);
-  int32_t port = (int32_t) hk_as_number(args[3]);
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  HkString *host = hk_as_string(args[2]);
+  int port = (int) hk_as_number(args[3]);
   char address[ADDRESS_MAX_LEN];
   if (!socket_resolve(wrapper->domain, wrapper->type, host->chars, address))
   {
@@ -191,7 +191,7 @@ static int32_t connect_call(hk_state_t *state, hk_value_t *args)
   sock_addr.sin_port = htons((uint16_t) port);
   if (inet_pton(AF_INET, address, &sock_addr.sin_addr) < 1)
     return hk_state_push_nil(state);
-  socket_t sock = wrapper->sock;
+  Socket sock = wrapper->sock;
   if (connect(sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == SOCKET_ERROR)
   {
     hk_runtime_error("cannot connect to address '%s'", address);
@@ -200,12 +200,12 @@ static int32_t connect_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t accept_call(hk_state_t *state, hk_value_t *args)
+static int accept_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  socket_t sock;
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  Socket sock;
   struct sockaddr_in sock_addr;
   socklen_t sock_addr_len = sizeof(sock_addr);
   for (;;)
@@ -222,11 +222,11 @@ static int32_t accept_call(hk_state_t *state, hk_value_t *args)
   #endif
     return hk_state_push_nil(state);
   }
-  socket_wrapper_t *result = socket_wrapper_new(sock, wrapper->domain, wrapper->type, wrapper->protocol);
-  return hk_state_push_userdata(state, (hk_userdata_t *) result);
+  SocketWrapper *result = socket_wrapper_new(sock, wrapper->domain, wrapper->type, wrapper->protocol);
+  return hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int32_t bind_call(hk_state_t *state, hk_value_t *args)
+static int bind_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -234,9 +234,9 @@ static int32_t bind_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  hk_string_t *host = hk_as_string(args[2]);
-  int32_t port = (int32_t) hk_as_number(args[3]);
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  HkString *host = hk_as_string(args[2]);
+  int port = (int) hk_as_number(args[3]);
   char address[ADDRESS_MAX_LEN];
   if (!socket_resolve(wrapper->domain, wrapper->type, host->chars, address))
   {
@@ -257,14 +257,14 @@ static int32_t bind_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t listen_call(hk_state_t *state, hk_value_t *args)
+static int listen_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  int32_t backlog = (int32_t) hk_as_number(args[2]);
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  int backlog = (int) hk_as_number(args[2]);
   if (listen(wrapper->sock, backlog) == SOCKET_ERROR)
   {
     hk_runtime_error("cannot listen on socket");
@@ -273,7 +273,7 @@ static int32_t listen_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t send_call(hk_state_t *state, hk_value_t *args)
+static int send_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -281,14 +281,14 @@ static int32_t send_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  hk_string_t *str = hk_as_string(args[2]);
-  int32_t flags = (int32_t) hk_as_number(args[3]);
-  int32_t length = (int32_t) send(wrapper->sock, str->chars, str->length, flags);
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  HkString *str = hk_as_string(args[2]);
+  int flags = (int) hk_as_number(args[3]);
+  int length = (int) send(wrapper->sock, str->chars, str->length, flags);
   return hk_state_push_number(state, length);
 }
 
-static int32_t recv_call(hk_state_t *state, hk_value_t *args)
+static int recv_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -296,18 +296,18 @@ static int32_t recv_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  int32_t size = (int32_t) hk_as_number(args[2]);
-  int32_t flags = (int32_t) hk_as_number(args[3]);
-  hk_string_t *str = hk_string_new_with_capacity(size);
-  int32_t length = (int32_t) recv(wrapper->sock, str->chars, size, flags);
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  int size = (int) hk_as_number(args[2]);
+  int flags = (int) hk_as_number(args[3]);
+  HkString *str = hk_string_new_with_capacity(size);
+  int length = (int) recv(wrapper->sock, str->chars, size, flags);
   if (!length)
     return hk_state_push_nil(state);
   str->length = length;
   return hk_state_push_string(state, str);
 }
 
-static int32_t set_option_call(hk_state_t *state, hk_value_t *args)
+static int set_option_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -317,15 +317,15 @@ static int32_t set_option_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 4) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  int32_t level = (int32_t) hk_as_number(args[2]);
-  int32_t option = (int32_t) hk_as_number(args[3]);
-  int32_t value = (int32_t) hk_as_number(args[4]);
-  socket_t sock = wrapper->sock;
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  int level = (int) hk_as_number(args[2]);
+  int option = (int) hk_as_number(args[3]);
+  int value = (int) hk_as_number(args[4]);
+  Socket sock = wrapper->sock;
 #ifdef _WIN32
-  int32_t result = setsockopt(sock, level, option, (const char *) &value, sizeof(value));
+  int result = setsockopt(sock, level, option, (const char *) &value, sizeof(value));
 #else
-  int32_t result = setsockopt(sock, level, option, &value, sizeof(value));
+  int result = setsockopt(sock, level, option, &value, sizeof(value));
 #endif
   if (result == SOCKET_ERROR)
   {
@@ -335,7 +335,7 @@ static int32_t set_option_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t get_option_call(hk_state_t *state, hk_value_t *args)
+static int get_option_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
@@ -343,16 +343,16 @@ static int32_t get_option_call(hk_state_t *state, hk_value_t *args)
     return HK_STATUS_ERROR;
   if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  int32_t level = (int32_t) hk_as_number(args[2]);
-  int32_t option = (int32_t) hk_as_number(args[3]);
-  int32_t value;
-  socket_t sock = wrapper->sock;
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  int level = (int) hk_as_number(args[2]);
+  int option = (int) hk_as_number(args[3]);
+  int value;
+  Socket sock = wrapper->sock;
   socklen_t size = sizeof(value);
 #ifdef _WIN32
-  int32_t result = getsockopt(sock, level, option, (char *) &value, &size);
+  int result = getsockopt(sock, level, option, (char *) &value, &size);
 #else
-  int32_t result = getsockopt(sock, level, option, &value, &size);
+  int result = getsockopt(sock, level, option, &value, &size);
 #endif
   if (result == SOCKET_ERROR)
   {
@@ -362,23 +362,23 @@ static int32_t get_option_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, value);
 }
 
-static int32_t set_block_call(hk_state_t *state, hk_value_t *args)
+static int set_block_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  socket_t sock = wrapper->sock;
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  Socket sock = wrapper->sock;
 #ifdef _WIN32
   unsigned long mode = 1;
-  int32_t result = ioctlsocket(sock, FIONBIO, &mode);
+  int result = ioctlsocket(sock, FIONBIO, &mode);
   if (result)
   {
     hk_runtime_error("cannot set socket to blocking mode");
     return HK_STATUS_ERROR;
   }
 #else
-  int32_t flags = fcntl(sock, F_GETFL, 0);
-  int32_t result = fcntl(sock, F_SETFL, flags & ~O_NONBLOCK);
+  int flags = fcntl(sock, F_GETFL, 0);
+  int result = fcntl(sock, F_SETFL, flags & ~O_NONBLOCK);
   if (result == -1)
   {
     hk_runtime_error("cannot set socket to blocking mode");
@@ -388,23 +388,23 @@ static int32_t set_block_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t set_nonblock_call(hk_state_t *state, hk_value_t *args)
+static int set_nonblock_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  socket_wrapper_t *wrapper = (socket_wrapper_t *) hk_as_userdata(args[1]);
-  socket_t sock = wrapper->sock;
+  SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
+  Socket sock = wrapper->sock;
 #ifdef _WIN32
   unsigned long mode = 0;
-  int32_t result = ioctlsocket(sock, FIONBIO, &mode);
+  int result = ioctlsocket(sock, FIONBIO, &mode);
   if (result)
   {
     hk_runtime_error("cannot set socket to non-blocking mode");
     return HK_STATUS_ERROR;
   }
 #else
-  int32_t flags = fcntl(sock, F_GETFL, 0);
-  int32_t result = fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+  int flags = fcntl(sock, F_GETFL, 0);
+  int result = fcntl(sock, F_SETFL, flags | O_NONBLOCK);
   if (result == -1)
   {
     hk_runtime_error("cannot set socket to non-blocking mode");

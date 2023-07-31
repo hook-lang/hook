@@ -15,40 +15,40 @@
 
 typedef struct
 {
-  hk_string_t *name;
-  int32_t index;
-} hk_field_t;
+  HkString *name;
+  int index;
+} HkField;
 
 typedef struct
 {
   HK_OBJECT_HEADER
-  int32_t capacity;
-  int32_t mask;
-  int32_t length;
-  hk_string_t *name;
-  hk_field_t *fields;
-  hk_field_t **table;
-} hk_struct_t;
+  int capacity;
+  int mask;
+  int length;
+  HkString *name;
+  HkField *fields;
+  HkField **table;
+} HkStruct;
 
 typedef struct
 {
   HK_OBJECT_HEADER
-  hk_struct_t *ztruct;
-  hk_value_t values[1];
-} hk_instance_t;
+  HkStruct *ztruct;
+  HkValue values[1];
+} HkInstance;
 
-hk_struct_t *hk_struct_new(hk_string_t *name);
-void hk_struct_free(hk_struct_t *ztruct);
-void hk_struct_release(hk_struct_t *ztruct);
-int32_t hk_struct_index_of(hk_struct_t *ztruct, hk_string_t *name);
-bool hk_struct_define_field(hk_struct_t *ztruct, hk_string_t *name);
-bool hk_struct_equal(hk_struct_t *ztruct1, hk_struct_t *ztruct2);
-hk_instance_t *hk_instance_new(hk_struct_t *ztruct);
-void hk_instance_free(hk_instance_t *inst);
-void hk_instance_release(hk_instance_t *inst);
-hk_instance_t *hk_instance_set_field(hk_instance_t *inst, int32_t index, hk_value_t value);
-void hk_instance_inplace_set_field(hk_instance_t *inst, int32_t index, hk_value_t value);
-void hk_instance_print(hk_instance_t *inst);
-bool hk_instance_equal(hk_instance_t *inst1, hk_instance_t *inst2);
+HkStruct *hk_struct_new(HkString *name);
+void hk_struct_free(HkStruct *ztruct);
+void hk_struct_release(HkStruct *ztruct);
+int hk_struct_index_of(HkStruct *ztruct, HkString *name);
+bool hk_struct_define_field(HkStruct *ztruct, HkString *name);
+bool hk_struct_equal(HkStruct *ztruct1, HkStruct *ztruct2);
+HkInstance *hk_instance_new(HkStruct *ztruct);
+void hk_instance_free(HkInstance *inst);
+void hk_instance_release(HkInstance *inst);
+HkInstance *hk_instance_set_field(HkInstance *inst, int index, HkValue value);
+void hk_instance_inplace_set_field(HkInstance *inst, int index, HkValue value);
+void hk_instance_print(HkInstance *inst);
+bool hk_instance_equal(HkInstance *inst1, HkInstance *inst2);
 
 #endif // HK_STRUCT_H

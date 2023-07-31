@@ -7,9 +7,9 @@
 #include <fcgi_stdio.h>
 #include <hook/status.h>
 
-static int32_t accept_call(hk_state_t *state, hk_value_t *args);
+static int accept_call(HkState *state, HkValue *args);
 
-static int32_t accept_call(hk_state_t *state, hk_value_t *args)
+static int accept_call(HkState *state, HkValue *args)
 {
   (void) args;
   return hk_state_push_number(state, FCGI_Accept());

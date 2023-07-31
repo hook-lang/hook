@@ -72,52 +72,52 @@ static const char *globals[] = {
   "panic"
 };
 
-static inline int32_t string_to_double(hk_string_t *str, double *result);
-static inline hk_array_t *split(hk_string_t *str, hk_string_t *separator);
-static inline int32_t join(hk_array_t *arr, hk_string_t *separator, hk_string_t **result);
-static int32_t print_call(hk_state_t *state, hk_value_t *args);
-static int32_t println_call(hk_state_t *state, hk_value_t *args);
-static int32_t type_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_nil_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_bool_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_number_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_int_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_string_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_range_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_array_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_struct_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_instance_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_iterator_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_callable_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_userdata_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_object_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_comparable_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_iterable_call(hk_state_t *state, hk_value_t *args);
-static int32_t to_bool_call(hk_state_t *state, hk_value_t *args);
-static int32_t to_int_call(hk_state_t *state, hk_value_t *args);
-static int32_t to_number_call(hk_state_t *state, hk_value_t *args);
-static int32_t to_string_call(hk_state_t *state, hk_value_t *args);
-static int32_t ord_call(hk_state_t *state, hk_value_t *args);
-static int32_t chr_call(hk_state_t *state, hk_value_t *args);
-static int32_t hex_call(hk_state_t *state, hk_value_t *args);
-static int32_t bin_call(hk_state_t *state, hk_value_t *args);
-static int32_t address_call(hk_state_t *state, hk_value_t *args);
-static int32_t refcount_call(hk_state_t *state, hk_value_t *args);
-static int32_t cap_call(hk_state_t *state, hk_value_t *args);
-static int32_t len_call(hk_state_t *state, hk_value_t *args);
-static int32_t is_empty_call(hk_state_t *state, hk_value_t *args);
-static int32_t compare_call(hk_state_t *state, hk_value_t *args);
-static int32_t split_call(hk_state_t *state, hk_value_t *args);
-static int32_t join_call(hk_state_t *state, hk_value_t *args);
-static int32_t iter_call(hk_state_t *state, hk_value_t *args);
-static int32_t valid_call(hk_state_t *state, hk_value_t *args);
-static int32_t current_call(hk_state_t *state, hk_value_t *args);
-static int32_t next_call(hk_state_t *state, hk_value_t *args);
-static int32_t sleep_call(hk_state_t *state, hk_value_t *args);
-static int32_t assert_call(hk_state_t *state, hk_value_t *args);
-static int32_t panic_call(hk_state_t *state, hk_value_t *args);
+static inline int string_to_double(HkString *str, double *result);
+static inline HkArray *split(HkString *str, HkString *separator);
+static inline int join(HkArray *arr, HkString *separator, HkString **result);
+static int print_call(HkState *state, HkValue *args);
+static int println_call(HkState *state, HkValue *args);
+static int type_call(HkState *state, HkValue *args);
+static int is_nil_call(HkState *state, HkValue *args);
+static int is_bool_call(HkState *state, HkValue *args);
+static int is_number_call(HkState *state, HkValue *args);
+static int is_int_call(HkState *state, HkValue *args);
+static int is_string_call(HkState *state, HkValue *args);
+static int is_range_call(HkState *state, HkValue *args);
+static int is_array_call(HkState *state, HkValue *args);
+static int is_struct_call(HkState *state, HkValue *args);
+static int is_instance_call(HkState *state, HkValue *args);
+static int is_iterator_call(HkState *state, HkValue *args);
+static int is_callable_call(HkState *state, HkValue *args);
+static int is_userdata_call(HkState *state, HkValue *args);
+static int is_object_call(HkState *state, HkValue *args);
+static int is_comparable_call(HkState *state, HkValue *args);
+static int is_iterable_call(HkState *state, HkValue *args);
+static int to_bool_call(HkState *state, HkValue *args);
+static int to_int_call(HkState *state, HkValue *args);
+static int to_number_call(HkState *state, HkValue *args);
+static int to_string_call(HkState *state, HkValue *args);
+static int ord_call(HkState *state, HkValue *args);
+static int chr_call(HkState *state, HkValue *args);
+static int hex_call(HkState *state, HkValue *args);
+static int bin_call(HkState *state, HkValue *args);
+static int address_call(HkState *state, HkValue *args);
+static int refcount_call(HkState *state, HkValue *args);
+static int cap_call(HkState *state, HkValue *args);
+static int len_call(HkState *state, HkValue *args);
+static int is_empty_call(HkState *state, HkValue *args);
+static int compare_call(HkState *state, HkValue *args);
+static int split_call(HkState *state, HkValue *args);
+static int join_call(HkState *state, HkValue *args);
+static int iter_call(HkState *state, HkValue *args);
+static int valid_call(HkState *state, HkValue *args);
+static int current_call(HkState *state, HkValue *args);
+static int next_call(HkState *state, HkValue *args);
+static int sleep_call(HkState *state, HkValue *args);
+static int assert_call(HkState *state, HkValue *args);
+static int panic_call(HkState *state, HkValue *args);
 
-static inline int32_t string_to_double(hk_string_t *str, double *result)
+static inline int string_to_double(HkString *str, double *result)
 {
   if (!str->length)
   {
@@ -132,25 +132,25 @@ static inline int32_t string_to_double(hk_string_t *str, double *result)
   return HK_STATUS_OK;
 }
 
-static inline hk_array_t *split(hk_string_t *str, hk_string_t *separator)
+static inline HkArray *split(HkString *str, HkString *separator)
 {
-  hk_array_t *arr = hk_array_new();
+  HkArray *arr = hk_array_new();
   char *cur = str->chars;
   char *tk;
   while ((tk = strtok_r(cur, separator->chars, &cur)))
   {
-    hk_value_t elem = hk_string_value(hk_string_from_chars(-1, tk));
+    HkValue elem = hk_string_value(hk_string_from_chars(-1, tk));
     hk_array_inplace_add_element(arr, elem);
   }
   return arr;
 }
 
-static inline int32_t join(hk_array_t *arr, hk_string_t *separator, hk_string_t **result)
+static inline int join(HkArray *arr, HkString *separator, HkString **result)
 {
-  hk_string_t *str = hk_string_new();
-  for (int32_t i = 0; i < arr->length; ++i)
+  HkString *str = hk_string_new();
+  for (int i = 0; i < arr->length; ++i)
   {
-    hk_value_t elem = hk_array_get_element(arr, i);
+    HkValue elem = hk_array_get_element(arr, i);
     if (!hk_is_string(elem))
       continue;
     if (i)
@@ -161,110 +161,110 @@ static inline int32_t join(hk_array_t *arr, hk_string_t *separator, hk_string_t 
   return HK_STATUS_OK;
 }
 
-static int32_t print_call(hk_state_t *state, hk_value_t *args)
+static int print_call(HkState *state, HkValue *args)
 {
   hk_value_print(args[1], false);
   return hk_state_push_nil(state);
 }
 
-static int32_t println_call(hk_state_t *state, hk_value_t *args)
+static int println_call(HkState *state, HkValue *args)
 {
   hk_value_print(args[1], false);
   printf("\n");
   return hk_state_push_nil(state);
 }
 
-static int32_t type_call(hk_state_t *state, hk_value_t *args)
+static int type_call(HkState *state, HkValue *args)
 {
   return hk_state_push_string_from_chars(state, -1, hk_type_name(args[1].type));
 }
 
-static int32_t is_nil_call(hk_state_t *state, hk_value_t *args)
+static int is_nil_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_nil(args[1]));
 }
 
-static int32_t is_bool_call(hk_state_t *state, hk_value_t *args)
+static int is_bool_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_bool(args[1]));
 }
 
-static int32_t is_number_call(hk_state_t *state, hk_value_t *args)
+static int is_number_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_number(args[1]));
 }
 
-static int32_t is_int_call(hk_state_t *state, hk_value_t *args)
+static int is_int_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_int(args[1]));
 }
 
-static int32_t is_string_call(hk_state_t *state, hk_value_t *args)
+static int is_string_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_string(args[1]));
 }
 
-static int32_t is_range_call(hk_state_t *state, hk_value_t *args)
+static int is_range_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_range(args[1]));
 }
 
-static int32_t is_array_call(hk_state_t *state, hk_value_t *args)
+static int is_array_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_array(args[1]));
 }
 
-static int32_t is_struct_call(hk_state_t *state, hk_value_t *args)
+static int is_struct_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_struct(args[1]));
 }
 
-static int32_t is_instance_call(hk_state_t *state, hk_value_t *args)
+static int is_instance_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_instance(args[1]));
 }
 
-static int32_t is_iterator_call(hk_state_t *state, hk_value_t *args)
+static int is_iterator_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_iterator(args[1]));
 }
 
-static int32_t is_callable_call(hk_state_t *state, hk_value_t *args)
+static int is_callable_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_callable(args[1]));
 }
 
-static int32_t is_userdata_call(hk_state_t *state, hk_value_t *args)
+static int is_userdata_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_userdata(args[1]));
 }
 
-static int32_t is_object_call(hk_state_t *state, hk_value_t *args)
+static int is_object_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_object(args[1]));
 }
 
-static int32_t is_comparable_call(hk_state_t *state, hk_value_t *args)
+static int is_comparable_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_comparable(args[1]));
 }
 
-static int32_t is_iterable_call(hk_state_t *state, hk_value_t *args)
+static int is_iterable_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_iterable(args[1]));
 }
 
-static int32_t to_bool_call(hk_state_t *state, hk_value_t *args)
+static int to_bool_call(HkState *state, HkValue *args)
 {
   return hk_state_push_bool(state, hk_is_truthy(args[1]));
 }
 
-static int32_t to_int_call(hk_state_t *state, hk_value_t *args)
+static int to_int_call(HkState *state, HkValue *args)
 {
-  hk_type_t types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  HkType types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
   if (hk_check_argument_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t val = args[1];
+  HkValue val = args[1];
   if (hk_is_number(val))
     return hk_state_push_number(state, (int64_t) hk_as_number(val));
   double result;
@@ -273,12 +273,12 @@ static int32_t to_int_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, (int64_t) result);
 }
 
-static int32_t to_number_call(hk_state_t *state, hk_value_t *args)
+static int to_number_call(HkState *state, HkValue *args)
 {
-  hk_type_t types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  HkType types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
   if (hk_check_argument_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t val = args[1];
+  HkValue val = args[1];
   if (hk_is_number(val))
     return HK_STATUS_OK;
   double result;
@@ -287,13 +287,13 @@ static int32_t to_number_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, result);
 }
 
-static int32_t to_string_call(hk_state_t *state, hk_value_t *args)
+static int to_string_call(HkState *state, HkValue *args)
 {
-  hk_type_t types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
+  HkType types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
   if (hk_check_argument_types(args, 1, 4, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t val = args[1];
-  hk_string_t *str;
+  HkValue val = args[1];
+  HkString *str;
   if (hk_is_nil(val))
   {
     str = hk_string_from_chars(-1, "nil");
@@ -321,12 +321,12 @@ end:
   return HK_STATUS_OK;
 }
 
-static int32_t ord_call(hk_state_t *state, hk_value_t *args)
+static int ord_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t val = args[1];
-  hk_string_t *str = hk_as_string(val);
+  HkValue val = args[1];
+  HkString *str = hk_as_string(val);
   if (!str->length)
   {
     hk_runtime_error("type error: argument #1 must be a non-empty string");
@@ -335,17 +335,17 @@ static int32_t ord_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, (uint32_t) str->chars[0]);
 }
 
-static int32_t chr_call(hk_state_t *state, hk_value_t *args)
+static int chr_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t data = (int32_t) hk_as_number(args[1]);
+  int data = (int) hk_as_number(args[1]);
   if (data < 0 || data > UCHAR_MAX)
   {
     hk_runtime_error("range error: argument #1 must be between 0 and %d", UCHAR_MAX);
     return HK_STATUS_ERROR;
   }
-  hk_string_t *str = hk_string_new_with_capacity(1);
+  HkString *str = hk_string_new_with_capacity(1);
   str->length = 1;
   str->chars[0] = (char) data;
   str->chars[1] = '\0';
@@ -357,19 +357,19 @@ static int32_t chr_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t hex_call(hk_state_t *state, hk_value_t *args)
+static int hex_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *str = hk_as_string(args[1]);
+  HkString *str = hk_as_string(args[1]);
   if (!str->length)
     return hk_state_push_string(state, str);
-  int32_t length = str->length << 1;
-  hk_string_t *result = hk_string_new_with_capacity(length);
+  int length = str->length << 1;
+  HkString *result = hk_string_new_with_capacity(length);
   result->length = length;
   result->chars[length] = '\0';
   char *chars = result->chars;
-  for (int32_t i = 0; i < str->length; ++i)
+  for (int i = 0; i < str->length; ++i)
   {
     snprintf(chars, INT32_MAX, "%.2x", (unsigned char) str->chars[i]);
     chars += 2;
@@ -382,11 +382,11 @@ static int32_t hex_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t bin_call(hk_state_t *state, hk_value_t *args)
+static int bin_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *str = hk_as_string(args[1]);
+  HkString *str = hk_as_string(args[1]);
   if (!str->length)
     return hk_state_push_string(state, str);
   if (str->length % 2)
@@ -394,12 +394,12 @@ static int32_t bin_call(hk_state_t *state, hk_value_t *args)
     hk_state_push_nil(state);
     return HK_STATUS_OK;
   }
-  int32_t length = str->length >> 1;
-  hk_string_t *result = hk_string_new_with_capacity(length);
+  int length = str->length >> 1;
+  HkString *result = hk_string_new_with_capacity(length);
   result->length = length;
   result->chars[length] = '\0';
   char *chars = str->chars;
-  for (int32_t i = 0; i < length; ++i)
+  for (int i = 0; i < length; ++i)
   {
     sscanf(chars, "%2hhx", (unsigned char *) &result->chars[i]);
     chars += 2;
@@ -412,14 +412,14 @@ static int32_t bin_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t address_call(hk_state_t *state, hk_value_t *args)
+static int address_call(HkState *state, HkValue *args)
 {
-  hk_value_t val = args[1];
-  void *ptr = (int64_t) hk_is_object(val) ? val.as.pointer_value : NULL;
-  hk_string_t *result = hk_string_new_with_capacity(32);
+  HkValue val = args[1];
+  void *ptr = (int64_t) hk_is_object(val) ? val.as.pointer : NULL;
+  HkString *result = hk_string_new_with_capacity(32);
   char *chars = result->chars;
   snprintf(chars, 31,  "%p", ptr);
-  result->length = (int32_t) strnlen(chars, 31);
+  result->length = (int) strnlen(chars, 31);
   if (hk_state_push_string(state, result) == HK_STATUS_ERROR)
   {
     hk_string_free(result);
@@ -428,43 +428,43 @@ static int32_t address_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t refcount_call(hk_state_t *state, hk_value_t *args)
+static int refcount_call(HkState *state, HkValue *args)
 {
-  int32_t result = hk_value_ref_count(args[1]);
+  int result = hk_value_ref_count(args[1]);
   return hk_state_push_number(state, result);
 }
 
-static int32_t cap_call(hk_state_t *state, hk_value_t *args)
+static int cap_call(HkState *state, HkValue *args)
 {
-  hk_type_t types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
+  HkType types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
   if (hk_check_argument_types(args, 1, 2, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t val = args[1];
-  int32_t capacity = hk_is_string(val) ? hk_as_string(val)->capacity
+  HkValue val = args[1];
+  int capacity = hk_is_string(val) ? hk_as_string(val)->capacity
     : hk_as_array(val)->capacity;
   return hk_state_push_number(state, capacity);
 }
 
-static int32_t len_call(hk_state_t *state, hk_value_t *args)
+static int len_call(HkState *state, HkValue *args)
 {
-  hk_type_t types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
+  HkType types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
     HK_TYPE_STRUCT, HK_TYPE_INSTANCE};
   if (hk_check_argument_types(args, 1, 5, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t val = args[1];
+  HkValue val = args[1];
   if (hk_is_string(val))
     return hk_state_push_number(state, hk_as_string(val)->length);
   if (hk_is_range(val))
   {
-    hk_range_t *range = hk_as_range(val);
+    HkRange *range = hk_as_range(val);
     if (range->start < range->end)
     {
-      int32_t result = (int32_t) range->end - range->start + 1;
+      int result = (int) range->end - range->start + 1;
       return hk_state_push_number(state, result);
     }
     if (range->start > range->end)
     {
-      int32_t result = (int32_t) range->start - range->end + 1;
+      int result = (int) range->start - range->end + 1;
       return hk_state_push_number(state, result);
     }
     return hk_state_push_number(state, 1);
@@ -476,13 +476,13 @@ static int32_t len_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_number(state, hk_as_instance(val)->ztruct->length);
 }
 
-static int32_t is_empty_call(hk_state_t *state, hk_value_t *args)
+static int is_empty_call(HkState *state, HkValue *args)
 {
-  hk_type_t types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
+  HkType types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
     HK_TYPE_STRUCT, HK_TYPE_INSTANCE};
   if (hk_check_argument_types(args, 1, 5, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t val = args[1];
+  HkValue val = args[1];
   if (hk_is_string(val))
     return hk_state_push_bool(state, !hk_as_string(val)->length);
   if (hk_is_range(val))
@@ -494,23 +494,23 @@ static int32_t is_empty_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_bool(state, !hk_as_instance(val)->ztruct->length);
 }
 
-static int32_t compare_call(hk_state_t *state, hk_value_t *args)
+static int compare_call(HkState *state, HkValue *args)
 {
-  hk_value_t val1 = args[1];
-  hk_value_t val2 = args[2];
-  int32_t result;
+  HkValue val1 = args[1];
+  HkValue val2 = args[2];
+  int result;
   if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_number(state, result);
 }
 
-static int32_t split_call(hk_state_t *state, hk_value_t *args)
+static int split_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_type(args, 1, HK_TYPE_STRING) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_type(args, 2, HK_TYPE_STRING) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_array_t *arr = split(hk_as_string(args[1]), hk_as_string(args[2]));
+  HkArray *arr = split(hk_as_string(args[1]), hk_as_string(args[2]));
   if (hk_state_push_array(state, arr) == HK_STATUS_ERROR)
   {
     hk_array_free(arr);
@@ -519,13 +519,13 @@ static int32_t split_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t join_call(hk_state_t *state, hk_value_t *args)
+static int join_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_type(args, 1, HK_TYPE_ARRAY) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_check_argument_type(args, 2, HK_TYPE_STRING) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *str;
+  HkString *str;
   if (join(hk_as_array(args[1]), hk_as_string(args[2]), &str) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_state_push_string(state, str) == HK_STATUS_ERROR)
@@ -536,19 +536,19 @@ static int32_t join_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t iter_call(hk_state_t *state, hk_value_t *args)
+static int iter_call(HkState *state, HkValue *args)
 {
-  hk_type_t types[] = {HK_TYPE_ITERATOR, HK_TYPE_RANGE, HK_TYPE_ARRAY};
+  HkType types[] = {HK_TYPE_ITERATOR, HK_TYPE_RANGE, HK_TYPE_ARRAY};
   if (hk_check_argument_types(args, 1, 3, types) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_value_t val = args[1];
+  HkValue val = args[1];
   if (hk_is_iterator(val))
   {
     if (hk_state_push_iterator(state, hk_as_iterator(val)) == HK_STATUS_ERROR)
       return HK_STATUS_ERROR;
     return HK_STATUS_OK;
   }
-  hk_iterator_t *it = hk_new_iterator(val);
+  HkIterator *it = hk_new_iterator(val);
   hk_assert(it, "could not create iterator");
   if (hk_state_push_iterator(state, it) == HK_STATUS_ERROR)
   {
@@ -558,38 +558,38 @@ static int32_t iter_call(hk_state_t *state, hk_value_t *args)
   return HK_STATUS_OK;
 }
 
-static int32_t valid_call(hk_state_t *state, hk_value_t *args)
+static int valid_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_type(args, 1, HK_TYPE_ITERATOR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   return hk_state_push_bool(state, hk_iterator_is_valid(hk_as_iterator(args[1])));
 }
 
-static int32_t current_call(hk_state_t *state, hk_value_t *args)
+static int current_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_type(args, 1, HK_TYPE_ITERATOR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_iterator_t *it = hk_as_iterator(args[1]);
+  HkIterator *it = hk_as_iterator(args[1]);
   if (!hk_iterator_is_valid(it))
     return hk_state_push_nil(state);
   return hk_state_push(state, hk_iterator_get_current(it));
 }
 
-static int32_t next_call(hk_state_t *state, hk_value_t *args)
+static int next_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_type(args, 1, HK_TYPE_ITERATOR) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_iterator_t *it = hk_as_iterator(args[1]);
+  HkIterator *it = hk_as_iterator(args[1]);
   if (hk_iterator_is_valid(it))
     it = hk_iterator_next(it);
   return hk_state_push_iterator(state, it);
 }
 
-static int32_t sleep_call(hk_state_t *state, hk_value_t *args)
+static int sleep_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_int(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  int32_t ms = (int32_t) hk_as_number(args[1]);
+  int ms = (int) hk_as_number(args[1]);
 #ifdef _WIN32
   Sleep(ms);
 #else
@@ -598,30 +598,30 @@ static int32_t sleep_call(hk_state_t *state, hk_value_t *args)
   return hk_state_push_nil(state);
 }
 
-static int32_t assert_call(hk_state_t *state, hk_value_t *args)
+static int assert_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
   if (hk_is_falsey(args[1]))
   {
-    hk_string_t *str = hk_as_string(args[2]);
+    HkString *str = hk_as_string(args[2]);
     fprintf(stderr, "assertion failed: %.*s\n", str->length, str->chars);
     return HK_STATUS_NO_TRACE;
   }
   return hk_state_push_nil(state);
 }
 
-static int32_t panic_call(hk_state_t *state, hk_value_t *args)
+static int panic_call(HkState *state, HkValue *args)
 {
   (void) state;
   if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  hk_string_t *str = hk_as_string(args[1]);
+  HkString *str = hk_as_string(args[1]);
   fprintf(stderr, "panic: %.*s\n", str->length, str->chars);
   return HK_STATUS_NO_TRACE;
 }
 
-void load_globals(hk_state_t *state)
+void load_globals(HkState *state)
 {
   hk_state_push_new_native(state, globals[0], 1, &print_call);
   hk_state_push_new_native(state, globals[1], 1, &println_call);
@@ -666,14 +666,14 @@ void load_globals(hk_state_t *state)
   hk_state_push_new_native(state, globals[40], 1, &panic_call);
 }
 
-int32_t num_globals(void)
+int num_globals(void)
 {
-  return (int32_t) (sizeof(globals) / sizeof(*globals));
+  return (int) (sizeof(globals) / sizeof(*globals));
 }
 
-int32_t lookup_global(int32_t length, char *chars)
+int lookup_global(int length, char *chars)
 {
-  int32_t index = num_globals() - 1;
+  int index = num_globals() - 1;
   for (; index > -1; --index)
   {
     const char *global = globals[index];

@@ -8,7 +8,7 @@
 
 #include <stdint.h>
 
-void *hk_allocate(int32_t size);
-void *hk_reallocate(void *ptr, int32_t size);
+void *hk_allocate(int size);
+void *hk_reallocate(void *ptr, int size);
 
 #endif // HK_MEMORY_H
