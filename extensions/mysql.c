@@ -20,11 +20,11 @@ typedef struct
 typedef struct
 {
   HK_USERDATA_HEADER
-  MYSQL_RES *mysql_res;
+  MYSQL_RES *res;
 } MySQLResultWrapper;
 
 static inline MySQLWrapper *mysql_wrapper_new(MYSQL *mysql);
-static inline MySQLResultWrapper *mysql_result_wrapper_new(MYSQL_RES *mysql_res);
+static inline MySQLResultWrapper *mysql_result_wrapper_new(MYSQL_RES *res);
 static void mysql_wrapper_deinit(HkUserdata *udata);
 static void mysql_result_wrapper_deinit(HkUserdata *udata);
 static int connect_call(HkState *state, HkValue *args);
@@ -44,29 +44,29 @@ static inline MySQLWrapper *mysql_wrapper_new(MYSQL *mysql)
   return wrapper;
 }
 
-static inline MySQLResultWrapper *mysql_result_wrapper_new(MYSQL_RES *mysql_res)
+static inline MySQLResultWrapper *mysql_result_wrapper_new(MYSQL_RES *res)
 {
   MySQLResultWrapper *wrapper = (MySQLResultWrapper *) hk_allocate(sizeof(*wrapper));
   hk_userdata_init((HkUserdata *) wrapper, &mysql_result_wrapper_deinit);
-  wrapper->mysql_res = mysql_res;
+  wrapper->res = res;
   return wrapper;
 }
 
 static void mysql_wrapper_deinit(HkUserdata *udata)
 {
-  MySQLWrapper *wrapper = (MySQLWrapper *) udata;
-  if (!wrapper->mysql)
+  MYSQL *mysql = ((MySQLWrapper *) udata)->mysql;
+  if (!mysql)
     return;
-  mysql_close(wrapper->mysql);
+  mysql_close(mysql);
   mysql_library_end();
 }
 
 static void mysql_result_wrapper_deinit(HkUserdata *udata)
 {
-  MySQLResultWrapper *wrapper = (MySQLResultWrapper *) udata;
-  if (!wrapper->mysql_res)
+  MYSQL_RES *res = ((MySQLResultWrapper *) udata)->res;
+  if (!res)
     return;
-  mysql_free_result(wrapper->mysql_res);
+  mysql_free_result(res);
 }
 
 static int connect_call(HkState *state, HkValue *args)
@@ -191,14 +191,14 @@ static int fetch_row_call(HkState *state, HkValue *args)
 {
   if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
     return HK_STATUS_ERROR;
-  MYSQL_RES *mysql_res = ((MySQLResultWrapper *) hk_as_userdata(args[1]))->mysql_res;
-  MYSQL_FIELD *fields = mysql_fetch_fields(mysql_res);
-  MYSQL_ROW row = mysql_fetch_row(mysql_res);
+  MYSQL_RES *res = ((MySQLResultWrapper *) hk_as_userdata(args[1]))->res;
+  MYSQL_FIELD *fields = mysql_fetch_fields(res);
+  MYSQL_ROW row = mysql_fetch_row(res);
   if (!row)
     return hk_state_push_nil(state);
-  int num_fields = mysql_num_fields(mysql_res);
-  HkArray *arr = hk_array_new_with_capacity(num_fields);
-  for (int i = 0; i < num_fields; ++i)
+  int numFields = mysql_num_fields(res);
+  HkArray *arr = hk_array_new_with_capacity(numFields);
+  for (int i = 0; i < numFields; ++i)
   {
     char *chars = row[i];
     if (!chars)
