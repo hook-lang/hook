@@ -6,14 +6,13 @@
 #include "json.h"
 #include <stdlib.h>
 #include <hook/check.h>
-#include <hook/status.h>
 #include <hook/error.h>
 #include "deps/cJSON.h"
 
 static inline cJSON *value_to_json(HkValue val);
 static inline HkValue json_to_value(HkState *state, cJSON *json);
-static int encode_call(HkState *state, HkValue *args);
-static int decode_call(HkState *state, HkValue *args);
+static void encode_call(HkState *state, HkValue *args);
+static void decode_call(HkState *state, HkValue *args);
 
 static inline cJSON *value_to_json(HkValue val)
 {
@@ -134,7 +133,7 @@ static inline HkValue json_to_value(HkState *state, cJSON *json)
   return val;
 }
 
-static int encode_call(HkState *state, HkValue *args)
+static void encode_call(HkState *state, HkValue *args)
 {
   HkValue val = args[1];
   cJSON *json = value_to_json(val);
@@ -142,46 +141,40 @@ static int encode_call(HkState *state, HkValue *args)
   cJSON_Delete(json);
   HkString *str = hk_string_from_chars(-1, chars);
   free(chars);
-  if (hk_state_push_string(state, str) == HK_STATUS_ERROR)
-  {
+  hk_state_push_string(state, str);
+  if (!hk_state_is_ok(state))
     hk_string_free(str);
-    return HK_STATUS_ERROR;
-  }
-  return HK_STATUS_OK;
 }
 
-static int decode_call(HkState *state, HkValue *args)
+static void decode_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_string(state, args, 1);
+  hk_return_if_not_ok(state);
   HkString *str = hk_as_string(args[1]);
   cJSON *json = cJSON_ParseWithLength(str->chars, str->length);
   if (!json)
   {
-    hk_runtime_error("cannot parse json");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot parse json");
+    return;
   }
   HkValue val = json_to_value(state, json);
   cJSON_Delete(json);
-  if (hk_state_push(state, val) == HK_STATUS_ERROR)
-  {
+  hk_state_push(state, val);
+  if (!hk_state_is_ok(state))
     hk_value_free(val);
-    return HK_STATUS_ERROR;
-  }
-  return HK_STATUS_OK;
 }
 
-HK_LOAD_FN(json)
+HK_LOAD_MODULE_HANDLER(json)
 {
-  if (hk_state_push_string_from_chars(state, -1, "json") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "encode") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "encode", 1, &encode_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "decode") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "decode", 1, &decode_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_construct(state, 2);
+  hk_state_push_string_from_chars(state, -1, "json");
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "encode");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "encode", 1, &encode_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "decode");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "decode", 1, &decode_call);
+  hk_return_if_not_ok(state);
+  hk_state_construct(state, 2);
 }

@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <hook/memory.h>
 #include <hook/check.h>
-#include <hook/status.h>
 
 typedef struct LinkedListNode
 {
@@ -31,15 +30,15 @@ static inline LinkedList *linked_list_copy(LinkedList *list);
 static inline void linked_list_inplace_push_front(LinkedList *list, HkValue elem);
 static inline void linked_list_inplace_push_back(LinkedList *list, HkValue elem);
 static void linked_list_deinit(HkUserdata *udata);
-static int new_linked_list_call(HkState *state, HkValue *args);
-static int len_call(HkState *state, HkValue *args);
-static int is_empty_call(HkState *state, HkValue *args);
-static int push_front_call(HkState *state, HkValue *args);
-static int push_back_call(HkState *state, HkValue *args);
-static int pop_front_call(HkState *state, HkValue *args);
-static int pop_back_call(HkState *state, HkValue *args);
-static int front_call(HkState *state, HkValue *args);
-static int back_call(HkState *state, HkValue *args);
+static void new_linked_list_call(HkState *state, HkValue *args);
+static void len_call(HkState *state, HkValue *args);
+static void is_empty_call(HkState *state, HkValue *args);
+static void push_front_call(HkState *state, HkValue *args);
+static void push_back_call(HkState *state, HkValue *args);
+static void pop_front_call(HkState *state, HkValue *args);
+static void pop_back_call(HkState *state, HkValue *args);
+static void front_call(HkState *state, HkValue *args);
+static void back_call(HkState *state, HkValue *args);
 
 static inline LinkedListNode *LinkedListNode_new(HkValue elem)
 {
@@ -123,54 +122,54 @@ static void linked_list_deinit(HkUserdata *udata)
   }
 }
 
-static int new_linked_list_call(HkState *state, HkValue *args)
+static void new_linked_list_call(HkState *state, HkValue *args)
 {
   (void) args;
-  return hk_state_push_userdata(state, (HkUserdata *) linked_list_new());
+  hk_state_push_userdata(state, (HkUserdata *) linked_list_new());
 }
 
-static int len_call(HkState *state, HkValue *args)
+static void len_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
-  return hk_state_push_number(state, list->length);
+  hk_state_push_number(state, list->length);
 }
 
-static int is_empty_call(HkState *state, HkValue *args)
+static void is_empty_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
-  return hk_state_push_bool(state, !list->length);
+  hk_state_push_bool(state, !list->length);
 }
 
-static int push_front_call(HkState *state, HkValue *args)
+static void push_front_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
   HkValue elem = args[2];
   LinkedList *result = linked_list_copy(list);
   linked_list_inplace_push_front(result, elem);
-  return hk_state_push_userdata(state, (HkUserdata *) result);
+  hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int push_back_call(HkState *state, HkValue *args)
+static void push_back_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
   HkValue elem = args[2];
   LinkedList *result = linked_list_copy(list);
   linked_list_inplace_push_back(result, elem);
-  return hk_state_push_userdata(state, (HkUserdata *) result);
+  hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int pop_front_call(HkState *state, HkValue *args)
+static void pop_front_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
   LinkedList *result = linked_list_new();
   if (!list->head)
@@ -182,13 +181,13 @@ static int pop_front_call(HkState *state, HkValue *args)
     node = node->next;
   }
 end:
-  return hk_state_push_userdata(state, (HkUserdata *) result);
+  hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int pop_back_call(HkState *state, HkValue *args)
+static void pop_back_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
   LinkedList *result = linked_list_new();
   if (!list->tail)
@@ -200,66 +199,66 @@ static int pop_back_call(HkState *state, HkValue *args)
     node = node->prev;
   }
 end:
-  return hk_state_push_userdata(state, (HkUserdata *) result);
+  hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int front_call(HkState *state, HkValue *args)
+static void front_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
   HkValue elem = list->head ? list->head->elem : HK_NIL_VALUE;
-  return hk_state_push(state, elem);
+  hk_state_push(state, elem);
 }
 
-static int back_call(HkState *state, HkValue *args)
+static void back_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
   HkValue elem = list->tail ? list->tail->elem : HK_NIL_VALUE;
-  return hk_state_push(state, elem);
+  hk_state_push(state, elem);
 }
 
-HK_LOAD_FN(lists)
+HK_LOAD_MODULE_HANDLER(lists)
 {
-  if (hk_state_push_string_from_chars(state, -1, "lists") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "new_linked_list") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "new_linked_list", 0, &new_linked_list_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "len") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "len", 1, &len_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "is_empty") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "is_empty", 1, &is_empty_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "push_front") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "push_front", 2, &push_front_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "push_back") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "push_back", 2, &push_back_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "pop_front") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "pop_front", 1, &pop_front_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "pop_back") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "pop_back", 1, &pop_back_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "front") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "front", 1, &front_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "back") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "back", 1, &back_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_construct(state, 9);
+  hk_state_push_string_from_chars(state, -1, "lists");
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "new_linked_list");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "new_linked_list", 0, &new_linked_list_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "len");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "len", 1, &len_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "is_empty");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "is_empty", 1, &is_empty_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "push_front");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "push_front", 2, &push_front_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "push_back");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "push_back", 2, &push_back_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "pop_front");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "pop_front", 1, &pop_front_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "pop_back");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "pop_back", 1, &pop_back_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "front");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "front", 1, &front_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "back");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "back", 1, &back_call);
+  hk_return_if_not_ok(state);
+  hk_state_construct(state, 9);
 }

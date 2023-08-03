@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <hook/check.h>
-#include <hook/status.h>
 
 #ifdef _WIN32
   #include <windows.h>
@@ -18,42 +17,42 @@
   #include <limits.h>
 #endif
 
-static int clock_call(HkState *state, HkValue *args);
-static int time_call(HkState *state, HkValue *args);
-static int system_call(HkState *state, HkValue *args);
-static int getenv_call(HkState *state, HkValue *args);
-static int getcwd_call(HkState *state, HkValue *args);
-static int name_call(HkState *state, HkValue *args);
+static void clock_call(HkState *state, HkValue *args);
+static void time_call(HkState *state, HkValue *args);
+static void system_call(HkState *state, HkValue *args);
+static void getenv_call(HkState *state, HkValue *args);
+static void getcwd_call(HkState *state, HkValue *args);
+static void name_call(HkState *state, HkValue *args);
 
-static int clock_call(HkState *state, HkValue *args)
+static void clock_call(HkState *state, HkValue *args)
 {
   (void) args;
-  return hk_state_push_number(state, (double) clock() / CLOCKS_PER_SEC);
+  hk_state_push_number(state, (double) clock() / CLOCKS_PER_SEC);
 }
 
-static int time_call(HkState *state, HkValue *args)
+static void time_call(HkState *state, HkValue *args)
 {
   (void) args;
-  return hk_state_push_number(state, (double) time(NULL));
+  hk_state_push_number(state, (double) time(NULL));
 }
 
-static int system_call(HkState *state, HkValue *args)
+static void system_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_push_number(state, system(hk_as_string(args[1])->chars));
+  hk_state_check_argument_string(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, system(hk_as_string(args[1])->chars));
 }
 
-static int getenv_call(HkState *state, HkValue *args)
+static void getenv_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_string(state, args, 1);
+  hk_return_if_not_ok(state);
   const char *chars = getenv(hk_as_string(args[1])->chars);
   chars = chars ? chars : "";
-  return hk_state_push_string_from_chars(state, -1, chars);
+  hk_state_push_string_from_chars(state, -1, chars);
 }
 
-static int getcwd_call(HkState *state, HkValue *args)
+static void getcwd_call(HkState *state, HkValue *args)
 {
   (void) args;
   HkString *result = NULL;
@@ -71,16 +70,16 @@ static int getcwd_call(HkState *state, HkValue *args)
 #endif
 end:
   if (!result)
-    return hk_state_push_nil(state);
-  if (hk_state_push_string(state, result) == HK_STATUS_ERROR)
   {
-    hk_string_free(result);
-    return HK_STATUS_ERROR;
+    hk_state_push_nil(state);
+    return;
   }
-  return HK_STATUS_OK;
+  hk_state_push_string(state, result);
+  if (!hk_state_is_ok(state))
+    hk_string_free(result);
 }
 
-static int name_call(HkState *state, HkValue *args)
+static void name_call(HkState *state, HkValue *args)
 {
   (void) args;
   char *result;
@@ -97,40 +96,40 @@ static int name_call(HkState *state, HkValue *args)
 #else
   result = "unknown";
 #endif
-  return hk_state_push_string_from_chars(state, -1, result);
+  hk_state_push_string_from_chars(state, -1, result);
 }
 
-HK_LOAD_FN(os)
+HK_LOAD_MODULE_HANDLER(os)
 {
-  if (hk_state_push_string_from_chars(state, -1, "os") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "CLOCKS_PER_SEC") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_number(state, CLOCKS_PER_SEC) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "clock") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "clock", 0, &clock_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "time") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "time", 0, &time_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "system") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "system", 1, &system_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "getenv") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "getenv", 1, &getenv_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "getcwd") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "getcwd", 1, &getcwd_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "name") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "name", 0, &name_call) == HK_STATUS_ERROR) 
-    return HK_STATUS_ERROR;
-  return hk_state_construct(state, 7);
+  hk_state_push_string_from_chars(state, -1, "os");
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "CLOCKS_PER_SEC");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, CLOCKS_PER_SEC);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "clock");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "clock", 0, &clock_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "time");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "time", 0, &time_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "system");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "system", 1, &system_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "getenv");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "getenv", 1, &getenv_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "getcwd");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "getcwd", 1, &getcwd_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "name");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "name", 0, &name_call);
+  hk_return_if_not_ok(state);
+  hk_state_construct(state, 7);
 }

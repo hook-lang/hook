@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(utf8);
+HK_LOAD_MODULE_HANDLER(utf8);
 
 #endif // UTF8_H

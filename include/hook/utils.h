@@ -9,12 +9,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define HK_LOAD_FN_PREFIX "load_"
+#define HK_LOAD_MODULE_HANDLER_PREFIX "load_"
 
 #ifdef _WIN32
-  #define HK_LOAD_FN(n) int __declspec(dllexport) __stdcall load_##n(HkState *state)
+  #define HK_LOAD_MODULE_HANDLER(n) void __declspec(dllexport) __stdcall load_##n(HkState *state)
 #else
-  #define HK_LOAD_FN(n) int load_##n(HkState *state)
+  #define HK_LOAD_MODULE_HANDLER(n) void load_##n(HkState *state)
 #endif
 
 #define hk_assert(cond, msg) do \

@@ -5,11 +5,10 @@
 
 #include "utf8.h"
 #include <hook/check.h>
-#include <hook/status.h>
 
 static inline int decode_char(unsigned char c);
-static int len_call(HkState *state, HkValue *args);
-static int sub_call(HkState *state, HkValue *args);
+static void len_call(HkState *state, HkValue *args);
+static void sub_call(HkState *state, HkValue *args);
 
 static inline int decode_char(unsigned char c)
 {
@@ -24,10 +23,10 @@ static inline int decode_char(unsigned char c)
   return 1;
 }
 
-static int len_call(HkState *state, HkValue *args)
+static void len_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_string(state, args, 1);
+  hk_return_if_not_ok(state);
   HkString *str = hk_as_string(args[1]);
   int result = 0;
   for (int i = 0; i < str->length;)
@@ -38,17 +37,17 @@ static int len_call(HkState *state, HkValue *args)
     i += length;
     ++result;
   }
-  return hk_state_push_number(state, result);
+  hk_state_push_number(state, result);
 }
 
-static int sub_call(HkState *state, HkValue *args)
+static void sub_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_number(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_number(args, 3) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_string(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_number(state, args, 2);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_number(state, args, 3);
+  hk_return_if_not_ok(state);
   HkString *str = hk_as_string(args[1]);
   int start = (int) hk_as_number(args[2]);
   int end = (int) hk_as_number(args[3]);
@@ -74,20 +73,20 @@ static int sub_call(HkState *state, HkValue *args)
   end = i;
   length = end - start;
   char *chars = &str->chars[start];
-  return hk_state_push_string_from_chars(state, length, chars);
+  hk_state_push_string_from_chars(state, length, chars);
 }
 
-HK_LOAD_FN(utf8)
+HK_LOAD_MODULE_HANDLER(utf8)
 {
-  if (hk_state_push_string_from_chars(state, -1, "utf8") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "len") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "len", 1, &len_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "sub") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "sub", 3, &sub_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_construct(state, 2);
+  hk_state_push_string_from_chars(state, -1, "utf8");
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "len");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "len", 1, &len_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "sub");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "sub", 3, &sub_call);
+  hk_return_if_not_ok(state);
+  hk_state_construct(state, 2);
 }

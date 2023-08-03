@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(encoding);
+HK_LOAD_MODULE_HANDLER(encoding);
 
 #endif // ENCODING_H

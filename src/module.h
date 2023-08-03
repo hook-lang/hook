@@ -10,6 +10,6 @@
 
 void init_module_cache(void);
 void free_module_cache(void);
-int load_module(HkState *state);
+void load_module(HkState *state);
 
 #endif // MODULE_H

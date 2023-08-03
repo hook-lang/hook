@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(math);
+HK_LOAD_MODULE_HANDLER(math);
 
 #endif // MATH_H

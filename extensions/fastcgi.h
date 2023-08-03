@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(fastcgi);
+HK_LOAD_MODULE_HANDLER(fastcgi);
 
 #endif // FASTCGI_H

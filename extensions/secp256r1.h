@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(secp256r1);
+HK_LOAD_MODULE_HANDLER(secp256r1);
 
 #endif // SECP256R1_H

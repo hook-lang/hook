@@ -5,7 +5,6 @@
 
 #include "module.h"
 #include <stdlib.h>
-#include <hook/status.h>
 #include <hook/error.h>
 #include <hook/utils.h>
 #include "string_map.h"
@@ -38,9 +37,9 @@
 #endif
 
 #ifdef _WIN32
-  typedef int (__stdcall *load_module_t)(HkState *);
+  typedef void (__stdcall *LoadModuleHandler)(HkState *);
 #else
-  typedef int (*load_module_t)(HkState *);
+  typedef void (*LoadModuleHandler)(HkState *);
 #endif
 
 static StringMap module_cache;
@@ -49,8 +48,7 @@ static inline bool get_module_result(HkString *name, HkValue *result);
 static inline void put_module_result(HkString *name, HkValue result);
 static inline const char *get_home_dir(void);
 static inline const char *get_default_home_dir(void);
-
-static inline int load_native_module(HkState *state, HkString *name);
+static inline void load_native_module(HkState *state, HkString *name);
 
 static inline bool get_module_result(HkString *name, HkValue *result)
 {
@@ -88,7 +86,7 @@ static inline const char *get_default_home_dir(void)
   return result;
 }
 
-static inline int load_native_module(HkState *state, HkString *name)
+static inline void load_native_module(HkState *state, HkString *name)
 {
   HkString *file = hk_string_from_chars(-1, get_home_dir());
   hk_string_inplace_concat_chars(file, -1, FILE_INFIX);
@@ -101,32 +99,32 @@ static inline int load_native_module(HkState *state, HkString *name)
 #endif
   if (!handle)
   {
-    hk_runtime_error("cannot open module `%.*s`", file->length, file->chars);
+    hk_state_error(state, "cannot open module `%.*s`", file->length, file->chars);
     hk_string_free(file);
-    return HK_STATUS_ERROR;
+    return;
   }
   hk_string_free(file);
-  HkString *fn_name = hk_string_from_chars(-1, HK_LOAD_FN_PREFIX);
+  HkString *fn_name = hk_string_from_chars(-1, HK_LOAD_MODULE_HANDLER_PREFIX);
   hk_string_inplace_concat(fn_name, name);
-  load_module_t load;
+  LoadModuleHandler load;
 #ifdef _WIN32
-  load = (load_module_t) GetProcAddress(handle, fn_name->chars);
+  load = (LoadModuleHandler) GetProcAddress(handle, fn_name->chars);
 #else
   *((void **) &load) = dlsym(handle, fn_name->chars);
 #endif
   if (!load)
   {
-    hk_runtime_error("no such function %.*s()", fn_name->length, fn_name->chars);
+    hk_state_error(state, "no such function %.*s()", fn_name->length, fn_name->chars);
     hk_string_free(fn_name);
-    return HK_STATUS_ERROR;
+    return;
   }
   hk_string_free(fn_name);
-  if (load(state) == HK_STATUS_ERROR)
+  load(state);
+  if (!hk_state_is_ok(state))
   {
-    hk_runtime_error("cannot load module `%.*s`", name->length, name->chars);
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot load module `%.*s`", name->length, name->chars);
+    return;
   }
-  return HK_STATUS_OK;
 }
 
 void init_module_cache(void)
@@ -139,7 +137,7 @@ void free_module_cache(void)
   string_map_free(&module_cache);
 }
 
-int load_module(HkState *state)
+void load_module(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
@@ -152,13 +150,12 @@ int load_module(HkState *state)
     slots[0] = result;
     --state->stackTop;
     hk_string_release(name);
-    return HK_STATUS_OK;
+    return;
   }
-  if (load_native_module(state, name) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  load_native_module(state, name);
+  hk_return_if_not_ok(state);
   put_module_result(name, state->stackSlots[state->stackTop]);
   slots[0] = state->stackSlots[state->stackTop];
   --state->stackTop;
   hk_string_release(name);
-  return HK_STATUS_OK;
 }

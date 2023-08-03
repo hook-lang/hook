@@ -36,7 +36,7 @@ typedef struct
   HK_OBJECT_HEADER
   int arity;
   HkString *name;
-  int (*call)(struct hk_state *, HkValue *);
+  void (*call)(struct hk_state *, HkValue *);
 } HkNative;
 
 HkFunction *hk_function_new(int arity, HkString *name, HkString *file);
@@ -48,7 +48,7 @@ HkFunction *hk_function_deserialize(FILE *stream);
 HkClosure *hk_closure_new(HkFunction *fn);
 void hk_closure_free(HkClosure *cl);
 void hk_closure_release(HkClosure *cl);
-HkNative *hk_native_new(HkString *name, int arity, int (*call)(struct hk_state *, HkValue *));
+HkNative *hk_native_new(HkString *name, int arity, void (*call)(struct hk_state *, HkValue *));
 void hk_native_free(HkNative *native);
 void hk_native_release(HkNative *native);
 

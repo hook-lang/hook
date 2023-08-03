@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(leveldb);
+HK_LOAD_MODULE_HANDLER(leveldb);
 
 #endif // LEVELDB_H

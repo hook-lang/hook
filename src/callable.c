@@ -161,7 +161,7 @@ void hk_closure_release(HkClosure *cl)
     hk_closure_free(cl);
 }
 
-HkNative *hk_native_new(HkString *name, int arity, int (*call)(struct hk_state *, HkValue *))
+HkNative *hk_native_new(HkString *name, int arity, void (*call)(struct hk_state *, HkValue *))
 {
   HkNative *native = (HkNative *) hk_allocate(sizeof(*native));
   native->ref_count = 0;

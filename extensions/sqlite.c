@@ -4,11 +4,10 @@
 //
 
 #include "sqlite.h"
-#include "deps/sqlite3.h"
 #include <hook/memory.h>
 #include <hook/check.h>
-#include <hook/status.h>
 #include <hook/error.h>
+#include "deps/sqlite3.h"
 
 typedef struct
 {
@@ -26,13 +25,13 @@ static inline SQLiteWrapper *sqlite_wrapper_new(sqlite3 *sqlite);
 static inline SQLiteStmtWrapper *sqlite_stmt_wrapper_new(sqlite3_stmt *sqlite_stmt);
 static void sqlite_wrapper_deinit(HkUserdata *udata);
 static void sqlite_stmt_wrapper_deinit(HkUserdata *udata);
-static int open_call(HkState *state, HkValue *args);
-static int close_call(HkState *state, HkValue *args);
-static int execute_call(HkState *state, HkValue *args);
-static int prepare_call(HkState *state, HkValue *args);
-static int finalize_call(HkState *state, HkValue *args);
-static int bind_call(HkState *state, HkValue *args);
-static int fetch_row_call(HkState *state, HkValue *args);
+static void open_call(HkState *state, HkValue *args);
+static void close_call(HkState *state, HkValue *args);
+static void execute_call(HkState *state, HkValue *args);
+static void prepare_call(HkState *state, HkValue *args);
+static void finalize_call(HkState *state, HkValue *args);
+static void bind_call(HkState *state, HkValue *args);
+static void fetch_row_call(HkState *state, HkValue *args);
 
 static inline SQLiteWrapper *sqlite_wrapper_new(sqlite3 *sqlite)
 {
@@ -60,104 +59,113 @@ static void sqlite_stmt_wrapper_deinit(HkUserdata *udata)
   sqlite3_finalize(((SQLiteStmtWrapper *) udata)->sqlite_stmt);
 }
 
-static int open_call(HkState *state, HkValue *args)
+static void open_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_string(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_string(state, args, 1);
+  hk_return_if_not_ok(state);
   HkString *filename = hk_as_string(args[1]);
   sqlite3 *sqlite;
   if (sqlite3_open(filename->chars, &sqlite) != SQLITE_OK)
   {
-    hk_runtime_error("cannot open database `%.*s`", filename->length,
+    hk_state_error(state, "cannot open database `%.*s`", filename->length,
       filename->chars);
     sqlite3_close(sqlite);
-    return HK_STATUS_ERROR;
+    return;
   }
-  return hk_state_push_userdata(state, (HkUserdata *) sqlite_wrapper_new(sqlite));
+  hk_state_push_userdata(state, (HkUserdata *) sqlite_wrapper_new(sqlite));
 }
 
-static int close_call(HkState *state, HkValue *args)
+static void close_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_push_number(state, sqlite3_close(((SQLiteWrapper *) hk_as_userdata(args[1]))->sqlite));
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, sqlite3_close(((SQLiteWrapper *) hk_as_userdata(args[1]))->sqlite));
 }
 
-static int execute_call(HkState *state, HkValue *args)
+static void execute_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_string(state, args, 2);
+  hk_return_if_not_ok(state);
   sqlite3 *sqlite = ((SQLiteWrapper *) hk_as_userdata(args[1]))->sqlite;
   HkString *sql = hk_as_string(args[2]);
   char *err = NULL;
   if (sqlite3_exec(sqlite, sql->chars, NULL, NULL, &err) != SQLITE_OK)
   {
-    hk_runtime_error("cannot execute SQL: %s", err);
+    hk_state_error(state, "cannot execute SQL: %s", err);
     sqlite3_free(err);
-    return HK_STATUS_ERROR;
+    return;
   }
-  return hk_state_push_nil(state);
+  hk_state_push_nil(state);
 }
 
-static int prepare_call(HkState *state, HkValue *args)
+static void prepare_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_string(state, args, 2);
+  hk_return_if_not_ok(state);
   sqlite3 *sqlite = ((SQLiteWrapper *) hk_as_userdata(args[1]))->sqlite;
   HkString *sql = hk_as_string(args[2]);
   sqlite3_stmt *sqlite_stmt;
   if (sqlite3_prepare_v2(sqlite, sql->chars, sql->length, &sqlite_stmt, NULL) != SQLITE_OK)
   {
-    hk_runtime_error("cannot prepare SQL: %s", sqlite3_errmsg(sqlite));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot prepare SQL: %s", sqlite3_errmsg(sqlite));
+    return;
   }
-  return hk_state_push_userdata(state, (HkUserdata *) sqlite_stmt_wrapper_new(sqlite_stmt));
+  hk_state_push_userdata(state, (HkUserdata *) sqlite_stmt_wrapper_new(sqlite_stmt));
 }
 
-static int finalize_call(HkState *state, HkValue *args)
+static void finalize_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   sqlite3_stmt *sqlite_stmt = ((SQLiteStmtWrapper *) hk_as_userdata(args[1]))->sqlite_stmt;
-  return hk_state_push_number(state, sqlite3_finalize(sqlite_stmt));
+  hk_state_push_number(state, sqlite3_finalize(sqlite_stmt));
 }
 
-static int bind_call(HkState *state, HkValue *args)
+static void bind_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 2);
+  hk_return_if_not_ok(state);
   HkType types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
-  if (hk_check_argument_types(args, 3, 4, types) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_types(state, args, 3, 4, types);
+  hk_return_if_not_ok(state);
   sqlite3_stmt *sqlite_stmt = ((SQLiteStmtWrapper *) hk_as_userdata(args[1]))->sqlite_stmt;
   int index = (int) hk_as_number(args[2]);
   HkValue val = args[3];
   if (hk_is_nil(val))
-    return hk_state_push_number(state, sqlite3_bind_null(sqlite_stmt, index));
+  {
+    hk_state_push_number(state, sqlite3_bind_null(sqlite_stmt, index));
+    return;
+  }
   if (hk_is_bool(val))
-    return hk_state_push_number(state, sqlite3_bind_int(sqlite_stmt, index, (int) hk_as_bool(val)));
+  {
+    hk_state_push_number(state, sqlite3_bind_int(sqlite_stmt, index, (int) hk_as_bool(val)));
+    return;
+  }
   if (hk_is_number(val))
   {
     double data = hk_as_number(val);
     if (hk_is_int(val))
-      return hk_state_push_number(state, sqlite3_bind_int64(sqlite_stmt, index, (int64_t) data));
-    return hk_state_push_number(state, sqlite3_bind_double(sqlite_stmt, index, data));
+    {
+      hk_state_push_number(state, sqlite3_bind_int64(sqlite_stmt, index, (int64_t) data));
+      return;
+    }
+    hk_state_push_number(state, sqlite3_bind_double(sqlite_stmt, index, data));
+    return;
   }
   HkString *str = hk_as_string(val);
-  return hk_state_push_number(state, sqlite3_bind_text(sqlite_stmt, index, str->chars, str->length,
-    NULL));
+  hk_state_push_number(state, sqlite3_bind_text(sqlite_stmt, index, str->chars, str->length, NULL));
 }
 
-static int fetch_row_call(HkState *state, HkValue *args)
+static void fetch_row_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   sqlite3_stmt *sqlite_stmt = ((SQLiteStmtWrapper *) hk_as_userdata(args[1]))->sqlite_stmt;
   int num_columns = sqlite3_column_count(sqlite_stmt);
   HkArray *row = NULL;
@@ -196,40 +204,45 @@ static int fetch_row_call(HkState *state, HkValue *args)
       hk_array_inplace_add_element(row, elem);
     }
   }
-  return row ? hk_state_push_array(state, row) : hk_state_push_nil(state);
+  if (row)
+  {
+    hk_state_push_array(state, row);
+    return;
+  }
+  hk_state_push_nil(state);
 }
 
-HK_LOAD_FN(sqlite)
+HK_LOAD_MODULE_HANDLER(sqlite)
 {
-  if (hk_state_push_string_from_chars(state, -1, "sqlite") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "open") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "open", 1, &open_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "close") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "close", 1, &close_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "execute") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "execute", 2, &execute_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "prepare") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "prepare", 2, &prepare_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "finalize") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "finalize", 1, &finalize_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "bind") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "bind", 3, &bind_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "fetch_row") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "fetch_row", 1, &fetch_row_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_construct(state, 7);
+  hk_state_push_string_from_chars(state, -1, "sqlite");
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "open");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "open", 1, &open_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "close");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "close", 1, &close_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "execute");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "execute", 2, &execute_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "prepare");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "prepare", 2, &prepare_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "finalize");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "finalize", 1, &finalize_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "bind");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "bind", 3, &bind_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "fetch_row");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "fetch_row", 1, &fetch_row_call);
+  hk_return_if_not_ok(state);
+  hk_state_construct(state, 7);
 }

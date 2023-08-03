@@ -61,9 +61,9 @@ Here is a quick overview of all the functions. Click on a function name to jump 
       <td><a href="#current">current</a></td>
       <td><a href="#next">next</a></td>
       <td><a href="#sleep">sleep</a></td>
+      <td><a href="#exit">exit</a></td>
       <td><a href="#assert">assert</a></td>
       <td><a href="#panic">panic</a></td>
-      <td></td>
     </tr>
   </tbody>
 </table>
@@ -711,6 +711,20 @@ Example:
 
 ```rust
 sleep(1000); // Sleeps for 1 second.
+```
+
+### exit
+
+Exits the program with the given exit code.
+
+```rust
+fn exit(code: number);
+```
+
+Example:
+
+```rust
+exit(0); // Exits the program with exit code 0.
 ```
 
 ### assert

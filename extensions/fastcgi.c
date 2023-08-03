@@ -5,23 +5,22 @@
 
 #include "fastcgi.h"
 #include <fcgi_stdio.h>
-#include <hook/status.h>
 
-static int accept_call(HkState *state, HkValue *args);
+static void accept_call(HkState *state, HkValue *args);
 
-static int accept_call(HkState *state, HkValue *args)
+static void accept_call(HkState *state, HkValue *args)
 {
   (void) args;
-  return hk_state_push_number(state, FCGI_Accept());
+  hk_state_push_number(state, FCGI_Accept());
 }
 
-HK_LOAD_FN(fastcgi)
+HK_LOAD_MODULE_HANDLER(fastcgi)
 {
-  if (hk_state_push_string_from_chars(state, -1, "fastcgi") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "accept") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "accept", 0, &accept_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_construct(state, 1);
+  hk_state_push_string_from_chars(state, -1, "fastcgi");
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "accept");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "accept", 0, &accept_call);
+  hk_return_if_not_ok(state);
+  hk_state_construct(state, 1);
 }

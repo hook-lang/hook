@@ -36,7 +36,7 @@ bool hk_string_equal(HkString *str1, HkString *str2);
 int hk_string_compare(HkString *str1, HkString *str2);
 HkString *hk_string_lower(HkString *str);
 HkString *hk_string_upper(HkString *str);
-bool HkStringrim(HkString *str, HkString **result);
+bool hk_string_trim(HkString *str, HkString **result);
 bool hk_string_starts_with(HkString *str1, HkString *str2);
 bool hk_string_ends_with(HkString *str1, HkString *str2);
 HkString *hk_string_reverse(HkString *str);

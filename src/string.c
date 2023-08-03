@@ -201,7 +201,7 @@ HkString *hk_string_upper(HkString *str)
   return result;
 }
 
-bool HkStringrim(HkString *str, HkString **result)
+bool hk_string_trim(HkString *str, HkString **result)
 {
   int length = str->length;
   if (!length)

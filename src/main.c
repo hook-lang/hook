@@ -8,7 +8,6 @@
 #include <hook/compiler.h>
 #include <hook/dump.h>
 #include <hook/state.h>
-#include <hook/status.h>
 #include <hook/error.h>
 #include <hook/utils.h>
 
@@ -17,23 +16,23 @@
 typedef struct
 {
   const char *cmd;
-  bool opt_help;
-  bool opt_version;
-  bool opt_eval;
-  bool opt_dump;
-  bool opt_compile;
-  bool opt_run;
-  int stack_size; 
+  bool optHelp;
+  bool optVersion;
+  bool optEval;
+  bool optDump;
+  bool optCompile;
+  bool optRun;
+  int stackSize; 
   const char *input;
   const char *output;
   const char **args;
   int num_args;
 } ParsedArgs;
 
-static inline void parse_args(ParsedArgs *parsed_args, int argc, const char **argv);
-static inline void parse_option(ParsedArgs *parsed_args, const char *arg);
+static inline void parse_args(ParsedArgs *parsedArgs, int argc, const char **argv);
+static inline void parse_option(ParsedArgs *parsedArgs, const char *arg);
 static inline const char *option(const char *arg, const char *opt);
-static inline HkArray *args_array(ParsedArgs *parsed_args);
+static inline HkArray *args_array(ParsedArgs *parsedArgs);
 static inline void print_help(const char *cmd);
 static inline void print_version(void);
 static inline FILE *open_file(const char *filename, const char *mode);
@@ -42,75 +41,75 @@ static inline HkClosure *load_bytecode_from_file(const char *filename);
 static inline HkClosure *load_bytecode_from_stream(FILE *stream);
 static inline void save_bytecode_to_file(HkClosure *cl, const char *filename);
 static inline void dump_bytecode_to_file(HkFunction *fn, const char *filename);
-static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsed_args);
+static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsedArgs);
 
-static inline void parse_args(ParsedArgs *parsed_args, int argc, const char **argv)
+static inline void parse_args(ParsedArgs *parsedArgs, int argc, const char **argv)
 {
-  parsed_args->cmd = argv[0];
-  parsed_args->opt_help = false;
-  parsed_args->opt_version = false;
-  parsed_args->opt_eval = false;
-  parsed_args->opt_dump = false;
-  parsed_args->opt_compile = false;
-  parsed_args->opt_run = false;
-  parsed_args->stack_size = 0;
-  parsed_args->input = NULL;
-  parsed_args->output = NULL;
+  parsedArgs->cmd = argv[0];
+  parsedArgs->optHelp = false;
+  parsedArgs->optVersion = false;
+  parsedArgs->optEval = false;
+  parsedArgs->optDump = false;
+  parsedArgs->optCompile = false;
+  parsedArgs->optRun = false;
+  parsedArgs->stackSize = 0;
+  parsedArgs->input = NULL;
+  parsedArgs->output = NULL;
   int i = 1;
   for (; i < argc; ++i)
   {
     const char *arg = argv[i];
     if (arg[0] != '-')
       break;
-    parse_option(parsed_args, arg);
+    parse_option(parsedArgs, arg);
   }
   if (i < argc)
   {
-    parsed_args->input = argv[i];
+    parsedArgs->input = argv[i];
     ++i;
   }
   if (i < argc)
-    parsed_args->output = argv[i];
-  parsed_args->args = &argv[i];
-  parsed_args->num_args = argc - i;
+    parsedArgs->output = argv[i];
+  parsedArgs->args = &argv[i];
+  parsedArgs->num_args = argc - i;
 }
 
-static inline void parse_option(ParsedArgs *parsed_args, const char *arg)
+static inline void parse_option(ParsedArgs *parsedArgs, const char *arg)
 {
   if (option(arg, "-h") || option(arg, "--help"))
   {
-    parsed_args->opt_help = true;
+    parsedArgs->optHelp = true;
     return;
   }
   if (option(arg, "-v") || option(arg, "--version"))
   {
-    parsed_args->opt_version = true;
+    parsedArgs->optVersion = true;
     return;
   }
   if (option(arg, "-e") || option(arg, "--eval"))
   {
-    parsed_args->opt_eval = true;
+    parsedArgs->optEval = true;
     return;
   }
   if (option(arg, "-d") || option(arg, "--dump"))
   {
-    parsed_args->opt_dump = true;
+    parsedArgs->optDump = true;
     return;
   }
   if (option(arg, "-c") || option(arg, "--compile"))
   {
-    parsed_args->opt_compile = true;
+    parsedArgs->optCompile = true;
     return;
   }
   if (option(arg, "-r") || option(arg, "--run"))
   {
-    parsed_args->opt_run = true;
+    parsedArgs->optRun = true;
     return;
   }
   const char *opt_val = option(arg, "-s");
   if (opt_val)
   {
-    parsed_args->stack_size = atoi(opt_val);
+    parsedArgs->stackSize = atoi(opt_val);
     return;
   }
   hk_fatal_error("unknown option `%s`\n", arg);
@@ -126,14 +125,14 @@ static inline const char *option(const char *arg, const char *opt)
   return arg[length] == '=' ? &arg[length + 1] : &arg[length];
 }
 
-static inline HkArray *args_array(ParsedArgs *parsed_args)
+static inline HkArray *args_array(ParsedArgs *parsedArgs)
 {
-  int length = parsed_args->num_args;
+  int length = parsedArgs->num_args;
   HkArray *args = hk_array_new_with_capacity(length);
   args->length = length;
   for (int i = 0; i < length; ++i)
   {
-    HkString *arg = hk_string_from_chars(-1, parsed_args->args[i]);
+    HkString *arg = hk_string_from_chars(-1, parsedArgs->args[i]);
     hk_incr_ref(arg);
     args->elements[i] = hk_string_value(arg);
   }
@@ -213,65 +212,74 @@ static inline void dump_bytecode_to_file(HkFunction *fn, const char *filename)
   fclose(stream);
 }
 
-static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsed_args)
+static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsedArgs)
 {
   HkState state;
-  hk_state_init(&state, parsed_args->stack_size);
+  hk_state_init(&state, parsedArgs->stackSize);
   hk_state_push_closure(&state, cl);
-  hk_state_push_array(&state, args_array(parsed_args));
-  if (hk_state_call(&state, 1) == HK_STATUS_ERROR)
+  hk_state_push_array(&state, args_array(parsedArgs));
+  hk_state_call(&state, 1);
+  int exitCode = EXIT_FAILURE;
+  if (hk_state_is_ok(&state))
   {
-    hk_state_free(&state);
-    return EXIT_FAILURE;
+    HkValue result = state.stackSlots[state.stackTop];
+    exitCode = hk_is_int(result) ? (int) hk_as_number(result) : EXIT_SUCCESS;
+    hk_state_pop(&state);
+    goto end;
   }
-  HkValue result = state.stackSlots[state.stackTop];
-  int status = hk_is_int(result) ? (int) hk_as_number(result) : 0;
-  --state.stackTop;
+  if (hk_state_is_exit(&state))
+  {
+    HkValue result = state.stackSlots[state.stackTop];
+    hk_assert(hk_is_int(result), "exit code must be an integer");
+    exitCode = (int) hk_as_number(result);
+    hk_state_pop(&state);
+  }
+end:
   hk_state_free(&state);
-  return status;
+  return exitCode;
 }
 
 int main(int argc, const char **argv)
 {
-  ParsedArgs parsed_args;
-  parse_args(&parsed_args, argc, argv);
-  if (parsed_args.opt_help)
+  ParsedArgs parsedArgs;
+  parse_args(&parsedArgs, argc, argv);
+  if (parsedArgs.optHelp)
   {
-    print_help(parsed_args.cmd);
+    print_help(parsedArgs.cmd);
     return EXIT_SUCCESS;
   }
-  if (parsed_args.opt_version)
+  if (parsedArgs.optVersion)
   {
     print_version();
     return EXIT_SUCCESS;
   }
-  const char *input = parsed_args.input;
-  if (parsed_args.opt_eval)
+  const char *input = parsedArgs.input;
+  if (parsedArgs.optEval)
   {
     if (!input)
       hk_fatal_error("no input string");
     HkString *file = hk_string_from_chars(-1, "<terminal>");
     HkString *source = hk_string_from_chars(-1, input);
     HkClosure *cl = hk_compile(file, source);
-    return run_bytecode(cl, &parsed_args);
+    return run_bytecode(cl, &parsedArgs);
   }
-  if (parsed_args.opt_run)
+  if (parsedArgs.optRun)
   {
     if (input)
     {
       HkClosure *cl = load_bytecode_from_file(input);
-      return run_bytecode(cl, &parsed_args);
+      return run_bytecode(cl, &parsedArgs);
     }
     HkClosure *cl = load_bytecode_from_stream(stdin);
     if (!cl)
       hk_fatal_error("unable to load bytecode");
-    return run_bytecode(cl, &parsed_args);
+    return run_bytecode(cl, &parsedArgs);
   }
   HkString *file = hk_string_from_chars(-1, input ? input : "<stdin>");
   HkString *source = input ? load_source_from_file(input) : hk_string_from_stream(stdin, '\0');
   HkClosure *cl = hk_compile(file, source);
-  const char *output = parsed_args.output;
-  if (parsed_args.opt_dump)
+  const char *output = parsedArgs.output;
+  if (parsedArgs.optDump)
   {
     if (output)
     {
@@ -283,11 +291,11 @@ int main(int argc, const char **argv)
     hk_closure_free(cl);
     return EXIT_SUCCESS;
   }
-  if (parsed_args.opt_compile)
+  if (parsedArgs.optCompile)
   {
     save_bytecode_to_file(cl, output);
     hk_closure_free(cl);
     return EXIT_SUCCESS;
   }
-  return run_bytecode(cl, &parsed_args);
+  return run_bytecode(cl, &parsedArgs);
 }

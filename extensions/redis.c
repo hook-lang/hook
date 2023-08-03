@@ -8,7 +8,6 @@
 #include <hiredis/hiredis.h>
 #include <hook/memory.h>
 #include <hook/check.h>
-#include <hook/status.h>
 
 typedef struct
 {
@@ -19,8 +18,8 @@ typedef struct
 static inline RedisContextWrapper *redis_context_wrapper_new(redisContext *redis_context);
 static void redis_context_wrapper_deinit(HkUserdata *udata);
 static HkValue redis_reply_to_value(redisReply *reply);
-static int connect_call(HkState *state, HkValue *args);
-static int command_call(HkState *state, HkValue *args);
+static void connect_call(HkState *state, HkValue *args);
+static void command_call(HkState *state, HkValue *args);
 
 static inline RedisContextWrapper *redis_context_wrapper_new(redisContext *redis_context)
 {
@@ -92,46 +91,49 @@ static HkValue redis_reply_to_value(redisReply *reply)
   return result;
 }
 
-static int connect_call(HkState *state, HkValue *args)
+static void connect_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 2);
+  hk_return_if_not_ok(state);
   HkString *hostname = hk_as_string(args[1]);
   int port = (int) hk_as_number(args[2]);
   redisContext *redis_context = redisConnect(hostname->chars, port);
   if (!redis_context || redis_context->err)
-    return hk_state_push_nil(state);
-  return hk_state_push_userdata(state, (HkUserdata *) redis_context_wrapper_new(redis_context));
+  {
+    hk_state_push_nil(state);
+    return;
+  }
+  hk_state_push_userdata(state, (HkUserdata *) redis_context_wrapper_new(redis_context));
 }
 
-static int command_call(HkState *state, HkValue *args)
+static void command_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_string(state, args, 2);
+  hk_return_if_not_ok(state);
   redisContext *redis_context = ((RedisContextWrapper *) hk_as_userdata(args[1]))->redis_context;
   HkString *command = hk_as_string(args[2]);
   redisReply *reply = redisCommand(redis_context, command->chars);
   hk_assert(reply, "redisCommand returned NULL");
   HkValue result = redis_reply_to_value(reply);
   freeReplyObject(reply);
-  return hk_state_push(state, result);
+  hk_state_push(state, result);
 }
 
-HK_LOAD_FN(redis)
+HK_LOAD_MODULE_HANDLER(redis)
 {
-  if (hk_state_push_string_from_chars(state, -1, "redis") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "connect") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "connect", 2, &connect_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "command") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "command", 2, &command_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_construct(state, 2);
+  hk_state_push_string_from_chars(state, -1, "redis");
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "connect");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "connect", 2, &connect_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "command");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "command", 2, &command_call);
+  hk_return_if_not_ok(state);
+  hk_state_construct(state, 2);
 }

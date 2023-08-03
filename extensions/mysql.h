@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(mysql);
+HK_LOAD_MODULE_HANDLER(mysql);
 
 #endif // MYSQL_H

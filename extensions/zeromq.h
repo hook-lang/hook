@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(zeromq);
+HK_LOAD_MODULE_HANDLER(zeromq);
 
 #endif // ZEROMQ_H

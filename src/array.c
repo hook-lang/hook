@@ -6,7 +6,6 @@
 #include <hook/array.h>
 #include <stdlib.h>
 #include <hook/memory.h>
-#include <hook/status.h>
 #include <hook/utils.h>
 
 typedef struct

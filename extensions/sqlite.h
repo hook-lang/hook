@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(sqlite);
+HK_LOAD_MODULE_HANDLER(sqlite);
 
 #endif // SQLITE_H

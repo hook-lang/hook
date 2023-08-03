@@ -4,91 +4,90 @@
 //
 
 #include <hook/state.h>
+#include <stdarg.h>
 #include <stdlib.h>
 #include <math.h>
 #include <hook/struct.h>
 #include <hook/iterable.h>
 #include <hook/memory.h>
-#include <hook/status.h>
 #include <hook/error.h>
 #include <hook/utils.h>
 #include "module.h"
 #include "builtin.h"
 
-static inline int push(HkState *state, HkValue val);
+static inline void push(HkState *state, HkValue val);
 static inline void pop(HkState *state);
 static inline int read_byte(uint8_t **pc);
 static inline int read_word(uint8_t **pc);
-static inline int do_range(HkState *state);
-static inline int do_array(HkState *state, int length);
-static inline int do_struct(HkState *state, int length);
-static inline int do_instance(HkState *state, int num_args);
-static inline int adjust_instance_args(HkState *state, int length, int num_args);
-static inline int do_construct(HkState *state, int length);
-static inline int do_iterator(HkState *state);
-static inline int do_closure(HkState *state, HkFunction *fn);
-static inline int do_unpack_array(HkState *state, int n);
-static inline int do_unpack_struct(HkState *state, int n);
-static inline int do_add_element(HkState *state);
-static inline int do_get_element(HkState *state);
+static inline void do_range(HkState *state);
+static inline void do_array(HkState *state, int length);
+static inline void do_struct(HkState *state, int length);
+static inline void do_instance(HkState *state, int num_args);
+static inline void adjust_instance_args(HkState *state, int length, int num_args);
+static inline void do_construct(HkState *state, int length);
+static inline void do_iterator(HkState *state);
+static inline void do_closure(HkState *state, HkFunction *fn);
+static inline void do_unpack_array(HkState *state, int n);
+static inline void do_unpack_struct(HkState *state, int n);
+static inline void do_add_element(HkState *state);
+static inline void do_get_element(HkState *state);
 static inline void slice_string(HkState *state, HkValue *slot, HkString *str, HkRange *range);
 static inline void slice_array(HkState *state, HkValue *slot, HkArray *arr, HkRange *range);
-static inline int do_fetch_element(HkState *state);
+static inline void do_fetch_element(HkState *state);
 static inline void do_set_element(HkState *state);
-static inline int do_put_element(HkState *state);
-static inline int do_delete_element(HkState *state);
-static inline int do_inplace_add_element(HkState *state);
-static inline int do_inplace_put_element(HkState *state);
-static inline int do_inplace_delete_element(HkState *state);
-static inline int do_get_field(HkState *state, HkString *name);
-static inline int do_fetch_field(HkState *state, HkString *name);
+static inline void do_put_element(HkState *state);
+static inline void do_delete_element(HkState *state);
+static inline void do_inplace_add_element(HkState *state);
+static inline void do_inplace_put_element(HkState *state);
+static inline void do_inplace_delete_element(HkState *state);
+static inline void do_get_field(HkState *state, HkString *name);
+static inline void do_fetch_field(HkState *state, HkString *name);
 static inline void do_set_field(HkState *state);
-static inline int do_put_field(HkState *state, HkString *name);
-static inline int do_inplace_put_field(HkState *state, HkString *name);
+static inline void do_put_field(HkState *state, HkString *name);
+static inline void do_inplace_put_field(HkState *state, HkString *name);
 static inline void do_current(HkState *state);
 static inline void do_next(HkState *state);
 static inline void do_equal(HkState *state);
-static inline int do_greater(HkState *state);
-static inline int do_less(HkState *state);
+static inline void do_greater(HkState *state);
+static inline void do_less(HkState *state);
 static inline void do_not_equal(HkState *state);
-static inline int do_not_greater(HkState *state);
-static inline int do_not_less(HkState *state);
-static inline int do_bitwise_or(HkState *state);
-static inline int do_bitwise_xor(HkState *state);
-static inline int do_bitwise_and(HkState *state);
-static inline int do_left_shift(HkState *state);
-static inline int do_right_shift(HkState *state);
-static inline int do_add(HkState *state);
-static inline int concat_strings(HkState *state, HkValue *slots, HkValue val1, HkValue val2);
-static inline int concat_arrays(HkState *state, HkValue *slots, HkValue val1, HkValue val2);
-static inline int do_subtract(HkState *state);
-static inline int diff_arrays(HkState *state, HkValue *slots, HkValue val1, HkValue val2);
-static inline int do_multiply(HkState *state);
-static inline int do_divide(HkState *state);
-static inline int do_quotient(HkState *state);
-static inline int do_remainder(HkState *state);
-static inline int do_negate(HkState *state);
+static inline void do_not_greater(HkState *state);
+static inline void do_not_less(HkState *state);
+static inline void do_bitwise_or(HkState *state);
+static inline void do_bitwise_xor(HkState *state);
+static inline void do_bitwise_and(HkState *state);
+static inline void do_left_shift(HkState *state);
+static inline void do_right_shift(HkState *state);
+static inline void do_add(HkState *state);
+static inline void concat_strings(HkState *state, HkValue *slots, HkValue val1, HkValue val2);
+static inline void concat_arrays(HkState *state, HkValue *slots, HkValue val1, HkValue val2);
+static inline void do_subtract(HkState *state);
+static inline void diff_arrays(HkState *state, HkValue *slots, HkValue val1, HkValue val2);
+static inline void do_multiply(HkState *state);
+static inline void do_divide(HkState *state);
+static inline void do_quotient(HkState *state);
+static inline void do_remainder(HkState *state);
+static inline void do_negate(HkState *state);
 static inline void do_not(HkState *state);
-static inline int do_bitwise_not(HkState *state);
-static inline int do_increment(HkState *state);
-static inline int do_decrement(HkState *state);
-static inline int do_call(HkState *state, int num_args);
-static inline int adjust_call_args(HkState *state, int arity, int num_args);
+static inline void do_bitwise_not(HkState *state);
+static inline void do_increment(HkState *state);
+static inline void do_decrement(HkState *state);
+static inline void do_call(HkState *state, int num_args);
+static inline void adjust_call_args(HkState *state, int arity, int num_args);
 static inline void print_trace(HkString *name, HkString *file, int line);
-static inline int call_function(HkState *state, HkValue *locals, HkClosure *cl, int *line);
+static inline void call_function(HkState *state, HkValue *locals, HkClosure *cl, int *line);
 static inline void discard_frame(HkState *state, HkValue *slots);
 static inline void move_result(HkState *state, HkValue *slots);
 
-static inline int push(HkState *state, HkValue val)
+static inline void push(HkState *state, HkValue val)
 {
   if (state->stackTop == state->stackEnd)
   {
-    hk_runtime_error("stack overflow");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "stack overflow");
+    return;
   }
   ++state->stackTop;
   state->stackSlots[state->stackTop] = val;
-  return HK_STATUS_OK;
 }
 
 static inline void pop(HkState *state)
@@ -113,24 +112,23 @@ static inline int read_word(uint8_t **pc)
   return word;
 }
 
-static inline int do_range(HkState *state)
+static inline void do_range(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: range must be of type number");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: range must be of type number");
+    return;
   }
   HkRange *range = hk_range_new(hk_as_number(val1), hk_as_number(val2));
   hk_incr_ref(range);
   slots[0] = hk_range_value(range);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_array(HkState *state, int length)
+static inline void do_array(HkState *state, int length)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - length + 1];
   HkArray *arr = hk_array_new_with_capacity(length);
@@ -138,16 +136,16 @@ static inline int do_array(HkState *state, int length)
   for (int i = 0; i < length; ++i)
     arr->elements[i] = slots[i];
   state->stackTop -= length;
-  if (push(state, hk_array_value(arr)) == HK_STATUS_ERROR)
+  push(state, hk_array_value(arr));
+  if (!hk_state_is_ok(state))
   {
     hk_array_free(arr);
-    return HK_STATUS_ERROR;
+    return;
   }
   hk_incr_ref(arr);
-  return HK_STATUS_OK;
 }
 
-static inline int do_struct(HkState *state, int length)
+static inline void do_struct(HkState *state, int length)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - length];
   HkValue val = slots[0];
@@ -158,10 +156,10 @@ static inline int do_struct(HkState *state, int length)
     HkString *field_name = hk_as_string(slots[i]);
     if (!hk_struct_define_field(ztruct, field_name))
     {
-      hk_runtime_error("field %.*s is already defined", field_name->length,
+      hk_state_error(state, "field %.*s is already defined", field_name->length,
         field_name->chars);
       hk_struct_free(ztruct);
-      return HK_STATUS_ERROR;
+      return;
     }
   }
   for (int i = 1; i <= length; ++i)
@@ -171,17 +169,16 @@ static inline int do_struct(HkState *state, int length)
   slots[0] = hk_struct_value(ztruct);
   if (struct_name)
     hk_decr_ref(struct_name);
-  return HK_STATUS_OK;
 }
 
-static inline int do_instance(HkState *state, int num_args)
+static inline void do_instance(HkState *state, int num_args)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - num_args];
   HkValue val = slots[0];
   if (!hk_is_struct(val))
   {
-    hk_runtime_error("type error: cannot use %s as a struct", hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot use %s as a struct", hk_type_name(val.type));
+    return;
   }
   HkStruct *ztruct = hk_as_struct(val);
   int length = ztruct->length;
@@ -193,10 +190,9 @@ static inline int do_instance(HkState *state, int num_args)
   hk_incr_ref(inst);
   slots[0] = hk_instance_value(inst);
   hk_struct_release(ztruct);
-  return HK_STATUS_OK;
 }
 
-static inline int adjust_instance_args(HkState *state, int length, int num_args)
+static inline void adjust_instance_args(HkState *state, int length, int num_args)
 {
   if (num_args > length)
   {
@@ -206,18 +202,17 @@ static inline int adjust_instance_args(HkState *state, int length, int num_args)
       --num_args;
     }
     while (num_args > length);
-    return HK_STATUS_OK;
+    return;
   }
   while (num_args < length)
   {
-    if (push(state, HK_NIL_VALUE) == HK_STATUS_ERROR)
-      return HK_STATUS_ERROR;
+    push(state, HK_NIL_VALUE);
+    hk_return_if_not_ok(state);
     ++num_args;
   }
-  return HK_STATUS_OK;
 }
 
-static inline int do_construct(HkState *state, int length)
+static inline void do_construct(HkState *state, int length)
 {
   int n = length << 1;
   HkValue *slots = &state->stackSlots[state->stackTop - n];
@@ -229,10 +224,10 @@ static inline int do_construct(HkState *state, int length)
     HkString *field_name = hk_as_string(slots[i]);
     if (hk_struct_define_field(ztruct, field_name))
       continue;
-    hk_runtime_error("field %.*s is already defined", field_name->length,
+    hk_state_error(state, "field %.*s is already defined", field_name->length,
       field_name->chars);
     hk_struct_free(ztruct);
-    return HK_STATUS_ERROR;
+    return;
   }
   for (int i = 1; i <= n; i += 2)
     hk_decr_ref(hk_as_object(slots[i]));
@@ -244,28 +239,26 @@ static inline int do_construct(HkState *state, int length)
   slots[0] = hk_instance_value(inst);
   if (struct_name)
     hk_decr_ref(struct_name);
-  return HK_STATUS_OK;
 }
 
-static inline int do_iterator(HkState *state)
+static inline void do_iterator(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   if (hk_is_iterator(val))
-    return HK_STATUS_OK;
+    return;
   HkIterator *it = hk_new_iterator(val);
   if (!it)
   {
-    hk_runtime_error("type error: value of type %s is not iterable", hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: value of type %s is not iterable", hk_type_name(val.type));
+    return;
   }
   hk_incr_ref(it);
   slots[0] = hk_iterator_value(it);
   hk_value_release(val);
-  return HK_STATUS_OK;
 }
 
-static inline int do_closure(HkState *state, HkFunction *fn)
+static inline void do_closure(HkState *state, HkFunction *fn)
 {
   int num_nonlocals = fn->num_nonlocals;
   HkValue *slots = &state->stackSlots[state->stackTop - num_nonlocals + 1];
@@ -273,50 +266,52 @@ static inline int do_closure(HkState *state, HkFunction *fn)
   for (int i = 0; i < num_nonlocals; ++i)
     cl->nonlocals[i] = slots[i];
   state->stackTop -= num_nonlocals;
-  if (push(state, hk_closure_value(cl)) == HK_STATUS_ERROR)
+  push(state, hk_closure_value(cl));
+  if (!hk_state_is_ok(state))
   {
     hk_closure_free(cl);
-    return HK_STATUS_ERROR;
+    return;
   }
   hk_incr_ref(cl);
-  return HK_STATUS_OK;
 }
 
-static inline int do_unpack_array(HkState *state, int n)
+static inline void do_unpack_array(HkState *state, int n)
 {
   HkValue val = state->stackSlots[state->stackTop];
   if (!hk_is_array(val))
   {
-    hk_runtime_error("type error: value of type %s is not an array",
+    hk_state_error(state, "type error: value of type %s is not an array",
       hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   HkArray *arr = hk_as_array(val);
   --state->stackTop;
-  int status = HK_STATUS_OK;
   for (int i = 0; i < n && i < arr->length; ++i)
   {
     HkValue elem = hk_array_get_element(arr, i);
-    if ((status = push(state, elem)) == HK_STATUS_ERROR)
+    push(state, elem);
+    if (!hk_state_is_ok(state))
       goto end;
     hk_value_incr_ref(elem);
   }
   for (int i = arr->length; i < n; ++i)
-    if ((status = push(state, HK_NIL_VALUE)) == HK_STATUS_ERROR)
+  {
+    push(state, HK_NIL_VALUE);
+    if (!hk_state_is_ok(state))
       break;
+  }
 end:
   hk_array_release(arr);
-  return status;
 }
 
-static inline int do_unpack_struct(HkState *state, int n)
+static inline void do_unpack_struct(HkState *state, int n)
 {
   HkValue val = state->stackSlots[state->stackTop];
   if (!hk_is_instance(val))
   {
-    hk_runtime_error("type error: value of type %s is not an instance of struct",
+    hk_state_error(state, "type error: value of type %s is not an instance of struct",
       hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   HkInstance *inst = hk_as_instance(val);
   HkStruct *ztruct = inst->ztruct;
@@ -333,18 +328,17 @@ static inline int do_unpack_struct(HkState *state, int n)
   }
   --state->stackTop;
   hk_instance_release(inst);
-  return HK_STATUS_OK;
 }
 
-static inline int do_add_element(HkState *state)
+static inline void do_add_element(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an array", hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    return;
   }
   HkArray *arr = hk_as_array(val1);
   HkArray *result = hk_array_add_element(arr, val2);
@@ -353,10 +347,9 @@ static inline int do_add_element(HkState *state)
   --state->stackTop;
   hk_array_release(arr);  
   hk_value_decr_ref(val2);
-  return HK_STATUS_OK;
 }
 
-static inline int do_get_element(HkState *state)
+static inline void do_get_element(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
@@ -369,29 +362,29 @@ static inline int do_get_element(HkState *state)
       int64_t index = (int64_t) hk_as_number(val2);
       if (index < 0 || index >= str->length)
       {
-        hk_runtime_error("range error: index %d is out of bounds for string of length %d",
+        hk_state_error(state, "range error: index %d is out of bounds for string of length %d",
           index, str->length);
-        return HK_STATUS_ERROR;
+        return;
       }
       HkValue result = hk_string_value(hk_string_from_chars(1, &str->chars[(int) index]));
       hk_value_incr_ref(result);
       slots[0] = result;
       --state->stackTop;
       hk_string_release(str);
-      return HK_STATUS_OK;
+      return;
     }
     if (!hk_is_range(val2))
     {
-      hk_runtime_error("type error: string cannot be indexed by %s", hk_type_name(val2.type));
-      return HK_STATUS_ERROR;
+      hk_state_error(state, "type error: string cannot be indexed by %s", hk_type_name(val2.type));
+      return;
     }
     slice_string(state, slots, str, hk_as_range(val2));
-    return HK_STATUS_OK;
+    return;
   }
   if (!hk_is_array(val1))
   {
-    hk_runtime_error("type error: %s cannot be indexed", hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: %s cannot be indexed", hk_type_name(val1.type));
+    return;
   }
   HkArray *arr = hk_as_array(val1);
   if (hk_is_int(val2))
@@ -399,24 +392,23 @@ static inline int do_get_element(HkState *state)
     int64_t index = (int64_t) hk_as_number(val2);
     if (index < 0 || index >= arr->length)
     {
-      hk_runtime_error("range error: index %d is out of bounds for array of length %d",
+      hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
         index, arr->length);
-      return HK_STATUS_ERROR;
+      return;
     }
     HkValue result = hk_array_get_element(arr, (int) index);
     hk_value_incr_ref(result);
     slots[0] = result;
     --state->stackTop;
     hk_array_release(arr);
-    return HK_STATUS_OK;
+    return;
   }
   if (!hk_is_range(val2))
   {
-    hk_runtime_error("type error: array cannot be indexed by %s", hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    return;
   }
   slice_array(state, slots, arr, hk_as_range(val2));
-  return HK_STATUS_OK;
 }
 
 static inline void slice_string(HkState *state, HkValue *slot, HkString *str, HkRange *range)
@@ -480,34 +472,33 @@ end:
   hk_range_release(range);
 }
 
-static inline int do_fetch_element(HkState *state)
+static inline void do_fetch_element(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an array", hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    return;
   }
   if (!hk_is_int(val2))
   {
-    hk_runtime_error("type error: array cannot be indexed by %s", hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_runtime_error("range error: index %d is out of bounds for array of length %d",
+    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
-    return HK_STATUS_ERROR;
+    return;
   }
   HkValue elem = hk_array_get_element(arr, (int) index);
-  if (push(state, elem) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, elem);
+  hk_return_if_not_ok(state);
   hk_value_incr_ref(elem);
-  return HK_STATUS_OK;
 }
 
 static inline void do_set_element(HkState *state)
@@ -526,7 +517,7 @@ static inline void do_set_element(HkState *state)
   hk_value_decr_ref(val3);
 }
 
-static inline int do_put_element(HkState *state)
+static inline void do_put_element(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 2];
   HkValue val1 = slots[0];
@@ -534,21 +525,21 @@ static inline int do_put_element(HkState *state)
   HkValue val3 = slots[2];
   if (!hk_is_array(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an array", hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    return;
   }
   if (!hk_is_int(val2))
   {
-    hk_runtime_error("type error: array cannot be indexed by %s", hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_runtime_error("range error: index %d is out of bounds for array of length %d",
+    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
-    return HK_STATUS_ERROR;
+    return;
   }
   HkArray *result = hk_array_set_element(arr, (int) index, val3);
   hk_incr_ref(result);
@@ -556,49 +547,47 @@ static inline int do_put_element(HkState *state)
   state->stackTop -= 2;
   hk_array_release(arr);
   hk_value_decr_ref(val3);
-  return HK_STATUS_OK;
 }
 
-static inline int do_delete_element(HkState *state)
+static inline void do_delete_element(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an array", hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    return;
   }
   if (!hk_is_int(val2))
   {
-    hk_runtime_error("type error: array cannot be indexed by %s", hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_runtime_error("range error: index %d is out of bounds for array of length %d",
+    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
-    return HK_STATUS_ERROR;
+    return;
   }
   HkArray *result = hk_array_delete_element(arr, (int) index);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
   --state->stackTop;
   hk_array_release(arr);
-  return HK_STATUS_OK;
 }
 
-static inline int do_inplace_add_element(HkState *state)
+static inline void do_inplace_add_element(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an array", hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    return;
   }
   HkArray *arr = hk_as_array(val1);
   if (arr->ref_count == 2)
@@ -606,7 +595,7 @@ static inline int do_inplace_add_element(HkState *state)
     hk_array_inplace_add_element(arr, val2);
     --state->stackTop;
     hk_value_decr_ref(val2);
-    return HK_STATUS_OK;
+    return;
   }
   HkArray *result = hk_array_add_element(arr, val2);
   hk_incr_ref(result);
@@ -614,10 +603,9 @@ static inline int do_inplace_add_element(HkState *state)
   --state->stackTop;
   hk_array_release(arr);
   hk_value_decr_ref(val2);
-  return HK_STATUS_OK;
 }
 
-static inline int do_inplace_put_element(HkState *state)
+static inline void do_inplace_put_element(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 2];
   HkValue val1 = slots[0];
@@ -625,28 +613,28 @@ static inline int do_inplace_put_element(HkState *state)
   HkValue val3 = slots[2];
   if (!hk_is_array(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an array", hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    return;
   }
   if (!hk_is_int(val2))
   {
-    hk_runtime_error("type error: array cannot be indexed by %s", hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_runtime_error("range error: index %d is out of bounds for array of length %d",
+    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
-    return HK_STATUS_ERROR;
+    return;
   }
   if (arr->ref_count == 2)
   {
     hk_array_inplace_set_element(arr, (int) index, val3);
     state->stackTop -= 2;
     hk_value_decr_ref(val3);
-    return HK_STATUS_OK;
+    return;
   }
   HkArray *result = hk_array_set_element(arr, index, val3);
   hk_incr_ref(result);
@@ -654,94 +642,90 @@ static inline int do_inplace_put_element(HkState *state)
   state->stackTop -= 2;
   hk_array_release(arr);
   hk_value_decr_ref(val3);
-  return HK_STATUS_OK;
 }
 
-static inline int do_inplace_delete_element(HkState *state)
+static inline void do_inplace_delete_element(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an array", hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    return;
   }
   if (!hk_is_int(val2))
   {
-    hk_runtime_error("type error: array cannot be indexed by %s", hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_runtime_error("range error: index %d is out of bounds for array of length %d",
+    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
-    return HK_STATUS_ERROR;
+    return;
   }
   if (arr->ref_count == 2)
   {
     hk_array_inplace_delete_element(arr, (int) index);
     --state->stackTop;
-    return HK_STATUS_OK;
+    return;
   }
   HkArray *result = hk_array_delete_element(arr, index);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
   --state->stackTop;
   hk_array_release(arr);
-  return HK_STATUS_OK;
 }
 
-static inline int do_get_field(HkState *state, HkString *name)
+static inline void do_get_field(HkState *state, HkString *name)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   if (!hk_is_instance(val))
   {
-    hk_runtime_error("type error: cannot use %s as an instance of struct",
+    hk_state_error(state, "type error: cannot use %s as an instance of struct",
       hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   HkInstance *inst = hk_as_instance(val);
   int index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
-    hk_runtime_error("no field %.*s on struct", name->length, name->chars);
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "no field %.*s on struct", name->length, name->chars);
+    return;
   }
   HkValue value = hk_instance_get_field(inst, index);
   hk_value_incr_ref(value);
   slots[0] = value;
   hk_instance_release(inst);
-  return HK_STATUS_OK;
 }
 
-static inline int do_fetch_field(HkState *state, HkString *name)
+static inline void do_fetch_field(HkState *state, HkString *name)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   if (!hk_is_instance(val))
   {
-    hk_runtime_error("type error: cannot use %s as an instance of struct",
+    hk_state_error(state, "type error: cannot use %s as an instance of struct",
       hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   HkInstance *inst = hk_as_instance(val);
   int index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
-    hk_runtime_error("no field %.*s on struct", name->length, name->chars);
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "no field %.*s on struct", name->length, name->chars);
+    return;
   }
-  if (push(state, hk_number_value(index)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_number_value(index));
+  hk_return_if_not_ok(state);
   HkValue value = hk_instance_get_field(inst, index);
-  if (push(state, value) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, value);
+  hk_return_if_not_ok(state);
   hk_value_incr_ref(value);
-  return HK_STATUS_OK;
 }
 
 static inline void do_set_field(HkState *state)
@@ -760,23 +744,23 @@ static inline void do_set_field(HkState *state)
   hk_value_decr_ref(val3);
 }
 
-static inline int do_put_field(HkState *state, HkString *name)
+static inline void do_put_field(HkState *state, HkString *name)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_instance(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an instance of struct",
+    hk_state_error(state, "type error: cannot use %s as an instance of struct",
       hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   HkInstance *inst = hk_as_instance(val1);
   int index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
-    hk_runtime_error("no field %.*s on struct", name->length, name->chars);
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "no field %.*s on struct", name->length, name->chars);
+    return;
   }
   HkInstance *result = hk_instance_set_field(inst, index, val2);
   hk_incr_ref(result);
@@ -784,33 +768,32 @@ static inline int do_put_field(HkState *state, HkString *name)
   --state->stackTop;
   hk_instance_release(inst);
   hk_value_decr_ref(val2);
-  return HK_STATUS_OK;
 }
 
-static inline int do_inplace_put_field(HkState *state, HkString *name)
+static inline void do_inplace_put_field(HkState *state, HkString *name)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_instance(val1))
   {
-    hk_runtime_error("type error: cannot use %s as an instance of struct",
+    hk_state_error(state, "type error: cannot use %s as an instance of struct",
       hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   HkInstance *inst = hk_as_instance(val1);
   int index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
-    hk_runtime_error("no field %.*s on struct", name->length, name->chars);
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "no field %.*s on struct", name->length, name->chars);
+    return;
   }
   if (inst->ref_count == 2)
   {
     hk_instance_inplace_set_field(inst, index, val2);
     --state->stackTop;
     hk_value_decr_ref(val2);
-    return HK_STATUS_OK;
+    return;
   }
   HkInstance *result = hk_instance_set_field(inst, index, val2);
   hk_incr_ref(result);
@@ -818,7 +801,6 @@ static inline int do_inplace_put_field(HkState *state, HkString *name)
   --state->stackTop;
   hk_instance_release(inst);
   hk_value_decr_ref(val2);
-  return HK_STATUS_OK;
 }
 
 static inline void do_current(HkState *state)
@@ -859,34 +841,32 @@ static inline void do_equal(HkState *state)
   hk_value_release(val2);
 }
 
-static inline int do_greater(HkState *state)
+static inline void do_greater(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   int result;
-  if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_compare(state, val1, val2, &result);
+  hk_return_if_not_ok(state);
   slots[0] = result > 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
   --state->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
-  return HK_STATUS_OK;
 }
 
-static inline int do_less(HkState *state)
+static inline void do_less(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   int result;
-  if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_compare(state, val1, val2, &result);
+  hk_return_if_not_ok(state);
   slots[0] = result < 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
   --state->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
-  return HK_STATUS_OK;
 }
 
 static inline void do_not_equal(HkState *state)
@@ -900,122 +880,115 @@ static inline void do_not_equal(HkState *state)
   hk_value_release(val2);
 }
 
-static inline int do_not_greater(HkState *state)
+static inline void do_not_greater(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   int result;
-  if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_compare(state, val1, val2, &result);
+  hk_return_if_not_ok(state);
   slots[0] = result > 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
   --state->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
-  return HK_STATUS_OK;
 }
 
-static inline int do_not_less(HkState *state)
+static inline void do_not_less(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   int result;
-  if (hk_state_compare(val1, val2, &result) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_compare(state, val1, val2, &result);
+  hk_return_if_not_ok(state);
   slots[0] = result < 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
   --state->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
-  return HK_STATUS_OK;
 }
 
-static inline int do_bitwise_or(HkState *state)
+static inline void do_bitwise_or(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: cannot apply `bitwise or` between %s and %s", hk_type_name(val1.type),
+    hk_state_error(state, "type error: cannot apply `bitwise or` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   int64_t data = ((int64_t) hk_as_number(val1)) | ((int64_t) hk_as_number(val2));
   slots[0] = hk_number_value(data);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_bitwise_xor(HkState *state)
+static inline void do_bitwise_xor(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: cannot apply `bitwise xor` between %s and %s", hk_type_name(val1.type),
+    hk_state_error(state, "type error: cannot apply `bitwise xor` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   int64_t data = ((int64_t) hk_as_number(val1)) ^ ((int64_t) hk_as_number(val2));
   slots[0] = hk_number_value(data);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_bitwise_and(HkState *state)
+static inline void do_bitwise_and(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: cannot apply `bitwise and` between %s and %s", hk_type_name(val1.type),
+    hk_state_error(state, "type error: cannot apply `bitwise and` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   int64_t data = ((int64_t) hk_as_number(val1)) & ((int64_t) hk_as_number(val2));
   slots[0] = hk_number_value(data);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_left_shift(HkState *state)
+static inline void do_left_shift(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: cannot apply `left shift` between %s and %s", hk_type_name(val1.type),
+    hk_state_error(state, "type error: cannot apply `left shift` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   int64_t data = ((int64_t) hk_as_number(val1)) << ((int64_t) hk_as_number(val2));
   slots[0] = hk_number_value(data);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_right_shift(HkState *state)
+static inline void do_right_shift(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: cannot apply `right shift` between %s and %s", hk_type_name(val1.type),
+    hk_state_error(state, "type error: cannot apply `right shift` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   int64_t data = ((int64_t) hk_as_number(val1)) >> ((int64_t) hk_as_number(val2));
   slots[0] = hk_number_value(data);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_add(HkState *state)
+static inline void do_add(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
@@ -1024,40 +997,41 @@ static inline int do_add(HkState *state)
   {
     if (!hk_is_number(val2))
     {
-      hk_runtime_error("type error: cannot add %s to number", hk_type_name(val2.type));
-      return HK_STATUS_ERROR;
+      hk_state_error(state, "type error: cannot add %s to number", hk_type_name(val2.type));
+      return;
     }
     double data = hk_as_number(val1) + hk_as_number(val2);
     slots[0] = hk_number_value(data);
     --state->stackTop;
-    return HK_STATUS_OK;
+    return;
   }
   if (hk_is_string(val1))
   {
     if (!hk_is_string(val2))
     {
-      hk_runtime_error("type error: cannot concatenate string and %s",
+      hk_state_error(state, "type error: cannot concatenate string and %s",
         hk_type_name(val2.type));
-      return HK_STATUS_ERROR;
+      return;
     }
-    return concat_strings(state, slots, val1, val2);
+    concat_strings(state, slots, val1, val2);
+    return;
   }
   if (hk_is_array(val1))
   {
     if (!hk_is_array(val2))
     {
-      hk_runtime_error("type error: cannot concatenate array and %s",
+      hk_state_error(state, "type error: cannot concatenate array and %s",
         hk_type_name(val2.type));
-      return HK_STATUS_ERROR;
+      return;
     }
-    return concat_arrays(state, slots, val1, val2);
+    concat_arrays(state, slots, val1, val2);
+    return;
   }
-  hk_runtime_error("type error: cannot add %s to %s", hk_type_name(val2.type),
+  hk_state_error(state, "type error: cannot add %s to %s", hk_type_name(val2.type),
     hk_type_name(val1.type));
-  return HK_STATUS_ERROR;
 }
 
-static inline int concat_strings(HkState *state, HkValue *slots, HkValue val1, HkValue val2)
+static inline void concat_strings(HkState *state, HkValue *slots, HkValue val1, HkValue val2)
 {
   HkString *str1 = hk_as_string(val1);
   if (!str1->length)
@@ -1065,21 +1039,21 @@ static inline int concat_strings(HkState *state, HkValue *slots, HkValue val1, H
     slots[0] = val2;
     --state->stackTop;
     hk_string_release(str1);
-    return HK_STATUS_OK;
+    return;
   }
   HkString *str2 = hk_as_string(val2);
   if (!str2->length)
   {
     --state->stackTop;
     hk_string_release(str2);
-    return HK_STATUS_OK;
+    return;
   }
   if (str1->ref_count == 1)
   {
     hk_string_inplace_concat(str1, str2);
     --state->stackTop;
     hk_string_release(str2);
-    return HK_STATUS_OK;
+    return;
   }
   HkString *result = hk_string_concat(str1, str2);
   hk_incr_ref(result);
@@ -1087,10 +1061,9 @@ static inline int concat_strings(HkState *state, HkValue *slots, HkValue val1, H
   --state->stackTop;
   hk_string_release(str1);
   hk_string_release(str2);
-  return HK_STATUS_OK;
 }
 
-static inline int concat_arrays(HkState *state, HkValue *slots, HkValue val1, HkValue val2)
+static inline void concat_arrays(HkState *state, HkValue *slots, HkValue val1, HkValue val2)
 {
   HkArray *arr1 = hk_as_array(val1);
   if (!arr1->length)
@@ -1098,21 +1071,21 @@ static inline int concat_arrays(HkState *state, HkValue *slots, HkValue val1, Hk
     slots[0] = val2;
     --state->stackTop;
     hk_array_release(arr1);
-    return HK_STATUS_OK;
+    return;
   }
   HkArray *arr2 = hk_as_array(val2);
   if (!arr2->length)
   {
     --state->stackTop;
     hk_array_release(arr2);
-    return HK_STATUS_OK;
+    return;
   }
   if (arr1->ref_count == 1)
   {
     hk_array_inplace_concat(arr1, arr2);
     --state->stackTop;
     hk_array_release(arr2);
-    return HK_STATUS_OK;
+    return;
   }
   HkArray *result = hk_array_concat(arr1, arr2);
   hk_incr_ref(result);
@@ -1120,10 +1093,9 @@ static inline int concat_arrays(HkState *state, HkValue *slots, HkValue val1, Hk
   --state->stackTop;
   hk_array_release(arr1);
   hk_array_release(arr2);
-  return HK_STATUS_OK;
 }
 
-static inline int do_subtract(HkState *state)
+static inline void do_subtract(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
@@ -1132,31 +1104,31 @@ static inline int do_subtract(HkState *state)
   {
     if (!hk_is_number(val2))
     {
-      hk_runtime_error("type error: cannot subtract %s from number",
+      hk_state_error(state, "type error: cannot subtract %s from number",
         hk_type_name(val2.type));
-      return HK_STATUS_ERROR;
+      return;
     }
     double data = hk_as_number(val1) - hk_as_number(val2);
     slots[0] = hk_number_value(data);
     --state->stackTop;
-    return HK_STATUS_OK;
+    return;
   }
   if (hk_is_array(val1))
   {
     if (!hk_is_array(val2))
     {
-      hk_runtime_error("type error: cannot diff between array and %s",
+      hk_state_error(state, "type error: cannot diff between array and %s",
         hk_type_name(val2.type));
-      return HK_STATUS_ERROR;
+      return;
     }
-    return diff_arrays(state, slots, val1, val2);
+    diff_arrays(state, slots, val1, val2);
+    return;
   }
-  hk_runtime_error("type error: cannot subtract %s from %s", hk_type_name(val2.type),
+  hk_state_error(state, "type error: cannot subtract %s from %s", hk_type_name(val2.type),
     hk_type_name(val1.type));
-  return HK_STATUS_ERROR;
 }
 
-static inline int diff_arrays(HkState *state, HkValue *slots, HkValue val1, HkValue val2)
+static inline void diff_arrays(HkState *state, HkValue *slots, HkValue val1, HkValue val2)
 {
   HkArray *arr1 = hk_as_array(val1);
   HkArray *arr2 = hk_as_array(val2);
@@ -1164,14 +1136,14 @@ static inline int diff_arrays(HkState *state, HkValue *slots, HkValue val1, HkVa
   {
     --state->stackTop;
     hk_array_release(arr2);
-    return HK_STATUS_OK;
+    return;
   }
   if (arr1->ref_count == 1)
   {
     hk_array_inplace_diff(arr1, arr2);
     --state->stackTop;
     hk_array_release(arr2);
-    return HK_STATUS_OK;
+    return;
   }
   HkArray *result = hk_array_diff(arr1, arr2);
   hk_incr_ref(result);
@@ -1179,89 +1151,83 @@ static inline int diff_arrays(HkState *state, HkValue *slots, HkValue val1, HkVa
   --state->stackTop;
   hk_array_release(arr1);
   hk_array_release(arr2);
-  return HK_STATUS_OK;
 }
 
-static inline int do_multiply(HkState *state)
+static inline void do_multiply(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: cannot multiply %s to %s", hk_type_name(val2.type),
+    hk_state_error(state, "type error: cannot multiply %s to %s", hk_type_name(val2.type),
       hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   double data = hk_as_number(val1) * hk_as_number(val2);
   slots[0] = hk_number_value(data);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_divide(HkState *state)
+static inline void do_divide(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: cannot divide %s by %s", hk_type_name(val1.type),
+    hk_state_error(state, "type error: cannot divide %s by %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   double data = hk_as_number(val1) / hk_as_number(val2);
   slots[0] = hk_number_value(data);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_quotient(HkState *state)
+static inline void do_quotient(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: cannot apply `quotient` between %s and %s",
+    hk_state_error(state, "type error: cannot apply `quotient` between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   double data = floor(hk_as_number(val1) / hk_as_number(val2));
   slots[0] = hk_number_value(data);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_remainder(HkState *state)
+static inline void do_remainder(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_runtime_error("type error: cannot apply `remainder` between %s and %s",
+    hk_state_error(state, "type error: cannot apply `remainder` between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   double data = fmod(hk_as_number(val1), hk_as_number(val2));
   slots[0] = hk_number_value(data);
   --state->stackTop;
-  return HK_STATUS_OK;
 }
 
-static inline int do_negate(HkState *state)
+static inline void do_negate(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   if (!hk_is_number(val))
   {
-    hk_runtime_error("type error: cannot apply `negate` to %s", hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot apply `negate` to %s", hk_type_name(val.type));
+    return;
   }
   double data = -hk_as_number(val);
   slots[0] = hk_number_value(data);
-  return HK_STATUS_OK;
 }
 
 static inline void do_not(HkState *state)
@@ -1272,109 +1238,123 @@ static inline void do_not(HkState *state)
   hk_value_release(val);
 }
 
-static inline int do_bitwise_not(HkState *state)
+static inline void do_bitwise_not(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   if (!hk_is_number(val))
   {
-    hk_runtime_error("type error: cannot apply `bitwise not` to %s", hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: cannot apply `bitwise not` to %s", hk_type_name(val.type));
+    return;
   }
   int64_t data = ~((int64_t) hk_as_number(val));
   slots[0] = hk_number_value(data);
-  return HK_STATUS_OK;
 }
 
-static inline int do_increment(HkState *state)
+static inline void do_increment(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   if (!hk_is_number(val))
   {
-    hk_runtime_error("type error: cannot increment value of type %s",
+    hk_state_error(state, "type error: cannot increment value of type %s",
       hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   ++slots[0].as.number;
-  return HK_STATUS_OK;
 }
 
-static inline int do_decrement(HkState *state)
+static inline void do_decrement(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   if (!hk_is_number(val))
   {
-    hk_runtime_error("type error: cannot decrement value of type %s",
+    hk_state_error(state, "type error: cannot decrement value of type %s",
       hk_type_name(val.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   --slots[0].as.number;
-  return HK_STATUS_OK;
 }
 
-static inline int do_call(HkState *state, int num_args)
+static inline void do_call(HkState *state, int num_args)
 {
   HkValue *slots = &state->stackSlots[state->stackTop - num_args];
   HkValue val = slots[0];
   if (!hk_is_callable(val))
   {
-    hk_runtime_error("type error: cannot call value of type %s",
+    hk_state_error(state, "type error: cannot call value of type %s",
       hk_type_name(val.type));
     discard_frame(state, slots);
-    return HK_STATUS_ERROR;
+    return;
   }
   if (hk_is_native(val))
   {
     HkNative *native = hk_as_native(val);
-    if (adjust_call_args(state, native->arity, num_args) == HK_STATUS_ERROR)
+    adjust_call_args(state, native->arity, num_args);
+    if (!hk_state_is_ok(state))
     {
       discard_frame(state, slots);
-      return HK_STATUS_ERROR;
+      return;
     }
-    int status;
-    if ((status = native->call(state, slots)) != HK_STATUS_OK)
+    native->call(state, slots);
+    HkSateStatus status = state->status;
+    if (status != HK_STATE_STATUS_OK)
     {
-      if (status != HK_STATUS_NO_TRACE)
+      if (hk_state_is_no_trace(state))
+        state->flags = HK_STATE_FLAG_NONE;
+      else
         print_trace(native->name, NULL, 0);
-      discard_frame(state, slots);
-      return HK_STATUS_ERROR;
+      if (status == HK_STATE_STATUS_ERROR)
+      {
+        discard_frame(state, slots);
+        return;
+      }
+      hk_assert(status == HK_STATE_STATUS_EXIT, "status should be exit");
     }
     hk_native_release(native);
     move_result(state, slots);
-    return HK_STATUS_OK;
+    return;
   }
   HkClosure *cl = hk_as_closure(val);
   HkFunction *fn = cl->fn;
-  if (adjust_call_args(state, fn->arity, num_args) == HK_STATUS_ERROR)
+  adjust_call_args(state, fn->arity, num_args);
+  if (!hk_state_is_ok(state))
   {
     discard_frame(state, slots);
-    return HK_STATUS_ERROR;
+    return;
   }
   int line;
-  if (call_function(state, slots, cl, &line) == HK_STATUS_ERROR)
+  call_function(state, slots, cl, &line);
+  HkSateStatus status = state->status;
+  if (status != HK_STATE_STATUS_OK)
   {
-    print_trace(fn->name, fn->file, line);
-    discard_frame(state, slots);
-    return HK_STATUS_ERROR;
+    if (hk_state_is_no_trace(state))
+      state->flags = HK_STATE_FLAG_NONE;
+    else
+      print_trace(fn->name, fn->file, line);
+    if (status == HK_STATE_STATUS_ERROR)
+    {
+      discard_frame(state, slots);
+      return;
+    }
+    hk_assert(status == HK_STATE_STATUS_EXIT, "status should be exit");
   }
   hk_closure_release(cl);
   move_result(state, slots);
-  return HK_STATUS_OK;
 }
 
-static inline int adjust_call_args(HkState *state, int arity,int num_args)
+static inline void adjust_call_args(HkState *state, int arity,int num_args)
 {
   if (num_args >= arity)
-    return HK_STATUS_OK;
+    return;
   while (num_args < arity)
   {
-    if (push(state, HK_NIL_VALUE) == HK_STATUS_ERROR)
-      return HK_STATUS_ERROR;
+    push(state, HK_NIL_VALUE);
+    if (!hk_state_is_ok(state))
+      return;
     ++num_args;
   }
-  return HK_STATUS_OK;
 }
 
 static inline void print_trace(HkString *name, HkString *file, int line)
@@ -1388,7 +1368,7 @@ static inline void print_trace(HkString *name, HkString *file, int line)
   fprintf(stderr, "  at %s() in <native>\n", name_chars);
 }
 
-static inline int call_function(HkState *state, HkValue *locals, HkClosure *cl, int *line)
+static inline void call_function(HkState *state, HkValue *locals, HkClosure *cl, int *line)
 {
   HkValue *slots = state->stackSlots;
   HkFunction *fn = cl->fn;
@@ -1404,64 +1384,78 @@ static inline int call_function(HkState *state, HkValue *locals, HkClosure *cl, 
     switch (op)
     {
     case HK_OP_NIL:
-      if (push(state, HK_NIL_VALUE) == HK_STATUS_ERROR)
-        goto error;
+      push(state, HK_NIL_VALUE);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_FALSE:
-      if (push(state, HK_FALSE_VALUE) == HK_STATUS_ERROR)
-        goto error;
+      push(state, HK_FALSE_VALUE);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_TRUE:
-      if (push(state, HK_TRUE_VALUE) == HK_STATUS_ERROR)
-        goto error;
+      push(state, HK_TRUE_VALUE);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_INT:
-      if (push(state, hk_number_value(read_word(&pc))) == HK_STATUS_ERROR)
-        goto error;
+      push(state, hk_number_value(read_word(&pc)));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_CONSTANT:
       {
         HkValue val = consts[read_byte(&pc)];
-        if (push(state, val) == HK_STATUS_ERROR)
-          goto error;
+        push(state, val);
+        if (!hk_state_is_ok(state))
+          goto end;
         hk_value_incr_ref(val);
       }
       break;
     case HK_OP_RANGE:
-      if (do_range(state) == HK_STATUS_ERROR)
-        goto error;
+      do_range(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_ARRAY:
-      if (do_array(state, read_byte(&pc)) == HK_STATUS_ERROR)
-        goto error;
+      do_array(state, read_byte(&pc));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_STRUCT:
-      if (do_struct(state, read_byte(&pc)) == HK_STATUS_ERROR)
-        goto error;
+      do_struct(state, read_byte(&pc));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_INSTANCE:
-      if (do_instance(state, read_byte(&pc)) == HK_STATUS_ERROR)
-        goto error;
+      do_instance(state, read_byte(&pc));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_CONSTRUCT:
-      if (do_construct(state, read_byte(&pc)) == HK_STATUS_ERROR)
-        goto error;
+      do_construct(state, read_byte(&pc));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_ITERATOR:
-      if (do_iterator(state) == HK_STATUS_ERROR)
-        goto error;
+      do_iterator(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_CLOSURE:
-      if (do_closure(state, functions[read_byte(&pc)]) == HK_STATUS_ERROR)
-        goto error;
+      do_closure(state, functions[read_byte(&pc)]);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_UNPACK_ARRAY:
-      if (do_unpack_array(state, read_byte(&pc)) == HK_STATUS_ERROR)
-        goto error;
+      do_unpack_array(state, read_byte(&pc));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_UNPACK_STRUCT:
-      if (do_unpack_struct(state, read_byte(&pc)) == HK_STATUS_ERROR)
-        goto error;
+      do_unpack_struct(state, read_byte(&pc));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_POP:
       hk_value_release(slots[state->stackTop--]);
@@ -1469,24 +1463,27 @@ static inline int call_function(HkState *state, HkValue *locals, HkClosure *cl, 
     case HK_OP_GLOBAL:
       {
         HkValue val = slots[read_byte(&pc)];
-        if (push(state, val) == HK_STATUS_ERROR)
-          goto error;
+        push(state, val);
+        if (!hk_state_is_ok(state))
+          goto end;
         hk_value_incr_ref(val);
       }
       break;
     case HK_OP_NONLOCAL:
       {
         HkValue val = nonlocals[read_byte(&pc)];
-        if (push(state, val) == HK_STATUS_ERROR)
-          goto error;
+        push(state, val);
+        if (!hk_state_is_ok(state))
+          goto end;
         hk_value_incr_ref(val);
       }
       break;
     case HK_OP_LOAD:
       {
         HkValue val = locals[read_byte(&pc)];
-        if (push(state, val) == HK_STATUS_ERROR)
-          goto error;
+        push(state, val);
+        if (!hk_state_is_ok(state))
+          goto end;
         hk_value_incr_ref(val);
       }
       break;
@@ -1500,58 +1497,70 @@ static inline int call_function(HkState *state, HkValue *locals, HkClosure *cl, 
       }
       break;
     case HK_OP_ADD_ELEMENT:
-      if (do_add_element(state) == HK_STATUS_ERROR)
-        goto error;
+      do_add_element(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_GET_ELEMENT:
-      if (do_get_element(state) == HK_STATUS_ERROR)
-        goto error;
+      do_get_element(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_FETCH_ELEMENT:
-      if (do_fetch_element(state) == HK_STATUS_ERROR)
-        goto error;
+      do_fetch_element(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_SET_ELEMENT:
       do_set_element(state);
       break;
     case HK_OP_PUT_ELEMENT:
-      if (do_put_element(state) == HK_STATUS_ERROR)
-        goto error;
+      do_put_element(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_DELETE_ELEMENT:
-      if (do_delete_element(state) == HK_STATUS_ERROR)
-        goto error;
+      do_delete_element(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_INPLACE_ADD_ELEMENT:
-      if (do_inplace_add_element(state) == HK_STATUS_ERROR)
-        goto error;
+      do_inplace_add_element(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_INPLACE_PUT_ELEMENT:
-      if (do_inplace_put_element(state) == HK_STATUS_ERROR)
-        goto error;
+      do_inplace_put_element(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_INPLACE_DELETE_ELEMENT:
-      if (do_inplace_delete_element(state) == HK_STATUS_ERROR)
-        goto error;
+      do_inplace_delete_element(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_GET_FIELD:
-      if (do_get_field(state, hk_as_string(consts[read_byte(&pc)])) == HK_STATUS_ERROR)
-        goto error;
+      do_get_field(state, hk_as_string(consts[read_byte(&pc)]));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_FETCH_FIELD:
-      if (do_fetch_field(state, hk_as_string(consts[read_byte(&pc)])) == HK_STATUS_ERROR)
-        goto error;
+      do_fetch_field(state, hk_as_string(consts[read_byte(&pc)]));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_SET_FIELD:
       do_set_field(state);
       break;
     case HK_OP_PUT_FIELD:
-      if (do_put_field(state, hk_as_string(consts[read_byte(&pc)])) == HK_STATUS_ERROR)
-        goto error;
+      do_put_field(state, hk_as_string(consts[read_byte(&pc)]));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_INPLACE_PUT_FIELD:
-      if (do_inplace_put_field(state, hk_as_string(consts[read_byte(&pc)])) == HK_STATUS_ERROR)
-        goto error;
+      do_inplace_put_field(state, hk_as_string(consts[read_byte(&pc)]));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_CURRENT:
       do_current(state);
@@ -1638,106 +1647,127 @@ static inline int call_function(HkState *state, HkValue *locals, HkClosure *cl, 
       do_equal(state);
       break;
     case HK_OP_GREATER:
-      if (do_greater(state) == HK_STATUS_ERROR)
-        goto error;
+      do_greater(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_LESS:
-      if (do_less(state) == HK_STATUS_ERROR)
-        goto error;
+      do_less(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_NOT_EQUAL:
       do_not_equal(state);
       break;
     case HK_OP_NOT_GREATER:
-      if (do_not_greater(state) == HK_STATUS_ERROR)
-        goto error;
+      do_not_greater(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_NOT_LESS:
-      if (do_not_less(state) == HK_STATUS_ERROR)
-        goto error;
+      do_not_less(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_BITWISE_OR:
-      if (do_bitwise_or(state) == HK_STATUS_ERROR)
-        goto error;
+      do_bitwise_or(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_BITWISE_XOR:
-      if (do_bitwise_xor(state) == HK_STATUS_ERROR)
-        goto error;
+      do_bitwise_xor(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_BITWISE_AND:
-      if (do_bitwise_and(state) == HK_STATUS_ERROR)
-        goto error;
+      do_bitwise_and(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_LEFT_SHIFT:
-      if (do_left_shift(state) == HK_STATUS_ERROR)
-        goto error;
+      do_left_shift(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_RIGHT_SHIFT:
-      if (do_right_shift(state) == HK_STATUS_ERROR)
-        goto error;
+      do_right_shift(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_ADD:
-      if (do_add(state) == HK_STATUS_ERROR)
-        goto error;
+      do_add(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_SUBTRACT:
-      if (do_subtract(state) == HK_STATUS_ERROR)
-        goto error;
+      do_subtract(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_MULTIPLY:
-      if (do_multiply(state) == HK_STATUS_ERROR)
-        goto error;
+      do_multiply(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_DIVIDE:
-      if (do_divide(state) == HK_STATUS_ERROR)
-        goto error;
+      do_divide(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_QUOTIENT:
-      if (do_quotient(state) == HK_STATUS_ERROR)
-        goto error;
+      do_quotient(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_REMAINDER:
-      if (do_remainder(state) == HK_STATUS_ERROR)
-        goto error;
+      do_remainder(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_NEGATE:
-      if (do_negate(state) == HK_STATUS_ERROR)
-        goto error;
+      do_negate(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_NOT:
       do_not(state);
       break;
     case HK_OP_BITWISE_NOT:
-      if (do_bitwise_not(state) == HK_STATUS_ERROR)
-        goto error;
+      do_bitwise_not(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_INCREMENT:
-      if (do_increment(state) == HK_STATUS_ERROR)
-        goto error;
+      do_increment(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_DECREMENT:
-      if (do_decrement(state) == HK_STATUS_ERROR)
-        goto error;
+      do_decrement(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_CALL:
-      if (do_call(state, read_byte(&pc)) == HK_STATUS_ERROR)
-        goto error;
+      do_call(state, read_byte(&pc));
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_LOAD_MODULE:
-      if (load_module(state) == HK_STATUS_ERROR)
-        goto error;
+      load_module(state);
+      if (!hk_state_is_ok(state))
+        goto end;
       break;
     case HK_OP_RETURN:
-      return HK_STATUS_OK;
+      return;
     case HK_OP_RETURN_NIL:
-      if (push(state, HK_NIL_VALUE) == HK_STATUS_ERROR)
-        goto error;
-      return HK_STATUS_OK;
+      push(state, HK_NIL_VALUE);
+      if (!hk_state_is_ok(state))
+        goto end;
+      return;
     }
   }
-error:
+end:
   *line = hk_chunk_get_line(chunk, (int) (pc - code));
-  return HK_STATUS_ERROR;
 }
 
 static inline void discard_frame(HkState *state, HkValue *slots)
@@ -1761,7 +1791,10 @@ void hk_state_init(HkState *state, int minCapacity)
   state->stackEnd = capacity - 1;
   state->stackTop = -1;
   state->stackSlots = (HkValue *) hk_allocate(sizeof(*state->stackSlots) * capacity);
+  state->flags = HK_STATE_FLAG_NONE;
+  state->status = HK_STATE_STATUS_OK;
   load_globals(state);
+  hk_assert(hk_state_is_ok(state), "state should be ok");
   init_module_cache();
 }
 
@@ -1774,152 +1807,144 @@ void hk_state_free(HkState *state)
   free(state->stackSlots);
 }
 
-int hk_state_push(HkState *state, HkValue val)
+void hk_state_error(HkState *state, const char *fmt, ...)
 {
-  if (push(state, val) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  state->status = HK_STATE_STATUS_ERROR;
+  fprintf(stderr, "runtime error: ");
+  va_list args;
+  va_start(args, fmt);
+  vfprintf(stderr, fmt, args);
+  va_end(args);
+  fprintf(stderr, "\n");
+}
+
+void hk_state_push(HkState *state, HkValue val)
+{
+  push(state, val);
+  hk_return_if_not_ok(state);
   hk_value_incr_ref(val);
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_nil(HkState *state)
+void hk_state_push_nil(HkState *state)
 {
-  return push(state, HK_NIL_VALUE);
+  push(state, HK_NIL_VALUE);
 }
 
-int hk_state_push_bool(HkState *state, bool data)
+void hk_state_push_bool(HkState *state, bool data)
 {
-  return push(state, data ? HK_TRUE_VALUE : HK_FALSE_VALUE);
+  push(state, data ? HK_TRUE_VALUE : HK_FALSE_VALUE);
 }
 
-int hk_state_push_number(HkState *state, double data)
+void hk_state_push_number(HkState *state, double data)
 {
-  return push(state, hk_number_value(data));
+  push(state, hk_number_value(data));
 }
 
-int hk_state_push_string(HkState *state, HkString *str)
+void hk_state_push_string(HkState *state, HkString *str)
 {
-  if (push(state, hk_string_value(str)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_string_value(str));
+  hk_return_if_not_ok(state);
   hk_incr_ref(str);
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_string_from_chars(HkState *state, int length, const char *chars)
-{   
+void hk_state_push_string_from_chars(HkState *state, int length, const char *chars)
+{
   HkString *str = hk_string_from_chars(length, chars);
-  if (hk_state_push_string(state, str) == HK_STATUS_ERROR)
-  {
+  hk_state_push_string(state, str);
+  if (!hk_state_is_ok(state))
     hk_string_free(str);
-    return HK_STATUS_ERROR;
-  }
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_string_from_stream(HkState *state, FILE *stream, const char terminal)
+void hk_state_push_string_from_stream(HkState *state, FILE *stream, const char terminal)
 {
   HkString *str = hk_string_from_stream(stream, terminal);
-  if (hk_state_push_string(state, str) == HK_STATUS_ERROR)
-  {
+  hk_state_push_string(state, str);
+  if (!hk_state_is_ok(state))
     hk_string_free(str);
-    return HK_STATUS_ERROR;
-  }
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_range(HkState *state, HkRange *range)
+void hk_state_push_range(HkState *state, HkRange *range)
 {
-  if (push(state, hk_range_value(range)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_range_value(range));
+  hk_return_if_not_ok(state);
   hk_incr_ref(range);
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_array(HkState *state, HkArray *arr)
+void hk_state_push_array(HkState *state, HkArray *arr)
 {
-  if (push(state, hk_array_value(arr)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_array_value(arr));
+  hk_return_if_not_ok(state);
   hk_incr_ref(arr);
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_struct(HkState *state, HkStruct *ztruct)
+void hk_state_push_struct(HkState *state, HkStruct *ztruct)
 {
-  if (push(state, hk_struct_value(ztruct)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_struct_value(ztruct));
+  hk_return_if_not_ok(state);
   hk_incr_ref(ztruct);
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_instance(HkState *state, HkInstance *inst)
+void hk_state_push_instance(HkState *state, HkInstance *inst)
 {
-  if (push(state, hk_instance_value(inst)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_instance_value(inst));
+  hk_return_if_not_ok(state);
   hk_incr_ref(inst);
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_iterator(HkState *state, HkIterator *it)
+void hk_state_push_iterator(HkState *state, HkIterator *it)
 {
-  if (push(state, hk_iterator_value(it)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_iterator_value(it));
+  hk_return_if_not_ok(state);
   hk_incr_ref(it);
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_closure(HkState *state, HkClosure *cl)
+void hk_state_push_closure(HkState *state, HkClosure *cl)
 {
-  if (push(state, hk_closure_value(cl)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_closure_value(cl));
+  hk_return_if_not_ok(state);
   hk_incr_ref(cl);
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_native(HkState *state, HkNative *native)
+void hk_state_push_native(HkState *state, HkNative *native)
 {
-  if (push(state, hk_native_value(native)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_native_value(native));
+  hk_return_if_not_ok(state);
   hk_incr_ref(native);
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_new_native(HkState *state, const char *name, int arity, int (*call)(HkState *, HkValue *))
+void hk_state_push_new_native(HkState *state, const char *name, int arity, void (*call)(HkState *, HkValue *))
 {
   HkNative *native = hk_native_new(hk_string_from_chars(-1, name), arity, call);
-  if (hk_state_push_native(state, native) == HK_STATUS_ERROR)
-  {
+  hk_state_push_native(state, native);
+  if (!hk_state_is_ok(state))
     hk_native_free(native);
-    return HK_STATUS_ERROR;
-  }
-  return HK_STATUS_OK;
 }
 
-int hk_state_push_userdata(HkState *state, HkUserdata *udata)
+void hk_state_push_userdata(HkState *state, HkUserdata *udata)
 {
-  if (push(state, hk_userdata_value(udata)) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  push(state, hk_userdata_value(udata));
+  hk_return_if_not_ok(state);
   hk_incr_ref(udata);
-  return HK_STATUS_OK;
 }
 
-int hk_state_array(HkState *state, int length)
+void hk_state_array(HkState *state, int length)
 {
-  return do_array(state, length);
+  do_array(state, length);
 }
 
-int hk_state_struct(HkState *state, int length)
+void hk_state_struct(HkState *state, int length)
 {
-  return do_struct(state, length);
+  do_struct(state, length);
 }
 
-int hk_state_instance(HkState *state, int num_args)
+void hk_state_instance(HkState *state, int num_args)
 {
-  return do_instance(state, num_args);
+  do_instance(state, num_args);
 }
 
-int hk_state_construct(HkState *state, int length)
+void hk_state_construct(HkState *state, int length)
 {
-  return do_construct(state, length);
+  do_construct(state, length);
 }
 
 void hk_state_pop(HkState *state)
@@ -1927,24 +1952,23 @@ void hk_state_pop(HkState *state)
   pop(state);
 }
 
-int hk_state_call(HkState *state, int num_args)
+void hk_state_call(HkState *state, int num_args)
 {
-  return do_call(state, num_args);
+  do_call(state, num_args);
 }
 
-int hk_state_compare(HkValue val1, HkValue val2, int *result)
+void hk_state_compare(HkState *state, HkValue val1, HkValue val2, int *result)
 {
   if (!hk_is_comparable(val1))
   {
-    hk_runtime_error("type error: value of type %s is not comparable", hk_type_name(val1.type));
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "type error: value of type %s is not comparable", hk_type_name(val1.type));
+    return;
   }
   if (val1.type != val2.type)
   {
-    hk_runtime_error("type error: cannot compare %s and %s", hk_type_name(val1.type),
+    hk_state_error(state, "type error: cannot compare %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
-    return HK_STATUS_ERROR;
+    return;
   }
   hk_assert(hk_value_compare(val1, val2, result), "hk_value_compare failed");
-  return HK_STATUS_OK; 
 }

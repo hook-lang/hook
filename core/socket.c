@@ -7,7 +7,6 @@
 #include <string.h>
 #include <hook/memory.h>
 #include <hook/check.h>
-#include <hook/status.h>
 #include <hook/error.h>
 
 #ifdef _WIN32
@@ -45,7 +44,7 @@ typedef struct
 } SocketWrapper;
 
 #ifdef _WIN32
-  static int socket_count = 0;
+  static int initialized = 0;
 #endif
 
 static inline void socket_startup(void);
@@ -54,36 +53,36 @@ static inline void socket_close(Socket sock);
 static inline bool socket_resolve(int domain, int type, const char *host, char *address);
 static inline SocketWrapper *socket_wrapper_new(Socket sock, int domain, int type, int protocol);
 static void socket_wrapper_deinit(HkUserdata *udata);
-static int new_call(HkState *state, HkValue *args);
-static int close_call(HkState *state, HkValue *args);
-static int connect_call(HkState *state, HkValue *args);
-static int accept_call(HkState *state, HkValue *args);
-static int bind_call(HkState *state, HkValue *args);
-static int listen_call(HkState *state, HkValue *args);
-static int send_call(HkState *state, HkValue *args);
-static int recv_call(HkState *state, HkValue *args);
-static int set_option_call(HkState *state, HkValue *args);
-static int get_option_call(HkState *state, HkValue *args);
-static int set_block_call(HkState *state, HkValue *args);
-static int set_nonblock_call(HkState *state, HkValue *args);
+static void new_call(HkState *state, HkValue *args);
+static void close_call(HkState *state, HkValue *args);
+static void connect_call(HkState *state, HkValue *args);
+static void accept_call(HkState *state, HkValue *args);
+static void bind_call(HkState *state, HkValue *args);
+static void listen_call(HkState *state, HkValue *args);
+static void send_call(HkState *state, HkValue *args);
+static void recv_call(HkState *state, HkValue *args);
+static void set_option_call(HkState *state, HkValue *args);
+static void get_option_call(HkState *state, HkValue *args);
+static void set_block_call(HkState *state, HkValue *args);
+static void set_nonblock_call(HkState *state, HkValue *args);
 
 static inline void socket_startup(void)
 {
 #ifdef _WIN32
-  if (!socket_count)
+  if (!initialized)
   {
     WSADATA wsa;
     (void) WSAStartup(MAKEWORD(2, 2), &wsa);
   }
-  ++socket_count;
+  ++initialized;
 #endif
 }
 
 static inline void socket_cleanup(void)
 {
 #ifdef _WIN32
-  --socket_count;
-  if (!socket_count)
+  --initialized;
+  if (!initialized)
     (void) WSACleanup();
 #endif
 }
@@ -132,14 +131,14 @@ static void socket_wrapper_deinit(HkUserdata *udata)
   socket_close(sock);
 }
 
-static int new_call(HkState *state, HkValue *args)
+static void new_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_int(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_int(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 2);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 3);
+  hk_return_if_not_ok(state);
   int domain = (int) hk_as_number(args[1]);
   int type = (int) hk_as_number(args[2]);
   int protocol = (int) hk_as_number(args[3]);
@@ -148,16 +147,17 @@ static int new_call(HkState *state, HkValue *args)
   if (sock == INVALID_SOCKET)
   {
     socket_cleanup();
-    return hk_state_push_nil(state);
+    hk_state_push_nil(state);
+    return;
   }
   SocketWrapper *wrapper = socket_wrapper_new(sock, domain, type, protocol);
-  return hk_state_push_userdata(state, (HkUserdata *) wrapper);
+  hk_state_push_userdata(state, (HkUserdata *) wrapper);
 }
 
-static int close_call(HkState *state, HkValue *args)
+static void close_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   Socket sock = wrapper->sock;
   if (sock != INVALID_SOCKET)
@@ -165,45 +165,48 @@ static int close_call(HkState *state, HkValue *args)
     socket_close(sock);
     wrapper->sock = INVALID_SOCKET;
   }
-  return hk_state_push_nil(state);
+  hk_state_push_nil(state);
 }
 
-static int connect_call(HkState *state, HkValue *args)
+static void connect_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_string(state, args, 2);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 3);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   HkString *host = hk_as_string(args[2]);
   int port = (int) hk_as_number(args[3]);
   char address[ADDRESS_MAX_LEN];
   if (!socket_resolve(wrapper->domain, wrapper->type, host->chars, address))
   {
-    hk_runtime_error("cannot resolve host '%s'", host->chars);
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot resolve host '%s'", host->chars);
+    return;
   }
   struct sockaddr_in sock_addr;
   memset(&sock_addr, 0, sizeof(sock_addr));
   sock_addr.sin_family = AF_INET;
   sock_addr.sin_port = htons((uint16_t) port);
   if (inet_pton(AF_INET, address, &sock_addr.sin_addr) < 1)
-    return hk_state_push_nil(state);
+  {
+    hk_state_push_nil(state);
+    return;
+  }
   Socket sock = wrapper->sock;
   if (connect(sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == SOCKET_ERROR)
   {
-    hk_runtime_error("cannot connect to address '%s'", address);
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot connect to address '%s'", address);
+    return;
   }
-  return hk_state_push_nil(state);
+  hk_state_push_nil(state);
 }
 
-static int accept_call(HkState *state, HkValue *args)
+static void accept_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   Socket sock;
   struct sockaddr_in sock_addr;
@@ -220,103 +223,110 @@ static int accept_call(HkState *state, HkValue *args)
     if (errno == EINTR)
       continue;
   #endif
-    return hk_state_push_nil(state);
+    hk_state_push_nil(state);
+    return;
   }
   SocketWrapper *result = socket_wrapper_new(sock, wrapper->domain, wrapper->type, wrapper->protocol);
-  return hk_state_push_userdata(state, (HkUserdata *) result);
+  hk_state_push_userdata(state, (HkUserdata *) result);
 }
 
-static int bind_call(HkState *state, HkValue *args)
+static void bind_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_string(state, args, 2);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 3);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   HkString *host = hk_as_string(args[2]);
   int port = (int) hk_as_number(args[3]);
   char address[ADDRESS_MAX_LEN];
   if (!socket_resolve(wrapper->domain, wrapper->type, host->chars, address))
   {
-    hk_runtime_error("cannot resolve host '%s'", host->chars);
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot resolve host '%s'", host->chars);
+    return;
   }
   struct sockaddr_in sock_addr;
   memset(&sock_addr, 0, sizeof(sock_addr));
   sock_addr.sin_family = wrapper->domain;
   sock_addr.sin_port = htons((uint16_t) port);
   if (inet_pton(AF_INET, address, &sock_addr.sin_addr) < 1)
-    return hk_state_push_nil(state);
+  {
+    hk_state_push_nil(state);
+    return;
+  }
   if (bind(wrapper->sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == SOCKET_ERROR)
   {
-    hk_runtime_error("cannot bind to address '%s'", address);
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot bind to address '%s'", address);
+    return;
   }
-  return hk_state_push_nil(state);
+  hk_state_push_nil(state);
 }
 
-static int listen_call(HkState *state, HkValue *args)
+static void listen_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 2);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   int backlog = (int) hk_as_number(args[2]);
   if (listen(wrapper->sock, backlog) == SOCKET_ERROR)
   {
-    hk_runtime_error("cannot listen on socket");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot listen on socket");
+    return;
   }
-  return hk_state_push_nil(state);
+  hk_state_push_nil(state);
 }
 
-static int send_call(HkState *state, HkValue *args)
+static void send_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_string(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_string(state, args, 2);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 3);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   HkString *str = hk_as_string(args[2]);
   int flags = (int) hk_as_number(args[3]);
   int length = (int) send(wrapper->sock, str->chars, str->length, flags);
-  return hk_state_push_number(state, length);
+  hk_state_push_number(state, length);
 }
 
-static int recv_call(HkState *state, HkValue *args)
+static void recv_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 2);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 3);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   int size = (int) hk_as_number(args[2]);
   int flags = (int) hk_as_number(args[3]);
   HkString *str = hk_string_new_with_capacity(size);
   int length = (int) recv(wrapper->sock, str->chars, size, flags);
   if (!length)
-    return hk_state_push_nil(state);
+  {
+    hk_state_push_nil(state);
+    return;
+  }
   str->length = length;
-  return hk_state_push_string(state, str);
+  hk_state_push_string(state, str);
 }
 
-static int set_option_call(HkState *state, HkValue *args)
+static void set_option_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 4) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 2);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 3);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 4);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   int level = (int) hk_as_number(args[2]);
   int option = (int) hk_as_number(args[3]);
@@ -329,20 +339,20 @@ static int set_option_call(HkState *state, HkValue *args)
 #endif
   if (result == SOCKET_ERROR)
   {
-    hk_runtime_error("cannot set socket option");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot set socket option");
+    return;
   }
-  return hk_state_push_nil(state);
+  hk_state_push_nil(state);
 }
 
-static int get_option_call(HkState *state, HkValue *args)
+static void get_option_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 2) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_check_argument_int(args, 3) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 2);
+  hk_return_if_not_ok(state);
+  hk_state_check_argument_int(state, args, 3);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   int level = (int) hk_as_number(args[2]);
   int option = (int) hk_as_number(args[3]);
@@ -356,16 +366,16 @@ static int get_option_call(HkState *state, HkValue *args)
 #endif
   if (result == SOCKET_ERROR)
   {
-    hk_runtime_error("cannot get socket option");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot get socket option");
+    return;
   }
-  return hk_state_push_number(state, value);
+  hk_state_push_number(state, value);
 }
 
-static int set_block_call(HkState *state, HkValue *args)
+static void set_block_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   Socket sock = wrapper->sock;
 #ifdef _WIN32
@@ -373,25 +383,25 @@ static int set_block_call(HkState *state, HkValue *args)
   int result = ioctlsocket(sock, FIONBIO, &mode);
   if (result)
   {
-    hk_runtime_error("cannot set socket to blocking mode");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot set socket to blocking mode");
+    return;
   }
 #else
   int flags = fcntl(sock, F_GETFL, 0);
   int result = fcntl(sock, F_SETFL, flags & ~O_NONBLOCK);
   if (result == -1)
   {
-    hk_runtime_error("cannot set socket to blocking mode");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot set socket to blocking mode");
+    return;
   }
 #endif
-  return hk_state_push_nil(state);
+  hk_state_push_nil(state);
 }
 
-static int set_nonblock_call(HkState *state, HkValue *args)
+static void set_nonblock_call(HkState *state, HkValue *args)
 {
-  if (hk_check_argument_userdata(args, 1) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
+  hk_state_check_argument_userdata(state, args, 1);
+  hk_return_if_not_ok(state);
   SocketWrapper *wrapper = (SocketWrapper *) hk_as_userdata(args[1]);
   Socket sock = wrapper->sock;
 #ifdef _WIN32
@@ -399,104 +409,104 @@ static int set_nonblock_call(HkState *state, HkValue *args)
   int result = ioctlsocket(sock, FIONBIO, &mode);
   if (result)
   {
-    hk_runtime_error("cannot set socket to non-blocking mode");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot set socket to non-blocking mode");
+    return;
   }
 #else
   int flags = fcntl(sock, F_GETFL, 0);
   int result = fcntl(sock, F_SETFL, flags | O_NONBLOCK);
   if (result == -1)
   {
-    hk_runtime_error("cannot set socket to non-blocking mode");
-    return HK_STATUS_ERROR;
+    hk_state_error(state, "cannot set socket to non-blocking mode");
+    return;
   }
 #endif
-  return hk_state_push_nil(state);
+  hk_state_push_nil(state);
 }
 
-HK_LOAD_FN(socket)
+HK_LOAD_MODULE_HANDLER(socket)
 {
-  if (hk_state_push_string_from_chars(state, -1, "socket") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "AF_INET") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_number(state, AF_INET) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "AF_INET6") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_number(state, AF_INET6) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "SOCK_STREAM") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_number(state, SOCK_STREAM) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "SOCK_DGRAM") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_number(state, SOCK_DGRAM) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "IPPROTO_TCP") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_number(state, IPPROTO_TCP) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "IPPROTO_UDP") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_number(state, IPPROTO_UDP) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "SOL_SOCKET") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_number(state, SOL_SOCKET) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "SO_REUSEADDR") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_number(state, SO_REUSEADDR) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "new") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "new", 3, &new_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "close") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "close", 1, &close_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "connect") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "connect", 3, &connect_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "accept") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "accept", 1, &accept_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "bind") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "bind", 3, &bind_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "listen") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "listen", 2, &listen_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "send") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "send", 3, &send_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "recv") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "recv", 3, &recv_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "set_option") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "set_option", 4, &set_option_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "get_option") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "get_option", 3, &get_option_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "set_block") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "set_block", 1, &set_block_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_string_from_chars(state, -1, "set_nonblock") == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  if (hk_state_push_new_native(state, "set_nonblock", 1, &set_nonblock_call) == HK_STATUS_ERROR)
-    return HK_STATUS_ERROR;
-  return hk_state_construct(state, 20);
+  hk_state_push_string_from_chars(state, -1, "socket");
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "AF_INET");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, AF_INET);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "AF_INET6");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, AF_INET6);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "SOCK_STREAM");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, SOCK_STREAM);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "SOCK_DGRAM");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, SOCK_DGRAM);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "IPPROTO_TCP");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, IPPROTO_TCP);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "IPPROTO_UDP");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, IPPROTO_UDP);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "SOL_SOCKET");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, SOL_SOCKET);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "SO_REUSEADDR");
+  hk_return_if_not_ok(state);
+  hk_state_push_number(state, SO_REUSEADDR);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "new");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "new", 3, &new_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "close");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "close", 1, &close_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "connect");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "connect", 3, &connect_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "accept");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "accept", 1, &accept_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "bind");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "bind", 3, &bind_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "listen");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "listen", 2, &listen_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "send");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "send", 3, &send_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "recv");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "recv", 3, &recv_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "set_option");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "set_option", 4, &set_option_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "get_option");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "get_option", 3, &get_option_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "set_block");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "set_block", 1, &set_block_call);
+  hk_return_if_not_ok(state);
+  hk_state_push_string_from_chars(state, -1, "set_nonblock");
+  hk_return_if_not_ok(state);
+  hk_state_push_new_native(state, "set_nonblock", 1, &set_nonblock_call);
+  hk_return_if_not_ok(state);
+  hk_state_construct(state, 20);
 }

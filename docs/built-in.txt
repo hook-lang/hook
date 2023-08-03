@@ -38,5 +38,6 @@ valid(it: iterator) -> bool
 current(it: iterator) -> any
 next(it: iterator) -> iterator
 sleep(ms: number)
+exit(code: number)
 assert(assertion, msg: string)
 panic(msg: string)

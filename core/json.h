@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(json);
+HK_LOAD_MODULE_HANDLER(json);
 
 #endif // JSON_H

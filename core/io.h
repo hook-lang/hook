@@ -9,6 +9,6 @@
 #include <hook/state.h>
 #include <hook/utils.h>
 
-HK_LOAD_FN(io);
+HK_LOAD_MODULE_HANDLER(io);
 
 #endif // IO_H
