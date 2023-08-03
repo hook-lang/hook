@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <zmq.h>
 #include <hook/memory.h>
-#include <hook/error.h>
 
 typedef struct
 {
@@ -120,7 +119,7 @@ static void connect_call(HkState *state, HkValue *args)
   void *sock = wrapper->sock;
   if (zmq_connect(sock, host->chars))
   {
-    hk_state_error(state, "cannot connect to address '%.*s'", host->length, host->chars);
+    hk_state_runtime_error(state, "cannot connect to address '%.*s'", host->length, host->chars);
     return;
   }
   hk_state_push_nil(state);
@@ -137,7 +136,7 @@ static void bind_call(HkState *state, HkValue *args)
   void *sock = wrapper->sock;
   if (zmq_bind(sock, host->chars))
   {
-    hk_state_error(state, "cannot bind to address '%.*s'", host->length, host->chars);
+    hk_state_runtime_error(state, "cannot bind to address '%.*s'", host->length, host->chars);
     return;
   }
   hk_state_push_nil(state);

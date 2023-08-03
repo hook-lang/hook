@@ -67,7 +67,7 @@ void hk_function_free(HkFunction *fn)
   if (name)
     hk_string_release(name);
   hk_string_release(fn->file);
-  hk_chunk_free(&fn->chunk);
+  hk_chunk_deinit(&fn->chunk);
   free_functions(fn);
   free(fn);
 }

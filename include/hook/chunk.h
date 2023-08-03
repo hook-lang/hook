@@ -53,7 +53,7 @@ typedef struct
 } HkChunk;
 
 void hk_chunk_init(HkChunk *chunk);
-void hk_chunk_free(HkChunk *chunk);
+void hk_chunk_deinit(HkChunk *chunk);
 void hk_chunk_emit_byte(HkChunk *chunk, uint8_t byte);
 void hk_chunk_emit_word(HkChunk *chunk, uint16_t word);
 void hk_chunk_emit_opcode(HkChunk *chunk, HkOpCode op);

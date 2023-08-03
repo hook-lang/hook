@@ -6,7 +6,6 @@
 #include "socket.h"
 #include <string.h>
 #include <hook/memory.h>
-#include <hook/error.h>
 
 #ifdef _WIN32
   #include <winsock2.h>
@@ -181,7 +180,7 @@ static void connect_call(HkState *state, HkValue *args)
   char address[ADDRESS_MAX_LEN];
   if (!socket_resolve(wrapper->domain, wrapper->type, host->chars, address))
   {
-    hk_state_error(state, "cannot resolve host '%s'", host->chars);
+    hk_state_runtime_error(state, "cannot resolve host '%s'", host->chars);
     return;
   }
   struct sockaddr_in sock_addr;
@@ -196,7 +195,7 @@ static void connect_call(HkState *state, HkValue *args)
   Socket sock = wrapper->sock;
   if (connect(sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == SOCKET_ERROR)
   {
-    hk_state_error(state, "cannot connect to address '%s'", address);
+    hk_state_runtime_error(state, "cannot connect to address '%s'", address);
     return;
   }
   hk_state_push_nil(state);
@@ -243,7 +242,7 @@ static void bind_call(HkState *state, HkValue *args)
   char address[ADDRESS_MAX_LEN];
   if (!socket_resolve(wrapper->domain, wrapper->type, host->chars, address))
   {
-    hk_state_error(state, "cannot resolve host '%s'", host->chars);
+    hk_state_runtime_error(state, "cannot resolve host '%s'", host->chars);
     return;
   }
   struct sockaddr_in sock_addr;
@@ -257,7 +256,7 @@ static void bind_call(HkState *state, HkValue *args)
   }
   if (bind(wrapper->sock, (struct sockaddr *) &sock_addr, sizeof(sock_addr)) == SOCKET_ERROR)
   {
-    hk_state_error(state, "cannot bind to address '%s'", address);
+    hk_state_runtime_error(state, "cannot bind to address '%s'", address);
     return;
   }
   hk_state_push_nil(state);
@@ -273,7 +272,7 @@ static void listen_call(HkState *state, HkValue *args)
   int backlog = (int) hk_as_number(args[2]);
   if (listen(wrapper->sock, backlog) == SOCKET_ERROR)
   {
-    hk_state_error(state, "cannot listen on socket");
+    hk_state_runtime_error(state, "cannot listen on socket");
     return;
   }
   hk_state_push_nil(state);
@@ -338,7 +337,7 @@ static void set_option_call(HkState *state, HkValue *args)
 #endif
   if (result == SOCKET_ERROR)
   {
-    hk_state_error(state, "cannot set socket option");
+    hk_state_runtime_error(state, "cannot set socket option");
     return;
   }
   hk_state_push_nil(state);
@@ -365,7 +364,7 @@ static void get_option_call(HkState *state, HkValue *args)
 #endif
   if (result == SOCKET_ERROR)
   {
-    hk_state_error(state, "cannot get socket option");
+    hk_state_runtime_error(state, "cannot get socket option");
     return;
   }
   hk_state_push_number(state, value);
@@ -382,7 +381,7 @@ static void set_block_call(HkState *state, HkValue *args)
   int result = ioctlsocket(sock, FIONBIO, &mode);
   if (result)
   {
-    hk_state_error(state, "cannot set socket to blocking mode");
+    hk_state_runtime_error(state, "cannot set socket to blocking mode");
     return;
   }
 #else
@@ -390,7 +389,7 @@ static void set_block_call(HkState *state, HkValue *args)
   int result = fcntl(sock, F_SETFL, flags & ~O_NONBLOCK);
   if (result == -1)
   {
-    hk_state_error(state, "cannot set socket to blocking mode");
+    hk_state_runtime_error(state, "cannot set socket to blocking mode");
     return;
   }
 #endif
@@ -408,7 +407,7 @@ static void set_nonblock_call(HkState *state, HkValue *args)
   int result = ioctlsocket(sock, FIONBIO, &mode);
   if (result)
   {
-    hk_state_error(state, "cannot set socket to non-blocking mode");
+    hk_state_runtime_error(state, "cannot set socket to non-blocking mode");
     return;
   }
 #else
@@ -416,7 +415,7 @@ static void set_nonblock_call(HkState *state, HkValue *args)
   int result = fcntl(sock, F_SETFL, flags | O_NONBLOCK);
   if (result == -1)
   {
-    hk_state_error(state, "cannot set socket to non-blocking mode");
+    hk_state_runtime_error(state, "cannot set socket to non-blocking mode");
     return;
   }
 #endif

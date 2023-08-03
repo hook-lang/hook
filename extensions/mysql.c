@@ -7,7 +7,6 @@
 #include <mysql/mysql.h>
 #include <assert.h>
 #include <hook/memory.h>
-#include <hook/error.h>
 
 typedef struct
 {
@@ -81,7 +80,7 @@ static void connect_call(HkState *state, HkValue *args)
   hk_return_if_not_ok(state);
   if (mysql_library_init(0, NULL, NULL))
   {
-    hk_state_error(state, "cannot initialize MySQL client library");
+    hk_state_runtime_error(state, "cannot initialize MySQL client library");
     return;
   }
   MYSQL *mysql = NULL;

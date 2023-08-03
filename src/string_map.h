@@ -26,7 +26,7 @@ typedef struct
 } StringMap;
 
 void string_map_init(StringMap *map, int minCapacity);
-void string_map_free(StringMap *map);
+void string_map_deinit(StringMap *map);
 StringMapEntry *string_map_get_entry(StringMap *map, HkString *key);
 void string_map_inplace_put(StringMap *map, HkString *key, HkValue value);
 

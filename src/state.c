@@ -10,7 +10,6 @@
 #include <hook/struct.h>
 #include <hook/iterable.h>
 #include <hook/memory.h>
-#include <hook/error.h>
 #include <hook/utils.h>
 #include "module.h"
 #include "builtin.h"
@@ -97,7 +96,7 @@ static inline void push(HkState *state, HkValue val)
 {
   if (state->stackTop == state->stackEnd)
   {
-    hk_state_error(state, "stack overflow");
+    hk_state_runtime_error(state, "stack overflow");
     return;
   }
   ++state->stackTop;
@@ -133,7 +132,7 @@ static inline void do_range(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: range must be of type number");
+    hk_state_runtime_error(state, "type error: range must be of type number");
     return;
   }
   HkRange *range = hk_range_new(hk_as_number(val1), hk_as_number(val2));
@@ -170,7 +169,7 @@ static inline void do_struct(HkState *state, int length)
     HkString *field_name = hk_as_string(slots[i]);
     if (!hk_struct_define_field(ztruct, field_name))
     {
-      hk_state_error(state, "field %.*s is already defined", field_name->length,
+      hk_state_runtime_error(state, "field %.*s is already defined", field_name->length,
         field_name->chars);
       hk_struct_free(ztruct);
       return;
@@ -191,7 +190,7 @@ static inline void do_instance(HkState *state, int num_args)
   HkValue val = slots[0];
   if (!hk_is_struct(val))
   {
-    hk_state_error(state, "type error: cannot use %s as a struct", hk_type_name(val.type));
+    hk_state_runtime_error(state, "type error: cannot use %s as a struct", hk_type_name(val.type));
     return;
   }
   HkStruct *ztruct = hk_as_struct(val);
@@ -238,7 +237,7 @@ static inline void do_construct(HkState *state, int length)
     HkString *field_name = hk_as_string(slots[i]);
     if (hk_struct_define_field(ztruct, field_name))
       continue;
-    hk_state_error(state, "field %.*s is already defined", field_name->length,
+    hk_state_runtime_error(state, "field %.*s is already defined", field_name->length,
       field_name->chars);
     hk_struct_free(ztruct);
     return;
@@ -264,7 +263,7 @@ static inline void do_iterator(HkState *state)
   HkIterator *it = hk_new_iterator(val);
   if (!it)
   {
-    hk_state_error(state, "type error: value of type %s is not iterable", hk_type_name(val.type));
+    hk_state_runtime_error(state, "type error: value of type %s is not iterable", hk_type_name(val.type));
     return;
   }
   hk_incr_ref(it);
@@ -294,7 +293,7 @@ static inline void do_unpack_array(HkState *state, int n)
   HkValue val = state->stackSlots[state->stackTop];
   if (!hk_is_array(val))
   {
-    hk_state_error(state, "type error: value of type %s is not an array",
+    hk_state_runtime_error(state, "type error: value of type %s is not an array",
       hk_type_name(val.type));
     return;
   }
@@ -323,7 +322,7 @@ static inline void do_unpack_struct(HkState *state, int n)
   HkValue val = state->stackSlots[state->stackTop];
   if (!hk_is_instance(val))
   {
-    hk_state_error(state, "type error: value of type %s is not an instance of struct",
+    hk_state_runtime_error(state, "type error: value of type %s is not an instance of struct",
       hk_type_name(val.type));
     return;
   }
@@ -351,7 +350,7 @@ static inline void do_add_element(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    hk_state_runtime_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
     return;
   }
   HkArray *arr = hk_as_array(val1);
@@ -376,7 +375,7 @@ static inline void do_get_element(HkState *state)
       int64_t index = (int64_t) hk_as_number(val2);
       if (index < 0 || index >= str->length)
       {
-        hk_state_error(state, "range error: index %d is out of bounds for string of length %d",
+        hk_state_runtime_error(state, "range error: index %d is out of bounds for string of length %d",
           index, str->length);
         return;
       }
@@ -389,7 +388,7 @@ static inline void do_get_element(HkState *state)
     }
     if (!hk_is_range(val2))
     {
-      hk_state_error(state, "type error: string cannot be indexed by %s", hk_type_name(val2.type));
+      hk_state_runtime_error(state, "type error: string cannot be indexed by %s", hk_type_name(val2.type));
       return;
     }
     slice_string(state, slots, str, hk_as_range(val2));
@@ -397,7 +396,7 @@ static inline void do_get_element(HkState *state)
   }
   if (!hk_is_array(val1))
   {
-    hk_state_error(state, "type error: %s cannot be indexed", hk_type_name(val1.type));
+    hk_state_runtime_error(state, "type error: %s cannot be indexed", hk_type_name(val1.type));
     return;
   }
   HkArray *arr = hk_as_array(val1);
@@ -406,7 +405,7 @@ static inline void do_get_element(HkState *state)
     int64_t index = (int64_t) hk_as_number(val2);
     if (index < 0 || index >= arr->length)
     {
-      hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
+      hk_state_runtime_error(state, "range error: index %d is out of bounds for array of length %d",
         index, arr->length);
       return;
     }
@@ -419,7 +418,7 @@ static inline void do_get_element(HkState *state)
   }
   if (!hk_is_range(val2))
   {
-    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    hk_state_runtime_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
     return;
   }
   slice_array(state, slots, arr, hk_as_range(val2));
@@ -493,19 +492,19 @@ static inline void do_fetch_element(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    hk_state_runtime_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
     return;
   }
   if (!hk_is_int(val2))
   {
-    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    hk_state_runtime_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
     return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
+    hk_state_runtime_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
     return;
   }
@@ -539,19 +538,19 @@ static inline void do_put_element(HkState *state)
   HkValue val3 = slots[2];
   if (!hk_is_array(val1))
   {
-    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    hk_state_runtime_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
     return;
   }
   if (!hk_is_int(val2))
   {
-    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    hk_state_runtime_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
     return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
+    hk_state_runtime_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
     return;
   }
@@ -570,19 +569,19 @@ static inline void do_delete_element(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    hk_state_runtime_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
     return;
   }
   if (!hk_is_int(val2))
   {
-    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    hk_state_runtime_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
     return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
+    hk_state_runtime_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
     return;
   }
@@ -600,7 +599,7 @@ static inline void do_inplace_add_element(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    hk_state_runtime_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
     return;
   }
   HkArray *arr = hk_as_array(val1);
@@ -627,19 +626,19 @@ static inline void do_inplace_put_element(HkState *state)
   HkValue val3 = slots[2];
   if (!hk_is_array(val1))
   {
-    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    hk_state_runtime_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
     return;
   }
   if (!hk_is_int(val2))
   {
-    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    hk_state_runtime_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
     return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
+    hk_state_runtime_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
     return;
   }
@@ -665,19 +664,19 @@ static inline void do_inplace_delete_element(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_array(val1))
   {
-    hk_state_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
+    hk_state_runtime_error(state, "type error: cannot use %s as an array", hk_type_name(val1.type));
     return;
   }
   if (!hk_is_int(val2))
   {
-    hk_state_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
+    hk_state_runtime_error(state, "type error: array cannot be indexed by %s", hk_type_name(val2.type));
     return;
   }
   HkArray *arr = hk_as_array(val1);
   int64_t index = (int64_t) hk_as_number(val2);
   if (index < 0 || index >= arr->length)
   {
-    hk_state_error(state, "range error: index %d is out of bounds for array of length %d",
+    hk_state_runtime_error(state, "range error: index %d is out of bounds for array of length %d",
       index, arr->length);
     return;
   }
@@ -700,7 +699,7 @@ static inline void do_get_field(HkState *state, HkString *name)
   HkValue val = slots[0];
   if (!hk_is_instance(val))
   {
-    hk_state_error(state, "type error: cannot use %s as an instance of struct",
+    hk_state_runtime_error(state, "type error: cannot use %s as an instance of struct",
       hk_type_name(val.type));
     return;
   }
@@ -708,7 +707,7 @@ static inline void do_get_field(HkState *state, HkString *name)
   int index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
-    hk_state_error(state, "no field %.*s on struct", name->length, name->chars);
+    hk_state_runtime_error(state, "no field %.*s on struct", name->length, name->chars);
     return;
   }
   HkValue value = hk_instance_get_field(inst, index);
@@ -723,7 +722,7 @@ static inline void do_fetch_field(HkState *state, HkString *name)
   HkValue val = slots[0];
   if (!hk_is_instance(val))
   {
-    hk_state_error(state, "type error: cannot use %s as an instance of struct",
+    hk_state_runtime_error(state, "type error: cannot use %s as an instance of struct",
       hk_type_name(val.type));
     return;
   }
@@ -731,7 +730,7 @@ static inline void do_fetch_field(HkState *state, HkString *name)
   int index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
-    hk_state_error(state, "no field %.*s on struct", name->length, name->chars);
+    hk_state_runtime_error(state, "no field %.*s on struct", name->length, name->chars);
     return;
   }
   push(state, hk_number_value(index));
@@ -765,7 +764,7 @@ static inline void do_put_field(HkState *state, HkString *name)
   HkValue val2 = slots[1];
   if (!hk_is_instance(val1))
   {
-    hk_state_error(state, "type error: cannot use %s as an instance of struct",
+    hk_state_runtime_error(state, "type error: cannot use %s as an instance of struct",
       hk_type_name(val1.type));
     return;
   }
@@ -773,7 +772,7 @@ static inline void do_put_field(HkState *state, HkString *name)
   int index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
-    hk_state_error(state, "no field %.*s on struct", name->length, name->chars);
+    hk_state_runtime_error(state, "no field %.*s on struct", name->length, name->chars);
     return;
   }
   HkInstance *result = hk_instance_set_field(inst, index, val2);
@@ -791,7 +790,7 @@ static inline void do_inplace_put_field(HkState *state, HkString *name)
   HkValue val2 = slots[1];
   if (!hk_is_instance(val1))
   {
-    hk_state_error(state, "type error: cannot use %s as an instance of struct",
+    hk_state_runtime_error(state, "type error: cannot use %s as an instance of struct",
       hk_type_name(val1.type));
     return;
   }
@@ -799,7 +798,7 @@ static inline void do_inplace_put_field(HkState *state, HkString *name)
   int index = hk_struct_index_of(inst->ztruct, name);
   if (index == -1)
   {
-    hk_state_error(state, "no field %.*s on struct", name->length, name->chars);
+    hk_state_runtime_error(state, "no field %.*s on struct", name->length, name->chars);
     return;
   }
   if (inst->ref_count == 2)
@@ -929,7 +928,7 @@ static inline void do_bitwise_or(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: cannot apply `bitwise or` between %s and %s", hk_type_name(val1.type),
+    hk_state_runtime_error(state, "type error: cannot apply `bitwise or` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return;
   }
@@ -945,7 +944,7 @@ static inline void do_bitwise_xor(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: cannot apply `bitwise xor` between %s and %s", hk_type_name(val1.type),
+    hk_state_runtime_error(state, "type error: cannot apply `bitwise xor` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return;
   }
@@ -961,7 +960,7 @@ static inline void do_bitwise_and(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: cannot apply `bitwise and` between %s and %s", hk_type_name(val1.type),
+    hk_state_runtime_error(state, "type error: cannot apply `bitwise and` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return;
   }
@@ -977,7 +976,7 @@ static inline void do_left_shift(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: cannot apply `left shift` between %s and %s", hk_type_name(val1.type),
+    hk_state_runtime_error(state, "type error: cannot apply `left shift` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return;
   }
@@ -993,7 +992,7 @@ static inline void do_right_shift(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: cannot apply `right shift` between %s and %s", hk_type_name(val1.type),
+    hk_state_runtime_error(state, "type error: cannot apply `right shift` between %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return;
   }
@@ -1011,7 +1010,7 @@ static inline void do_add(HkState *state)
   {
     if (!hk_is_number(val2))
     {
-      hk_state_error(state, "type error: cannot add %s to number", hk_type_name(val2.type));
+      hk_state_runtime_error(state, "type error: cannot add %s to number", hk_type_name(val2.type));
       return;
     }
     double data = hk_as_number(val1) + hk_as_number(val2);
@@ -1023,7 +1022,7 @@ static inline void do_add(HkState *state)
   {
     if (!hk_is_string(val2))
     {
-      hk_state_error(state, "type error: cannot concatenate string and %s",
+      hk_state_runtime_error(state, "type error: cannot concatenate string and %s",
         hk_type_name(val2.type));
       return;
     }
@@ -1034,14 +1033,14 @@ static inline void do_add(HkState *state)
   {
     if (!hk_is_array(val2))
     {
-      hk_state_error(state, "type error: cannot concatenate array and %s",
+      hk_state_runtime_error(state, "type error: cannot concatenate array and %s",
         hk_type_name(val2.type));
       return;
     }
     concat_arrays(state, slots, val1, val2);
     return;
   }
-  hk_state_error(state, "type error: cannot add %s to %s", hk_type_name(val2.type),
+  hk_state_runtime_error(state, "type error: cannot add %s to %s", hk_type_name(val2.type),
     hk_type_name(val1.type));
 }
 
@@ -1118,7 +1117,7 @@ static inline void do_subtract(HkState *state)
   {
     if (!hk_is_number(val2))
     {
-      hk_state_error(state, "type error: cannot subtract %s from number",
+      hk_state_runtime_error(state, "type error: cannot subtract %s from number",
         hk_type_name(val2.type));
       return;
     }
@@ -1131,14 +1130,14 @@ static inline void do_subtract(HkState *state)
   {
     if (!hk_is_array(val2))
     {
-      hk_state_error(state, "type error: cannot diff between array and %s",
+      hk_state_runtime_error(state, "type error: cannot diff between array and %s",
         hk_type_name(val2.type));
       return;
     }
     diff_arrays(state, slots, val1, val2);
     return;
   }
-  hk_state_error(state, "type error: cannot subtract %s from %s", hk_type_name(val2.type),
+  hk_state_runtime_error(state, "type error: cannot subtract %s from %s", hk_type_name(val2.type),
     hk_type_name(val1.type));
 }
 
@@ -1174,7 +1173,7 @@ static inline void do_multiply(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: cannot multiply %s to %s", hk_type_name(val2.type),
+    hk_state_runtime_error(state, "type error: cannot multiply %s to %s", hk_type_name(val2.type),
       hk_type_name(val1.type));
     return;
   }
@@ -1190,7 +1189,7 @@ static inline void do_divide(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: cannot divide %s by %s", hk_type_name(val1.type),
+    hk_state_runtime_error(state, "type error: cannot divide %s by %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return;
   }
@@ -1206,7 +1205,7 @@ static inline void do_quotient(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: cannot apply `quotient` between %s and %s",
+    hk_state_runtime_error(state, "type error: cannot apply `quotient` between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
     return;
   }
@@ -1222,7 +1221,7 @@ static inline void do_remainder(HkState *state)
   HkValue val2 = slots[1];
   if (!hk_is_number(val1) || !hk_is_number(val2))
   {
-    hk_state_error(state, "type error: cannot apply `remainder` between %s and %s",
+    hk_state_runtime_error(state, "type error: cannot apply `remainder` between %s and %s",
       hk_type_name(val1.type), hk_type_name(val2.type));
     return;
   }
@@ -1237,7 +1236,7 @@ static inline void do_negate(HkState *state)
   HkValue val = slots[0];
   if (!hk_is_number(val))
   {
-    hk_state_error(state, "type error: cannot apply `negate` to %s", hk_type_name(val.type));
+    hk_state_runtime_error(state, "type error: cannot apply `negate` to %s", hk_type_name(val.type));
     return;
   }
   double data = -hk_as_number(val);
@@ -1258,7 +1257,7 @@ static inline void do_bitwise_not(HkState *state)
   HkValue val = slots[0];
   if (!hk_is_number(val))
   {
-    hk_state_error(state, "type error: cannot apply `bitwise not` to %s", hk_type_name(val.type));
+    hk_state_runtime_error(state, "type error: cannot apply `bitwise not` to %s", hk_type_name(val.type));
     return;
   }
   int64_t data = ~((int64_t) hk_as_number(val));
@@ -1271,7 +1270,7 @@ static inline void do_increment(HkState *state)
   HkValue val = slots[0];
   if (!hk_is_number(val))
   {
-    hk_state_error(state, "type error: cannot increment value of type %s",
+    hk_state_runtime_error(state, "type error: cannot increment value of type %s",
       hk_type_name(val.type));
     return;
   }
@@ -1284,7 +1283,7 @@ static inline void do_decrement(HkState *state)
   HkValue val = slots[0];
   if (!hk_is_number(val))
   {
-    hk_state_error(state, "type error: cannot decrement value of type %s",
+    hk_state_runtime_error(state, "type error: cannot decrement value of type %s",
       hk_type_name(val.type));
     return;
   }
@@ -1297,7 +1296,7 @@ static inline void do_call(HkState *state, int num_args)
   HkValue val = slots[0];
   if (!hk_is_callable(val))
   {
-    hk_state_error(state, "type error: cannot call value of type %s",
+    hk_state_runtime_error(state, "type error: cannot call value of type %s",
       hk_type_name(val.type));
     discard_frame(state, slots);
     return;
@@ -1316,7 +1315,10 @@ static inline void do_call(HkState *state, int num_args)
     if (status != HK_STATE_STATUS_OK)
     {
       if (hk_state_is_no_trace(state))
-        state->flags = HK_STATE_FLAG_NONE;
+      {
+        if (hk_state_is_error(state))
+          state->flags = HK_STATE_FLAG_NONE;
+      }
       else
         print_trace(native->name, NULL, 0);
       if (status == HK_STATE_STATUS_ERROR)
@@ -1344,7 +1346,10 @@ static inline void do_call(HkState *state, int num_args)
   if (status != HK_STATE_STATUS_OK)
   {
     if (hk_state_is_no_trace(state))
-      state->flags = HK_STATE_FLAG_NONE;
+    {
+      if (hk_state_is_error(state))
+        state->flags = HK_STATE_FLAG_NONE;
+    }
     else
       print_trace(fn->name, fn->file, line);
     if (status == HK_STATE_STATUS_ERROR)
@@ -1812,7 +1817,7 @@ void hk_state_init(HkState *state, int minCapacity)
   init_module_cache();
 }
 
-void hk_state_free(HkState *state)
+void hk_state_deinit(HkState *state)
 {
   free_module_cache();
   hk_assert(state->stackTop == num_globals() - 1, "stack must contain the globals");
@@ -1821,7 +1826,7 @@ void hk_state_free(HkState *state)
   free(state->stackSlots);
 }
 
-void hk_state_error(HkState *state, const char *fmt, ...)
+void hk_state_runtime_error(HkState *state, const char *fmt, ...)
 {
   state->status = HK_STATE_STATUS_ERROR;
   fprintf(stderr, "runtime error: ");
@@ -1836,7 +1841,7 @@ void hk_state_check_argument_type(HkState *state, HkValue *args, int index, HkTy
 {
   HkType valType = args[index].type;
   if (valType != type)
-    hk_state_error(state, "type error: argument #%d must be of the type %s, %s given", index,
+    hk_state_runtime_error(state, "type error: argument #%d must be of the type %s, %s given", index,
       hk_type_name(type), hk_type_name(valType));
 }
 
@@ -1865,7 +1870,7 @@ void hk_state_check_argument_int(HkState *state, HkValue *args, int index)
 {
   HkValue val = args[index];
   if (!hk_is_int(val))
-    hk_state_error(state, "type error: argument #%d must be of the type int, %s given",
+    hk_state_runtime_error(state, "type error: argument #%d must be of the type int, %s given",
       index, hk_type_name(val.type));
 }
 
@@ -2052,12 +2057,12 @@ void hk_state_compare(HkState *state, HkValue val1, HkValue val2, int *result)
 {
   if (!hk_is_comparable(val1))
   {
-    hk_state_error(state, "type error: value of type %s is not comparable", hk_type_name(val1.type));
+    hk_state_runtime_error(state, "type error: value of type %s is not comparable", hk_type_name(val1.type));
     return;
   }
   if (val1.type != val2.type)
   {
-    hk_state_error(state, "type error: cannot compare %s and %s", hk_type_name(val1.type),
+    hk_state_runtime_error(state, "type error: cannot compare %s and %s", hk_type_name(val1.type),
       hk_type_name(val2.type));
     return;
   }

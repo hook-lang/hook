@@ -5,7 +5,6 @@
 
 #include "module.h"
 #include <stdlib.h>
-#include <hook/error.h>
 #include <hook/utils.h>
 #include "string_map.h"
 
@@ -99,7 +98,7 @@ static inline void load_native_module(HkState *state, HkString *name)
 #endif
   if (!handle)
   {
-    hk_state_error(state, "cannot open module `%.*s`", file->length, file->chars);
+    hk_state_runtime_error(state, "cannot open module `%.*s`", file->length, file->chars);
     hk_string_free(file);
     return;
   }
@@ -114,7 +113,7 @@ static inline void load_native_module(HkState *state, HkString *name)
 #endif
   if (!load)
   {
-    hk_state_error(state, "no such function %.*s()", fn_name->length, fn_name->chars);
+    hk_state_runtime_error(state, "no such function %.*s()", fn_name->length, fn_name->chars);
     hk_string_free(fn_name);
     return;
   }
@@ -122,7 +121,7 @@ static inline void load_native_module(HkState *state, HkString *name)
   load(state);
   if (!hk_state_is_ok(state))
   {
-    hk_state_error(state, "cannot load module `%.*s`", name->length, name->chars);
+    hk_state_runtime_error(state, "cannot load module `%.*s`", name->length, name->chars);
     return;
   }
 }
@@ -134,7 +133,7 @@ void init_module_cache(void)
 
 void free_module_cache(void)
 {
-  string_map_free(&module_cache);
+  string_map_deinit(&module_cache);
 }
 
 void load_module(HkState *state)

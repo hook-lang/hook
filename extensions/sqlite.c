@@ -5,7 +5,6 @@
 
 #include "sqlite.h"
 #include <hook/memory.h>
-#include <hook/error.h>
 #include "deps/sqlite3.h"
 
 typedef struct
@@ -66,7 +65,7 @@ static void open_call(HkState *state, HkValue *args)
   sqlite3 *sqlite;
   if (sqlite3_open(filename->chars, &sqlite) != SQLITE_OK)
   {
-    hk_state_error(state, "cannot open database `%.*s`", filename->length,
+    hk_state_runtime_error(state, "cannot open database `%.*s`", filename->length,
       filename->chars);
     sqlite3_close(sqlite);
     return;
@@ -92,7 +91,7 @@ static void execute_call(HkState *state, HkValue *args)
   char *err = NULL;
   if (sqlite3_exec(sqlite, sql->chars, NULL, NULL, &err) != SQLITE_OK)
   {
-    hk_state_error(state, "cannot execute SQL: %s", err);
+    hk_state_runtime_error(state, "cannot execute SQL: %s", err);
     sqlite3_free(err);
     return;
   }
@@ -110,7 +109,7 @@ static void prepare_call(HkState *state, HkValue *args)
   sqlite3_stmt *sqlite_stmt;
   if (sqlite3_prepare_v2(sqlite, sql->chars, sql->length, &sqlite_stmt, NULL) != SQLITE_OK)
   {
-    hk_state_error(state, "cannot prepare SQL: %s", sqlite3_errmsg(sqlite));
+    hk_state_runtime_error(state, "cannot prepare SQL: %s", sqlite3_errmsg(sqlite));
     return;
   }
   hk_state_push_userdata(state, (HkUserdata *) sqlite_stmt_wrapper_new(sqlite_stmt));

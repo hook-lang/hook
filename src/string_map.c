@@ -52,7 +52,7 @@ void string_map_init(StringMap *map, int minCapacity)
   map->entries = allocate_entries(capacity);
 }
 
-void string_map_free(StringMap *map)
+void string_map_deinit(StringMap *map)
 {
   StringMapEntry *entries = map->entries;
   for (int i = 0, j = 0; i < map->capacity && j < map->length; ++i)

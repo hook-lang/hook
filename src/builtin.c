@@ -11,7 +11,6 @@
 #include <limits.h>
 #include <hook/struct.h>
 #include <hook/iterable.h>
-#include <hook/error.h>
 #include <hook/utils.h>
 
 #ifdef _WIN32
@@ -121,12 +120,12 @@ static inline void string_to_double(HkState *state, HkString *str, double *resul
 {
   if (!str->length)
   {
-    hk_state_error(state, "type error: argument #1 must be a non-empty string");
+    hk_state_runtime_error(state, "type error: argument #1 must be a non-empty string");
     return;
   }
   if (!hk_double_from_chars(result, str->chars, true))
   {
-    hk_state_error(state, "type error: argument #1 is not a convertible string");
+    hk_state_runtime_error(state, "type error: argument #1 is not a convertible string");
     return;
   }
 }
@@ -331,7 +330,7 @@ static void ord_call(HkState *state, HkValue *args)
   HkString *str = hk_as_string(val);
   if (!str->length)
   {
-    hk_state_error(state, "type error: argument #1 must be a non-empty string");
+    hk_state_runtime_error(state, "type error: argument #1 must be a non-empty string");
     return;
   }
   hk_state_push_number(state, (uint32_t) str->chars[0]);
@@ -344,7 +343,7 @@ static void chr_call(HkState *state, HkValue *args)
   int data = (int) hk_as_number(args[1]);
   if (data < 0 || data > UCHAR_MAX)
   {
-    hk_state_error(state, "range error: argument #1 must be between 0 and %d", UCHAR_MAX);
+    hk_state_runtime_error(state, "range error: argument #1 must be between 0 and %d", UCHAR_MAX);
     return;
   }
   HkString *str = hk_string_new_with_capacity(1);

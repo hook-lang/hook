@@ -3,12 +3,12 @@
 // main.c
 //
 
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <hook/compiler.h>
 #include <hook/dump.h>
 #include <hook/state.h>
-#include <hook/error.h>
 #include <hook/utils.h>
 
 #define VERSION "0.1.0"
@@ -29,6 +29,7 @@ typedef struct
   int num_args;
 } ParsedArgs;
 
+static inline void fatal_error(const char *fmt, ...);
 static inline void parse_args(ParsedArgs *parsedArgs, int argc, const char **argv);
 static inline void parse_option(ParsedArgs *parsedArgs, const char *arg);
 static inline const char *option(const char *arg, const char *opt);
@@ -42,6 +43,17 @@ static inline HkClosure *load_bytecode_from_stream(FILE *stream);
 static inline void save_bytecode_to_file(HkClosure *cl, const char *filename);
 static inline void dump_bytecode_to_file(HkFunction *fn, const char *filename);
 static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsedArgs);
+
+static inline void fatal_error(const char *fmt, ...)
+{
+  fprintf(stderr, "fatal error: ");
+  va_list args;
+  va_start(args, fmt);
+  vfprintf(stderr, fmt, args);
+  va_end(args);
+  fprintf(stderr, "\n");
+  exit(EXIT_FAILURE);
+}
 
 static inline void parse_args(ParsedArgs *parsedArgs, int argc, const char **argv)
 {
@@ -112,7 +124,8 @@ static inline void parse_option(ParsedArgs *parsedArgs, const char *arg)
     parsedArgs->stackSize = atoi(opt_val);
     return;
   }
-  hk_fatal_error("unknown option `%s`\n", arg);
+  // TODO
+  fatal_error("unknown option `%s`\n", arg);
 }
 
 static inline const char *option(const char *arg, const char *opt)
@@ -165,7 +178,7 @@ static inline FILE *open_file(const char *filename, const char *mode)
 {
   FILE *stream = fopen(filename, mode);
   if (!stream)
-    hk_fatal_error("unable to open file `%s`", filename);
+    fatal_error("unable to open file `%s`", filename);
   return stream;
 }
 
@@ -182,7 +195,7 @@ static inline HkClosure *load_bytecode_from_file(const char *filename)
   FILE *stream = open_file(filename, "rb");
   HkClosure *cl = load_bytecode_from_stream(stream);
   if (!cl)
-    hk_fatal_error("unable to load file `%s`", filename);
+    fatal_error("unable to load file `%s`", filename);
   fclose(stream);
   return cl;
 }
@@ -235,7 +248,7 @@ static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsedArgs)
     hk_state_pop(&state);
   }
 end:
-  hk_state_free(&state);
+  hk_state_deinit(&state);
   return exitCode;
 }
 
@@ -257,7 +270,7 @@ int main(int argc, const char **argv)
   if (parsedArgs.optEval)
   {
     if (!input)
-      hk_fatal_error("no input string");
+      fatal_error("no input string");
     HkString *file = hk_string_from_chars(-1, "<terminal>");
     HkString *source = hk_string_from_chars(-1, input);
     HkClosure *cl = hk_compile(file, source);
@@ -272,7 +285,7 @@ int main(int argc, const char **argv)
     }
     HkClosure *cl = load_bytecode_from_stream(stdin);
     if (!cl)
-      hk_fatal_error("unable to load bytecode");
+      fatal_error("unable to load bytecode");
     return run_bytecode(cl, &parsedArgs);
   }
   HkString *file = hk_string_from_chars(-1, input ? input : "<stdin>");

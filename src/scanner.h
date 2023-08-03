@@ -44,7 +44,7 @@ typedef struct
 } Scanner;
 
 void scanner_init(Scanner *scan, HkString *file, HkString *source);
-void scanner_free(Scanner *scan);
+void scanner_deinit(Scanner *scan);
 void scanner_next_token(Scanner *scan);
 
 #endif // SCANNER_H

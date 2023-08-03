@@ -4,7 +4,6 @@
 //
 
 #include "arrays.h"
-#include <hook/error.h>
 
 static void new_array_call(HkState *state, HkValue *args);
 static void fill_call(HkState *state, HkValue *args);
@@ -163,7 +162,7 @@ static void sort_call(HkState *state, HkValue *args)
   HkArray *arr;
   if (!hk_array_sort(hk_as_array(args[1]), &arr))
   {
-    hk_state_error(state, "cannot compare elements of array");
+    hk_state_runtime_error(state, "cannot compare elements of array");
     return;
   }
   hk_state_push_array(state, arr);

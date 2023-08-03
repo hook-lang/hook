@@ -5,7 +5,6 @@
 
 #include "json.h"
 #include <stdlib.h>
-#include <hook/error.h>
 #include "deps/cJSON.h"
 
 static inline cJSON *value_to_json(HkValue val);
@@ -153,7 +152,7 @@ static void decode_call(HkState *state, HkValue *args)
   cJSON *json = cJSON_ParseWithLength(str->chars, str->length);
   if (!json)
   {
-    hk_state_error(state, "cannot parse json");
+    hk_state_runtime_error(state, "cannot parse json");
     return;
   }
   HkValue val = json_to_value(state, json);

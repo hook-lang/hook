@@ -45,8 +45,8 @@ typedef struct hk_state
 } HkState;
 
 void hk_state_init(HkState *state, int minCapacity);
-void hk_state_free(HkState *state);
-void hk_state_error(HkState *state, const char *fmt, ...);
+void hk_state_deinit(HkState *state);
+void hk_state_runtime_error(HkState *state, const char *fmt, ...);
 void hk_state_check_argument_type(HkState *state, HkValue *args, int index, HkType type);
 void hk_state_check_argument_types(HkState *state, HkValue *args, int index, int numTypes, HkType types[]);
 void hk_state_check_argument_bool(HkState *state, HkValue *args, int index);

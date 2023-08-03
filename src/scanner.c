@@ -4,10 +4,10 @@
 //
 
 #include "scanner.h"
-#include <stdlib.h>
-#include <stdarg.h>
 #include <ctype.h>
+#include <stdarg.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define MATCH_MAX_LENGTH (1 << 3)
@@ -238,7 +238,7 @@ void scanner_init(Scanner *scan, HkString *file, HkString *source)
   scanner_next_token(scan);
 }
 
-void scanner_free(Scanner *scan)
+void scanner_deinit(Scanner *scan)
 {
   hk_string_release(scan->file);
   hk_string_release(scan->source);

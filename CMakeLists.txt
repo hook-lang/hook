@@ -44,7 +44,6 @@ add_executable(${PROJECT_NAME}
   src/utils.c
   src/compiler.c
   src/dump.c
-  src/error.c
   src/iterable.c
   src/iterator.c
   src/main.c

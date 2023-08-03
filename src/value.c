@@ -9,7 +9,6 @@
 #include <hook/struct.h>
 #include <hook/callable.h>
 #include <hook/userdata.h>
-#include <hook/error.h>
 #include <hook/utils.h>
 
 void hk_value_free(HkValue val)

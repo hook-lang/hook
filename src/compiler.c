@@ -2215,6 +2215,6 @@ HkClosure *hk_compile(HkString *file, HkString *source)
   HkChunk *chunk = &fn->chunk;
   hk_chunk_emit_opcode(chunk, HK_OP_RETURN_NIL);
   HkClosure *cl = hk_closure_new(fn);
-  scanner_free(&scan);
+  scanner_deinit(&scan);
   return cl;
 }

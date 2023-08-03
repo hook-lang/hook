@@ -49,7 +49,7 @@ void hk_chunk_init(HkChunk *chunk)
   chunk->consts = hk_array_new();
 }
 
-void hk_chunk_free(HkChunk *chunk)
+void hk_chunk_deinit(HkChunk *chunk)
 {
   free(chunk->code);
   free(chunk->lines);
