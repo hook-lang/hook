@@ -6,7 +6,6 @@
 #include "lists.h"
 #include <stdlib.h>
 #include <hook/memory.h>
-#include <hook/check.h>
 
 typedef struct LinkedListNode
 {

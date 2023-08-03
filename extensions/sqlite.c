@@ -5,7 +5,6 @@
 
 #include "sqlite.h"
 #include <hook/memory.h>
-#include <hook/check.h>
 #include <hook/error.h>
 #include "deps/sqlite3.h"
 

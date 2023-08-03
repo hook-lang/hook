@@ -7,7 +7,6 @@
 #include <mysql/mysql.h>
 #include <assert.h>
 #include <hook/memory.h>
-#include <hook/check.h>
 #include <hook/error.h>
 
 typedef struct

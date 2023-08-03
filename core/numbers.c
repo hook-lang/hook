@@ -6,7 +6,6 @@
 #include "numbers.h"
 #include <stdlib.h>
 #include <float.h>
-#include <hook/check.h>
 
 #define PI  3.14159265358979323846264338327950288
 #define TAU 6.28318530717958647692528676655900577

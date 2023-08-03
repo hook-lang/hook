@@ -4,7 +4,6 @@
 //
 
 #include "encoding.h"
-#include <hook/check.h>
 #include "deps/ascii85.h"
 #include "deps/base32.h"
 #include "deps/base64.h"

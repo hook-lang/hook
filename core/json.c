@@ -5,7 +5,6 @@
 
 #include "json.h"
 #include <stdlib.h>
-#include <hook/check.h>
 #include <hook/error.h>
 #include "deps/cJSON.h"
 

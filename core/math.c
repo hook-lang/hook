@@ -5,7 +5,6 @@
 
 #include "math.h"
 #include <math.h>
-#include <hook/check.h>
 
 static void abs_call(HkState *state, HkValue *args);
 static void sin_call(HkState *state, HkValue *args);

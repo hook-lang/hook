@@ -4,7 +4,6 @@
 //
 
 #include "arrays.h"
-#include <hook/check.h>
 #include <hook/error.h>
 
 static void new_array_call(HkState *state, HkValue *args);

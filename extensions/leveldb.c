@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <leveldb/c.h>
 #include <hook/memory.h>
-#include <hook/check.h>
 
 typedef struct
 {

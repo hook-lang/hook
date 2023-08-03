@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <zmq.h>
 #include <hook/memory.h>
-#include <hook/check.h>
 #include <hook/error.h>
 
 typedef struct

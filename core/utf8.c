@@ -4,7 +4,6 @@
 //
 
 #include "utf8.h"
-#include <hook/check.h>
 
 static inline int decode_char(unsigned char c);
 static void len_call(HkState *state, HkValue *args);

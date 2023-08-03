@@ -6,7 +6,6 @@
 #include "socket.h"
 #include <string.h>
 #include <hook/memory.h>
-#include <hook/check.h>
 #include <hook/error.h>
 
 #ifdef _WIN32

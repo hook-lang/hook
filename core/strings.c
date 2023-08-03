@@ -5,7 +5,6 @@
 
 #include "strings.h"
 #include <string.h>
-#include <hook/check.h>
 
 static void new_string_call(HkState *state, HkValue *args);
 static void repeat_call(HkState *state, HkValue *args);

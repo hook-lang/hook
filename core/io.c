@@ -6,7 +6,6 @@
 #include "io.h"
 #include <stdio.h>
 #include <hook/memory.h>
-#include <hook/check.h>
 
 #ifdef _WIN32
   #include <windows.h>

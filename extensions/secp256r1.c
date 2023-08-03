@@ -5,7 +5,6 @@
 
 #include "secp256r1.h"
 #define ECC_CURVE 32
-#include <hook/check.h>
 #include "deps/ecc.h"
 
 #define PUBLIC_KEY_SIZE  (ECC_BYTES + 1)

@@ -40,7 +40,6 @@ add_executable(${PROJECT_NAME}
   src/array.c
   src/builtin.c
   src/callable.c
-  src/check.c
   src/chunk.c
   src/utils.c
   src/compiler.c

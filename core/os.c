@@ -6,7 +6,6 @@
 #include "os.h"
 #include <stdlib.h>
 #include <time.h>
-#include <hook/check.h>
 
 #ifdef _WIN32
   #include <windows.h>

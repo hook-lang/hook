@@ -5,7 +5,6 @@
 
 #include "crypto.h"
 #include <openssl/rand.h>
-#include <hook/check.h>
 #include "deps/rc4.h"
 
 static void random_bytes_call(HkState *state, HkValue *args);

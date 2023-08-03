@@ -11,7 +11,6 @@
 #include <limits.h>
 #include <hook/struct.h>
 #include <hook/iterable.h>
-#include <hook/check.h>
 #include <hook/error.h>
 #include <hook/utils.h>
 

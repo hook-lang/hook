@@ -5,7 +5,6 @@
 
 #include "hashing.h"
 #include <string.h>
-#include <hook/check.h>
 #include "deps/crc32.h"
 #include "deps/crc64.h"
 #include "deps/sha1.h"

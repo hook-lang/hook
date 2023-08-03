@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <gmp.h>
 #include <hook/memory.h>
-#include <hook/check.h>
 
 typedef struct
 {

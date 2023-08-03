@@ -47,7 +47,6 @@ add_library(sqlite_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -68,7 +67,6 @@ add_library(curl_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -89,7 +87,6 @@ add_library(redis_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -111,7 +108,6 @@ add_library(secp256r1_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -132,7 +128,6 @@ add_library(fastcgi_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -153,7 +148,6 @@ add_library(mysql_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -174,7 +168,6 @@ add_library(bigint_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -195,7 +188,6 @@ add_library(zeromq_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -216,7 +208,6 @@ add_library(leveldb_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
@@ -238,7 +229,6 @@ add_library(crypto_mod SHARED
   ../src/array.c
   ../src/builtin.c
   ../src/callable.c
-  ../src/check.c
   ../src/chunk.c
   ../src/utils.c
   ../src/error.c
