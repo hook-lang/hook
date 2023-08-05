@@ -234,6 +234,17 @@ add_library(crypto_mod SHARED
   ../src/userdata.c
   ../src/value.c)
 
+set_target_properties(sqlite_mod PROPERTIES PREFIX "")
+set_target_properties(curl_mod PROPERTIES PREFIX "")
+set_target_properties(redis_mod PROPERTIES PREFIX "")
+set_target_properties(secp256r1_mod PROPERTIES PREFIX "")
+set_target_properties(fastcgi_mod PROPERTIES PREFIX "")
+set_target_properties(mysql_mod PROPERTIES PREFIX "")
+set_target_properties(bigint_mod PROPERTIES PREFIX "")
+set_target_properties(zeromq_mod PROPERTIES PREFIX "")
+set_target_properties(leveldb_mod PROPERTIES PREFIX "")
+set_target_properties(crypto_mod PROPERTIES PREFIX "")
+
 if(MSVC)
   target_link_libraries(curl_mod PRIVATE CURL::libcurl)
   target_link_libraries(mysql_mod PRIVATE ${MYSQL_LIBRARIES})

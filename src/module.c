@@ -19,20 +19,21 @@
 #define HOME_ENV_VAR "HOOK_HOME"
 
 #ifdef _WIN32
-  #define FILE_INFIX   "\\lib\\"
-  #define FILE_POSTFIX "_mod.dll"
+  #define LIB_DIR "\\lib\\"
+#else
+  #define LIB_DIR "/lib/"
 #endif
 
-#ifndef _WIN32
-  #define FILE_INFIX "/lib/lib"
-#endif
+#define LIB_POSTFIX "_mod"
 
-#ifdef __linux__
-  #define FILE_POSTFIX "_mod.so"
-#endif
-
-#ifdef __APPLE__
-  #define FILE_POSTFIX "_mod.dylib"
+#ifdef _WIN32
+  #define LIB_EXT ".dll"
+#elif __linux__
+  #define LIB_EXT ".so"
+#elif __APPLE__
+  #define LIB_EXT ".dylib"
+#else
+  #error "unsupported platform"
 #endif
 
 #ifdef _WIN32
@@ -88,9 +89,10 @@ static inline const char *get_default_home_dir(void)
 static inline void load_native_module(HkState *state, HkString *name)
 {
   HkString *file = hk_string_from_chars(-1, get_home_dir());
-  hk_string_inplace_concat_chars(file, -1, FILE_INFIX);
+  hk_string_inplace_concat_chars(file, -1, LIB_DIR);
   hk_string_inplace_concat(file, name);
-  hk_string_inplace_concat_chars(file, -1, FILE_POSTFIX);
+  hk_string_inplace_concat_chars(file, -1, LIB_POSTFIX);
+  hk_string_inplace_concat_chars(file, -1, LIB_EXT);
 #ifdef _WIN32
   HINSTANCE handle = LoadLibrary(file->chars);
 #else

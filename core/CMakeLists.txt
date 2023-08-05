@@ -250,6 +250,19 @@ add_library(lists_mod SHARED
   ../src/userdata.c
   ../src/value.c)
 
+set_target_properties(math_mod PROPERTIES PREFIX "")
+set_target_properties(os_mod PROPERTIES PREFIX "")
+set_target_properties(io_mod PROPERTIES PREFIX "")
+set_target_properties(numbers_mod PROPERTIES PREFIX "")
+set_target_properties(strings_mod PROPERTIES PREFIX "")
+set_target_properties(arrays_mod PROPERTIES PREFIX "")
+set_target_properties(utf8_mod PROPERTIES PREFIX "")
+set_target_properties(hashing_mod PROPERTIES PREFIX "")
+set_target_properties(encoding_mod PROPERTIES PREFIX "")
+set_target_properties(socket_mod PROPERTIES PREFIX "")
+set_target_properties(json_mod PROPERTIES PREFIX "")
+set_target_properties(lists_mod PROPERTIES PREFIX "")
+
 if(WIN32)
   target_link_libraries(socket_mod ws2_32)
 endif()
