@@ -1,0 +1,10 @@
+//
+// import.hk
+//
+
+import os;
+import { foo, bar } from module;
+
+println(os.clock());
+println(foo());
+println(bar());

@@ -71,8 +71,8 @@ static const char *globals[] = {
 };
 
 static inline void string_to_double(HkState *state, HkString *str, double *result);
-static inline HkArray *split(HkString *str, HkString *separator);
-static inline void join(HkArray *arr, HkString *separator, HkString **result);
+static inline HkArray *split(HkString *str, HkString *sep);
+static inline void join(HkArray *arr, HkString *sep, HkString **result);
 static void print_call(HkState *state, HkValue *args);
 static void println_call(HkState *state, HkValue *args);
 static void type_call(HkState *state, HkValue *args);
@@ -130,12 +130,12 @@ static inline void string_to_double(HkState *state, HkString *str, double *resul
   }
 }
 
-static inline HkArray *split(HkString *str, HkString *separator)
+static inline HkArray *split(HkString *str, HkString *sep)
 {
   HkArray *arr = hk_array_new();
   char *cur = str->chars;
   char *tk;
-  while ((tk = strtok_r(cur, separator->chars, &cur)))
+  while ((tk = strtok_r(cur, sep->chars, &cur)))
   {
     HkValue elem = hk_string_value(hk_string_from_chars(-1, tk));
     hk_array_inplace_add_element(arr, elem);
@@ -143,7 +143,7 @@ static inline HkArray *split(HkString *str, HkString *separator)
   return arr;
 }
 
-static inline void join(HkArray *arr, HkString *separator, HkString **result)
+static inline void join(HkArray *arr, HkString *sep, HkString **result)
 {
   HkString *str = hk_string_new();
   for (int i = 0; i < arr->length; ++i)
@@ -152,7 +152,7 @@ static inline void join(HkArray *arr, HkString *separator, HkString **result)
     if (!hk_is_string(elem))
       continue;
     if (i)
-      hk_string_inplace_concat(str, separator);
+      hk_string_inplace_concat(str, sep);
     hk_string_inplace_concat(str, hk_as_string(elem));
   }
   *result = str;

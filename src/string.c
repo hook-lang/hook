@@ -11,9 +11,14 @@
 #include <hook/memory.h>
 #include <hook/utils.h>
 
+#ifdef _WIN32
+  #define strtok_r strtok_s
+#endif
+
 static inline HkString *string_allocate(int minCapacity);
 static inline void add_char(HkString *str, char c);
 static inline uint32_t hash(int length, char *chars);
+static inline int index_of(char *chars, int length, char *sub);
 
 static inline HkString *string_allocate(int minCapacity)
 {
@@ -43,6 +48,14 @@ static inline uint32_t hash(int length, char *chars)
     hash *= 16777619;
   }
   return hash;
+}
+
+static inline int index_of(char *chars, int length, char *sub)
+{
+  for (int i = 0; chars[i + length]; ++i)
+    if (!memcmp(&chars[i], sub, length))
+      return i;
+  return -1;
 }
 
 HkString *hk_string_new(void)
@@ -113,6 +126,16 @@ void hk_string_release(HkString *str)
     hk_string_free(str);
 }
 
+HkString *hk_string_copy(HkString *str)
+{
+  int length = str->length;
+  HkString *result = string_allocate(length);
+  memcpy(result->chars, str->chars, length);
+  result->length = length;
+  result->chars[length] = '\0';
+  return result;
+}
+
 HkString *hk_string_concat(HkString *str1, HkString *str2)
 {
   int length = str1->length + str2->length;
@@ -153,6 +176,76 @@ void hk_string_inplace_concat(HkString *dest, HkString *src)
   dest->length = length;
   dest->chars[length] = '\0';
   dest->hash = -1;
+}
+
+int hk_string_index_of_chars(HkString *str, int length, const char *chars)
+{
+  if (length < 0)
+    length = (int) strnlen(chars, INT_MAX);
+  if (!length || length > str->length)
+    return -1;
+  return index_of(str->chars, length, (char *) chars);
+}
+
+int hk_string_index_of(HkString *str, HkString *sub)
+{
+  int strLength = str->length;
+  int subLength = sub->length;
+  if (!subLength || subLength > strLength)
+    return -1;
+  return index_of(str->chars, subLength, sub->chars);
+}
+
+HkString *hk_string_replace_all(HkString *str, HkString *sub1, HkString *sub2)
+{
+  int strLength = str->length;
+  int subLength = sub1->length;
+  if (!subLength || subLength > strLength)
+    return hk_string_copy(str);
+  HkString *result = string_allocate(0);
+  result->length = 0;
+  char *chars = str->chars;
+  char *subChars = sub1->chars;
+  for (;;)
+  {
+    int index = index_of(chars, subLength, subChars);
+    if (index == -1)
+      break;
+    hk_string_inplace_concat_chars(result, index, chars);
+    hk_string_inplace_concat(result, sub2);
+    chars += index + subLength;
+  }
+  hk_string_inplace_concat_chars(result, -1, chars);
+  return result;
+}
+
+HkString *hk_string_slice(HkString *str, int start, int stop)
+{
+  int length = str->length;
+  start = start < 0 ? 0 : start;
+  start = start > length ? length : start;
+  stop = stop < 0 ? length : stop;
+  stop = stop > length ? length : stop;
+  length = stop - start;
+  length = length < 0 ? 0 : length;
+  HkString *result = string_allocate(length);
+  result->length = length;
+  memcpy(result->chars, &str->chars[start], length);
+  result->chars[length] = '\0';
+  return result;
+}
+
+HkArray *hk_string_split(HkString *str, HkString *sep)
+{
+  HkArray *arr = hk_array_new();
+  char *cur = str->chars;
+  char *tk;
+  while ((tk = strtok_r(cur, sep->chars, &cur)))
+  {
+    HkValue elem = hk_string_value(hk_string_from_chars(-1, tk));
+    hk_array_inplace_add_element(arr, elem);
+  }
+  return arr;
 }
 
 void hk_string_print(HkString *str, bool quoted)

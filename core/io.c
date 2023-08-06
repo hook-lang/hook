@@ -56,7 +56,7 @@ static void file_deinit(HkUserdata *udata)
   FILE *stream = ((File *) udata)->stream;
   if (stream == stdin || stream == stdout || stream == stderr)
     return;
-  fclose(stream);
+  (void) fclose(stream);
 }
 
 static void open_call(HkState *state, HkValue *args)

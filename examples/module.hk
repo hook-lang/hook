@@ -1,0 +1,17 @@
+//
+// module.hk
+//
+
+struct module {
+  foo, bar
+}
+
+fn foo() {
+  return 1;
+}
+
+fn bar() {
+  return 2;
+}
+
+return module { foo, bar };

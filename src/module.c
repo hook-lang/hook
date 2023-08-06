@@ -5,26 +5,45 @@
 
 #include "module.h"
 #include <stdlib.h>
+#include <string.h>
+#include <hook/compiler.h>
 #include <hook/utils.h>
 #include "string_map.h"
 
 #ifdef _WIN32
   #include <Windows.h>
+  #include <io.h>
 #endif
 
 #ifndef _WIN32
   #include <dlfcn.h>
+  #include <unistd.h>
+#endif
+
+#ifdef _WIN32
+  #define file_exists(f) (_access((f), 0) != -1)
+#else
+  #define file_exists(f) (access((f), F_OK) != -1)
 #endif
 
 #define HOME_ENV_VAR "HOOK_HOME"
+#define PATH_ENV_VAR "HOOK_PATH"
 
 #ifdef _WIN32
-  #define LIB_DIR "\\lib\\"
+  #define DIR_SEP "\\"
 #else
-  #define LIB_DIR "/lib/"
+  #define DIR_SEP "/"
 #endif
 
+#define PATH_SEP ";"
+#define WILDCARD "?"
+
+#define LIB_DIR     "lib"
+#define LIB_PREFIX  "lib"
 #define LIB_POSTFIX "_mod"
+
+#define SRC_EXT  ".hk"
+#define SRC_MAIN "main"
 
 #ifdef _WIN32
   #define LIB_EXT ".dll"
@@ -33,7 +52,7 @@
 #elif __APPLE__
   #define LIB_EXT ".dylib"
 #else
-  #error "unsupported platform"
+  #error "Unsupported platform"
 #endif
 
 #ifdef _WIN32
@@ -42,57 +61,145 @@
   typedef void (*LoadModuleHandler)(HkState *);
 #endif
 
-static StringMap module_cache;
+static StringMap moduleCache;
 
-static inline bool get_module_result(HkString *name, HkValue *result);
-static inline void put_module_result(HkString *name, HkValue result);
 static inline const char *get_home_dir(void);
 static inline const char *get_default_home_dir(void);
-static inline void load_native_module(HkState *state, HkString *name);
-
-static inline bool get_module_result(HkString *name, HkValue *result)
-{
-  StringMapEntry *entry = string_map_get_entry(&module_cache, name);
-  if (!entry)
-    return false;
-  *result = entry->value;
-  return true;
-}
-
-static inline void put_module_result(HkString *name, HkValue result)
-{
-  string_map_inplace_put(&module_cache, name, result);
-}
+static inline HkString *get_path(void);
+static inline HkString *get_default_path(void);
+static inline HkString *path_match(HkString *path, HkString *name);
+static inline void load_module(HkState *state, HkString *name);
+static inline bool is_source_module(char *filename);
+static inline void load_source_module(HkState *state, HkString *file, HkString *name);
+static inline void load_native_module(HkState *state, HkString *file, HkString *name);
+static inline HkString *load_source_from_file(const char *filename);
+static inline bool module_cache_get(HkString *name, HkValue *module);
+static inline void module_cache_put(HkString *name, HkValue module);
 
 static inline const char *get_home_dir(void)
 {
-  const char *result = getenv(HOME_ENV_VAR);
-  if (!result)
-    result = get_default_home_dir();
-  return result;
+  const char *dir = getenv(HOME_ENV_VAR);
+  if (!dir)
+    dir = get_default_home_dir();
+  return dir;
 }
 
 static inline const char *get_default_home_dir(void)
 {
-  const char *result = "/opt/hook";
+  const char *dir = "/opt/hook";
 #ifdef _WIN32
   const char *drive = getenv("SystemDrive");
   hk_assert(drive, "environment variable 'SystemDrive' not set");
   char *path[MAX_PATH + 1];
   snprintf(path, MAX_PATH, "%s\\hook", drive);
   strncpy_s(path, MAX_PATH, drive, _TRUNCATE);
-  result = (const char *) path;
+  dir = (const char *) path;
 #endif
-  return result;
+  return dir;
 }
 
-static inline void load_native_module(HkState *state, HkString *name)
+static inline HkString *get_path(void)
 {
-  HkString *file = hk_string_from_chars(-1, get_home_dir());
-  hk_string_inplace_concat_chars(file, -1, LIB_DIR);
-  hk_string_inplace_concat(file, name);
-  hk_string_inplace_concat_chars(file, -1, LIB_POSTFIX);
-  hk_string_inplace_concat_chars(file, -1, LIB_EXT);
+  const char *_path = getenv(PATH_ENV_VAR);
+  if (_path)
+    return hk_string_from_chars(-1, _path);
+  return get_default_path();
+}
+
+static inline HkString *get_default_path(void)
+{
+  HkString *path = hk_string_new();
+  hk_string_inplace_concat_chars(path, -1, get_home_dir());
+  hk_string_inplace_concat_chars(path, -1, DIR_SEP);
+  hk_string_inplace_concat_chars(path, -1, LIB_DIR);
+  hk_string_inplace_concat_chars(path, -1, DIR_SEP);
+  hk_string_inplace_concat_chars(path, -1, LIB_PREFIX);
+  hk_string_inplace_concat_chars(path, -1, WILDCARD);
+  hk_string_inplace_concat_chars(path, -1, LIB_POSTFIX);
+  hk_string_inplace_concat_chars(path, -1, LIB_EXT);
+  hk_string_inplace_concat_chars(path, -1, PATH_SEP);
+
+  hk_string_inplace_concat_chars(path, -1, WILDCARD);
+  hk_string_inplace_concat_chars(path, -1, SRC_EXT);
+  hk_string_inplace_concat_chars(path, -1, PATH_SEP);
+
+  hk_string_inplace_concat_chars(path, -1, WILDCARD);
+  hk_string_inplace_concat_chars(path, -1, DIR_SEP);
+  hk_string_inplace_concat_chars(path, -1, SRC_MAIN);
+  hk_string_inplace_concat_chars(path, -1, SRC_EXT);
+  return path;
+}
+
+static inline HkString *path_match(HkString *path, HkString *name)
+{
+  HkString *sep = hk_string_from_chars(-1, PATH_SEP);
+  HkArray *entries = hk_string_split(path, sep);
+  hk_string_free(sep);
+  HkString *wc = hk_string_from_chars(-1, WILDCARD);
+  int n = entries->length;
+  for (int i = 0; i < n; ++i)
+  {
+    HkValue elem = hk_array_get_element(entries, i);
+    HkString *entry = hk_as_string(elem);
+    HkString *file = hk_string_replace_all(entry, wc, name);
+    if (file_exists(file->chars))
+    {
+      hk_string_free(wc);
+      hk_array_free(entries);
+      return file;
+    }
+    hk_string_free(file);
+  }
+  hk_string_free(wc);
+  hk_array_free(entries);
+  return NULL;
+}
+
+static inline void load_module(HkState *state, HkString *name)
+{
+  HkString *path = get_path();
+  HkString *file = path_match(path, name);
+  hk_string_free(path);
+  if (!file)
+  {
+    hk_state_runtime_error(state, "cannot find module `%.*s`",
+      name->length, name->chars);
+    return;
+  }
+  if (is_source_module(file->chars))
+  {
+    load_source_module(state, file, name);
+    return;
+  }
+  load_native_module(state, file, name);
+  hk_string_free(file);
+}
+
+static inline bool is_source_module(char *filename)
+{
+  char *ext = strrchr(filename, '.');
+  if (!ext)
+    return false;
+  return !strcmp(ext, SRC_EXT);
+}
+
+static inline void load_source_module(HkState *state, HkString *file, HkString *name)
+{
+  HkString *source = load_source_from_file(file->chars);
+  if (!source)
+    hk_state_runtime_error(state, "cannot open module `%.*s`",
+      name->length, name->chars);
+  HkClosure *cl = hk_compile(file, source);
+  hk_state_push_closure(state, cl);
+  hk_state_push_array(state, hk_array_new());
+  hk_state_call(state, 1);
+  if (!hk_state_is_ok(state))
+    hk_state_runtime_error(state, "cannot load module `%.*s`",
+      name->length, name->chars);
+}
+
+static inline void load_native_module(HkState *state, HkString *file, HkString *name)
+{
 #ifdef _WIN32
   HINSTANCE handle = LoadLibrary(file->chars);
 #else
@@ -100,62 +207,84 @@ static inline void load_native_module(HkState *state, HkString *name)
 #endif
   if (!handle)
   {
-    hk_state_runtime_error(state, "cannot open module `%.*s`", file->length, file->chars);
-    hk_string_free(file);
+    hk_state_runtime_error(state, "cannot open module `%.*s`",
+      name->length, name->chars);
     return;
   }
-  hk_string_free(file);
-  HkString *fn_name = hk_string_from_chars(-1, HK_LOAD_MODULE_HANDLER_PREFIX);
-  hk_string_inplace_concat(fn_name, name);
+  HkString *funcName = hk_string_from_chars(-1, HK_LOAD_MODULE_HANDLER_PREFIX);
+  hk_string_inplace_concat(funcName, name);
   LoadModuleHandler load;
 #ifdef _WIN32
-  load = (LoadModuleHandler) GetProcAddress(handle, fn_name->chars);
+  load = (LoadModuleHandler) GetProcAddress(handle, funcName->chars);
 #else
-  *((void **) &load) = dlsym(handle, fn_name->chars);
+  *((void **) &load) = dlsym(handle, funcName->chars);
 #endif
   if (!load)
   {
-    hk_state_runtime_error(state, "no such function %.*s()", fn_name->length, fn_name->chars);
-    hk_string_free(fn_name);
+    hk_state_runtime_error(state, "no such function %.*s()",
+      funcName->length, funcName->chars);
+    hk_string_free(funcName);
     return;
   }
-  hk_string_free(fn_name);
+  hk_string_free(funcName);
   load(state);
   if (!hk_state_is_ok(state))
-  {
-    hk_state_runtime_error(state, "cannot load module `%.*s`", name->length, name->chars);
-    return;
-  }
+    hk_state_runtime_error(state, "cannot load module `%.*s`",
+      name->length, name->chars);
 }
 
-void init_module_cache(void)
+static inline HkString *load_source_from_file(const char *filename)
 {
-  string_map_init(&module_cache, 0);
+  FILE *stream = fopen(filename, "r");
+  if (!stream)
+    return NULL;
+  HkString *source = hk_string_from_stream(stream, '\0');
+  (void) fclose(stream);
+  return source;
 }
 
-void free_module_cache(void)
+static inline bool module_cache_get(HkString *name, HkValue *module)
 {
-  string_map_deinit(&module_cache);
+  StringMapEntry *entry = string_map_get_entry(&moduleCache, name);
+  if (!entry)
+    return false;
+  *module = entry->value;
+  return true;
 }
 
-void load_module(HkState *state)
+static inline void module_cache_put(HkString *name, HkValue module)
+{
+  string_map_inplace_put(&moduleCache, name, module);
+}
+
+void module_cache_init(void)
+{
+  string_map_init(&moduleCache, 0);
+}
+
+void module_cache_deinit(void)
+{
+  string_map_deinit(&moduleCache);
+}
+
+void module_load(HkState *state)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   hk_assert(hk_is_string(val), "module name must be a string");
   HkString *name = hk_as_string(val);
-  HkValue result;
-  if (get_module_result(name, &result))
+  HkValue module;
+  if (module_cache_get(name, &module))
   {
-    hk_value_incr_ref(result);
-    slots[0] = result;
+    hk_value_incr_ref(module);
+    slots[0] = module;
     --state->stackTop;
     hk_string_release(name);
     return;
   }
-  load_native_module(state, name);
+  load_module(state, name);
   hk_return_if_not_ok(state);
-  put_module_result(name, state->stackSlots[state->stackTop]);
+  module_cache_put(name, state->stackSlots[state->stackTop]);
   slots[0] = state->stackSlots[state->stackTop];
   --state->stackTop;
   hk_string_release(name);

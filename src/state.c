@@ -1772,7 +1772,7 @@ static inline void call_function(HkState *state, HkValue *locals, HkClosure *cl,
         goto end;
       break;
     case HK_OP_LOAD_MODULE:
-      load_module(state);
+      module_load(state);
       if (!hk_state_is_ok(state))
         goto end;
       break;
@@ -1814,12 +1814,12 @@ void hk_state_init(HkState *state, int minCapacity)
   state->status = HK_STATE_STATUS_OK;
   load_globals(state);
   hk_assert(hk_state_is_ok(state), "state should be ok");
-  init_module_cache();
+  module_cache_init();
 }
 
 void hk_state_deinit(HkState *state)
 {
-  free_module_cache();
+  module_cache_deinit();
   hk_assert(state->stackTop == num_globals() - 1, "stack must contain the globals");
   while (state->stackTop > -1)
     hk_value_release(state->stackSlots[state->stackTop--]);
