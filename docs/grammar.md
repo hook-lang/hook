@@ -217,9 +217,9 @@ function_declaration ::= 'fn' name '(' ( 'mut'? name ( ',' 'mut'? name )* )? ')'
 
 delete_statement     ::= 'del' name subscript* '[' expression ']' ';'
 
-if_statement         ::= ( 'if' | 'if!' ) '(' expression ')' statement ( 'else' statement )?
+if_statement         ::= ( 'if' | 'if!' ) '(' ( variable_declaration ';' )? expression ')' statement ( 'else' statement )?
 
-match_statement      ::= 'match' '(' expression ')' '{' ( expression '=>' statement )+ ( '_' '=>' statement )? '}'
+match_statement      ::= 'match' '(' ( variable_declaration ';' )? expression ')' '{' ( expression '=>' statement )+ ( '_' '=>' statement )? '}'
 
 loop_statement       ::= 'loop' statement
 

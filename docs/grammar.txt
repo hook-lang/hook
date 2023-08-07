@@ -9,8 +9,8 @@ stmt        ::= 'import' NAME ( 'as' NAME )? ';'
               | 'fn' NAME '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')'
                 ( '=>' expr | block )
               | 'del' NAME subscr* '[' expr ']' ';'
-              | ( 'if' | 'if!' ) '(' expr ')' stmt ( 'else' stmt )?
-              | 'match' '(' expr ')' '{' ( expr '=>' stmt )+ ( '_' '=>' stmt )? '}'
+              | ( 'if' | 'if!' ) '(' ( var_decl ';' )? expr ')' stmt ( 'else' stmt )?
+              | 'match' '(' ( var_decl ';' )? expr ')' '{' ( expr '=>' stmt )+ ( '_' '=>' stmt )? '}'
               | 'loop' stmt
               | ( 'while' | 'while!' ) '(' expr ')' stmt
               | 'do' stmt ( 'while' | 'while!' ) '(' expr ')' ';'

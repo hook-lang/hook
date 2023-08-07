@@ -1250,6 +1250,17 @@ static void compile_if_statement(Compiler *comp, bool not)
   HkChunk *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   consume(comp, TOKEN_LPAREN);
+  push_scope(comp);
+  if (match(scan, TOKEN_LET))
+  {
+    compile_constant_declaration(comp);
+    consume(comp, TOKEN_SEMICOLON);
+  }
+  else if (match(scan, TOKEN_MUT))
+  {
+    compile_variable_declaration(comp);
+    consume(comp, TOKEN_SEMICOLON);
+  }
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
   HkOpCode op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
@@ -1263,6 +1274,7 @@ static void compile_if_statement(Compiler *comp, bool not)
     compile_statement(comp);
   }
   patch_jump(comp, offset2);
+  pop_scope(comp);
 }
 
 static void compile_match_statement(Compiler *comp)
@@ -1271,6 +1283,17 @@ static void compile_match_statement(Compiler *comp)
   HkChunk *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   consume(comp, TOKEN_LPAREN);
+  push_scope(comp);
+  if (match(scan, TOKEN_LET))
+  {
+    compile_constant_declaration(comp);
+    consume(comp, TOKEN_SEMICOLON);
+  }
+  else if (match(scan, TOKEN_MUT))
+  {
+    compile_variable_declaration(comp);
+    consume(comp, TOKEN_SEMICOLON);
+  }
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
   consume(comp, TOKEN_LBRACE);
@@ -1282,6 +1305,7 @@ static void compile_match_statement(Compiler *comp)
   patch_jump(comp, offset1);
   compile_match_statement_member(comp);
   patch_jump(comp, offset2);
+  pop_scope(comp);
 }
 
 static void compile_match_statement_member(Compiler *comp)

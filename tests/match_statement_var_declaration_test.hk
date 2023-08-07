@@ -1,0 +1,38 @@
+
+struct Log {
+  lvl,
+  msg
+}
+
+fn info(msg) {
+  return Log { "info", msg };
+}
+
+fn warn(msg) {
+  return Log { "warn", msg };
+}
+
+fn error(msg) {
+  return Log { "error", msg };
+}
+
+match (let { lvl, msg } = info("info message"); lvl) {
+  "info" => println(msg);
+  "warn" => println(msg);
+  "error" => println(msg);
+  _ => println("unknown log level");
+}
+
+match (let { lvl, msg } = warn("warn message"); lvl) {
+  "info" => println(msg);
+  "warn" => println(msg);
+  "error" => println(msg);
+  _ => println("unknown log level");
+}
+
+match (let { lvl, msg } = error("error message"); lvl) {
+  "info" => println(msg);
+  "warn" => println(msg);
+  "error" => println(msg);
+  _ => println("unknown log level");
+}
