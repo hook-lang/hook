@@ -10,6 +10,7 @@ add_library(math_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/compiler.c
   ../src/iterable.c
@@ -31,6 +32,7 @@ add_library(os_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/compiler.c
   ../src/iterable.c
@@ -52,6 +54,7 @@ add_library(io_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/compiler.c
   ../src/iterable.c
@@ -73,12 +76,14 @@ add_library(numbers_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -92,12 +97,14 @@ add_library(strings_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -111,12 +118,14 @@ add_library(arrays_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -130,6 +139,7 @@ add_library(utf8_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
@@ -137,6 +147,7 @@ add_library(utf8_mod SHARED
   ../src/module.c
   ../src/state.c
   ../src/range.c
+  ../src/scanner.c
   ../src/string_map.c
   ../src/string.c
   ../src/struct.c
@@ -156,12 +167,14 @@ add_library(hashing_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -179,12 +192,14 @@ add_library(encoding_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -198,12 +213,14 @@ add_library(socket_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -218,12 +235,14 @@ add_library(json_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -237,12 +256,14 @@ add_library(lists_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c

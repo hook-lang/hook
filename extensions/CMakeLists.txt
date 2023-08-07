@@ -48,12 +48,14 @@ add_library(sqlite_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -67,12 +69,14 @@ add_library(curl_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -86,12 +90,14 @@ add_library(redis_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -106,12 +112,14 @@ add_library(secp256r1_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -125,12 +133,14 @@ add_library(fastcgi_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -144,12 +154,14 @@ add_library(mysql_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -163,12 +175,14 @@ add_library(bigint_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -182,12 +196,14 @@ add_library(zeromq_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -201,12 +217,14 @@ add_library(leveldb_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c
@@ -221,12 +239,14 @@ add_library(crypto_mod SHARED
   ../src/builtin.c
   ../src/callable.c
   ../src/chunk.c
+  ../src/compiler.c
   ../src/utils.c
   ../src/iterable.c
   ../src/iterator.c
   ../src/memory.c
   ../src/module.c
   ../src/range.c
+  ../src/scanner.c
   ../src/state.c
   ../src/string_map.c
   ../src/string.c

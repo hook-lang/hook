@@ -1,0 +1,30 @@
+
+fn foo() {
+  return ["ok", nil];
+}
+
+fn bar() {
+  return [nil, "error"];
+}
+
+fn baz() {
+  return { ok: "ok", err: nil };
+}
+
+if (let [ok, err] = foo(); err) {
+  println(err);
+} else {
+  println(ok);
+}
+
+if (let [ok, err] = bar(); err) {
+  println(err);
+} else {
+  println(ok);
+}
+
+if (mut { ok, err } = baz(); err) {
+  println(err);
+} else {
+  println(ok);
+}

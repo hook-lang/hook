@@ -8,8 +8,8 @@
 
 #include <hook/state.h>
 
-void init_module_cache(void);
-void free_module_cache(void);
-void load_module(HkState *state);
+void module_cache_init(void);
+void module_cache_deinit(void);
+void module_load(HkState *state);
 
 #endif // MODULE_H

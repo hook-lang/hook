@@ -124,7 +124,6 @@ static inline void parse_option(ParsedArgs *parsedArgs, const char *arg)
     parsedArgs->stackSize = atoi(opt_val);
     return;
   }
-  // TODO
   fatal_error("unknown option `%s`\n", arg);
 }
 
@@ -186,7 +185,7 @@ static inline HkString *load_source_from_file(const char *filename)
 {
   FILE *stream = open_file(filename, "r");
   HkString *source = hk_string_from_stream(stream, '\0');
-  fclose(stream);
+  (void) fclose(stream);
   return source;
 }
 
@@ -196,7 +195,7 @@ static inline HkClosure *load_bytecode_from_file(const char *filename)
   HkClosure *cl = load_bytecode_from_stream(stream);
   if (!cl)
     fatal_error("unable to load file `%s`", filename);
-  fclose(stream);
+  (void) fclose(stream);
   return cl;
 }
 
@@ -214,7 +213,7 @@ static inline void save_bytecode_to_file(HkClosure *cl, const char *filename)
   hk_ensure_path(filename);
   FILE *stream = open_file(filename, "wb");
   hk_function_serialize(cl->fn, stream);
-  fclose(stream);
+  (void) fclose(stream);
 }
 
 static inline void dump_bytecode_to_file(HkFunction *fn, const char *filename)
@@ -222,7 +221,7 @@ static inline void dump_bytecode_to_file(HkFunction *fn, const char *filename)
   hk_ensure_path(filename);
   FILE *stream = open_file(filename, "w");
   hk_dump(fn, stream);
-  fclose(stream);
+  (void) fclose(stream);
 }
 
 static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsedArgs)

@@ -11,7 +11,13 @@
 
 #define HK_ARRAY_MIN_CAPACITY (1 << 3)
 
+#define hk_array_is_empty(a)       (!(a)->length)
 #define hk_array_get_element(a, i) ((a)->elements[(i)])
+
+#define hk_array_inplace_clear(a) do \
+  { \
+    (a)->length = 0; \
+  } while (0)
 
 typedef struct
 {
