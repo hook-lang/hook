@@ -133,13 +133,16 @@ static inline void string_to_double(HkState *state, HkString *str, double *resul
 static inline HkArray *split(HkString *str, HkString *sep)
 {
   HkArray *arr = hk_array_new();
-  char *cur = str->chars;
+  // TODO: Do not use strtok_r and do not copy the string
+  HkString *_str = hk_string_copy(str);
+  char *cur = _str->chars;
   char *tk;
   while ((tk = strtok_r(cur, sep->chars, &cur)))
   {
     HkValue elem = hk_string_value(hk_string_from_chars(-1, tk));
     hk_array_inplace_add_element(arr, elem);
   }
+  hk_string_free(_str);
   return arr;
 }
 

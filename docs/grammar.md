@@ -198,7 +198,8 @@ statement            ::= import_statement
                        | block
 
 import_statement     ::= 'import' name ( 'as' name )? ';'
-                       | 'import' '{' name ( ',' name )* '}' 'from' name ';'
+                       | 'import' STRING 'as' name ';'
+                       | 'import' '{' name ( ',' name )* '}' 'from' ( name | STRING ) ';'
 
 variable_declaration ::= 'let' name '=' expression
                        | 'mut' name ( '=' expression )?

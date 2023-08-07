@@ -1772,7 +1772,7 @@ static inline void call_function(HkState *state, HkValue *locals, HkClosure *cl,
         goto end;
       break;
     case HK_OP_LOAD_MODULE:
-      module_load(state);
+      module_load(state, fn->file);
       if (!hk_state_is_ok(state))
         goto end;
       break;

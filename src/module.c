@@ -39,7 +39,6 @@
 #define WILDCARD "?"
 
 #define LIB_DIR     "lib"
-#define LIB_PREFIX  "lib"
 #define LIB_POSTFIX "_mod"
 
 #define SRC_EXT  ".hk"
@@ -62,13 +61,16 @@
 #endif
 
 static StringMap moduleCache;
+static HkString *path = NULL;
 
 static inline const char *get_home_dir(void);
 static inline const char *get_default_home_dir(void);
 static inline HkString *get_path(void);
 static inline HkString *get_default_path(void);
-static inline HkString *path_match(HkString *path, HkString *name);
-static inline void load_module(HkState *state, HkString *name);
+static inline HkString *path_match(HkString *path, HkString *name, HkString *currFile);
+static inline bool is_relative(char *filename);
+static inline HkString *get_module_file(HkString *relFile, HkString *currFile);
+static inline void load_module(HkState *state, HkString *name, HkString *currFile);
 static inline bool is_source_module(char *filename);
 static inline void load_source_module(HkState *state, HkString *file, HkString *name);
 static inline void load_native_module(HkState *state, HkString *file, HkString *name);
@@ -100,20 +102,24 @@ static inline const char *get_default_home_dir(void)
 
 static inline HkString *get_path(void)
 {
-  const char *_path = getenv(PATH_ENV_VAR);
-  if (_path)
-    return hk_string_from_chars(-1, _path);
-  return get_default_path();
+  if (!path)
+  {
+    const char *_path = getenv(PATH_ENV_VAR);
+    path = _path ? hk_string_from_chars(-1, _path) : get_default_path();
+  }
+  return path;
 }
 
 static inline HkString *get_default_path(void)
 {
   HkString *path = hk_string_new();
+  hk_string_inplace_concat_chars(path, -1, WILDCARD);
+  hk_string_inplace_concat_chars(path, -1, PATH_SEP);
+
   hk_string_inplace_concat_chars(path, -1, get_home_dir());
   hk_string_inplace_concat_chars(path, -1, DIR_SEP);
   hk_string_inplace_concat_chars(path, -1, LIB_DIR);
   hk_string_inplace_concat_chars(path, -1, DIR_SEP);
-  hk_string_inplace_concat_chars(path, -1, LIB_PREFIX);
   hk_string_inplace_concat_chars(path, -1, WILDCARD);
   hk_string_inplace_concat_chars(path, -1, LIB_POSTFIX);
   hk_string_inplace_concat_chars(path, -1, LIB_EXT);
@@ -130,36 +136,61 @@ static inline HkString *get_default_path(void)
   return path;
 }
 
-static inline HkString *path_match(HkString *path, HkString *name)
+static inline HkString *path_match(HkString *path, HkString *name, HkString *currFile)
 {
   HkString *sep = hk_string_from_chars(-1, PATH_SEP);
-  HkArray *entries = hk_string_split(path, sep);
+  HkArray *patterns = hk_string_split(path, sep);
   hk_string_free(sep);
   HkString *wc = hk_string_from_chars(-1, WILDCARD);
-  int n = entries->length;
+  int n = patterns->length;
   for (int i = 0; i < n; ++i)
   {
-    HkValue elem = hk_array_get_element(entries, i);
-    HkString *entry = hk_as_string(elem);
-    HkString *file = hk_string_replace_all(entry, wc, name);
+    HkValue elem = hk_array_get_element(patterns, i);
+    HkString *pattern = hk_as_string(elem);
+    HkString *file = hk_string_replace_all(pattern, wc, name);
+    if (is_relative(file->chars))
+    {
+      HkString *_file = get_module_file(file, currFile);
+      hk_string_free(file);
+      file = _file;
+    }
     if (file_exists(file->chars))
     {
       hk_string_free(wc);
-      hk_array_free(entries);
+      hk_array_free(patterns);
       return file;
     }
     hk_string_free(file);
   }
   hk_string_free(wc);
-  hk_array_free(entries);
+  hk_array_free(patterns);
   return NULL;
 }
 
-static inline void load_module(HkState *state, HkString *name)
+static inline bool is_relative(char *filename)
+{
+  return filename[0] != DIR_SEP[0];
+}
+
+static inline HkString *get_module_file(HkString *relFile, HkString *currFile)
+{
+  char *chars = currFile->chars;
+  char *end = strrchr(chars, DIR_SEP[0]);
+  if (end)
+  {
+    int length = (int) (end - chars);
+    HkString *file = hk_string_from_chars(length, chars);
+    hk_string_inplace_concat_chars(file, -1, DIR_SEP);
+    hk_string_inplace_concat(file, relFile);
+    return file;
+  }
+  return hk_string_copy(relFile);
+}
+
+static inline void load_module(HkState *state, HkString *name, HkString *currFile)
 {
   HkString *path = get_path();
-  HkString *file = path_match(path, name);
-  hk_string_free(path);
+  HkString *file = path_match(path, name, currFile);
   if (!file)
   {
     hk_state_runtime_error(state, "cannot find module `%.*s`",
@@ -265,24 +296,26 @@ void module_cache_init(void)
 void module_cache_deinit(void)
 {
   string_map_deinit(&moduleCache);
+  if (path)
+    hk_string_free(path);
 }
 
-void module_load(HkState *state)
+void module_load(HkState *state, HkString *currFile)
 {
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   hk_assert(hk_is_string(val), "module name must be a string");
   HkString *name = hk_as_string(val);
   HkValue module;
+  // FIXME: Do cache using absolute file path instead of module name
   if (module_cache_get(name, &module))
   {
     hk_value_incr_ref(module);
     slots[0] = module;
-    --state->stackTop;
     hk_string_release(name);
     return;
   }
-  load_module(state, name);
+  load_module(state, name, currFile);
   hk_return_if_not_ok(state);
   module_cache_put(name, state->stackSlots[state->stackTop]);
   slots[0] = state->stackSlots[state->stackTop];

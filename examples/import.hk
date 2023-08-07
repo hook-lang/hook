@@ -3,7 +3,7 @@
 //
 
 import os;
-import { foo, bar } from module;
+import { foo, bar } from "module.hk";
 
 println(os.clock());
 println(foo());

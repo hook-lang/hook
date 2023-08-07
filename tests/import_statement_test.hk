@@ -1,0 +1,15 @@
+
+import os;
+println(os.clock());
+
+import "numbers" as n;
+println(n.PI);
+
+import { clock } from "os";
+println(clock());
+
+import "../examples/module.hk" as m;
+println(m.foo());
+
+import { bar } from "../examples/module";
+println(bar());
