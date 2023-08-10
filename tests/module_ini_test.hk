@@ -1,0 +1,9 @@
+
+import ini;
+let config = ini.load("tests/module_ini_test.ini");
+println(ini.get(config, "general", "name"));
+println(ini.get(config, "general", "version"));
+println(ini.get(config, "general", "description"));
+println(ini.get(config, "general", "author"));
+println(ini.get(config, "general", "license"));
+println(ini.get(config, "deps", "hook"));

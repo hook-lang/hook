@@ -160,3 +160,8 @@ lists:
   pop_back(list: userdata) -> userdata
   front(list: userdata) -> any
   back(list: userdata) -> any
+
+ini:
+
+  load(filename: string) -> userdata
+  get(config: userdata, section: string, key: string) -> string

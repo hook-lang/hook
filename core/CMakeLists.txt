@@ -271,6 +271,28 @@ add_library(lists_mod SHARED
   ../src/userdata.c
   ../src/value.c)
 
+add_library(ini_mod SHARED
+  ini.c
+  deps/ini.c
+  ../src/array.c
+  ../src/builtin.c
+  ../src/callable.c
+  ../src/chunk.c
+  ../src/compiler.c
+  ../src/utils.c
+  ../src/iterable.c
+  ../src/iterator.c
+  ../src/memory.c
+  ../src/module.c
+  ../src/range.c
+  ../src/scanner.c
+  ../src/state.c
+  ../src/string_map.c
+  ../src/string.c
+  ../src/struct.c
+  ../src/userdata.c
+  ../src/value.c)
+
 set_target_properties(math_mod PROPERTIES PREFIX "")
 set_target_properties(os_mod PROPERTIES PREFIX "")
 set_target_properties(io_mod PROPERTIES PREFIX "")
@@ -283,6 +305,7 @@ set_target_properties(encoding_mod PROPERTIES PREFIX "")
 set_target_properties(socket_mod PROPERTIES PREFIX "")
 set_target_properties(json_mod PROPERTIES PREFIX "")
 set_target_properties(lists_mod PROPERTIES PREFIX "")
+set_target_properties(ini_mod PROPERTIES PREFIX "")
 
 if(WIN32)
   target_link_libraries(socket_mod ws2_32)

@@ -40,14 +40,16 @@ Below is a comprehensive list of all the modules available. Click on any module 
       <td><a href="#numbers">numbers</a></td>
       <td><a href="#strings">strings</a></td>
       <td><a href="#arrays">arrays</a></td>
+      <td><a href="#utf8">utf8</a></td>
     </tr>
     <tr>
-      <td><a href="#utf8">utf8</a></td>
       <td><a href="#hashing">hashing</a></td>
       <td><a href="#encoding">encoding</a></td>
       <td><a href="#socket">socket</a></td>
       <td><a href="#json">json</a></td>
       <td><a href="#lists">lists</a></td>
+      <td><a href="#ini">ini</a></td>
+      <td></td>
     </tr>
   </tbody>
 </table>
@@ -2082,4 +2084,48 @@ mut list = lists.new_linked_list();
 list = lists.push_back(list, 1);
 list = lists.push_back(list, 2);
 println(lists.back(list)); // 2
+```
+
+### ini
+
+The `ini` module provides functions for working with `.ini` files.
+
+<table>
+  <tbody>
+    <tr>
+      <td><a href="#load">load</a></td>
+    </tr>
+    <tr>
+      <td><a href="#get">get</a></td>
+    </tr>
+  </tbody>
+</table>
+
+#### load
+
+Loads the given `.ini` file and returns a configuration object.
+
+```rust
+fn load(filename: string) -> userdata;
+```
+
+Example:
+
+```rust
+let config = ini.load("config.ini");
+```
+
+#### get
+
+Returns the value for the given configuration, section, and key.
+
+```rust
+fn get(config: userdata, section: string, key: string) -> string;
+```
+
+Example:
+
+```rust
+let config = ini.load("config.ini");
+println(ini.get(config, "section", "key")); // value
 ```
