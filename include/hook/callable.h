@@ -16,10 +16,10 @@ typedef struct hk_function
   HkString *name;
   HkString *file;
   HkChunk chunk;
-  uint8_t functions_capacity;
-  uint8_t functions_length;
+  uint8_t functionsCapacity;
+  uint8_t functionsLength;
   struct hk_function **functions;
-  uint8_t num_nonlocals;
+  uint8_t numNonlocals;
 } HkFunction;
 
 typedef struct

@@ -117,19 +117,19 @@ HK_LOAD_MODULE_HANDLER(secp256r1)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "new_key_pair");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "new_key_pair", 0, &new_key_pair_call);
+  hk_state_push_new_native(state, "new_key_pair", 0, new_key_pair_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "shared_secret");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "shared_secret", 2, &shared_secret_call);
+  hk_state_push_new_native(state, "shared_secret", 2, shared_secret_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "sign_hash");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "sign_hash", 2, &sign_hash_call);
+  hk_state_push_new_native(state, "sign_hash", 2, sign_hash_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "verify_signature");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "verify_signature", 3, &verify_signature_call);
+  hk_state_push_new_native(state, "verify_signature", 3, verify_signature_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 9);
 }

@@ -112,15 +112,15 @@ HK_LOAD_MODULE_HANDLER(crypto)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "random_bytes");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "random_bytes", 1, &random_bytes_call);
+  hk_state_push_new_native(state, "random_bytes", 1, random_bytes_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "rc4_encrypt");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "rc4_encrypt", 2, &rc4_encrypt_call);
+  hk_state_push_new_native(state, "rc4_encrypt", 2, rc4_encrypt_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "rc4_decrypt");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "rc4_decrypt", 2, &rc4_decrypt_call);
+  hk_state_push_new_native(state, "rc4_decrypt", 2, rc4_decrypt_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 3);
 }

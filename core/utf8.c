@@ -81,11 +81,11 @@ HK_LOAD_MODULE_HANDLER(utf8)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "len");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "len", 1, &len_call);
+  hk_state_push_new_native(state, "len", 1, len_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "sub");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "sub", 3, &sub_call);
+  hk_state_push_new_native(state, "sub", 3, sub_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 2);
 }

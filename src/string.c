@@ -26,7 +26,7 @@ static inline HkString *string_allocate(int minCapacity)
   ++minCapacity;
   int capacity = minCapacity < HK_STRING_MIN_CAPACITY ? HK_STRING_MIN_CAPACITY : minCapacity;
   capacity = hk_power_of_two_ceil(capacity);
-  str->ref_count = 0;
+  str->refCount = 0;
   str->capacity = capacity;
   str->chars = (char *) hk_allocate(capacity);
   str->hash = -1;

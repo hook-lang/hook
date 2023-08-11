@@ -21,7 +21,7 @@ static void get_call(HkState *state, HkValue *args);
 static inline IniWrapper *ini_wrapper_new(ini_t *config)
 {
   IniWrapper *wrapper = (IniWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &ini_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, ini_wrapper_deinit);
   wrapper->config = config;
   return wrapper;
 }
@@ -74,11 +74,11 @@ HK_LOAD_MODULE_HANDLER(ini)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "load");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "load", 1, &load_call);
+  hk_state_push_new_native(state, "load", 1, load_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "get");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "get", 3, &get_call);
+  hk_state_push_new_native(state, "get", 3, get_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 2);
 }

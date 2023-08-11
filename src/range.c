@@ -24,9 +24,9 @@ static void range_iterator_inplace_next(HkIterator *it);
 static inline RangeIterator *range_iterator_allocate(HkRange *range)
 {
    RangeIterator *range_it = (RangeIterator *) hk_allocate(sizeof(*range_it));
-  hk_iterator_init((HkIterator *) range_it, &range_iterator_deinit,
-    &range_iterator_is_valid, &range_iterator_get_current,
-    &range_iterator_next, &range_iterator_inplace_next);
+  hk_iterator_init((HkIterator *) range_it, range_iterator_deinit,
+    range_iterator_is_valid, range_iterator_get_current,
+    range_iterator_next, range_iterator_inplace_next);
   hk_incr_ref(range);
   range_it->range = range;
   return range_it;
@@ -71,7 +71,7 @@ static void range_iterator_inplace_next(HkIterator *it)
 HkRange *hk_range_new(int64_t start, int64_t end)
 {
   HkRange *range = (HkRange *) hk_allocate(sizeof(*range));
-  range->ref_count = 0;
+  range->refCount = 0;
   range->step = start < end ? 1 : -1;
   range->start = start;
   range->end = end;

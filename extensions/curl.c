@@ -57,7 +57,7 @@ static inline void deinitialize(void)
 static inline CurlWrapper *curl_wrapper_new(CURL *curl, CURLcode res)
 {
   CurlWrapper *wrapper = (CurlWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &curl_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, curl_wrapper_deinit);
   wrapper->curl = curl;
   wrapper->res = res;
   wrapper->url = NULL;
@@ -285,31 +285,31 @@ HK_LOAD_MODULE_HANDLER(curl)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "init");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "init", 1, &init_call);
+  hk_state_push_new_native(state, "init", 1, init_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "setopt");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "setopt", 3, &setopt_call);
+  hk_state_push_new_native(state, "setopt", 3, setopt_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "close");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "close", 1, &close_call);
+  hk_state_push_new_native(state, "close", 1, close_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "exec");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "exec", 1, &exec_call);
+  hk_state_push_new_native(state, "exec", 1, exec_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "errno");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "errno", 1, &errno_call);
+  hk_state_push_new_native(state, "errno", 1, errno_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "error");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "error", 1, &error_call);
+  hk_state_push_new_native(state, "error", 1, error_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "getinfo");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "getinfo", 2, &getinfo_call);
+  hk_state_push_new_native(state, "getinfo", 2, getinfo_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 13);
 }

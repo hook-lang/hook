@@ -11,7 +11,7 @@ static inline int get_line(HkChunk *chunk, int offset)
 {
   int result = 1;
   HkLine *lines = chunk->lines;
-  for (int i = 0; i < chunk->lines_length; ++i)
+  for (int i = 0; i < chunk->linesLength; ++i)
   {
     HkLine *line = &lines[i];
     if (line->offset > offset)
@@ -30,12 +30,12 @@ void hk_dump(HkFunction *fn, FILE *stream)
   HkChunk *chunk = &fn->chunk;
   fprintf(stream, "; %s in %s at %p\n", name_chars, file_chars, (void *) fn);
   fprintf(stream, "; %d parameter(s), %d non-local(s), %d constant(s), %d function(s)\n", fn->arity,
-    fn->num_nonlocals, chunk->consts->length, fn->functions_length);
+    fn->numNonlocals, chunk->consts->length, fn->functionsLength);
   uint8_t *code = chunk->code;
   int i = 0;
   int n = 0;
   int last_line = -1;
-  while (i < chunk->code_length)
+  while (i < chunk->codeLength)
   {
     HkOpCode op = (HkOpCode) code[i];
     int j = i++;
@@ -289,6 +289,6 @@ void hk_dump(HkFunction *fn, FILE *stream)
     }
   }
   fprintf(stream, "; %d instruction(s)\n\n", n);
-  for (int i = 0; i < fn->functions_length; ++i)
+  for (int i = 0; i < fn->functionsLength; ++i)
     hk_dump(fn->functions[i], stream);
 }

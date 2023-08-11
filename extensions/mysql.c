@@ -36,7 +36,7 @@ static void affected_rows_call(HkState *state, HkValue *args);
 static inline MySQLWrapper *mysql_wrapper_new(MYSQL *mysql)
 {
   MySQLWrapper *wrapper = (MySQLWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &mysql_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, mysql_wrapper_deinit);
   wrapper->mysql = mysql;
   return wrapper;
 }
@@ -44,7 +44,7 @@ static inline MySQLWrapper *mysql_wrapper_new(MYSQL *mysql)
 static inline MySQLResultWrapper *mysql_result_wrapper_new(MYSQL_RES *res)
 {
   MySQLResultWrapper *wrapper = (MySQLResultWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &mysql_result_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, mysql_result_wrapper_deinit);
   wrapper->res = res;
   return wrapper;
 }
@@ -267,35 +267,35 @@ HK_LOAD_MODULE_HANDLER(mysql)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "connect");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "connect", 5, &connect_call);
+  hk_state_push_new_native(state, "connect", 5, connect_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "close");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "close", 1, &close_call);
+  hk_state_push_new_native(state, "close", 1, close_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "ping");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "ping", 1, &ping_call);
+  hk_state_push_new_native(state, "ping", 1, ping_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "error");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "error", 1, &error_call);
+  hk_state_push_new_native(state, "error", 1, error_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "select_db");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "select_db", 2, &select_db_call);
+  hk_state_push_new_native(state, "select_db", 2, select_db_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "query");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "query", 2, &query_call);
+  hk_state_push_new_native(state, "query", 2, query_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "fetch_row");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "fetch_row", 1, &fetch_row_call);
+  hk_state_push_new_native(state, "fetch_row", 1, fetch_row_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "affected_rows");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "affected_rows", 1, &affected_rows_call);
+  hk_state_push_new_native(state, "affected_rows", 1, affected_rows_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 8);
 }

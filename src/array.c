@@ -28,7 +28,7 @@ static inline HkArray *array_allocate(int minCapacity)
   HkArray *arr = (HkArray *) hk_allocate(sizeof(*arr));
   int capacity = minCapacity < HK_ARRAY_MIN_CAPACITY ? HK_ARRAY_MIN_CAPACITY : minCapacity;
   capacity = hk_power_of_two_ceil(capacity);
-  arr->ref_count = 0;
+  arr->refCount = 0;
   arr->capacity = capacity;
   arr->elements = (HkValue *) hk_allocate(sizeof(*arr->elements) * capacity);
   return arr;
@@ -37,9 +37,9 @@ static inline HkArray *array_allocate(int minCapacity)
 static inline ArrayIterator *array_iterator_allocate(HkArray *arr)
 {
   ArrayIterator *arr_it = (ArrayIterator *) hk_allocate(sizeof(*arr_it));
-  hk_iterator_init((HkIterator *) arr_it, &array_iterator_deinit,
-    &array_iterator_is_valid, &array_iterator_get_current,
-    &array_iterator_next, &array_iterator_inplace_next);
+  hk_iterator_init((HkIterator *) arr_it, array_iterator_deinit,
+    array_iterator_is_valid, array_iterator_get_current,
+    array_iterator_next, array_iterator_inplace_next);
   hk_incr_ref(arr);
   arr_it->arr = arr;
   return arr_it;

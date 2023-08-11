@@ -52,7 +52,7 @@ static void delete_call(HkState *state, HkValue *args);
 static inline LeveldbWrapper *leveldb_wrapper_new(leveldb_t *db)
 {
   LeveldbWrapper *wrapper = (LeveldbWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &leveldb_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, leveldb_wrapper_deinit);
   wrapper->db = db;
   return wrapper;
 }
@@ -60,7 +60,7 @@ static inline LeveldbWrapper *leveldb_wrapper_new(leveldb_t *db)
 static inline LeveldbOptionsWrapper *leveldb_options_wrapper_new(leveldb_options_t *options)
 {
   LeveldbOptionsWrapper *wrapper = (LeveldbOptionsWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &leveldb_options_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, leveldb_options_wrapper_deinit);
   wrapper->options = options;
   return wrapper;
 }
@@ -68,7 +68,7 @@ static inline LeveldbOptionsWrapper *leveldb_options_wrapper_new(leveldb_options
 static inline LeveldbReadOptionsWrapper *leveldb_read_options_wrapper_new(leveldb_readoptions_t *options)
 {
   LeveldbReadOptionsWrapper *wrapper = (LeveldbReadOptionsWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &leveldb_read_options_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, leveldb_read_options_wrapper_deinit);
   wrapper->options = options;
   return wrapper;
 }
@@ -76,7 +76,7 @@ static inline LeveldbReadOptionsWrapper *leveldb_read_options_wrapper_new(leveld
 static inline LeveldbWriteOptionsWrapper *leveldb_write_options_wrapper_new(leveldb_writeoptions_t *options)
 {
   LeveldbWriteOptionsWrapper *wrapper = (LeveldbWriteOptionsWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &leveldb_write_options_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, leveldb_write_options_wrapper_deinit);
   wrapper->options = options;
   return wrapper;
 }
@@ -283,39 +283,39 @@ HK_LOAD_MODULE_HANDLER(leveldb)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "new_options");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "new_options", 0, &new_options_call);
+  hk_state_push_new_native(state, "new_options", 0, new_options_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "new_read_options");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "new_read_options", 0, &new_read_options_call);
+  hk_state_push_new_native(state, "new_read_options", 0, new_read_options_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "new_write_options");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "new_write_options", 0, &new_write_options_call);
+  hk_state_push_new_native(state, "new_write_options", 0, new_write_options_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "options_set_create_if_missing");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "options_set_create_if_missing", 2, &options_set_create_if_missing_call);
+  hk_state_push_new_native(state, "options_set_create_if_missing", 2, options_set_create_if_missing_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "open");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "open", 2, &open_call);
+  hk_state_push_new_native(state, "open", 2, open_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "close");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "close", 1, &close_call);
+  hk_state_push_new_native(state, "close", 1, close_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "put");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "put", 4, &put_call);
+  hk_state_push_new_native(state, "put", 4, put_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "get");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "get", 3, &get_call);
+  hk_state_push_new_native(state, "get", 3, get_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "delete");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "delete", 3, &delete_call);
+  hk_state_push_new_native(state, "delete", 3, delete_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 9);
 }

@@ -168,11 +168,11 @@ HK_LOAD_MODULE_HANDLER(json)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "encode");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "encode", 1, &encode_call);
+  hk_state_push_new_native(state, "encode", 1, encode_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "decode");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "decode", 1, &decode_call);
+  hk_state_push_new_native(state, "decode", 1, decode_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 2);
 }

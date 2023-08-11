@@ -35,7 +35,7 @@ static void recv_call(HkState *state, HkValue *args);
 static inline ZeroMQContextWrapper *zeromq_context_wrapper_new(void *ctx)
 {
   ZeroMQContextWrapper *wrapper = (ZeroMQContextWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &zeromq_context_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, zeromq_context_wrapper_deinit);
   wrapper->ctx = ctx;
   return wrapper;
 }
@@ -43,7 +43,7 @@ static inline ZeroMQContextWrapper *zeromq_context_wrapper_new(void *ctx)
 static inline ZeroMQWocketWrapper *zeromq_socket_wrapper_new(void *sock)
 {
   ZeroMQWocketWrapper *wrapper = (ZeroMQWocketWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &zeromq_socket_wrapper_deinit);
+  hk_userdata_init((HkUserdata *) wrapper, zeromq_socket_wrapper_deinit);
   wrapper->sock = sock;
   return wrapper;
 }
@@ -193,31 +193,31 @@ HK_LOAD_MODULE_HANDLER(zeromq)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "new_context");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "new_context", 0, &new_context_call);
+  hk_state_push_new_native(state, "new_context", 0, new_context_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "new_socket");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "new_socket", 2, &new_socket_call);
+  hk_state_push_new_native(state, "new_socket", 2, new_socket_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "close");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "close", 1, &close_call);
+  hk_state_push_new_native(state, "close", 1, close_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "connect");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "connect", 2, &connect_call);
+  hk_state_push_new_native(state, "connect", 2, connect_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "bind");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "bind", 2, &bind_call);
+  hk_state_push_new_native(state, "bind", 2, bind_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "send");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "send", 3, &send_call);
+  hk_state_push_new_native(state, "send", 3, send_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "recv");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "recv", 3, &recv_call);
+  hk_state_push_new_native(state, "recv", 3, recv_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 9);
 }

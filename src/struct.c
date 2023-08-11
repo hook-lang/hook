@@ -60,7 +60,7 @@ HkStruct *hk_struct_new(HkString *name)
 {
   int capacity = STRUCT_MIN_CAPACITY;
   HkStruct *ztruct = (HkStruct *) hk_allocate(sizeof(*ztruct));
-  ztruct->ref_count = 0;
+  ztruct->refCount = 0;
   ztruct->capacity = capacity;
   ztruct->mask = capacity - 1;
   ztruct->length = 0;
@@ -147,7 +147,7 @@ HkInstance *hk_instance_new(HkStruct *ztruct)
 {
   int size = sizeof(HkInstance) + sizeof(HkValue) * (ztruct->length - 1);
   HkInstance *inst = (HkInstance *) hk_allocate(size);
-  inst->ref_count = 0;
+  inst->refCount = 0;
   hk_incr_ref(ztruct);
   inst->ztruct = ztruct;
   return inst;

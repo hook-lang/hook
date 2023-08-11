@@ -273,12 +273,12 @@ static inline void do_iterator(HkState *state)
 
 static inline void do_closure(HkState *state, HkFunction *fn)
 {
-  int num_nonlocals = fn->num_nonlocals;
-  HkValue *slots = &state->stackSlots[state->stackTop - num_nonlocals + 1];
+  int numNonlocals = fn->numNonlocals;
+  HkValue *slots = &state->stackSlots[state->stackTop - numNonlocals + 1];
   HkClosure *cl = hk_closure_new(fn);
-  for (int i = 0; i < num_nonlocals; ++i)
+  for (int i = 0; i < numNonlocals; ++i)
     cl->nonlocals[i] = slots[i];
-  state->stackTop -= num_nonlocals;
+  state->stackTop -= numNonlocals;
   push(state, hk_closure_value(cl));
   if (!hk_state_is_ok(state))
   {
@@ -603,7 +603,7 @@ static inline void do_inplace_add_element(HkState *state)
     return;
   }
   HkArray *arr = hk_as_array(val1);
-  if (arr->ref_count == 2)
+  if (arr->refCount == 2)
   {
     hk_array_inplace_add_element(arr, val2);
     --state->stackTop;
@@ -642,7 +642,7 @@ static inline void do_inplace_put_element(HkState *state)
       index, arr->length);
     return;
   }
-  if (arr->ref_count == 2)
+  if (arr->refCount == 2)
   {
     hk_array_inplace_set_element(arr, (int) index, val3);
     state->stackTop -= 2;
@@ -680,7 +680,7 @@ static inline void do_inplace_delete_element(HkState *state)
       index, arr->length);
     return;
   }
-  if (arr->ref_count == 2)
+  if (arr->refCount == 2)
   {
     hk_array_inplace_delete_element(arr, (int) index);
     --state->stackTop;
@@ -801,7 +801,7 @@ static inline void do_inplace_put_field(HkState *state, HkString *name)
     hk_state_runtime_error(state, "no field %.*s on struct", name->length, name->chars);
     return;
   }
-  if (inst->ref_count == 2)
+  if (inst->refCount == 2)
   {
     hk_instance_inplace_set_field(inst, index, val2);
     --state->stackTop;
@@ -832,7 +832,7 @@ static inline void do_next(HkState *state)
   HkValue *slots = &state->stackSlots[state->stackTop];
   HkValue val = slots[0];
   HkIterator *it = hk_as_iterator(val);
-  if (it->ref_count == 2)
+  if (it->refCount == 2)
   {
     hk_iterator_inplace_next(it);
     return;
@@ -1061,7 +1061,7 @@ static inline void concat_strings(HkState *state, HkValue *slots, HkValue val1, 
     hk_string_release(str2);
     return;
   }
-  if (str1->ref_count == 1)
+  if (str1->refCount == 1)
   {
     hk_string_inplace_concat(str1, str2);
     --state->stackTop;
@@ -1093,7 +1093,7 @@ static inline void concat_arrays(HkState *state, HkValue *slots, HkValue val1, H
     hk_array_release(arr2);
     return;
   }
-  if (arr1->ref_count == 1)
+  if (arr1->refCount == 1)
   {
     hk_array_inplace_concat(arr1, arr2);
     --state->stackTop;
@@ -1151,7 +1151,7 @@ static inline void diff_arrays(HkState *state, HkValue *slots, HkValue val1, HkV
     hk_array_release(arr2);
     return;
   }
-  if (arr1->ref_count == 1)
+  if (arr1->refCount == 1)
   {
     hk_array_inplace_diff(arr1, arr2);
     --state->stackTop;

@@ -64,11 +64,11 @@ HK_LOAD_MODULE_HANDLER(numbers)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "srand");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "srand", 1, &srand_call);
+  hk_state_push_new_native(state, "srand", 1, srand_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "rand");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "rand", 0, &rand_call);
+  hk_state_push_new_native(state, "rand", 0, rand_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 8);
 }

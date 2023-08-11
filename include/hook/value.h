@@ -78,13 +78,12 @@ typedef enum
 #define hk_is_iterable(v)   ((v).flags & HK_FLAG_ITERABLE)
 #define hk_is_native(v)     ((v).flags & HK_FLAG_NATIVE)
 
-#define HK_OBJECT_HEADER int ref_count;
+#define HK_OBJECT_HEADER int refCount;
 
-#define hk_incr_ref(o)       ++(o)->ref_count
-#define hk_decr_ref(o)       --(o)->ref_count
-#define hk_is_unreachable(o) (!(o)->ref_count)
+#define hk_incr_ref(o)       ++(o)->refCount
+#define hk_decr_ref(o)       --(o)->refCount
+#define hk_is_unreachable(o) (!(o)->refCount)
 
-#define hk_value_ref_count(v) (hk_is_object(v) ? hk_as_object(v)->ref_count : 0)
 #define hk_value_incr_ref(v)  if (hk_is_object(v)) hk_incr_ref(hk_as_object(v))
 #define hk_value_decr_ref(v)  if (hk_is_object(v)) hk_decr_ref(hk_as_object(v))
 

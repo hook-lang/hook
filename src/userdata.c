@@ -8,7 +8,7 @@
 
 void hk_userdata_init(HkUserdata *udata, void (*deinit)(struct hk_userdata *))
 {
-  udata->ref_count = 0;
+  udata->refCount = 0;
   udata->deinit = deinit;
 }
 

@@ -10,10 +10,10 @@
 
 #define HK_ITERATOR_HEADER HK_OBJECT_HEADER \
                            void (*deinit)(struct hk_iterator *); \
-                           bool (*is_valid)(struct hk_iterator *); \
-                           HkValue (*get_current)(struct hk_iterator *); \
+                           bool (*isValid)(struct hk_iterator *); \
+                           HkValue (*getCurrent)(struct hk_iterator *); \
                            struct hk_iterator *(*next)(struct hk_iterator *); \
-                           void (*inplace_next)(struct hk_iterator *);
+                           void (*inplaceNext)(struct hk_iterator *);
 
 typedef struct hk_iterator
 {
@@ -21,8 +21,8 @@ typedef struct hk_iterator
 } HkIterator;
 
 void hk_iterator_init(HkIterator *it, void (*deinit)(struct hk_iterator *),
-  bool (*is_valid)(struct hk_iterator *), HkValue (*get_current)(struct hk_iterator *),
-  struct hk_iterator *(*next)(struct hk_iterator *), void (*inplace_next)(struct hk_iterator *));
+  bool (*isValid)(struct hk_iterator *), HkValue (*getCurrent)(struct hk_iterator *),
+  struct hk_iterator *(*next)(struct hk_iterator *), void (*inplaceNext)(struct hk_iterator *));
 void hk_iterator_free(HkIterator *it);
 void hk_iterator_release(HkIterator *it);
 bool hk_iterator_is_valid(HkIterator *it);

@@ -271,7 +271,7 @@ static inline void add_local(Compiler *comp, Token *tk, bool isMutable)
 
 static inline uint8_t add_nonlocal(Compiler *comp, Token *tk)
 {
-  uint8_t index = comp->fn->num_nonlocals++;
+  uint8_t index = comp->fn->numNonlocals++;
   add_variable(comp, false, index, tk, false);
   return index;
 }
@@ -338,7 +338,7 @@ static inline bool nonlocal_exists(Compiler *comp, Token *tk)
 static inline int emit_jump(HkChunk *chunk, HkOpCode op)
 {
   hk_chunk_emit_opcode(chunk, op);
-  int offset = chunk->code_length;
+  int offset = chunk->codeLength;
   hk_chunk_emit_word(chunk, 0);
   return offset;
 }
@@ -348,7 +348,7 @@ static inline void patch_jump(Compiler *comp, int offset)
   HkChunk *chunk = &comp->fn->chunk;
   Scanner *scan = comp->scan;
   Token *tk = &scan->token;
-  int jump = chunk->code_length;
+  int jump = chunk->codeLength;
   if (jump > UINT16_MAX)
     syntax_error(comp->fn->name, scan->file->chars, tk->line, tk->col,
       "code too large");
@@ -364,7 +364,7 @@ static inline void start_loop(Compiler *comp, Loop *loop)
 {
   loop->parent = comp->loop;
   loop->scopeDepth = comp->scopeDepth;
-  loop->jump = (uint16_t) comp->fn->chunk.code_length;
+  loop->jump = (uint16_t) comp->fn->chunk.codeLength;
   loop->numOffsets = 0;
   comp->loop = loop;
 }
@@ -905,7 +905,7 @@ static int compile_assign(Compiler *comp, Production prod, bool inplace)
       hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_PUT_ELEMENT : HK_OP_PUT_ELEMENT);
       return PRODUCTION_ASSIGN;
     }
-    int offset = chunk->code_length;
+    int offset = chunk->codeLength;
     hk_chunk_emit_opcode(chunk, HK_OP_GET_ELEMENT);
     Production _prod = compile_assign(comp, PRODUCTION_SUBSCRIPT, false);
     if (_prod == PRODUCTION_ASSIGN)
@@ -931,7 +931,7 @@ static int compile_assign(Compiler *comp, Production prod, bool inplace)
       hk_chunk_emit_byte(chunk, index);
       return PRODUCTION_ASSIGN;
     }
-    int offset = chunk->code_length;
+    int offset = chunk->codeLength;
     hk_chunk_emit_opcode(chunk, HK_OP_GET_FIELD);
     hk_chunk_emit_byte(chunk, index);
     Production _prod = compile_assign(comp, PRODUCTION_SUBSCRIPT, false);
@@ -1097,7 +1097,7 @@ static void compile_function_declaration(Compiler *comp)
   hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
   uint8_t index;
 end:
-  index = fn->functions_length;
+  index = fn->functionsLength;
   hk_function_add_child(fn, child_comp.fn);
   hk_chunk_emit_opcode(chunk, HK_OP_CLOSURE);
   hk_chunk_emit_byte(chunk, index);
@@ -1169,7 +1169,7 @@ static void compile_anonymous_function(Compiler *comp)
   hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
   uint8_t index;
 end:
-  index = fn->functions_length;
+  index = fn->functionsLength;
   hk_function_add_child(fn, child_comp.fn);
   hk_chunk_emit_opcode(chunk, HK_OP_CLOSURE);
   hk_chunk_emit_byte(chunk, index);
@@ -1197,7 +1197,7 @@ static void compile_anonymous_function_without_params(Compiler *comp)
   hk_chunk_emit_opcode(child_chunk, HK_OP_RETURN_NIL);
   uint8_t index;
 end:
-  index = fn->functions_length;
+  index = fn->functionsLength;
   hk_function_add_child(fn, child_comp.fn);
   hk_chunk_emit_opcode(chunk, HK_OP_CLOSURE);
   hk_chunk_emit_byte(chunk, index);
@@ -1446,7 +1446,7 @@ static void compile_for_statement(Compiler *comp)
     else
       syntax_error_unexpected(comp);
   }
-  uint16_t jump1 = (uint16_t) chunk->code_length;
+  uint16_t jump1 = (uint16_t) chunk->codeLength;
   bool missing = match(scan, TOKEN_SEMICOLON);
   int offset1;
   if (missing)
@@ -1458,7 +1458,7 @@ static void compile_for_statement(Compiler *comp)
     offset1 = emit_jump(chunk, HK_OP_JUMP_IF_FALSE);
   }
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
-  uint16_t jump2 = (uint16_t) chunk->code_length;
+  uint16_t jump2 = (uint16_t) chunk->codeLength;
   Loop loop;
   start_loop(comp, &loop);
   if (match(scan, TOKEN_RPAREN))

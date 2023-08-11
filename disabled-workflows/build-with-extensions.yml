@@ -21,6 +21,7 @@ jobs:
         sudo apt-get install -y libgmp3-dev
         sudo apt-get install libzmq3-dev
         sudo apt-get install libleveldb-dev
+        sudo apt-get install libpcre3-dev
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
@@ -69,6 +70,7 @@ jobs:
         brew install gmp
         brew install zmq
         brew install leveldb
+        brew install pcre
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git
@@ -110,6 +112,7 @@ jobs:
         vcpkg install gmp:x64-windows
         vcpkg install zeromq:x64-windows
         vcpkg install leveldb:x64-windows
+        vcpkg install pcre2:x64-windows
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git

@@ -254,6 +254,27 @@ add_library(crypto_mod SHARED
   ../src/userdata.c
   ../src/value.c)
 
+add_library(regex_mod SHARED
+  regex.c
+  ../src/array.c
+  ../src/builtin.c
+  ../src/callable.c
+  ../src/chunk.c
+  ../src/compiler.c
+  ../src/utils.c
+  ../src/iterable.c
+  ../src/iterator.c
+  ../src/memory.c
+  ../src/module.c
+  ../src/range.c
+  ../src/scanner.c
+  ../src/state.c
+  ../src/string_map.c
+  ../src/string.c
+  ../src/struct.c
+  ../src/userdata.c
+  ../src/value.c)
+
 set_target_properties(sqlite_mod PROPERTIES PREFIX "")
 set_target_properties(curl_mod PROPERTIES PREFIX "")
 set_target_properties(redis_mod PROPERTIES PREFIX "")
@@ -264,6 +285,7 @@ set_target_properties(bigint_mod PROPERTIES PREFIX "")
 set_target_properties(zeromq_mod PROPERTIES PREFIX "")
 set_target_properties(leveldb_mod PROPERTIES PREFIX "")
 set_target_properties(crypto_mod PROPERTIES PREFIX "")
+set_target_properties(regex_mod PROPERTIES PREFIX "")
 
 if(MSVC)
   target_link_libraries(curl_mod PRIVATE CURL::libcurl)
@@ -271,12 +293,14 @@ if(MSVC)
   target_link_libraries(zeromq_mod PRIVATE ${ZEROMQ_LIBRARIES})
   target_link_libraries(leveldb_mod PRIVATE ${LEVELDB_LIBRARIES})
   target_link_libraries(crypto_mod PRIVATE ${OPENSSL_LIBRARIES})
+  target_link_libraries(regex_mod PRIVATE ${PCRE_LIBRARIES})
 else()
   target_link_libraries(curl_mod curl)
   target_link_libraries(mysql_mod mysqlclient)
   target_link_libraries(zeromq_mod zmq)
   target_link_libraries(leveldb_mod leveldb)
   target_link_libraries(crypto_mod crypto)
+  target_link_libraries(regex_mod pcre)
 endif()
 
 target_link_libraries(redis_mod hiredis)

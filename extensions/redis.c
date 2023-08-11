@@ -11,26 +11,26 @@
 typedef struct
 {
   HK_USERDATA_HEADER
-  redisContext *redis_context;
+  redisContext *context;
 } RedisContextWrapper;
 
-static inline RedisContextWrapper *redis_context_wrapper_new(redisContext *redis_context);
+static inline RedisContextWrapper *redis_context_wrapper_new(redisContext *context);
 static void redis_context_wrapper_deinit(HkUserdata *udata);
 static HkValue redis_reply_to_value(redisReply *reply);
 static void connect_call(HkState *state, HkValue *args);
 static void command_call(HkState *state, HkValue *args);
 
-static inline RedisContextWrapper *redis_context_wrapper_new(redisContext *redis_context)
+static inline RedisContextWrapper *redis_context_wrapper_new(redisContext *context)
 {
   RedisContextWrapper *wrapper = (RedisContextWrapper *) hk_allocate(sizeof(*wrapper));
-  hk_userdata_init((HkUserdata *) wrapper, &redis_context_wrapper_deinit);
-  wrapper->redis_context = redis_context;
+  hk_userdata_init((HkUserdata *) wrapper, redis_context_wrapper_deinit);
+  wrapper->context = context;
   return wrapper;
 }
 
 static void redis_context_wrapper_deinit(HkUserdata *udata)
 {
-  redisFree(((RedisContextWrapper *) udata)->redis_context);
+  redisFree(((RedisContextWrapper *) udata)->context);
 }
 
 static HkValue redis_reply_to_value(redisReply *reply)
@@ -98,13 +98,13 @@ static void connect_call(HkState *state, HkValue *args)
   hk_return_if_not_ok(state);
   HkString *hostname = hk_as_string(args[1]);
   int port = (int) hk_as_number(args[2]);
-  redisContext *redis_context = redisConnect(hostname->chars, port);
-  if (!redis_context || redis_context->err)
+  redisContext *context = redisConnect(hostname->chars, port);
+  if (!context || context->err)
   {
     hk_state_push_nil(state);
     return;
   }
-  hk_state_push_userdata(state, (HkUserdata *) redis_context_wrapper_new(redis_context));
+  hk_state_push_userdata(state, (HkUserdata *) redis_context_wrapper_new(context));
 }
 
 static void command_call(HkState *state, HkValue *args)
@@ -113,9 +113,9 @@ static void command_call(HkState *state, HkValue *args)
   hk_return_if_not_ok(state);
   hk_state_check_argument_string(state, args, 2);
   hk_return_if_not_ok(state);
-  redisContext *redis_context = ((RedisContextWrapper *) hk_as_userdata(args[1]))->redis_context;
+  redisContext *context = ((RedisContextWrapper *) hk_as_userdata(args[1]))->context;
   HkString *command = hk_as_string(args[2]);
-  redisReply *reply = redisCommand(redis_context, command->chars);
+  redisReply *reply = redisCommand(context, command->chars);
   hk_assert(reply, "redisCommand returned NULL");
   HkValue result = redis_reply_to_value(reply);
   freeReplyObject(reply);
@@ -128,11 +128,11 @@ HK_LOAD_MODULE_HANDLER(redis)
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "connect");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "connect", 2, &connect_call);
+  hk_state_push_new_native(state, "connect", 2, connect_call);
   hk_return_if_not_ok(state);
   hk_state_push_string_from_chars(state, -1, "command");
   hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "command", 2, &command_call);
+  hk_state_push_new_native(state, "command", 2, command_call);
   hk_return_if_not_ok(state);
   hk_state_construct(state, 2);
 }
