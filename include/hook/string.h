@@ -31,7 +31,7 @@ typedef struct
 HkString *hk_string_new(void);
 HkString *hk_string_new_with_capacity(int minCapacity);
 HkString *hk_string_from_chars(int length, const char *chars);
-HkString *hk_string_from_stream(FILE *stream, const char terminal);
+HkString *hk_string_from_stream(FILE *stream, const char delim);
 void hk_string_ensure_capacity(HkString *str, int minCapacity);
 void hk_string_free(HkString *str);
 void hk_string_release(HkString *str);

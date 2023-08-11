@@ -66,7 +66,7 @@ void hk_state_push_bool(HkState *state, bool data);
 void hk_state_push_number(HkState *state, double data);
 void hk_state_push_string(HkState *state, HkString *str);
 void hk_state_push_string_from_chars(HkState *state, int length, const char *chars);
-void hk_state_push_string_from_stream(HkState *state, FILE *stream, const char terminal);
+void hk_state_push_string_from_stream(HkState *state, FILE *stream, const char delim);
 void hk_state_push_range(HkState *state, HkRange *range);
 void hk_state_push_array(HkState *state, HkArray *arr);
 void hk_state_push_struct(HkState *state, HkStruct *ztruct);

@@ -87,20 +87,14 @@ HkString *hk_string_from_chars(int length, const char *chars)
   return str;
 }
 
-HkString *hk_string_from_stream(FILE *stream, const char terminal)
+HkString *hk_string_from_stream(FILE *stream, const char delim)
 {
   HkString *str = string_allocate(0);
   str->length = 0;
   for (;;)
   {
     int c = fgetc(stream);
-    if (c == EOF)
-    {
-      if (feof(stream))
-        break;
-      hk_assert(!ferror(stream), "unexpected error on fgetc()");
-    }
-    if (c == terminal)
+    if (c == EOF || c == delim)
       break;
     add_char(str, (char) c);
     ++str->length;

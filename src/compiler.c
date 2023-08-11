@@ -2253,6 +2253,7 @@ HkClosure *hk_compile(HkString *file, HkString *source)
   while (!match(comp.scan, TOKEN_EOF))
     compile_statement(&comp);
   HkFunction *fn = comp.fn;
+  fn->arity = 1;
   HkChunk *chunk = &fn->chunk;
   hk_chunk_emit_opcode(chunk, HK_OP_RETURN_NIL);
   HkClosure *cl = hk_closure_new(fn);

@@ -1363,15 +1363,22 @@ static inline void do_call(HkState *state, int num_args)
   move_result(state, slots);
 }
 
-static inline void adjust_call_args(HkState *state, int arity,int num_args)
+static inline void adjust_call_args(HkState *state, int arity, int num_args)
 {
-  if (num_args >= arity)
+  if (num_args > arity)
+  {
+    do
+    {
+      pop(state);
+      --num_args;
+    }
+    while (num_args > arity);
     return;
+  }
   while (num_args < arity)
   {
     push(state, HK_NIL_VALUE);
-    if (!hk_state_is_ok(state))
-      return;
+    hk_return_if_not_ok(state);
     ++num_args;
   }
 }
@@ -1951,9 +1958,9 @@ void hk_state_push_string_from_chars(HkState *state, int length, const char *cha
     hk_string_free(str);
 }
 
-void hk_state_push_string_from_stream(HkState *state, FILE *stream, const char terminal)
+void hk_state_push_string_from_stream(HkState *state, FILE *stream, const char delim)
 {
-  HkString *str = hk_string_from_stream(stream, terminal);
+  HkString *str = hk_string_from_stream(stream, delim);
   hk_state_push_string(state, str);
   if (!hk_state_is_ok(state))
     hk_string_free(str);

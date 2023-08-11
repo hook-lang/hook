@@ -14,11 +14,6 @@
 #define hk_array_is_empty(a)       (!(a)->length)
 #define hk_array_get_element(a, i) ((a)->elements[(i)])
 
-#define hk_array_inplace_clear(a) do \
-  { \
-    (a)->length = 0; \
-  } while (0)
-
 typedef struct
 {
   HK_OBJECT_HEADER
@@ -45,6 +40,7 @@ void hk_array_inplace_insert_element(HkArray *arr, int index, HkValue elem);
 void hk_array_inplace_delete_element(HkArray *arr, int index);
 void hk_array_inplace_concat(HkArray *dest, HkArray *src);
 void hk_array_inplace_diff(HkArray *dest, HkArray *src);
+void hk_array_inplace_clear(HkArray *arr);
 void hk_array_print(HkArray *arr);
 bool hk_array_equal(HkArray *arr1, HkArray *arr2);
 bool hk_array_compare(HkArray *arr1, HkArray *arr2, int *result);

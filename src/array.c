@@ -298,6 +298,13 @@ void hk_array_inplace_diff(HkArray *dest, HkArray *src)
   }
 }
 
+void hk_array_inplace_clear(HkArray *arr)
+{
+  for (int i = 0; i < arr->length; ++i)
+    hk_value_release(arr->elements[i]);
+  arr->length = 0;
+}
+
 void hk_array_print(HkArray *arr)
 {
   printf("[");
