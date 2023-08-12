@@ -169,7 +169,11 @@ static inline HkString *path_match(HkString *path, HkString *name, HkString *cur
 
 static inline bool is_relative(char *filename)
 {
+#ifdef _WIN32
+  return filename[0] != DIR_SEP[0] && filename[1] != ':';
+#else
   return filename[0] != DIR_SEP[0];
+#endif
 }
 
 static inline HkString *get_module_file(HkString *relFile, HkString *currFile)
