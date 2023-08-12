@@ -6,7 +6,6 @@
 #include "bigint.h"
 #include <stdlib.h>
 #include <gmp.h>
-#include <hook/memory.h>
 
 typedef struct
 {

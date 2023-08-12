@@ -6,8 +6,7 @@
 #ifndef BIGINT_H
 #define BIGINT_H
 
-#include <hook/state.h>
-#include <hook/utils.h>
+#include <hook.h>
 
 HK_LOAD_MODULE_HANDLER(bigint);
 

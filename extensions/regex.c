@@ -5,7 +5,6 @@
 
 #include "regex.h"
 #include <pcre.h>
-#include <hook/memory.h>
 
 typedef struct
 {

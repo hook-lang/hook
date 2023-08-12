@@ -6,10 +6,10 @@
 #ifndef HK_STRUCT_H
 #define HK_STRUCT_H
 
-#include <hook/string.h>
+#include "string.h"
 
-#define STRUCT_MIN_CAPACITY    (1 << 3)
-#define STRUCT_MAX_LOAD_FACTOR 0.75
+#define HK_STRUCT_MIN_CAPACITY    (1 << 3)
+#define HK_STRUCT_MAX_LOAD_FACTOR 0.75
 
 #define hk_instance_get_field(inst, i) ((inst)->values[(i)])
 

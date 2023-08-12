@@ -1,7 +1,14 @@
+# ------------------------------------------------------------------------------
+# CMakeLists.txt (Extensions)
+# ------------------------------------------------------------------------------
 
 if(MSVC)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${LIBRARY_DIR})
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${LIBRARY_DIR})
+endif()
+
+if(NOT MSVC)
+  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_DIR})
 endif()
 
 if(MSVC)
@@ -43,266 +50,82 @@ endif()
 
 add_library(sqlite_mod SHARED
   sqlite.c
-  deps/sqlite3.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  deps/sqlite3.c)
 
 add_library(curl_mod SHARED
-  curl.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  curl.c)
 
 add_library(redis_mod SHARED
-  redis.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  redis.c)
 
 add_library(secp256r1_mod SHARED
   secp256r1.c
-  deps/ecc.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  deps/ecc.c)
 
 add_library(fastcgi_mod SHARED
-  fastcgi.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  fastcgi.c)
 
 add_library(mysql_mod SHARED
-  mysql.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  mysql.c)
 
 add_library(bigint_mod SHARED
-  bigint.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  bigint.c)
 
 add_library(zeromq_mod SHARED
-  zeromq.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  zeromq.c)
 
 add_library(leveldb_mod SHARED
-  leveldb.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  leveldb.c)
 
 add_library(crypto_mod SHARED
   crypto.c
-  deps/rc4.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  deps/rc4.c)
 
 add_library(regex_mod SHARED
-  regex.c
-  ../src/array.c
-  ../src/builtin.c
-  ../src/callable.c
-  ../src/chunk.c
-  ../src/compiler.c
-  ../src/utils.c
-  ../src/iterable.c
-  ../src/iterator.c
-  ../src/memory.c
-  ../src/module.c
-  ../src/range.c
-  ../src/scanner.c
-  ../src/state.c
-  ../src/string_map.c
-  ../src/string.c
-  ../src/struct.c
-  ../src/userdata.c
-  ../src/value.c)
+  regex.c)
 
-set_target_properties(sqlite_mod PROPERTIES PREFIX "")
-set_target_properties(curl_mod PROPERTIES PREFIX "")
-set_target_properties(redis_mod PROPERTIES PREFIX "")
+target_link_libraries(sqlite_mod    ${STATIC_LIB_TARGET})
+target_link_libraries(curl_mod      ${STATIC_LIB_TARGET})
+target_link_libraries(redis_mod     ${STATIC_LIB_TARGET})
+target_link_libraries(secp256r1_mod ${STATIC_LIB_TARGET})
+target_link_libraries(fastcgi_mod   ${STATIC_LIB_TARGET})
+target_link_libraries(mysql_mod     ${STATIC_LIB_TARGET})
+target_link_libraries(bigint_mod    ${STATIC_LIB_TARGET})
+target_link_libraries(zeromq_mod    ${STATIC_LIB_TARGET})
+target_link_libraries(leveldb_mod   ${STATIC_LIB_TARGET})
+target_link_libraries(crypto_mod    ${STATIC_LIB_TARGET})
+target_link_libraries(regex_mod     ${STATIC_LIB_TARGET})
+
+set_target_properties(sqlite_mod    PROPERTIES PREFIX "")
+set_target_properties(curl_mod      PROPERTIES PREFIX "")
+set_target_properties(redis_mod     PROPERTIES PREFIX "")
 set_target_properties(secp256r1_mod PROPERTIES PREFIX "")
-set_target_properties(fastcgi_mod PROPERTIES PREFIX "")
-set_target_properties(mysql_mod PROPERTIES PREFIX "")
-set_target_properties(bigint_mod PROPERTIES PREFIX "")
-set_target_properties(zeromq_mod PROPERTIES PREFIX "")
-set_target_properties(leveldb_mod PROPERTIES PREFIX "")
-set_target_properties(crypto_mod PROPERTIES PREFIX "")
-set_target_properties(regex_mod PROPERTIES PREFIX "")
+set_target_properties(fastcgi_mod   PROPERTIES PREFIX "")
+set_target_properties(mysql_mod     PROPERTIES PREFIX "")
+set_target_properties(bigint_mod    PROPERTIES PREFIX "")
+set_target_properties(zeromq_mod    PROPERTIES PREFIX "")
+set_target_properties(leveldb_mod   PROPERTIES PREFIX "")
+set_target_properties(crypto_mod    PROPERTIES PREFIX "")
+set_target_properties(regex_mod     PROPERTIES PREFIX "")
 
 if(MSVC)
-  target_link_libraries(curl_mod PRIVATE CURL::libcurl)
-  target_link_libraries(mysql_mod PRIVATE ${MYSQL_LIBRARIES})
-  target_link_libraries(zeromq_mod PRIVATE ${ZEROMQ_LIBRARIES})
+  target_link_libraries(curl_mod    PRIVATE CURL::libcurl)
+  target_link_libraries(mysql_mod   PRIVATE ${MYSQL_LIBRARIES})
+  target_link_libraries(zeromq_mod  PRIVATE ${ZEROMQ_LIBRARIES})
   target_link_libraries(leveldb_mod PRIVATE ${LEVELDB_LIBRARIES})
-  target_link_libraries(crypto_mod PRIVATE ${OPENSSL_LIBRARIES})
-  target_link_libraries(regex_mod PRIVATE ${PCRE_LIBRARIES})
-else()
-  target_link_libraries(curl_mod curl)
-  target_link_libraries(mysql_mod mysqlclient)
-  target_link_libraries(zeromq_mod zmq)
-  target_link_libraries(leveldb_mod leveldb)
-  target_link_libraries(crypto_mod crypto)
-  target_link_libraries(regex_mod pcre)
+  target_link_libraries(crypto_mod  PRIVATE ${OPENSSL_LIBRARIES})
+  target_link_libraries(regex_mod   PRIVATE ${PCRE_LIBRARIES})
 endif()
 
-target_link_libraries(redis_mod hiredis)
+if(NOT MSVC)
+  target_link_libraries(curl_mod    curl)
+  target_link_libraries(mysql_mod   mysqlclient)
+  target_link_libraries(zeromq_mod  zmq)
+  target_link_libraries(leveldb_mod leveldb)
+  target_link_libraries(crypto_mod  crypto)
+  target_link_libraries(regex_mod   pcre)
+endif()
+
+target_link_libraries(redis_mod   hiredis)
 target_link_libraries(fastcgi_mod fcgi)
-target_link_libraries(bigint_mod gmp)
+target_link_libraries(bigint_mod  gmp)

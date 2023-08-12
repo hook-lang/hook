@@ -6,7 +6,7 @@
 #ifndef HK_ITERABLE_H
 #define HK_ITERABLE_H
 
-#include <hook/iterator.h>
+#include "iterator.h"
 
 HkIterator *hk_new_iterator(HkValue val);
 

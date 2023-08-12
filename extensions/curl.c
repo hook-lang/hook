@@ -5,7 +5,6 @@
 
 #include "curl.h"
 #include <curl/curl.h>
-#include <hook/memory.h>
 
 typedef struct
 {

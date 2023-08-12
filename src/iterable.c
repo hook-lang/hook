@@ -4,8 +4,8 @@
 //
 
 #include <hook/iterable.h>
-#include <hook/range.h>
 #include <hook/array.h>
+#include <hook/range.h>
 
 HkIterator *hk_new_iterator(HkValue val)
 {

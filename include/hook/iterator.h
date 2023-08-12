@@ -6,7 +6,7 @@
 #ifndef HK_ITERATOR_H
 #define HK_ITERATOR_H
 
-#include <hook/value.h>
+#include "value.h"
 
 #define HK_ITERATOR_HEADER HK_OBJECT_HEADER \
                            void (*deinit)(struct hk_iterator *); \

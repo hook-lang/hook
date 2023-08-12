@@ -4,13 +4,13 @@
 //
 
 #include "builtin.h"
+#include <ctype.h>
+#include <float.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#include <float.h>
-#include <ctype.h>
-#include <limits.h>
-#include <hook/struct.h>
 #include <hook/iterable.h>
+#include <hook/struct.h>
 #include <hook/utils.h>
 
 #ifdef _WIN32

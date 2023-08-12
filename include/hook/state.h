@@ -6,10 +6,10 @@
 #ifndef HK_STATE_H
 #define HK_STATE_H
 
-#include <hook/range.h>
-#include <hook/struct.h>
-#include <hook/callable.h>
-#include <hook/userdata.h>
+#include "callable.h"
+#include "range.h"
+#include "struct.h"
+#include "userdata.h"
 
 #define HK_STATE_FLAG_NONE     0x00
 #define HK_STATE_FLAG_NO_TRACE 0x01

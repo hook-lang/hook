@@ -6,7 +6,7 @@
 #ifndef HK_USERDATA_H
 #define HK_USERDATA_H
 
-#include <hook/value.h>
+#include "value.h"
 
 #define HK_USERDATA_HEADER HK_OBJECT_HEADER \
                            void (*deinit)(struct hk_userdata *);

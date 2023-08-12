@@ -4,15 +4,15 @@
 //
 
 #include <hook/compiler.h>
-#include <stdlib.h>
-#include <string.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 #include <hook/struct.h>
 #include <hook/utils.h>
-#include "scanner.h"
 #include "builtin.h"
+#include "scanner.h"
 
 #define MAX_CONSTANTS UINT8_MAX
 #define MAX_VARIABLES UINT8_MAX

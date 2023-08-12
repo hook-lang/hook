@@ -5,7 +5,6 @@
 
 #include "socket.h"
 #include <string.h>
-#include <hook/memory.h>
 
 #ifdef _WIN32
   #include <winsock2.h>

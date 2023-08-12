@@ -6,8 +6,7 @@
 #ifndef UTF8_H
 #define UTF8_H
 
-#include <hook/state.h>
-#include <hook/utils.h>
+#include <hook.h>
 
 HK_LOAD_MODULE_HANDLER(utf8);
 

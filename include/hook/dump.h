@@ -6,7 +6,7 @@
 #ifndef HK_DUMP_H
 #define HK_DUMP_H
 
-#include <hook/callable.h>
+#include "callable.h"
 
 void hk_dump(HkFunction *fn, FILE *stream);
 

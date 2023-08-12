@@ -11,8 +11,8 @@
 #include <hook/iterable.h>
 #include <hook/memory.h>
 #include <hook/utils.h>
-#include "module.h"
 #include "builtin.h"
+#include "module.h"
 
 static inline void type_error(HkState *state, int index, int numTypes, HkType types[],
   HkType valType);

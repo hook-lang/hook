@@ -6,7 +6,7 @@
 #ifndef HK_CHUNK_H
 #define HK_CHUNK_H
 
-#include <hook/array.h>
+#include "array.h"
 
 typedef enum
 {

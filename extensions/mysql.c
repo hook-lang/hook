@@ -6,7 +6,6 @@
 #include "mysql.h"
 #include <mysql/mysql.h>
 #include <assert.h>
-#include <hook/memory.h>
 
 typedef struct
 {

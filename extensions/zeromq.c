@@ -6,7 +6,6 @@
 #include "zeromq.h"
 #include <stdlib.h>
 #include <zmq.h>
-#include <hook/memory.h>
 
 typedef struct
 {
