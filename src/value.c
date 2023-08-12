@@ -5,9 +5,9 @@
 
 #include <hook/value.h>
 #include <stdlib.h>
+#include <hook/callable.h>
 #include <hook/range.h>
 #include <hook/struct.h>
-#include <hook/callable.h>
 #include <hook/userdata.h>
 #include <hook/utils.h>
 

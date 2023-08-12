@@ -4,7 +4,6 @@
 //
 
 #include "sqlite.h"
-#include <hook/memory.h>
 #include "deps/sqlite3.h"
 
 typedef struct

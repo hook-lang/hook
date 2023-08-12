@@ -6,10 +6,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <hook/compiler.h>
-#include <hook/dump.h>
-#include <hook/state.h>
-#include <hook/utils.h>
+#include <hook.h>
 
 #define VERSION "0.1.0"
 

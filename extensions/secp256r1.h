@@ -6,8 +6,7 @@
 #ifndef SECP256R1_H
 #define SECP256R1_H
 
-#include <hook/state.h>
-#include <hook/utils.h>
+#include <hook.h>
 
 HK_LOAD_MODULE_HANDLER(secp256r1);
 

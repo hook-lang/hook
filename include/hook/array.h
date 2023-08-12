@@ -6,8 +6,8 @@
 #ifndef HK_ARRAY_H
 #define HK_ARRAY_H
 
-#include <hook/value.h>
-#include <hook/iterator.h>
+#include "iterator.h"
+#include "value.h"
 
 #define HK_ARRAY_MIN_CAPACITY (1 << 3)
 

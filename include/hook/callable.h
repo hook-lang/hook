@@ -6,8 +6,8 @@
 #ifndef HK_CALLABLE_H
 #define HK_CALLABLE_H
 
-#include <hook/string.h>
-#include <hook/chunk.h>
+#include "chunk.h"
+#include "string.h"
 
 typedef struct hk_function
 {

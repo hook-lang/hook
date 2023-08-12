@@ -6,8 +6,7 @@
 #ifndef ENCODING_H
 #define ENCODING_H
 
-#include <hook/state.h>
-#include <hook/utils.h>
+#include <hook.h>
 
 HK_LOAD_MODULE_HANDLER(encoding);
 

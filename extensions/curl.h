@@ -6,8 +6,7 @@
 #ifndef CURL_H
 #define CURL_H
 
-#include <hook/state.h>
-#include <hook/utils.h>
+#include <hook.h>
 
 HK_LOAD_MODULE_HANDLER(curl);
 

@@ -5,7 +5,6 @@
 
 #include "io.h"
 #include <stdio.h>
-#include <hook/memory.h>
 
 #ifdef _WIN32
   #include <windows.h>

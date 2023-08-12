@@ -6,8 +6,7 @@
 #ifndef NUMBERS_H
 #define NUMBERS_H
 
-#include <hook/state.h>
-#include <hook/utils.h>
+#include <hook.h>
 
 HK_LOAD_MODULE_HANDLER(numbers);
 

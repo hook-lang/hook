@@ -4,7 +4,6 @@
 //
 
 #include "ini.h"
-#include <hook/memory.h>
 #include "deps/ini.h"
 
 typedef struct

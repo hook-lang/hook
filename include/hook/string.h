@@ -6,7 +6,7 @@
 #ifndef HK_STRING_H
 #define HK_STRING_H
 
-#include <hook/array.h>
+#include "array.h"
 
 #define HK_STRING_MIN_CAPACITY (1 << 3)
 

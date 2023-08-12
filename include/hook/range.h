@@ -6,8 +6,8 @@
 #ifndef HK_RANGE_H
 #define HK_RANGE_H
 
-#include <hook/value.h>
-#include <hook/iterator.h>
+#include "iterator.h"
+#include "value.h"
 
 typedef struct
 {

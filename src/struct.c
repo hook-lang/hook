@@ -6,8 +6,8 @@
 #include <hook/struct.h>
 #include <stdlib.h>
 #include <string.h>
-#include <hook/string.h>
 #include <hook/memory.h>
+#include <hook/string.h>
 
 static inline HkField **allocate_table(int capacity);
 static inline HkField *add_field(HkStruct *ztruct, HkString *name);
@@ -34,7 +34,7 @@ static inline HkField *add_field(HkStruct *ztruct, HkString *name)
 static inline void grow(HkStruct *ztruct)
 {
   int length = ztruct->length;
-  if (length / STRUCT_MAX_LOAD_FACTOR <= ztruct->capacity)
+  if (length / HK_STRUCT_MAX_LOAD_FACTOR <= ztruct->capacity)
     return;
   int capacity = ztruct->capacity << 1;
   ztruct->capacity = capacity;
@@ -58,7 +58,7 @@ static inline void grow(HkStruct *ztruct)
 
 HkStruct *hk_struct_new(HkString *name)
 {
-  int capacity = STRUCT_MIN_CAPACITY;
+  int capacity = HK_STRUCT_MIN_CAPACITY;
   HkStruct *ztruct = (HkStruct *) hk_allocate(sizeof(*ztruct));
   ztruct->refCount = 0;
   ztruct->capacity = capacity;

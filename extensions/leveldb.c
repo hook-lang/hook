@@ -6,7 +6,6 @@
 #include "leveldb.h"
 #include <stdlib.h>
 #include <leveldb/c.h>
-#include <hook/memory.h>
 
 typedef struct
 {

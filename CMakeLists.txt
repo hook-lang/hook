@@ -1,32 +1,31 @@
+# ------------------------------------------------------------------------------
+# CMakeLists.txt (Root)
+# ------------------------------------------------------------------------------
+
 cmake_minimum_required(VERSION 3.13)
 
 project(hook
-  DESCRIPTION "The Hook interpreter"
+  DESCRIPTION "The Hook Programming Language"
   VERSION 0.1.0
   LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-include_directories(/usr/local/include)
-include_directories(include)
-link_directories(/usr/local/lib)
-
 set(BINARY_DIR ${CMAKE_BINARY_DIR}/../bin)
 set(LIBRARY_DIR ${CMAKE_BINARY_DIR}/../lib)
 set(PACKAGE_DIR ${CMAKE_BINARY_DIR}/../package)
 
-if(MSVC)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BINARY_DIR})
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BINARY_DIR})
-else()
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BINARY_DIR})
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_DIR})
-endif()
+include_directories(/usr/local/include)
+include_directories(include)
+
+link_directories(/usr/local/lib)
 
 if(MSVC)
   add_compile_options(/W4)
-else()
+endif()
+
+if(NOT MSVC)
   add_compile_options(-Wall -Wextra -Wpedantic)
   add_compile_options("$<$<CONFIG:Debug>:-fsanitize=address>")
   add_compile_options("$<$<CONFIG:Debug>:-fprofile-arcs>")
@@ -36,32 +35,16 @@ else()
   add_link_options("$<$<CONFIG:Debug>:-ftest-coverage>")
 endif()
 
-add_executable(${PROJECT_NAME}
-  src/array.c
-  src/builtin.c
-  src/callable.c
-  src/chunk.c
-  src/utils.c
-  src/compiler.c
-  src/dump.c
-  src/iterable.c
-  src/iterator.c
-  src/main.c
-  src/memory.c
-  src/module.c
-  src/range.c
-  src/scanner.c
-  src/state.c
-  src/string_map.c
-  src/string.c
-  src/struct.c
-  src/userdata.c
-  src/value.c)
+# ------------------------------------------------------------------------------
+# Libraries, CLI, Core Modules, and Extensions
+# ------------------------------------------------------------------------------
 
-if(NOT MSVC)
-  target_link_libraries(${PROJECT_NAME} m)
-  target_link_libraries(${PROJECT_NAME} dl)
-endif()
+set(STATIC_LIB_TARGET "static_lib")
+set(SHARED_LIB_TARGET "shared_lib")
+
+add_subdirectory(src)
+
+add_subdirectory(cli)
 
 add_subdirectory(core)
 
@@ -70,12 +53,16 @@ if(BUILD_EXTENSIONS)
   add_subdirectory(extensions)
 endif()
 
+# ------------------------------------------------------------------------------
+# Package
+# ------------------------------------------------------------------------------
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 
-set(fmt TGZ)
-set(CPACK_GENERATOR ${fmt})
-set(CPACK_SOURCE_GENERATOR ${fmt})
+set(FORMAT TGZ)
+set(CPACK_GENERATOR ${FORMAT})
+set(CPACK_SOURCE_GENERATOR ${FORMAT})
 
 set(CPACK_OUTPUT_FILE_PREFIX ${PACKAGE_DIR})
 set(CPACK_PACKAGE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
@@ -103,12 +90,11 @@ file(READ ${CMAKE_CURRENT_LIST_DIR}/.cpack_ignore cpack_ignore)
 string(REGEX REPLACE "\n" ";" cpack_ignore ${cpack_ignore})
 set(CPACK_SOURCE_IGNORE_FILES "${cpack_ignore}")
 
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-
 if(MSVC)
   set(EXECUTABLE "${PROJECT_NAME}.exe")
-else()
+endif()
+
+if(NOT MSVC)
   set(EXECUTABLE ${PROJECT_NAME})
 endif()
 
@@ -120,9 +106,9 @@ install(
   DESTINATION bin
 )
 
-install(DIRECTORY examples/ DESTINATION examples)
-install(DIRECTORY lib/ DESTINATION lib)
-install(FILES ${CPACK_RESOURCE_FILE_README} ${CPACK_RESOURCE_FILE_LICENSE}
-  DESTINATION docs)
+install(DIRECTORY examples/     DESTINATION examples)
+install(DIRECTORY include/      DESTINATION include)
+install(DIRECTORY lib/          DESTINATION lib)
+install(FILES LICENSE README.md DESTINATION docs)
 
 include(CPack)
