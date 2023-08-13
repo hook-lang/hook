@@ -37,14 +37,14 @@ Hook offers the following key features:
 The following command can be used to install Hook on Linux (x64) and macOS (x64, arm64) systems:
 
 ```
-curl -sSL https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.sh | sh
+curl -sSL https://raw.githubusercontent.com/fabiosvm/hook-lang/main/scripts/install.sh | sh
 ```
 
 For Windows (x64) users, open a terminal and use the following commands:
 
 ```
 cd %tmp%
-curl -sSLO https://github.com/fabiosvm/hook-lang/releases/download/0.1.0/install.bat
+curl -sSLO https://raw.githubusercontent.com/fabiosvm/hook-lang/main/scripts/install.bat
 install
 ```
 

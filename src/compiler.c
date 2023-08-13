@@ -105,7 +105,7 @@ static void compile_constant_declaration(Compiler *comp);
 static void compile_variable_declaration(Compiler *comp);
 static void compile_assign_statement(Compiler *comp, Token *tk);
 static int compile_assign(Compiler *comp, Production prod, bool inplace);
-static void compile_struct_declaration(Compiler *comp, bool is_anonymous);
+static void compile_struct_declaration(Compiler *comp, bool isAnonymous);
 static void compile_function_declaration(Compiler *comp);
 static void compile_anonymous_function(Compiler *comp);
 static void compile_anonymous_function_without_params(Compiler *comp);
@@ -970,14 +970,14 @@ static int compile_assign(Compiler *comp, Production prod, bool inplace)
   return prod;
 }
 
-static void compile_struct_declaration(Compiler *comp, bool is_anonymous)
+static void compile_struct_declaration(Compiler *comp, bool isAnonymous)
 {
   Scanner *scan = comp->scan;
   HkChunk *chunk = &comp->fn->chunk;
   scanner_next_token(scan);
   Token tk;
   uint8_t index;
-  if (is_anonymous)
+  if (isAnonymous)
     hk_chunk_emit_opcode(chunk, HK_OP_NIL);
   else
   {
