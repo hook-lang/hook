@@ -243,11 +243,11 @@ int32_t decode_ascii85 (const uint8_t *inp, int32_t in_length, uint8_t *outp, in
             {
                 chunk  = inp[in_rover++] - base_char;
                 chunk *= 85u; // max: 84 * 85 = 7,140
-                chunk += ((in_rover < in_length) ? (inp[in_rover++] - base_char) : 84u);
+                chunk += ((in_rover < in_length) ? (unsigned int) (inp[in_rover++] - base_char) : 84u);
                 chunk *= 85u; // max: (84 * 85 + 84) * 85 = 614,040
-                chunk += ((in_rover < in_length) ? (inp[in_rover++] - base_char) : 84u);
+                chunk += ((in_rover < in_length) ? (unsigned int) (inp[in_rover++] - base_char) : 84u);
                 chunk *= 85u; // max: (((84 * 85 + 84) * 85) + 84) * 85 = 52,200,540
-                chunk += ((in_rover < in_length) ? (inp[in_rover++] - base_char) : 84u);
+                chunk += ((in_rover < in_length) ? (unsigned int) (inp[in_rover++] - base_char) : 84u);
                 // max: (((((84 * 85 + 84) * 85) + 84) * 85) + 84) * 85 = 4,437,053,040 oops! 0x108780E70
                 if (chunk > (UINT32_MAX / 85u))
                 {
@@ -257,7 +257,7 @@ int32_t decode_ascii85 (const uint8_t *inp, int32_t in_length, uint8_t *outp, in
                 }
                 else
                 {
-                    uint8_t addend = (uint8_t )((in_rover < in_length) ? (inp[in_rover++] - base_char) : 84u);
+                    uint8_t addend = (uint8_t )((in_rover < in_length) ? (unsigned int) (inp[in_rover++] - base_char) : 84u);
 
                     chunk *= 85u; // multiply will not overflow due to test above
 

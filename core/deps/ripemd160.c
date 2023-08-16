@@ -61,7 +61,7 @@ void ripemd160_compute_line(uint32_t* digest, uint32_t* words, uint32_t* chunk, 
         uint32_t k  = ks[round];
         uint8_t  fn = fns[round];
         for (uint8_t i = 0; i < 16; i++) {
-            uint32_t tmp;
+            uint32_t tmp = 0;
             switch (fn) {
                 case 1:
                     tmp = words[1] ^ words[2] ^ words[3];
