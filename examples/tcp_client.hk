@@ -3,11 +3,11 @@
 //
 
 import socket;
-import { stdin, readln } from io;
+import io;
 
 let { AF_INET, SOCK_STREAM } = socket;
 let { SOL_SOCKET, SO_REUSEADDR } = socket;
-let { set_option, connect, send, recv, close } = socket;
+let { set_option, connect, writeln, readln, close } = socket;
 
 let host = "localhost";
 let port = 9000;
@@ -19,10 +19,10 @@ connect(client, host, port);
 println("Connected to " + to_string(host) + ":" + to_string(port));
 
 loop {
-  let msg = readln(stdin);
-  send(client, msg, 0);
-  let received = recv(client, 1024, 0);
-  if (!received)
+  let msg = io.readln(io.stdin);
+  writeln(client, msg);
+  let received = readln(client);
+  if (is_empty(received))
     break;
   println(received);
 }

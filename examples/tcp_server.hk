@@ -6,7 +6,7 @@ import socket;
 
 let { AF_INET, SOCK_STREAM } = socket;
 let { SOL_SOCKET, SO_REUSEADDR } = socket;
-let { set_option, bind, listen, accept, recv, send, close } = socket;
+let { set_option, bind, listen, accept, readln, writeln, close } = socket;
 
 let port = 9000;
 
@@ -23,11 +23,11 @@ if (!client) {
 println("Client connected");
 
 loop {
-  let received = recv(client, 1024, 0);
-  if (!received)
+  let received = readln(client);
+  if (is_empty(received))
     break;
   println("Received: " + received);
-  send(client, "reply - " + received, 0);
+  writeln(client, "Reply: " + received);
 }
 
 close(client);
