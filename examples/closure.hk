@@ -1,0 +1,17 @@
+//
+// closure.hk
+//
+
+let x = 1;
+
+fn f(y) {
+  let z = 2;
+  fn g() {
+    return x + y + z;
+  }
+  return g;
+}
+
+let g = f(3);
+let result = g();
+println(result);

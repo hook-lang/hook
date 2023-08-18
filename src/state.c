@@ -1504,7 +1504,7 @@ static inline void call_function(HkState *state, HkValue *locals, HkClosure *cl,
         hk_value_incr_ref(val);
       }
       break;
-    case HK_OP_LOAD:
+    case HK_OP_GET_LOCAL:
       {
         HkValue val = locals[read_byte(&pc)];
         push(state, val);
@@ -1513,7 +1513,7 @@ static inline void call_function(HkState *state, HkValue *locals, HkClosure *cl,
         hk_value_incr_ref(val);
       }
       break;
-    case HK_OP_STORE:
+    case HK_OP_SET_LOCAL:
       {
         int index = read_byte(&pc);
         HkValue val = slots[state->stackTop];

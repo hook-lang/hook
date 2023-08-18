@@ -105,11 +105,11 @@ void hk_dump(HkFunction *fn, FILE *stream)
     case HK_OP_NONLOCAL:
       fprintf(stream, "NonLocal              %5d\n", code[i++]);
       break;
-    case HK_OP_LOAD:
-      fprintf(stream, "Load                  %5d\n", code[i++]);
+    case HK_OP_GET_LOCAL:
+      fprintf(stream, "GetLocal              %5d\n", code[i++]);
       break;
-    case HK_OP_STORE:
-      fprintf(stream, "Store                 %5d\n", code[i++]);
+    case HK_OP_SET_LOCAL:
+      fprintf(stream, "SetLocal              %5d\n", code[i++]);
       break;
     case HK_OP_ADD_ELEMENT:
       fprintf(stream, "AddElement\n");
