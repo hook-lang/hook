@@ -28,3 +28,9 @@ if (mut { ok, err } = baz(); err) {
 } else {
   println(ok);
 }
+
+mut result;
+if (result = baz(); result.err) {
+  println(result.err);
+}
+println(result.ok);

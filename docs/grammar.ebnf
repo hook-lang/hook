@@ -1,0 +1,119 @@
+
+chunk                ::= statement* EOF
+
+statement            ::= import_statement
+                       | variable_declaration ';'
+                       | assign_call ';'
+                       | struct_declaration
+                       | function_declaration
+                       | delete_statement
+                       | if_statement
+                       | match_statement
+                       | loop_statement
+                       | while_statement
+                       | for_statement
+                       | break_statement
+                       | return_statement
+                       | block
+
+import_statement     ::= 'import' name ( 'as' name )? ';'
+                       | 'import' STRING 'as' name ';'
+                       | 'import' '{' name ( ',' name )* '}' 'from' ( name | STRING ) ';'
+
+variable_declaration ::= 'let' name '=' expression
+                       | 'mut' name ( '=' expression )?
+                       | ( 'let' | 'mut' ) '[' '_' | name ( ',' '_' | name )* ']' '=' expression
+                       | ( 'let' | 'mut' ) '{' name ( ',' name )* '}' '=' expression
+
+assign_call          ::= name subscript* assign_op expression
+                       | name subscript* ( '++' | '--' )
+                       | name subscript* '[' ']' '=' expression
+                       | name subscript* subscript '=' expression
+                       | name ( subscript | call )* call
+
+struct_declaration   ::= 'struct' name '{' ( string | name ( ',' string | name )* )? '}'
+
+function_declaration ::= 'fn' name '(' ( 'mut'? name ( ',' 'mut'? name )* )? ')' ( '=>' expression | block )
+
+delete_statement     ::= 'del' name subscript* '[' expression ']' ';'
+
+if_statement         ::= ( 'if' | 'if!' ) '(' ( ( variable_declaration | assign_call ) ';' )? expression ')'
+                         statement ( 'else' statement )?
+
+match_statement      ::= 'match' '(' ( ( variable_declaration | assign_call ) ';' )? expression ')'
+                         '{' ( expression '=>' statement )+ ( '_' '=>' statement )? '}'
+
+loop_statement       ::= 'loop' statement
+
+while_statement      ::= ( 'while' | 'while!' ) '(' expression ')' statement
+                       | 'do' statement ( 'while' | 'while!' ) '(' expression ')' ';'
+
+for_statement        ::= 'for' '(' ( variable_declaration | assign_call )? ';' expression? ';' assign_call? ')' statement
+                       | 'foreach' '(' name 'in' expression ')' statement
+
+break_statement      ::= ( 'break' | 'continue' ) ';'
+
+return_statement     ::= 'return' expression? ';'
+
+block                ::= '{' stmt* '}'
+
+assign_op            ::= '=' | '|=' | '^=' | '&=' | '<<=' | '>>=' 
+                       | '+=' | '-=' | '*=' | '/=' | '~/=' | '%='
+
+subscript            ::= '[' expression ']' | '.' name
+
+call                 ::= '(' ( expression ( ',' expression )* )? ')'
+
+expression           ::= and_expression ( '||' and_expression )*
+
+and_expression       ::= equal_expression ( '&&' equal_expression )*
+
+equal_expression     ::= comp_expression ( ( '==' | '!=' ) comp_expression )*
+
+comp_expression      ::= bor_expression ( ( '>' | '>=' | '<' | '<=' ) bor_expression )*
+
+bor_expression       ::= bxor_expression ( '|' bxor_expression )*
+
+bxor_expression      ::= band_expression ( '^' band_expression )*
+
+band_expression      ::= shift_expression ( '&' shift_expression )*
+
+shift_expression     ::= range_expression ( ( '<<' | '>>' ) range_expression )*
+
+range_expression     ::= add_expression ( '..' add_expression )?
+
+add_expression       ::= mul_expression ( ( '+' | '-' ) mul_expression )*
+
+mul_expression       ::= unary_expression ( ( '*' | '/' | '~/' | '%' ) unary_expression )*
+
+unary_expression     ::= ( '-' | '!' | '~' ) unary_expression | primary_expression
+
+primary_expression   ::= literal
+                       | array_constructor
+                       | struct_constructor
+                       | anonymous_struct
+                       | anonymous_function
+                       | if_expression
+                       | match_expression
+                       | subscript_call
+                       | group_expression
+
+literal              ::= 'nil' | 'false' | 'true' | number | string
+
+array_constructor    ::= '[' ( expression ( ',' expression )* )? ']'
+
+struct_constructor   ::= '{' ( string | name ':' expression ( ',' string | name ':' expression )* )? '}'
+
+anonymous_struct     ::= 'struct' '{' ( string | name ( ',' string | name )* )? '}'
+
+anonymous_function   ::= '|' ( 'mut'? name ( ',' 'mut'? name )* )? '|' ( '=>' expression | block )
+                       | '||' ( '=>' expression | block )
+
+if_expression        ::= ( 'if' | 'if!' ) '(' expression ')' expression 'else' expression
+
+match_expression     ::= 'match' '(' expression ')' '{' expression '=>' expression ( ',' expression '=>' expression )*
+                         ',' '_' '=>' expression '}'
+
+subscript_call       ::= name ( subscript | call )* ( '{' ( expression ( ',' expression )* )? '}' )?
+
+group_expression     ::= '(' expression ')'

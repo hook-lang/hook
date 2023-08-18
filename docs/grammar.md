@@ -179,7 +179,7 @@ In addition, Hook uses a special token to indicate the end of a file. This token
 
 The complete syntactic grammar of Hook is defined by the following EBNF grammar:
 
-```
+```ebnf
 chunk                ::= statement* EOF
 
 statement            ::= import_statement
@@ -218,16 +218,18 @@ function_declaration ::= 'fn' name '(' ( 'mut'? name ( ',' 'mut'? name )* )? ')'
 
 delete_statement     ::= 'del' name subscript* '[' expression ']' ';'
 
-if_statement         ::= ( 'if' | 'if!' ) '(' ( variable_declaration ';' )? expression ')' statement ( 'else' statement )?
+if_statement         ::= ( 'if' | 'if!' ) '(' ( ( variable_declaration | assign_call ) ';' )? expression ')'
+                         statement ( 'else' statement )?
 
-match_statement      ::= 'match' '(' ( variable_declaration ';' )? expression ')' '{' ( expression '=>' statement )+ ( '_' '=>' statement )? '}'
+match_statement      ::= 'match' '(' ( ( variable_declaration | assign_call ) ';' )? expression ')'
+                         '{' ( expression '=>' statement )+ ( '_' '=>' statement )? '}'
 
 loop_statement       ::= 'loop' statement
 
 while_statement      ::= ( 'while' | 'while!' ) '(' expression ')' statement
                        | 'do' statement ( 'while' | 'while!' ) '(' expression ')' ';'
 
-for_statement        ::= 'for' '(' variable_declaration | assign_call? ';' expression? ';' assign_call? ')' statement
+for_statement        ::= 'for' '(' ( variable_declaration | assign_call )? ';' expression? ';' assign_call? ')' statement
                        | 'foreach' '(' name 'in' expression ')' statement
 
 break_statement      ::= ( 'break' | 'continue' ) ';'
