@@ -138,7 +138,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data)
 
 static void init_call(HkState *state, HkValue *args)
 {
-  HkType types[] = {HK_TYPE_NIL, HK_TYPE_STRING};
+  HkType types[] = { HK_TYPE_NIL, HK_TYPE_STRING };
   hk_state_check_argument_types(state, args, 1, 2, types);
   hk_return_if_not_ok(state);
   HkValue val = args[1];
@@ -166,7 +166,7 @@ static void setopt_call(HkState *state, HkValue *args)
   hk_return_if_not_ok(state);
   hk_state_check_argument_int(state, args, 2);
   hk_return_if_not_ok(state);
-  HkType types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
+  HkType types[] = { HK_TYPE_STRING, HK_TYPE_ARRAY };
   hk_state_check_argument_types(state, args, 3, 2, types);
   hk_return_if_not_ok(state);
   CurlWrapper *wrapper = (CurlWrapper *) hk_as_userdata(args[1]);

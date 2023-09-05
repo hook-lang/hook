@@ -143,7 +143,7 @@ static void open_call(HkState *state, HkValue *args)
 {
   hk_state_check_argument_string(state, args, 1);
   hk_return_if_not_ok(state);
-  HkType types[] = {HK_TYPE_NIL, HK_TYPE_USERDATA};
+  HkType types[] = { HK_TYPE_NIL, HK_TYPE_USERDATA };
   hk_state_check_argument_types(state, args, 2, 2, types);
   hk_return_if_not_ok(state);
   HkString *name = hk_as_string(args[1]);
@@ -185,7 +185,7 @@ static void put_call(HkState *state, HkValue *args)
 {
   hk_state_check_argument_userdata(state, args, 1);
   hk_return_if_not_ok(state);
-  HkType types[] = {HK_TYPE_NIL, HK_TYPE_USERDATA};
+  HkType types[] = { HK_TYPE_NIL, HK_TYPE_USERDATA };
   hk_state_check_argument_types(state, args, 2, 2, types);
   hk_return_if_not_ok(state);
   hk_state_check_argument_string(state, args, 3);
@@ -218,7 +218,7 @@ static void get_call(HkState *state, HkValue *args)
 {
   hk_state_check_argument_userdata(state, args, 1);
   hk_return_if_not_ok(state);
-  HkType types[] = {HK_TYPE_NIL, HK_TYPE_USERDATA};
+  HkType types[] = { HK_TYPE_NIL, HK_TYPE_USERDATA };
   hk_state_check_argument_types(state, args, 2, 2, types);
   hk_return_if_not_ok(state);
   hk_state_check_argument_string(state, args, 3);
@@ -250,7 +250,7 @@ static void delete_call(HkState *state, HkValue *args)
 {
   hk_state_check_argument_userdata(state, args, 1);
   hk_return_if_not_ok(state);
-  HkType types[] = {HK_TYPE_NIL, HK_TYPE_USERDATA};
+  HkType types[] = { HK_TYPE_NIL, HK_TYPE_USERDATA };
   hk_state_check_argument_types(state, args, 2, 2, types);
   hk_return_if_not_ok(state);
   hk_state_check_argument_string(state, args, 3);

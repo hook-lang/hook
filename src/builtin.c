@@ -261,7 +261,7 @@ static void to_bool_call(HkState *state, HkValue *args)
 
 static void to_int_call(HkState *state, HkValue *args)
 {
-  HkType types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  HkType types[] = { HK_TYPE_NUMBER, HK_TYPE_STRING };
   hk_state_check_argument_types(state, args, 1, 2, types);
   hk_return_if_not_ok(state);
   HkValue val = args[1];
@@ -278,7 +278,7 @@ static void to_int_call(HkState *state, HkValue *args)
 
 static void to_number_call(HkState *state, HkValue *args)
 {
-  HkType types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  HkType types[] = { HK_TYPE_NUMBER, HK_TYPE_STRING };
   hk_state_check_argument_types(state, args, 1, 2, types);
   hk_return_if_not_ok(state);
   HkValue val = args[1];
@@ -295,7 +295,7 @@ static void to_number_call(HkState *state, HkValue *args)
 
 static void to_string_call(HkState *state, HkValue *args)
 {
-  HkType types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
+  HkType types[] = { HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING };
   hk_state_check_argument_types(state, args, 1, 4, types);
   hk_return_if_not_ok(state);
   HkValue val = args[1];
@@ -435,7 +435,7 @@ static void refcount_call(HkState *state, HkValue *args)
 
 static void cap_call(HkState *state, HkValue *args)
 {
-  HkType types[] = {HK_TYPE_STRING, HK_TYPE_ARRAY};
+  HkType types[] = { HK_TYPE_STRING, HK_TYPE_ARRAY };
   hk_state_check_argument_types(state, args, 1, 2, types);
   hk_return_if_not_ok(state);
   HkValue val = args[1];
@@ -446,8 +446,13 @@ static void cap_call(HkState *state, HkValue *args)
 
 static void len_call(HkState *state, HkValue *args)
 {
-  HkType types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
-    HK_TYPE_STRUCT, HK_TYPE_INSTANCE};
+  HkType types[] = {
+    HK_TYPE_STRING,
+    HK_TYPE_RANGE,
+    HK_TYPE_ARRAY,
+    HK_TYPE_STRUCT,
+    HK_TYPE_INSTANCE
+  };
   hk_state_check_argument_types(state, args, 1, 5, types);
   hk_return_if_not_ok(state);
   HkValue val = args[1];
@@ -489,8 +494,13 @@ static void len_call(HkState *state, HkValue *args)
 
 static void is_empty_call(HkState *state, HkValue *args)
 {
-  HkType types[] = {HK_TYPE_STRING, HK_TYPE_RANGE, HK_TYPE_ARRAY,
-    HK_TYPE_STRUCT, HK_TYPE_INSTANCE};
+  HkType types[] = {
+    HK_TYPE_STRING,
+    HK_TYPE_RANGE,
+    HK_TYPE_ARRAY,
+    HK_TYPE_STRUCT,
+    HK_TYPE_INSTANCE
+  };
   hk_state_check_argument_types(state, args, 1, 5, types);
   hk_return_if_not_ok(state);
   HkValue val = args[1];
@@ -554,7 +564,7 @@ static void join_call(HkState *state, HkValue *args)
 
 static void iter_call(HkState *state, HkValue *args)
 {
-  HkType types[] = {HK_TYPE_ITERATOR, HK_TYPE_RANGE, HK_TYPE_ARRAY};
+  HkType types[] = { HK_TYPE_ITERATOR, HK_TYPE_RANGE, HK_TYPE_ARRAY };
   hk_state_check_argument_types(state, args, 1, 3, types);
   hk_return_if_not_ok(state);
   HkValue val = args[1];

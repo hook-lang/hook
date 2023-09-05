@@ -23,8 +23,8 @@ static inline int read_word(uint8_t **pc);
 static inline void do_range(HkState *state);
 static inline void do_array(HkState *state, int length);
 static inline void do_struct(HkState *state, int length);
-static inline void do_instance(HkState *state, int num_args);
-static inline void adjust_instance_args(HkState *state, int length, int num_args);
+static inline void do_instance(HkState *state, int numArgs);
+static inline void adjust_instance_args(HkState *state, int length, int numArgs);
 static inline void do_construct(HkState *state, int length);
 static inline void do_iterator(HkState *state);
 static inline void do_closure(HkState *state, HkFunction *fn);
@@ -73,8 +73,8 @@ static inline void do_not(HkState *state);
 static inline void do_bitwise_not(HkState *state);
 static inline void do_increment(HkState *state);
 static inline void do_decrement(HkState *state);
-static inline void do_call(HkState *state, int num_args);
-static inline void adjust_call_args(HkState *state, int arity, int num_args);
+static inline void do_call(HkState *state, int numArgs);
+static inline void adjust_call_args(HkState *state, int arity, int numArgs);
 static inline void print_trace(HkString *name, HkString *file, int line);
 static inline void call_function(HkState *state, HkValue *locals, HkClosure *cl, int *line);
 static inline void discard_frame(HkState *state, HkValue *slots);
@@ -184,9 +184,9 @@ static inline void do_struct(HkState *state, int length)
     hk_decr_ref(struct_name);
 }
 
-static inline void do_instance(HkState *state, int num_args)
+static inline void do_instance(HkState *state, int numArgs)
 {
-  HkValue *slots = &state->stackSlots[state->stackTop - num_args];
+  HkValue *slots = &state->stackSlots[state->stackTop - numArgs];
   HkValue val = slots[0];
   if (!hk_is_struct(val))
   {
@@ -195,7 +195,7 @@ static inline void do_instance(HkState *state, int num_args)
   }
   HkStruct *ztruct = hk_as_struct(val);
   int length = ztruct->length;
-  adjust_instance_args(state, length, num_args);
+  adjust_instance_args(state, length, numArgs);
   HkInstance *inst = hk_instance_new(ztruct);
   for (int i = 0; i < length; ++i)
     inst->values[i] = slots[i + 1];
@@ -205,23 +205,23 @@ static inline void do_instance(HkState *state, int num_args)
   hk_struct_release(ztruct);
 }
 
-static inline void adjust_instance_args(HkState *state, int length, int num_args)
+static inline void adjust_instance_args(HkState *state, int length, int numArgs)
 {
-  if (num_args > length)
+  if (numArgs > length)
   {
     do
     {
       pop(state);
-      --num_args;
+      --numArgs;
     }
-    while (num_args > length);
+    while (numArgs > length);
     return;
   }
-  while (num_args < length)
+  while (numArgs < length)
   {
     push(state, HK_NIL_VALUE);
     hk_return_if_not_ok(state);
-    ++num_args;
+    ++numArgs;
   }
 }
 
@@ -1290,9 +1290,9 @@ static inline void do_decrement(HkState *state)
   --slots[0].as.number;
 }
 
-static inline void do_call(HkState *state, int num_args)
+static inline void do_call(HkState *state, int numArgs)
 {
-  HkValue *slots = &state->stackSlots[state->stackTop - num_args];
+  HkValue *slots = &state->stackSlots[state->stackTop - numArgs];
   HkValue val = slots[0];
   if (!hk_is_callable(val))
   {
@@ -1304,7 +1304,7 @@ static inline void do_call(HkState *state, int num_args)
   if (hk_is_native(val))
   {
     HkNative *native = hk_as_native(val);
-    adjust_call_args(state, native->arity, num_args);
+    adjust_call_args(state, native->arity, numArgs);
     if (!hk_state_is_ok(state))
     {
       discard_frame(state, slots);
@@ -1334,7 +1334,7 @@ static inline void do_call(HkState *state, int num_args)
   }
   HkClosure *cl = hk_as_closure(val);
   HkFunction *fn = cl->fn;
-  adjust_call_args(state, fn->arity, num_args);
+  adjust_call_args(state, fn->arity, numArgs);
   if (!hk_state_is_ok(state))
   {
     discard_frame(state, slots);
@@ -1363,35 +1363,35 @@ static inline void do_call(HkState *state, int num_args)
   move_result(state, slots);
 }
 
-static inline void adjust_call_args(HkState *state, int arity, int num_args)
+static inline void adjust_call_args(HkState *state, int arity, int numArgs)
 {
-  if (num_args > arity)
+  if (numArgs > arity)
   {
     do
     {
       pop(state);
-      --num_args;
+      --numArgs;
     }
-    while (num_args > arity);
+    while (numArgs > arity);
     return;
   }
-  while (num_args < arity)
+  while (numArgs < arity)
   {
     push(state, HK_NIL_VALUE);
     hk_return_if_not_ok(state);
-    ++num_args;
+    ++numArgs;
   }
 }
 
 static inline void print_trace(HkString *name, HkString *file, int line)
 {
-  char *name_chars = name ? name->chars : "<anonymous>";
+  char *nameChars = name ? name->chars : "<anonymous>";
   if (file)
   {
-    fprintf(stderr, "  at %s() in %.*s:%d\n", name_chars, file->length, file->chars, line);
+    fprintf(stderr, "  at %s() in %.*s:%d\n", nameChars, file->length, file->chars, line);
     return;
   }
-  fprintf(stderr, "  at %s() in <native>\n", name_chars);
+  fprintf(stderr, "  at %s() in <native>\n", nameChars);
 }
 
 static inline void call_function(HkState *state, HkValue *locals, HkClosure *cl, int *line)
@@ -2040,9 +2040,9 @@ void hk_state_struct(HkState *state, int length)
   do_struct(state, length);
 }
 
-void hk_state_instance(HkState *state, int num_args)
+void hk_state_instance(HkState *state, int numArgs)
 {
-  do_instance(state, num_args);
+  do_instance(state, numArgs);
 }
 
 void hk_state_construct(HkState *state, int length)
@@ -2055,9 +2055,9 @@ void hk_state_pop(HkState *state)
   pop(state);
 }
 
-void hk_state_call(HkState *state, int num_args)
+void hk_state_call(HkState *state, int numArgs)
 {
-  do_call(state, num_args);
+  do_call(state, numArgs);
 }
 
 void hk_state_compare(HkState *state, HkValue val1, HkValue val2, int *result)

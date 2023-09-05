@@ -25,10 +25,10 @@ void hk_dump(HkFunction *fn, FILE *stream)
 {
   HkString *name = fn->name;
   HkString *file = fn->file;
-  char *name_chars = name ? name->chars : "; <anonymous>";
-  char *file_chars = file ? file->chars : "; <srdin>";
+  char *nameChars = name ? name->chars : "; <anonymous>";
+  char *fileChars = file ? file->chars : "; <srdin>";
   HkChunk *chunk = &fn->chunk;
-  fprintf(stream, "; %s in %s at %p\n", name_chars, file_chars, (void *) fn);
+  fprintf(stream, "; %s in %s at %p\n", nameChars, fileChars, (void *) fn);
   fprintf(stream, "; %d parameter(s), %d non-local(s), %d constant(s), %d function(s)\n", fn->arity,
     fn->numNonlocals, chunk->consts->length, fn->functionsLength);
   uint8_t *code = chunk->code;

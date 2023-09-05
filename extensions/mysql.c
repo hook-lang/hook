@@ -67,15 +67,15 @@ static void mysql_result_wrapper_deinit(HkUserdata *udata)
 
 static void connect_call(HkState *state, HkValue *args)
 {
-  hk_state_check_argument_types(state, args, 1, 2, (HkType[]) {HK_TYPE_NIL, HK_TYPE_STRING});
+  hk_state_check_argument_types(state, args, 1, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
   hk_return_if_not_ok(state);
-  hk_state_check_argument_types(state, args, 2, 2, (HkType[]) {HK_TYPE_NIL, HK_TYPE_NUMBER});
+  hk_state_check_argument_types(state, args, 2, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_NUMBER });
   hk_return_if_not_ok(state);
-  hk_state_check_argument_types(state, args, 3, 2, (HkType[]) {HK_TYPE_NIL, HK_TYPE_STRING});
+  hk_state_check_argument_types(state, args, 3, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
   hk_return_if_not_ok(state);
-  hk_state_check_argument_types(state, args, 4, 2, (HkType[]) {HK_TYPE_NIL, HK_TYPE_STRING});
+  hk_state_check_argument_types(state, args, 4, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
   hk_return_if_not_ok(state);
-  hk_state_check_argument_types(state, args, 5, 2, (HkType[]) {HK_TYPE_NIL, HK_TYPE_STRING});
+  hk_state_check_argument_types(state, args, 5, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
   hk_return_if_not_ok(state);
   if (mysql_library_init(0, NULL, NULL))
   {

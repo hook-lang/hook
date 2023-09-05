@@ -154,8 +154,8 @@ static inline void syntax_error(HkString *name, const char *file, int line,
   va_start(args, fmt);
   vfprintf(stderr, fmt, args);
   va_end(args);
-  char *name_chars = name ? name->chars : "<anonymous>";
-  fprintf(stderr, "\n  at %s() in %s:%d,%d\n", name_chars, file, line, col);
+  char *chars = name ? name->chars : "<anonymous>";
+  fprintf(stderr, "\n  at %s() in %s:%d,%d\n", chars, file, line, col);
   exit(EXIT_FAILURE);
 }
 
@@ -314,7 +314,7 @@ static inline Variable resolve_variable(Compiler *comp, Token *tk)
   if (!nonlocal_exists(comp->parent, tk) && lookup_global(tk->length, tk->start) == -1)
     syntax_error(comp->fn->name, comp->scan->file->chars, tk->line, tk->col,
       "variable `%.*s` is used but not defined", tk->length, tk->start);
-  return (Variable) {.isMutable = false};
+  return (Variable) { .isMutable = false };
 }
 
 static inline Variable *lookup_variable(Compiler *comp, Token *tk)
@@ -954,16 +954,16 @@ static int compile_assign(Compiler *comp, Production prod, bool inplace)
       return compile_assign(comp, PRODUCTION_CALL, false);
     }
     compile_expression(comp);
-    uint8_t num_args = 1;
+    uint8_t numArgs = 1;
     while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
       compile_expression(comp);
-      ++num_args;
+      ++numArgs;
     }
     consume(comp, TOKEN_RPAREN);
     hk_chunk_emit_opcode(chunk, HK_OP_CALL);
-    hk_chunk_emit_byte(chunk, num_args);
+    hk_chunk_emit_byte(chunk, numArgs);
     return compile_assign(comp, PRODUCTION_CALL, false);
   }
   if (prod == PRODUCTION_NONE || prod == PRODUCTION_SUBSCRIPT)
@@ -2155,16 +2155,16 @@ static void compile_subscript(Compiler *comp)
         return;
       }
       compile_expression(comp);
-      uint8_t num_args = 1;
+      uint8_t numArgs = 1;
       while (match(scan, TOKEN_COMMA))
       {
         scanner_next_token(scan);
         compile_expression(comp);
-        ++num_args;
+        ++numArgs;
       }
       consume(comp, TOKEN_RPAREN);
       hk_chunk_emit_opcode(chunk, HK_OP_CALL);
-      hk_chunk_emit_byte(chunk, num_args);
+      hk_chunk_emit_byte(chunk, numArgs);
       continue;
     }
     break;
@@ -2180,16 +2180,16 @@ static void compile_subscript(Compiler *comp)
       return;
     }
     compile_expression(comp);
-    uint8_t num_args = 1;
+    uint8_t numArgs = 1;
     while (match(scan, TOKEN_COMMA))
     {
       scanner_next_token(scan);
       compile_expression(comp);
-      ++num_args;
+      ++numArgs;
     }
     consume(comp, TOKEN_RBRACE);
     hk_chunk_emit_opcode(chunk, HK_OP_INSTANCE);
-    hk_chunk_emit_byte(chunk, num_args);
+    hk_chunk_emit_byte(chunk, numArgs);
   }
 }
 
@@ -2220,8 +2220,14 @@ static Variable compile_variable(Compiler *comp, Token *tk, bool emit)
       "variable `%.*s` is used but not defined", tk->length, tk->start);
   hk_chunk_emit_opcode(chunk, HK_OP_GLOBAL);
   hk_chunk_emit_byte(chunk, (uint8_t) index);
-  return (Variable) {.isLocal = false, .depth = -1, .index = index, .length = tk->length,
-    .start = tk->start, .isMutable = false};
+  return (Variable) {
+    .isLocal = false,
+    .depth = -1,
+    .index = index,
+    .length = tk->length,
+    .start = tk->start,
+    .isMutable = false
+  };
 }
 
 static Variable *compile_nonlocal(Compiler *comp, Token *tk)
@@ -2262,8 +2268,8 @@ HkClosure *hk_compile(HkString *file, HkString *source)
   scanner_init(&scan, file, source);
   Compiler comp;
   compiler_init(&comp, NULL, &scan, hk_string_from_chars(-1, "main"));
-  char args_name[] = "args";
-  Token tk = {.length = sizeof(args_name) - 1, .start = args_name};
+  char name[] = "args";
+  Token tk = { .length = sizeof(name) - 1, .start = name };
   add_local(&comp, &tk, false);
   while (!match(comp.scan, TOKEN_EOF))
     compile_statement(&comp);

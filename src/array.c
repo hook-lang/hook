@@ -36,13 +36,13 @@ static inline HkArray *array_allocate(int minCapacity)
 
 static inline ArrayIterator *array_iterator_allocate(HkArray *arr)
 {
-  ArrayIterator *arr_it = (ArrayIterator *) hk_allocate(sizeof(*arr_it));
-  hk_iterator_init((HkIterator *) arr_it, array_iterator_deinit,
+  ArrayIterator *arrIt = (ArrayIterator *) hk_allocate(sizeof(*arrIt));
+  hk_iterator_init((HkIterator *) arrIt, array_iterator_deinit,
     array_iterator_is_valid, array_iterator_get_current,
     array_iterator_next, array_iterator_inplace_next);
   hk_incr_ref(arr);
-  arr_it->arr = arr;
-  return arr_it;
+  arrIt->arr = arr;
+  return arrIt;
 }
 
 static void array_iterator_deinit(HkIterator *it)
@@ -52,29 +52,29 @@ static void array_iterator_deinit(HkIterator *it)
 
 static bool array_iterator_is_valid(HkIterator *it)
 {
-  ArrayIterator *arr_it = (ArrayIterator *) it;
-  HkArray *arr = arr_it->arr;
-  return arr_it->current < arr->length;
+  ArrayIterator *arrIt = (ArrayIterator *) it;
+  HkArray *arr = arrIt->arr;
+  return arrIt->current < arr->length;
 }
 
 static HkValue array_iterator_get_current(HkIterator *it)
 {
-  ArrayIterator *arr_it = (ArrayIterator *) it;
-  return arr_it->arr->elements[arr_it->current];
+  ArrayIterator *arrIt = (ArrayIterator *) it;
+  return arrIt->arr->elements[arrIt->current];
 }
 
 static HkIterator *array_iterator_next(HkIterator *it)
 {
-  ArrayIterator *arr_it = (ArrayIterator *) it;
-  ArrayIterator *result = array_iterator_allocate(arr_it->arr);
-  result->current = arr_it->current + 1;
+  ArrayIterator *arrIt = (ArrayIterator *) it;
+  ArrayIterator *result = array_iterator_allocate(arrIt->arr);
+  result->current = arrIt->current + 1;
   return (HkIterator *) result;
 }
 
 static void array_iterator_inplace_next(HkIterator *it)
 {
-  ArrayIterator *arr_it = (ArrayIterator *) it;
-  ++arr_it->current;
+  ArrayIterator *arrIt = (ArrayIterator *) it;
+  ++arrIt->current;
 }
 
 HkArray *hk_array_new(void)
@@ -369,9 +369,9 @@ bool hk_array_compare(HkArray *arr1, HkArray *arr2, int *result)
 
 HkIterator *hk_array_new_iterator(HkArray *arr)
 {
-  ArrayIterator *arr_it = array_iterator_allocate(arr);
-  arr_it->current = 0;
-  return (HkIterator *) arr_it;
+  ArrayIterator *arrIt = array_iterator_allocate(arr);
+  arrIt->current = 0;
+  return (HkIterator *) arrIt;
 }
 
 HkArray *hk_array_reverse(HkArray *arr)

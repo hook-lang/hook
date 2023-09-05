@@ -44,7 +44,7 @@ static void bigint_deinit(HkUserdata *udata)
 
 static void new_call(HkState *state, HkValue *args)
 {
-  HkType types[] = {HK_TYPE_NUMBER, HK_TYPE_STRING};
+  HkType types[] = { HK_TYPE_NUMBER, HK_TYPE_STRING };
   hk_state_check_argument_types(state, args, 1, 2, types);
   hk_return_if_not_ok(state);
   HkValue val = args[1];

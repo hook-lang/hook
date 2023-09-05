@@ -78,10 +78,10 @@ void hk_state_push_new_native(HkState *state, const char *name, int arity, void 
 void hk_state_push_userdata(HkState *state, HkUserdata *udata);
 void hk_state_array(HkState *state, int length);
 void hk_state_struct(HkState *state, int length);
-void hk_state_instance(HkState *state, int num_args);
+void hk_state_instance(HkState *state, int numArgs);
 void hk_state_construct(HkState *state, int length);
 void hk_state_pop(HkState *state);
-void hk_state_call(HkState *state, int num_args);
+void hk_state_call(HkState *state, int numArgs);
 void hk_state_compare(HkState *state, HkValue val1, HkValue val2, int *result);
 
 #endif // HK_STATE_H

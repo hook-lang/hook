@@ -128,7 +128,7 @@ static void bind_call(HkState *state, HkValue *args)
   hk_return_if_not_ok(state);
   hk_state_check_argument_int(state, args, 2);
   hk_return_if_not_ok(state);
-  HkType types[] = {HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING};
+  HkType types[] = { HK_TYPE_NIL, HK_TYPE_BOOL, HK_TYPE_NUMBER, HK_TYPE_STRING };
   hk_state_check_argument_types(state, args, 3, 4, types);
   hk_return_if_not_ok(state);
   sqlite3_stmt *stmt = ((SQLiteStmtWrapper *) hk_as_userdata(args[1]))->stmt;

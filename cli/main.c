@@ -23,7 +23,7 @@ typedef struct
   const char *input;
   const char *output;
   const char **args;
-  int num_args;
+  int numArgs;
 } ParsedArgs;
 
 static inline void fatal_error(const char *fmt, ...);
@@ -80,7 +80,7 @@ static inline void parse_args(ParsedArgs *parsedArgs, int argc, const char **arg
   if (i < argc)
     parsedArgs->output = argv[i];
   parsedArgs->args = &argv[i];
-  parsedArgs->num_args = argc - i;
+  parsedArgs->numArgs = argc - i;
 }
 
 static inline void parse_option(ParsedArgs *parsedArgs, const char *arg)
@@ -136,7 +136,7 @@ static inline const char *option(const char *arg, const char *opt)
 
 static inline HkArray *args_array(ParsedArgs *parsedArgs)
 {
-  int length = parsedArgs->num_args;
+  int length = parsedArgs->numArgs;
   HkArray *args = hk_array_new_with_capacity(length);
   args->length = length;
   for (int i = 0; i < length; ++i)

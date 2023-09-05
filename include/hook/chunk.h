@@ -57,7 +57,7 @@ void hk_chunk_deinit(HkChunk *chunk);
 void hk_chunk_emit_byte(HkChunk *chunk, uint8_t byte);
 void hk_chunk_emit_word(HkChunk *chunk, uint16_t word);
 void hk_chunk_emit_opcode(HkChunk *chunk, HkOpCode op);
-void hk_chunk_add_line(HkChunk *chunk, int line_no);
+void hk_chunk_add_line(HkChunk *chunk, int no);
 int hk_chunk_get_line(HkChunk *chunk, int offset);
 void hk_chunk_serialize(HkChunk *chunk, FILE *stream);
 bool hk_chunk_deserialize(HkChunk *chunk, FILE *stream);
