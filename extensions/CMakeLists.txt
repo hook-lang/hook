@@ -12,6 +12,7 @@ if(NOT MSVC)
 endif()
 
 if(MSVC)
+  find_package(SQLite3 CONFIG REQUIRED)
   find_package(CURL CONFIG REQUIRED)
   find_package(libmysql REQUIRED)
 endif()
@@ -49,8 +50,7 @@ if(APPLE)
 endif()
 
 add_library(sqlite_mod SHARED
-  sqlite.c
-  deps/sqlite3.c)
+  sqlite.c)
 
 add_library(curl_mod SHARED
   curl.c)
@@ -109,6 +109,7 @@ set_target_properties(crypto_mod    PROPERTIES PREFIX "")
 set_target_properties(regex_mod     PROPERTIES PREFIX "")
 
 if(MSVC)
+  target_link_libraries(sqlite_mod  PRIVATE SQLite::SQLite3)
   target_link_libraries(curl_mod    PRIVATE CURL::libcurl)
   target_link_libraries(mysql_mod   PRIVATE ${MYSQL_LIBRARIES})
   target_link_libraries(zeromq_mod  PRIVATE ${ZEROMQ_LIBRARIES})
@@ -118,6 +119,7 @@ if(MSVC)
 endif()
 
 if(NOT MSVC)
+  target_link_libraries(sqlite_mod  sqlite3)
   target_link_libraries(curl_mod    curl)
   target_link_libraries(mysql_mod   mysqlclient)
   target_link_libraries(zeromq_mod  zmq)

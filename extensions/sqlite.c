@@ -4,7 +4,7 @@
 //
 
 #include "sqlite.h"
-#include "deps/sqlite3.h"
+#include <sqlite3.h>
 
 typedef struct
 {

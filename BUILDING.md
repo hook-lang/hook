@@ -34,7 +34,7 @@ Hook's project brings some extensions (non-core built-in modules) that are not c
 To build the extensions, you need to install some dependencies:
 
 ```
-sudo apt-get install -y libcurl4-openssl-dev libhiredis-dev libmysqlclient-dev
+sudo apt-get install -y libsqlite3-dev libcurl4-openssl-dev libmysqlclient-dev libgmp3-dev libzmq3-dev libleveldb-dev libpcre3-dev
 ```
 
 So you can build the extensions with the following command:
