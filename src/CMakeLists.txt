@@ -27,9 +27,9 @@ set(SOURCES
   memory.c
   module.c
   range.c
+  record.c
   scanner.c
   state.c
-  string_map.c
   string.c
   struct.c
   userdata.c

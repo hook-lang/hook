@@ -8,7 +8,7 @@
 #include <string.h>
 #include <hook/compiler.h>
 #include <hook/utils.h>
-#include "string_map.h"
+#include "record.h"
 
 #ifdef _WIN32
   #include <Windows.h>
@@ -60,7 +60,7 @@
   typedef void (*LoadModuleHandler)(HkState *);
 #endif
 
-static StringMap moduleCache;
+static Record moduleCache;
 static HkString *path = NULL;
 
 static inline const char *get_home_dir(void);
@@ -280,7 +280,7 @@ static inline HkString *load_source_from_file(const char *filename)
 
 static inline bool module_cache_get(HkString *name, HkValue *module)
 {
-  StringMapEntry *entry = string_map_get_entry(&moduleCache, name);
+  RecordEntry *entry = record_get_entry(&moduleCache, name);
   if (!entry)
     return false;
   *module = entry->value;
@@ -289,17 +289,17 @@ static inline bool module_cache_get(HkString *name, HkValue *module)
 
 static inline void module_cache_put(HkString *name, HkValue module)
 {
-  string_map_inplace_put(&moduleCache, name, module);
+  record_inplace_put(&moduleCache, name, module);
 }
 
 void module_cache_init(void)
 {
-  string_map_init(&moduleCache, 0);
+  record_init(&moduleCache, 0);
 }
 
 void module_cache_deinit(void)
 {
-  string_map_deinit(&moduleCache);
+  record_deinit(&moduleCache);
   if (path)
     hk_string_free(path);
 }
