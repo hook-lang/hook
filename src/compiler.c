@@ -425,7 +425,6 @@ static void compile_statement(Compiler *comp)
   }
   if (match(scan, TOKEN_FN))
   {
-    // TODO
     compile_function_declaration(comp);
     return;
   }
@@ -1279,13 +1278,6 @@ static void compile_if_statement(Compiler *comp, bool not)
     compile_variable_declaration(comp);
     consume(comp, TOKEN_SEMICOLON);
   }
-  else if (match(scan, TOKEN_NAME))
-  {
-    Token tk = scan->token;
-    scanner_next_token(scan);
-    compile_assign_statement(comp, &tk);
-    consume(comp, TOKEN_SEMICOLON);
-  }
   compile_expression(comp);
   consume(comp, TOKEN_RPAREN);
   HkOpCode op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
@@ -1317,13 +1309,6 @@ static void compile_match_statement(Compiler *comp)
   else if (match(scan, TOKEN_MUT))
   {
     compile_variable_declaration(comp);
-    consume(comp, TOKEN_SEMICOLON);
-  }
-  else if (match(scan, TOKEN_NAME))
-  {
-    Token tk = scan->token;
-    scanner_next_token(scan);
-    compile_assign_statement(comp, &tk);
     consume(comp, TOKEN_SEMICOLON);
   }
   compile_expression(comp);
