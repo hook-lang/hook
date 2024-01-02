@@ -148,7 +148,7 @@ static inline bool match_number(Scanner *scan)
     while (isdigit(char_at(scan, n)))
       ++n;
   }
-  TokenType type = TOKEN_INT;
+  TokenKind kind = TOKEN_KIND_INT;
   if (char_at(scan, n) == '.')
   {
     if (!isdigit(char_at(scan, n + 1)))
@@ -156,7 +156,7 @@ static inline bool match_number(Scanner *scan)
     n += 2;
     while (isdigit(char_at(scan, n)))
       ++n;
-    type = TOKEN_FLOAT;
+    kind = TOKEN_KIND_FLOAT;
   }
   if (char_at(scan, n) == 'e' || char_at(scan, n) == 'E')
   {
@@ -172,7 +172,7 @@ static inline bool match_number(Scanner *scan)
   if (isalnum(char_at(scan, n)) || char_at(scan, n) == '_')
     return false;
 end:
-  scan->token.type = type;
+  scan->token.kind = kind;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
   scan->token.length = n;
@@ -198,7 +198,7 @@ static inline bool match_string(Scanner *scan)
         lexical_error(scan, "unterminated string");
       ++n;
     }
-    scan->token.type = TOKEN_STRING;
+    scan->token.kind = TOKEN_KIND_STRING;
     scan->token.line = scan->line;
     scan->token.col = scan->col;
     scan->token.length = n - 2;
@@ -216,7 +216,7 @@ static inline bool match_name(Scanner *scan)
   int n = 1;
   while (char_at(scan, n) == '_' || isalnum(char_at(scan, n)))
     ++n;
-  scan->token.type = TOKEN_NAME;
+  scan->token.kind = TOKEN_KIND_NAME;
   scan->token.line = scan->line;
   scan->token.col = scan->col;
   scan->token.length = n;
@@ -249,242 +249,242 @@ void scanner_next_token(Scanner *scan)
   skip_spaces_comments(scan);
   if (match_char(scan, '\0'))
   {
-    scan->token.type = TOKEN_EOF;
+    scan->token.kind = TOKEN_KIND_EOF;
     return;
   }
   if (match_chars(scan, ".."))
   {
-    scan->token.type = TOKEN_DOTDOT;
+    scan->token.kind = TOKEN_KIND_DOTDOT;
     return;
   }
   if (match_char(scan, '.'))
   {
-    scan->token.type = TOKEN_DOT;
+    scan->token.kind = TOKEN_KIND_DOT;
     return;
   }
   if (match_char(scan, ','))
   {
-    scan->token.type = TOKEN_COMMA;
+    scan->token.kind = TOKEN_KIND_COMMA;
     return;
   }
   if (match_char(scan, ':'))
   {
-    scan->token.type = TOKEN_COLON;
+    scan->token.kind = TOKEN_KIND_COLON;
     return;
   }
   if (match_char(scan, ';'))
   {
-    scan->token.type = TOKEN_SEMICOLON;
+    scan->token.kind = TOKEN_KIND_SEMICOLON;
     return;
   }
   if (match_char(scan, '('))
   {
-    scan->token.type = TOKEN_LPAREN;
+    scan->token.kind = TOKEN_KIND_LPAREN;
     return;
   }
   if (match_char(scan, ')'))
   {
-    scan->token.type = TOKEN_RPAREN;
+    scan->token.kind = TOKEN_KIND_RPAREN;
     return;
   }
   if (match_char(scan, '['))
   {
-    scan->token.type = TOKEN_LBRACKET;
+    scan->token.kind = TOKEN_KIND_LBRACKET;
     return;
   }
   if (match_char(scan, ']'))
   {
-    scan->token.type = TOKEN_RBRACKET;
+    scan->token.kind = TOKEN_KIND_RBRACKET;
     return;
   }
   if (match_char(scan, '{'))
   {
-    scan->token.type = TOKEN_LBRACE;
+    scan->token.kind = TOKEN_KIND_LBRACE;
     return;
   }
   if (match_char(scan, '}'))
   {
-    scan->token.type = TOKEN_RBRACE;
+    scan->token.kind = TOKEN_KIND_RBRACE;
     return;
   }
   if (match_chars(scan, "|="))
   {
-    scan->token.type = TOKEN_PIPEEQ;
+    scan->token.kind = TOKEN_KIND_PIPEEQ;
     return;
   }
   if (match_chars(scan, "||"))
   {
-    scan->token.type = TOKEN_PIPEPIPE;
+    scan->token.kind = TOKEN_KIND_PIPEPIPE;
     return;
   }
   if (match_char(scan, '|'))
   {
-    scan->token.type = TOKEN_PIPE;
+    scan->token.kind = TOKEN_KIND_PIPE;
     return;
   }
   if (match_chars(scan, "^="))
   {
-    scan->token.type = TOKEN_CARETEQ;
+    scan->token.kind = TOKEN_KIND_CARETEQ;
     return;
   }
   if (match_char(scan, '^'))
   {
-    scan->token.type = TOKEN_CARET;
+    scan->token.kind = TOKEN_KIND_CARET;
     return;
   }
   if (match_chars(scan, "&="))
   {
-    scan->token.type = TOKEN_AMPEQ;
+    scan->token.kind = TOKEN_KIND_AMPEQ;
     return;
   }
   if (match_chars(scan, "&&"))
   {
-    scan->token.type = TOKEN_AMPAMP;
+    scan->token.kind = TOKEN_KIND_AMPAMP;
     return;
   }
   if (match_char(scan, '&'))
   {
-    scan->token.type = TOKEN_AMP;
+    scan->token.kind = TOKEN_KIND_AMP;
     return;
   }
   if (match_chars(scan, "=>"))
   {
-    scan->token.type = TOKEN_ARROW;
+    scan->token.kind = TOKEN_KIND_ARROW;
     return;
   }
   if (match_chars(scan, "=="))
   {
-    scan->token.type = TOKEN_EQEQ;
+    scan->token.kind = TOKEN_KIND_EQEQ;
     return;
   }
   if (match_char(scan, '='))
   {
-    scan->token.type = TOKEN_EQ;
+    scan->token.kind = TOKEN_KIND_EQ;
     return;
   }
   if (match_chars(scan, "!="))
   {
-    scan->token.type = TOKEN_BANGEQ;
+    scan->token.kind = TOKEN_KIND_BANGEQ;
     return;
   }
   if (match_char(scan, '!'))
   {
-    scan->token.type = TOKEN_BANG;
+    scan->token.kind = TOKEN_KIND_BANG;
     return;
   }
   if (match_chars(scan, ">="))
   {
-    scan->token.type = TOKEN_GTEQ;
+    scan->token.kind = TOKEN_KIND_GTEQ;
     return;
   }
   if (match_chars(scan, ">>="))
   {
-    scan->token.type = TOKEN_GTGTEQ;
+    scan->token.kind = TOKEN_KIND_GTGTEQ;
     return;
   }
   if (match_chars(scan, ">>"))
   {
-    scan->token.type = TOKEN_GTGT;
+    scan->token.kind = TOKEN_KIND_GTGT;
     return;
   }
   if (match_char(scan, '>'))
   {
-    scan->token.type = TOKEN_GT;
+    scan->token.kind = TOKEN_KIND_GT;
     return;
   }
   if (match_chars(scan, "<="))
   {
-    scan->token.type = TOKEN_LTEQ;
+    scan->token.kind = TOKEN_KIND_LTEQ;
     return;
   }
   if (match_chars(scan, "<<="))
   {
-    scan->token.type = TOKEN_LTLTEQ;
+    scan->token.kind = TOKEN_KIND_LTLTEQ;
     return;
   }
   if (match_chars(scan, "<<"))
   {
-    scan->token.type = TOKEN_LTLT;
+    scan->token.kind = TOKEN_KIND_LTLT;
     return;
   }
   if (match_char(scan, '<'))
   {
-    scan->token.type = TOKEN_LT;
+    scan->token.kind = TOKEN_KIND_LT;
     return;
   }
   if (match_chars(scan, "+="))
   {
-    scan->token.type = TOKEN_PLUSEQ;
+    scan->token.kind = TOKEN_KIND_PLUSEQ;
     return;
   }
   if (match_chars(scan, "++"))
   {
-    scan->token.type = TOKEN_PLUSPLUS;
+    scan->token.kind = TOKEN_KIND_PLUSPLUS;
     return;
   }
   if (match_char(scan, '+'))
   {
-    scan->token.type = TOKEN_PLUS;
+    scan->token.kind = TOKEN_KIND_PLUS;
     return;
   }
   if (match_chars(scan, "-="))
   {
-    scan->token.type = TOKEN_DASHEQ;
+    scan->token.kind = TOKEN_KIND_DASHEQ;
     return;
   }
   if (match_chars(scan, "--"))
   {
-    scan->token.type = TOKEN_DASHDASH;
+    scan->token.kind = TOKEN_KIND_DASHDASH;
     return;
   }
   if (match_char(scan, '-'))
   {
-    scan->token.type = TOKEN_DASH;
+    scan->token.kind = TOKEN_KIND_DASH;
     return;
   }
   if (match_chars(scan, "*="))
   {
-    scan->token.type = TOKEN_STAREQ;
+    scan->token.kind = TOKEN_KIND_STAREQ;
     return;
   }
   if (match_char(scan, '*'))
   {
-    scan->token.type = TOKEN_STAR;
+    scan->token.kind = TOKEN_KIND_STAR;
     return;
   }
   if (match_chars(scan, "/="))
   {
-    scan->token.type = TOKEN_SLASHEQ;
+    scan->token.kind = TOKEN_KIND_SLASHEQ;
     return;
   }
   if (match_char(scan, '/'))
   {
-    scan->token.type = TOKEN_SLASH;
+    scan->token.kind = TOKEN_KIND_SLASH;
     return;
   }
   if (match_chars(scan, "~/="))
   {
-    scan->token.type = TOKEN_TILDESLASHEQ;
+    scan->token.kind = TOKEN_KIND_TILDESLASHEQ;
     return;
   }
   if (match_chars(scan, "~/"))
   {
-    scan->token.type = TOKEN_TILDESLASH;
+    scan->token.kind = TOKEN_KIND_TILDESLASH;
     return;
   }
   if (match_char(scan, '~'))
   {
-    scan->token.type = TOKEN_TILDE;
+    scan->token.kind = TOKEN_KIND_TILDE;
     return;
   }
   if (match_chars(scan, "%="))
   {
-    scan->token.type = TOKEN_PERCENTEQ;
+    scan->token.kind = TOKEN_KIND_PERCENTEQ;
     return;
   }
   if (match_char(scan, '%'))
   {
-    scan->token.type = TOKEN_PERCENT;
+    scan->token.kind = TOKEN_KIND_PERCENT;
     return;
   }
   if (match_number(scan))
@@ -493,132 +493,132 @@ void scanner_next_token(Scanner *scan)
     return;
   if (match_chars(scan, "_"))
   {
-    scan->token.type = TOKEN_UNDERSCORE;
+    scan->token.kind = TOKEN_KIND_UNDERSCORE;
     return;
   }
   if (match_keyword(scan, "as"))
   {
-    scan->token.type = TOKEN_AS;
+    scan->token.kind = TOKEN_KIND_AS_KW;
     return;
   }
   if (match_keyword(scan, "break"))
   {
-    scan->token.type = TOKEN_BREAK;
+    scan->token.kind = TOKEN_KIND_BREAK_KW;
     return;
   }
   if (match_keyword(scan, "continue"))
   {
-    scan->token.type = TOKEN_CONTINUE;
+    scan->token.kind = TOKEN_KIND_CONTINUE_KW;
     return;
   }
   if (match_keyword(scan, "del"))
   {
-    scan->token.type = TOKEN_DEL;
+    scan->token.kind = TOKEN_KIND_DEL_KW;
     return;
   }
   if (match_keyword(scan, "do"))
   {
-    scan->token.type = TOKEN_DO;
+    scan->token.kind = TOKEN_KIND_DO_KW;
     return;
   }
   if (match_keyword(scan, "else"))
   {
-    scan->token.type = TOKEN_ELSE;
+    scan->token.kind = TOKEN_KIND_ELSE_KW;
     return;
   }
   if (match_keyword(scan, "false"))
   {
-    scan->token.type = TOKEN_FALSE;
+    scan->token.kind = TOKEN_KIND_FALSE_KW;
     return;
   }
   if (match_keyword(scan, "fn"))
   {
-    scan->token.type = TOKEN_FN;
+    scan->token.kind = TOKEN_KIND_FN_KW;
     return;
   }
   if (match_keyword(scan, "foreach"))
   {
-    scan->token.type = TOKEN_FOREACH;
+    scan->token.kind = TOKEN_KIND_FOREACH_KW;
     return;
   }
   if (match_keyword(scan, "for"))
   {
-    scan->token.type = TOKEN_FOR;
+    scan->token.kind = TOKEN_KIND_FOR_KW;
     return;
   }
   if (match_keyword(scan, "from"))
   {
-    scan->token.type = TOKEN_FROM;
+    scan->token.kind = TOKEN_KIND_FROM_KW;
     return;
   }
   if (match_keyword(scan, "if!"))
   {
-    scan->token.type = TOKEN_IFBANG;
+    scan->token.kind = TOKEN_KIND_IFBANG_KW;
     return;
   }
   if (match_keyword(scan, "if"))
   {
-    scan->token.type = TOKEN_IF;
+    scan->token.kind = TOKEN_KIND_IF_KW;
     return;
   }
   if (match_keyword(scan, "import"))
   {
-    scan->token.type = TOKEN_IMPORT;
+    scan->token.kind = TOKEN_KIND_IMPORT_KW;
     return;
   }
   if (match_keyword(scan, "in"))
   {
-    scan->token.type = TOKEN_IN;
+    scan->token.kind = TOKEN_KIND_IN_KW;
     return;
   }
   if (match_keyword(scan, "let"))
   {
-    scan->token.type = TOKEN_LET;
+    scan->token.kind = TOKEN_KIND_LET_KW;
     return;
   }
   if (match_keyword(scan, "loop"))
   {
-    scan->token.type = TOKEN_LOOP;
+    scan->token.kind = TOKEN_KIND_LOOP_KW;
     return;
   }
   if (match_keyword(scan, "match"))
   {
-    scan->token.type = TOKEN_MATCH;
+    scan->token.kind = TOKEN_KIND_MATCH_KW;
     return;
   }
   if (match_keyword(scan, "mut"))
   {
-    scan->token.type = TOKEN_MUT;
+    scan->token.kind = TOKEN_KIND_MUT_KW;
     return;
   }
   if (match_keyword(scan, "nil"))
   {
-    scan->token.type = TOKEN_NIL;
+    scan->token.kind = TOKEN_KIND_NIL_KW;
     return;
   }
   if (match_keyword(scan, "return"))
   {
-    scan->token.type = TOKEN_RETURN;
+    scan->token.kind = TOKEN_KIND_RETURN_KW;
     return;
   }
   if (match_keyword(scan, "struct"))
   {
-    scan->token.type = TOKEN_STRUCT;
+    scan->token.kind = TOKEN_KIND_STRUCT_KW;
     return;
   }
   if (match_keyword(scan, "true"))
   {
-    scan->token.type = TOKEN_TRUE;
+    scan->token.kind = TOKEN_KIND_TRUE_KW;
     return;
   }
   if (match_keyword(scan, "while!"))
   {
-    scan->token.type = TOKEN_WHILEBANG;
+    scan->token.kind = TOKEN_KIND_WHILEBANG_KW;
     return;
   }
   if (match_keyword(scan, "while"))
   {
-    scan->token.type = TOKEN_WHILE;
+    scan->token.kind = TOKEN_KIND_WHILE_KW;
     return;
   }
   if (match_name(scan))
