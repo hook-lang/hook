@@ -4,12 +4,15 @@
 //
 
 #include <hook/value.h>
+#include <math.h>
 #include <stdlib.h>
 #include <hook/callable.h>
 #include <hook/range.h>
 #include <hook/struct.h>
 #include <hook/userdata.h>
 #include <hook/utils.h>
+
+#define EPSILON 1e-9
 
 void hk_value_free(HkValue val)
 {
@@ -210,17 +213,16 @@ bool hk_value_compare(HkValue val1, HkValue val2, int *result)
     *result = hk_as_bool(val1) - hk_as_bool(val2);
     return true;
   case HK_TYPE_NUMBER:
-    if (hk_as_number(val1) > hk_as_number(val2))
     {
-      *result = 1;
-      return true;
+      double num1 = hk_as_number(val1);
+      double num2 = hk_as_number(val2);
+      if (fabs(num1 - num2) < EPSILON)
+      {
+        *result = 0;
+        return true;
+      }
+      *result = num1 > num2 ? 1 : -1;
     }
-    if (hk_as_number(val1) < hk_as_number(val2))
-    {
-      *result = -1;
-      return true;
-    }
-    *result = 0;
     return true;
   case HK_TYPE_STRING:
     *result = hk_string_compare(hk_as_string(val1), hk_as_string(val2));
