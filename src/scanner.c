@@ -491,9 +491,9 @@ void scanner_next_token(Scanner *scan)
     return;
   if (match_string(scan))
     return;
-  if (match_chars(scan, "_"))
+  if (match_keyword(scan, "_"))
   {
-    scan->token.kind = TOKEN_KIND_UNDERSCORE;
+    scan->token.kind = TOKEN_KIND_UNDERSCORE_KW;
     return;
   }
   if (match_keyword(scan, "as"))

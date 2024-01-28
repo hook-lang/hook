@@ -603,7 +603,7 @@ static void compile_constant_declaration(Compiler *comp)
   if (match(scan, TOKEN_KIND_LBRACKET))
   {
     scanner_next_token(scan);
-    if (match(scan, TOKEN_KIND_UNDERSCORE))
+    if (match(scan, TOKEN_KIND_UNDERSCORE_KW))
       add_placeholder(comp);
     else
     {
@@ -616,7 +616,7 @@ static void compile_constant_declaration(Compiler *comp)
     while (match(scan, TOKEN_KIND_COMMA))
     {
       scanner_next_token(scan);
-      if (match(scan, TOKEN_KIND_UNDERSCORE))
+      if (match(scan, TOKEN_KIND_UNDERSCORE_KW))
         add_placeholder(comp);
       else
       {
@@ -695,7 +695,7 @@ static void compile_variable_declaration(Compiler *comp)
   if (match(scan, TOKEN_KIND_LBRACKET))
   {
     scanner_next_token(scan);
-    if (match(scan, TOKEN_KIND_UNDERSCORE))
+    if (match(scan, TOKEN_KIND_UNDERSCORE_KW))
       add_placeholder(comp);
     else
     {
@@ -709,7 +709,7 @@ static void compile_variable_declaration(Compiler *comp)
     while (match(scan, TOKEN_KIND_COMMA))
     {
       scanner_next_token(scan);
-      if (match(scan, TOKEN_KIND_UNDERSCORE))
+      if (match(scan, TOKEN_KIND_UNDERSCORE_KW))
         add_placeholder(comp);
       else
       {
@@ -1335,7 +1335,7 @@ static void compile_match_statement_member(Compiler *comp)
     hk_chunk_emit_opcode(chunk, HK_OP_POP);
     return;
   }
-  if (match(scan, TOKEN_KIND_UNDERSCORE))
+  if (match(scan, TOKEN_KIND_UNDERSCORE_KW))
   {
     scanner_next_token(scan);
     consume(comp, TOKEN_KIND_ARROW);
@@ -2054,7 +2054,7 @@ static void compile_match_expression(Compiler *comp)
   if (match(scan, TOKEN_KIND_COMMA))
   {
     scanner_next_token(scan);
-    if (match(scan, TOKEN_KIND_UNDERSCORE))
+    if (match(scan, TOKEN_KIND_UNDERSCORE_KW))
     {
       scanner_next_token(scan);
       consume(comp, TOKEN_KIND_ARROW);
@@ -2084,7 +2084,7 @@ static void compile_match_expression_member(Compiler *comp)
   if (match(scan, TOKEN_KIND_COMMA))
   {
     scanner_next_token(scan);
-    if (match(scan, TOKEN_KIND_UNDERSCORE))
+    if (match(scan, TOKEN_KIND_UNDERSCORE_KW))
     {
       scanner_next_token(scan);
       consume(comp, TOKEN_KIND_ARROW);
