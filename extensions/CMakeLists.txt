@@ -90,6 +90,10 @@ add_library(uuid_mod SHARED
   uuid.c
   deps/uuid4.c)
 
+add_library(geohash_mod SHARED
+  geohash.c
+  deps/geohash.c)
+
 target_link_libraries(sqlite_mod    ${STATIC_LIB_TARGET})
 target_link_libraries(curl_mod      ${STATIC_LIB_TARGET})
 target_link_libraries(redis_mod     ${STATIC_LIB_TARGET})
@@ -102,6 +106,7 @@ target_link_libraries(leveldb_mod   ${STATIC_LIB_TARGET})
 target_link_libraries(crypto_mod    ${STATIC_LIB_TARGET})
 target_link_libraries(regex_mod     ${STATIC_LIB_TARGET})
 target_link_libraries(uuid_mod      ${STATIC_LIB_TARGET})
+target_link_libraries(geohash_mod   ${STATIC_LIB_TARGET})
 
 set_target_properties(sqlite_mod    PROPERTIES PREFIX "")
 set_target_properties(curl_mod      PROPERTIES PREFIX "")
@@ -115,6 +120,7 @@ set_target_properties(leveldb_mod   PROPERTIES PREFIX "")
 set_target_properties(crypto_mod    PROPERTIES PREFIX "")
 set_target_properties(regex_mod     PROPERTIES PREFIX "")
 set_target_properties(uuid_mod      PROPERTIES PREFIX "")
+set_target_properties(geohash_mod   PROPERTIES PREFIX "")
 
 if(MSVC)
   target_link_libraries(sqlite_mod  PRIVATE SQLite::SQLite3)
