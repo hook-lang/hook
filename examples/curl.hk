@@ -4,7 +4,7 @@
 
 import curl;
 
-let c = curl.init("https://api.github.com/repos/fabiosvm/hook-lang");
+let c = curl.init("https://api.github.com/repos/hook-lang/hook");
 curl.setopt(c, curl.OPT_HTTPHEADER, ["User-Agent: curl.hk"]);
 let response = curl.exec(c);
 println(response);

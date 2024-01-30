@@ -5,7 +5,7 @@ rem ----------------------------------------------------------------------------
 rem Installation script for Hook
 rem ------------------------------------------------------------------------------
 
-set BASE_URL=https://github.com/fabiosvm/hook-lang/releases/download
+set BASE_URL=https://github.com/hook-lang/hook/releases/download
 set VERSION=0.1.0
 set ARCH=x64
 

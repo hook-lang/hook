@@ -4,7 +4,7 @@
 # Installation script for Hook
 #------------------------------------------------------------------------------
 
-BASE_URL="https://github.com/fabiosvm/hook-lang/releases/download"
+BASE_URL="https://github.com/hook-lang/hook/releases/download"
 VERSION="0.1.0"
 
 #------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ detect_platform() {
 download_failed() {
   warning "Unable to download: $1"
   warning "It may be that there is no binary installer available for this platform: $platform"
-  warning "It's possible to build Hook from source: <https://github.com/fabiosvm/hook-lang>"
+  warning "It's possible to build Hook from source: <https://github.com/hook-lang/hook>"
   exit 1
 }
 

@@ -1,6 +1,6 @@
 
-[![Build and test](https://github.com/fabiosvm/hook-lang/actions/workflows/build.yml/badge.svg)](https://github.com/fabiosvm/hook-lang/actions/workflows/build.yml)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f2f1345083c1455683dabcf48b0ea6dd)](https://app.codacy.com/gh/fabiosvm/hook-lang/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+[![Build and test](https://github.com/hook-lang/hook/actions/workflows/build.yml/badge.svg)](https://github.com/hook-lang/hook/actions/workflows/build.yml)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/b58fa787c8cc480091a8e976164ee203)](https://app.codacy.com/gh/hook-lang/hook/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![codecov](https://codecov.io/gh/fabiosvm/hook-lang/branch/main/graph/badge.svg?token=mkmMpfS1yu)](https://codecov.io/gh/fabiosvm/hook-lang)
 
 # The Hook Programming Language
@@ -37,14 +37,14 @@ Hook offers the following key features:
 The following command can be used to install Hook on Linux (x64) and macOS (x64, arm64) systems:
 
 ```
-curl -sSL https://raw.githubusercontent.com/fabiosvm/hook-lang/main/scripts/install.sh | sh
+curl -sSL https://raw.githubusercontent.com/hook-lang/hook/main/scripts/install.sh | sh
 ```
 
 For Windows (x64) users, open a terminal and use the following commands:
 
 ```
 cd %tmp%
-curl -sSLO https://raw.githubusercontent.com/fabiosvm/hook-lang/main/scripts/install.bat
+curl -sSLO https://raw.githubusercontent.com/hook-lang/hook/main/scripts/install.bat
 install
 ```
 

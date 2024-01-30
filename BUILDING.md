@@ -22,8 +22,8 @@ Use the following commands to build the binaries:
 
 ```
 cd ~
-git clone https://github.com/fabiosvm/hook-lang.git
-mv hook-lang hook && cd hook
+git clone https://github.com/hook-lang/hook.git
+cd hook
 scripts/build.sh
 ```
 
