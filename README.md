@@ -48,7 +48,18 @@ curl -sSLO https://raw.githubusercontent.com/hook-lang/hook/main/scripts/install
 install
 ```
 
-## Building from the source code
+### Installing with Homebrew
+
+If you're a macOS user (works on Linux too), you can also install Hook using [Homebrew](https://brew.sh):
+
+```
+brew tap hook-lang/hook
+brew install hook
+```
+
+> **Note**: Follow the instructions provided by Homebrew to add the `HOOK_HOME` environment variable to your system.
+
+### Building from the source code
 
 If you prefer, you can also build Hook locally by following the instructions provided in [BUILDING.md](BUILDING.md).
 
