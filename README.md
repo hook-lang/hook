@@ -50,7 +50,7 @@ install
 
 ### Installing with Homebrew
 
-If you're a macOS user (works on Linux too), you can also install Hook using [Homebrew](https://brew.sh):
+If you're a macOS user, you can also install Hook using [Homebrew](https://brew.sh):
 
 ```
 brew tap hook-lang/hook
