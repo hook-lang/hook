@@ -11,6 +11,8 @@ if(NOT MSVC)
   set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_DIR})
 endif()
 
+find_package(PostgreSQL REQUIRED)
+
 if(MSVC)
   find_package(SQLite3 CONFIG REQUIRED)
   find_package(CURL CONFIG REQUIRED)
@@ -94,6 +96,11 @@ add_library(geohash_mod SHARED
   geohash.c
   deps/geohash.c)
 
+add_library(postgres_mod SHARED
+  postgres.c)
+
+target_include_directories(postgres_mod PUBLIC ${PostgreSQL_INCLUDE_DIRS})
+
 target_link_libraries(sqlite_mod    ${STATIC_LIB_TARGET})
 target_link_libraries(curl_mod      ${STATIC_LIB_TARGET})
 target_link_libraries(redis_mod     ${STATIC_LIB_TARGET})
@@ -107,6 +114,7 @@ target_link_libraries(crypto_mod    ${STATIC_LIB_TARGET})
 target_link_libraries(regex_mod     ${STATIC_LIB_TARGET})
 target_link_libraries(uuid_mod      ${STATIC_LIB_TARGET})
 target_link_libraries(geohash_mod   ${STATIC_LIB_TARGET})
+target_link_libraries(postgres_mod  ${STATIC_LIB_TARGET})
 
 set_target_properties(sqlite_mod    PROPERTIES PREFIX "")
 set_target_properties(curl_mod      PROPERTIES PREFIX "")
@@ -121,6 +129,7 @@ set_target_properties(crypto_mod    PROPERTIES PREFIX "")
 set_target_properties(regex_mod     PROPERTIES PREFIX "")
 set_target_properties(uuid_mod      PROPERTIES PREFIX "")
 set_target_properties(geohash_mod   PROPERTIES PREFIX "")
+set_target_properties(postgres_mod  PROPERTIES PREFIX "")
 
 if(MSVC)
   target_link_libraries(sqlite_mod  PRIVATE SQLite::SQLite3)
@@ -142,6 +151,7 @@ if(NOT MSVC)
   target_link_libraries(regex_mod   pcre)
 endif()
 
-target_link_libraries(redis_mod   hiredis)
-target_link_libraries(fastcgi_mod fcgi)
-target_link_libraries(bigint_mod  gmp)
+target_link_libraries(redis_mod    hiredis)
+target_link_libraries(fastcgi_mod  fcgi)
+target_link_libraries(bigint_mod   gmp)
+target_link_libraries(postgres_mod ${PostgreSQL_LIBRARIES})

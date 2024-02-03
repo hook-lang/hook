@@ -1,0 +1,14 @@
+//
+// postgres.hk
+//
+
+import postgres;
+
+let conn_info = "host=localhost dbname=postgres user=default_user password=";
+let [ conn, err ] = postgres.connect(conn_info);
+
+if (err) {
+  panic(err);
+}
+
+assert(postgres.close(conn), "close connection");
