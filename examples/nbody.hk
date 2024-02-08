@@ -18,7 +18,7 @@ struct Body {
   mass
 }
 
-fn sun() => Body { 0, 0, 0, 0, 0, 0, SOLAR_MASS }
+fn sun() => Body { 0, 0, 0, 0, 0, 0, SOLAR_MASS };
 
 fn jupiter() => Body {
   4.84143144246472090e+00,
@@ -28,7 +28,7 @@ fn jupiter() => Body {
   7.69901118419740425e-03 * DAYS_PER_YEAR,
   -6.90460016972063023e-05 * DAYS_PER_YEAR,
   9.54791938424326609e-04 * SOLAR_MASS
-}
+};
 
 fn saturn() => Body {
   8.34336671824457987e+00,
@@ -38,7 +38,7 @@ fn saturn() => Body {
   4.99852801234917238e-03 * DAYS_PER_YEAR,
   2.30417297573763929e-05 * DAYS_PER_YEAR,
   2.85885980666130812e-04 * SOLAR_MASS
-}
+};
 
 fn uranus() => Body {
   1.28943695621391310e+01,
@@ -48,7 +48,7 @@ fn uranus() => Body {
   2.37847173959480950e-03 * DAYS_PER_YEAR,
   -2.96589568540237556e-05 * DAYS_PER_YEAR,
   4.36624404335156298e-05 * SOLAR_MASS
-}
+};
 
 fn neptune() => Body {
   1.53796971148509165e+01,
@@ -58,7 +58,7 @@ fn neptune() => Body {
   1.62824170038242295e-03 * DAYS_PER_YEAR,
   -9.51592254519715870e-05 * DAYS_PER_YEAR,
   5.15138902046611451e-05 * SOLAR_MASS
-}
+};
 
 fn offset_momentum(mut bodies) {
   mut px = 0;

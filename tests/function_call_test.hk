@@ -1,9 +1,9 @@
 
-fn f() => nil
+fn f() => nil;
 
-fn g(a) => nil
+fn g(a) => nil;
 
-fn h(a, b) => nil
+fn h(a, b) => nil;
 
 f();
 f(1);

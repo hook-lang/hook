@@ -1,6 +1,6 @@
 fn fib(n) =>
   if (n < 2) n
-  else fib(n - 1) + fib(n - 2)
+  else fib(n - 1) + fib(n - 2);
 
 let n = to_int(args[0]);
 let m = to_int(args[1]);

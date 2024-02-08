@@ -7,7 +7,7 @@ let g = |a, b| {
   return a - b;
 };
 
-fn h(a, b) => a + b
+fn h(a, b) => a + b;
 
 let i = |a, b| => a - b;
 

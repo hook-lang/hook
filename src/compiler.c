@@ -1047,6 +1047,7 @@ static void compile_function_declaration(Compiler *comp)
     {
       scanner_next_token(scan);
       compile_expression(&childComp);
+      consume(comp, TOKEN_KIND_SEMICOLON);
       hk_chunk_emit_opcode(childChunk, HK_OP_RETURN);
       goto end;
     }
@@ -1088,6 +1089,7 @@ static void compile_function_declaration(Compiler *comp)
   {
     scanner_next_token(scan);
     compile_expression(&childComp);
+    consume(comp, TOKEN_KIND_SEMICOLON);
     hk_chunk_emit_opcode(childChunk, HK_OP_RETURN);
     goto end;
   }

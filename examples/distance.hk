@@ -11,7 +11,7 @@ struct Point {
   x, y
 }
 
-fn deg_to_rad(deg) => deg * PI / 180.0
+fn deg_to_rad(deg) => deg * PI / 180.0;
 
 fn euclidean_distance(p1, p2) {
   let dx = abs(p1.x - p2.x);

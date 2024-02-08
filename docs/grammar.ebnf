@@ -16,26 +16,26 @@ statement            ::= import_statement
                        | return_statement
                        | block
 
-import_statement     ::= 'import' name ( 'as' name )? ';'
-                       | 'import' STRING 'as' name ';'
-                       | 'import' '{' name ( ',' name )* '}' 'from' ( name | STRING ) ';'
+import_statement     ::= 'import' NAME ( 'as' NAME )? ';'
+                       | 'import' STRING 'as' NAME ';'
+                       | 'import' '{' NAME ( ',' NAME )* '}' 'from' ( NAME | STRING ) ';'
 
-variable_declaration ::= 'let' name '=' expression
-                       | 'mut' name ( '=' expression )?
-                       | ( 'let' | 'mut' ) '[' '_' | name ( ',' '_' | name )* ']' '=' expression
-                       | ( 'let' | 'mut' ) '{' name ( ',' name )* '}' '=' expression
+variable_declaration ::= 'let' NAME '=' expression
+                       | 'mut' NAME ( '=' expression )?
+                       | ( 'let' | 'mut' ) '[' '_' | NAME ( ',' '_' | NAME )* ']' '=' expression
+                       | ( 'let' | 'mut' ) '{' NAME ( ',' NAME )* '}' '=' expression
 
-assign_call          ::= name subscript* assign_op expression
-                       | name subscript* ( '++' | '--' )
-                       | name subscript* '[' ']' '=' expression
-                       | name subscript* subscript '=' expression
-                       | name ( subscript | call )* call
+assign_call          ::= NAME subscript* assign_op expression
+                       | NAME subscript* ( '++' | '--' )
+                       | NAME subscript* '[' ']' '=' expression
+                       | NAME subscript* subscript '=' expression
+                       | NAME ( subscript | call )* call
 
-struct_declaration   ::= 'struct' name '{' ( string | name ( ',' string | name )* )? '}'
+struct_declaration   ::= 'struct' NAME '{' ( string | NAME ( ',' string | NAME )* )? '}'
 
-function_declaration ::= 'fn' name '(' ( 'mut'? name ( ',' 'mut'? name )* )? ')' ( '=>' expression | block )
+function_declaration ::= 'fn' NAME '(' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? ')' ( '=>' expression ";" | block )
 
-delete_statement     ::= 'del' name subscript* '[' expression ']' ';'
+delete_statement     ::= 'del' NAME subscript* '[' expression ']' ';'
 
 if_statement         ::= ( 'if' | 'if!' ) '(' ( variable_declaration ';' )? expression ')'
                          statement ( 'else' statement )?
@@ -49,7 +49,7 @@ while_statement      ::= ( 'while' | 'while!' ) '(' expression ')' statement
                        | 'do' statement ( 'while' | 'while!' ) '(' expression ')' ';'
 
 for_statement        ::= 'for' '(' ( variable_declaration | assign_call )? ';' expression? ';' assign_call? ')' statement
-                       | 'foreach' '(' name 'in' expression ')' statement
+                       | 'foreach' '(' NAME 'in' expression ')' statement
 
 break_statement      ::= ( 'break' | 'continue' ) ';'
 
@@ -60,7 +60,7 @@ block                ::= '{' stmt* '}'
 assign_op            ::= '=' | '|=' | '^=' | '&=' | '<<=' | '>>=' 
                        | '+=' | '-=' | '*=' | '/=' | '~/=' | '%='
 
-subscript            ::= '[' expression ']' | '.' name
+subscript            ::= '[' expression ']' | '.' NAME
 
 call                 ::= '(' ( expression ( ',' expression )* )? ')'
 
@@ -102,11 +102,11 @@ literal              ::= 'nil' | 'false' | 'true' | number | string
 
 array_constructor    ::= '[' ( expression ( ',' expression )* )? ']'
 
-struct_constructor   ::= '{' ( string | name ':' expression ( ',' string | name ':' expression )* )? '}'
+struct_constructor   ::= '{' ( string | NAME ':' expression ( ',' string | NAME ':' expression )* )? '}'
 
-anonymous_struct     ::= 'struct' '{' ( string | name ( ',' string | name )* )? '}'
+anonymous_struct     ::= 'struct' '{' ( string | NAME ( ',' string | NAME )* )? '}'
 
-anonymous_function   ::= '|' ( 'mut'? name ( ',' 'mut'? name )* )? '|' ( '=>' expression | block )
+anonymous_function   ::= '|' ( 'mut'? NAME ( ',' 'mut'? NAME )* )? '|' ( '=>' expression | block )
                        | '||' ( '=>' expression | block )
 
 if_expression        ::= ( 'if' | 'if!' ) '(' expression ')' expression 'else' expression
@@ -114,6 +114,6 @@ if_expression        ::= ( 'if' | 'if!' ) '(' expression ')' expression 'else' e
 match_expression     ::= 'match' '(' expression ')' '{' expression '=>' expression ( ',' expression '=>' expression )*
                          ',' '_' '=>' expression '}'
 
-subscript_call       ::= name ( subscript | call )* ( '{' ( expression ( ',' expression )* )? '}' )?
+subscript_call       ::= NAME ( subscript | call )* ( '{' ( expression ( ',' expression )* )? '}' )?
 
 group_expression     ::= '(' expression ')'
