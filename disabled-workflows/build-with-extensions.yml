@@ -82,6 +82,14 @@ jobs:
         cmake -B build -DCMAKE_BUILD_TYPE=Release
         cmake --build build
         sudo cmake --install build
+    - name: Installing dependency uWebSockets
+      run: |
+        brew install libuv zlib boost
+        git clone --recursive https://github.com/uNetworking/uWebSockets.git
+        cd uWebSockets
+        make
+       #WITH_OPENSSL=1 CFLAGS=-I/opt/homebrew/opt/openssl/include LDFLAGS=-L/opt/homebrew/opt/openssl/lib make
+        sudo make install
     - name: Configure CMake
       run: |
         cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXTENSIONS=1
@@ -116,6 +124,7 @@ jobs:
         vcpkg install zeromq:x64-windows
         vcpkg install leveldb:x64-windows
         vcpkg install pcre2:x64-windows
+        vcpkg install uwebsockets:x64-windows
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git

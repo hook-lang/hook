@@ -1,0 +1,21 @@
+//
+// uws.hk
+//
+
+import uws;
+
+let port = 3000;
+
+fn get_handler(app, req, res) {
+  uws.res_end(app, res, "Hello, World!");
+}
+
+let app = uws.new_http_app();
+
+uws.get(app, "/*", get_handler);
+
+uws.listen(app, port);
+
+println("uWebSockets HTTP App listening on port " + to_string(port));
+
+uws.run(app);
