@@ -31,7 +31,7 @@ fn win(board) {
     [0, 4, 8],
     [2, 4, 6]
   ];
-  for (mut i = 0; i < 8; i++) {
+  for (var i = 0; i < 8; i++) {
     if (board[wins[i][0]] != 0 && board[wins[i][0]] == board[wins[i][1]] &&
         board[wins[i][0]] == board[wins[i][2]])
       return board[wins[i][2]];
@@ -39,13 +39,13 @@ fn win(board) {
   return 0;
 }
 
-fn minimax(mut board, player) {
-  mut winner = win(board);
+fn minimax(board, player) {
+  var winner = win(board);
   if (winner != 0)
     return winner * player;
-  mut move = -1;
-  mut score = -2;
-  for (mut i = 0; i < 9; i++) {
+  var move = -1;
+  var score = -2;
+  for (var i = 0; i < 9; i++) {
     if (board[i] == 0) {
         board[i] = player;
         let this_score = - minimax(board, player * -1);
@@ -61,11 +61,11 @@ fn minimax(mut board, player) {
   return score;
 }
 
-fn cpu_move(mut board) {
+fn cpu_move(board) {
   println("Thinking...");
-  mut move = -1;
-  mut score = -2;
-  for (mut i = 0; i < 9; i++) {
+  var move = -1;
+  var score = -2;
+  for (var i = 0; i < 9; i++) {
     if (board[i] == 0) {
       board[i] = 1;
       let temp_score = - minimax(board, -1);
@@ -80,8 +80,8 @@ fn cpu_move(mut board) {
   return board;
 }
 
-fn player_move(mut board) {
-  mut move;
+fn player_move(board) {
+  var move;
   do {
     print("Input move ([0..8]): ");
     move = to_int(readln(stdin));
@@ -90,14 +90,14 @@ fn player_move(mut board) {
   return board;
 }
 
-mut board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+var board = [0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 println("CPU: O, You: X");
 println("Play (1)st or (2)nd? ");
 
 let player = to_int(readln(stdin));
 
-for (mut turn = 0; turn < 9 && win(board) == 0; turn++) {
+for (var turn = 0; turn < 9 && win(board) == 0; turn++) {
   if ((turn + player) % 2 == 0) {
     board = cpu_move(board);
     continue;

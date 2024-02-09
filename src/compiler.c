@@ -404,7 +404,7 @@ static void compile_statement(Compiler *comp)
     consume(comp, TOKEN_KIND_SEMICOLON);
     return;
   }
-  if (match(scan, TOKEN_KIND_MUT_KW))
+  if (match(scan, TOKEN_KIND_VAR_KW))
   {
     compile_variable_declaration(comp);
     consume(comp, TOKEN_KIND_SEMICOLON);
@@ -1057,29 +1057,17 @@ static void compile_function_declaration(Compiler *comp)
     hk_chunk_emit_opcode(childChunk, HK_OP_RETURN_NIL);
     goto end;
   }
-  bool isMutable = false;
-  if (match(scan, TOKEN_KIND_MUT_KW))
-  {
-    scanner_next_token(scan);
-    isMutable = true;
-  }
   if (!match(scan, TOKEN_KIND_NAME))
     syntax_error_unexpected(comp);
-  define_local(&childComp, &scan->token, isMutable);
+  define_local(&childComp, &scan->token, true);
   scanner_next_token(scan);
   int arity = 1;
   while (match(scan, TOKEN_KIND_COMMA))
   {
     scanner_next_token(scan);
-    bool isMutable = false;
-    if (match(scan, TOKEN_KIND_MUT_KW))
-    {
-      scanner_next_token(scan);
-      isMutable = true;
-    }
     if (!match(scan, TOKEN_KIND_NAME))
       syntax_error_unexpected(comp);
-    define_local(&childComp, &scan->token, isMutable);
+    define_local(&childComp, &scan->token, true);
     scanner_next_token(scan);
     ++arity;
   }
@@ -1130,29 +1118,17 @@ static void compile_anonymous_function(Compiler *comp)
     hk_chunk_emit_opcode(childChunk, HK_OP_RETURN_NIL);
     goto end;
   }
-  bool isMutable = false;
-  if (match(scan, TOKEN_KIND_MUT_KW))
-  {
-    scanner_next_token(scan);
-    isMutable = true;
-  }
   if (!match(scan, TOKEN_KIND_NAME))
     syntax_error_unexpected(comp);
-  define_local(&childComp, &scan->token, isMutable);
+  define_local(&childComp, &scan->token, true);
   scanner_next_token(scan);
   int arity = 1;
   while (match(scan, TOKEN_KIND_COMMA))
   {
     scanner_next_token(scan);
-    bool isMutable = false;
-    if (match(scan, TOKEN_KIND_MUT_KW))
-    {
-      scanner_next_token(scan);
-      isMutable = true;
-    }
     if (!match(scan, TOKEN_KIND_NAME))
       syntax_error_unexpected(comp);
-    define_local(&childComp, &scan->token, isMutable);
+    define_local(&childComp, &scan->token, true);
     scanner_next_token(scan);
     ++arity;
   }
@@ -1275,7 +1251,7 @@ static void compile_if_statement(Compiler *comp, bool not)
     compile_constant_declaration(comp);
     consume(comp, TOKEN_KIND_SEMICOLON);
   }
-  else if (match(scan, TOKEN_KIND_MUT_KW))
+  else if (match(scan, TOKEN_KIND_VAR_KW))
   {
     compile_variable_declaration(comp);
     consume(comp, TOKEN_KIND_SEMICOLON);
@@ -1308,7 +1284,7 @@ static void compile_match_statement(Compiler *comp)
     compile_constant_declaration(comp);
     consume(comp, TOKEN_KIND_SEMICOLON);
   }
-  else if (match(scan, TOKEN_KIND_MUT_KW))
+  else if (match(scan, TOKEN_KIND_VAR_KW))
   {
     compile_variable_declaration(comp);
     consume(comp, TOKEN_KIND_SEMICOLON);
@@ -1433,7 +1409,7 @@ static void compile_for_statement(Compiler *comp)
       compile_constant_declaration(comp);
       consume(comp, TOKEN_KIND_SEMICOLON);
     }
-    else if (match(scan, TOKEN_KIND_MUT_KW))
+    else if (match(scan, TOKEN_KIND_VAR_KW))
     {
       compile_variable_declaration(comp);
       consume(comp, TOKEN_KIND_SEMICOLON);

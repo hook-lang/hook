@@ -7,9 +7,9 @@ import { time } from os;
 
 srand(time());
 
-fn shuffle(mut arr) {
+fn shuffle(arr) {
   let n = len(arr);
-  for (mut i = n - 1; i >= 0; i--) {
+  for (var i = n - 1; i >= 0; i--) {
     let j = to_int(rand() * (i - 1));
     let tmp = arr[i];
     arr[i] = arr[j]; 

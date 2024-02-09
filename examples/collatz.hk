@@ -2,8 +2,8 @@
 // collatz.hk
 //
 
-fn collatz(mut n) {
-  mut count = 0;
+fn collatz(n) {
+  var count = 0;
   while (n != 1) {
     count++;
     if (n % 2 == 0)

@@ -649,7 +649,7 @@ fn valid(it: iterator) -> bool;
 Example:
 
 ```rust
-mut it = iter(1..3);
+var it = iter(1..3);
 println(valid(it)); // true
 it = next(it);
 println(valid(it)); // true
@@ -670,7 +670,7 @@ fn current(it: iterator) -> any;
 Example:
 
 ```rust
-mut it = iter(1..3);
+var it = iter(1..3);
 println(current(it)); // 1
 it = next(it);
 println(current(it)); // 2
@@ -691,7 +691,7 @@ fn next(it: iterator) -> iterator;
 Example:
 
 ```rust
-mut it = iter(1..3);
+var it = iter(1..3);
 println(current(it)); // 1
 it = next(it);
 println(current(it)); // 2

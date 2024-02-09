@@ -3,14 +3,14 @@
 //
 
 fn knapsack(weight_cap, weights, values) {
-  mut high = 0;
+  var high = 0;
   let n = len(weights);
-  for (mut i = 0; i < n; i++) {
-    mut cap = weights[i];
-    mut value = values[i];
+  for (var i = 0; i < n; i++) {
+    var cap = weights[i];
+    var value = values[i];
     let new_cap = weights[i];
     let new_value = values[i];
-    for (mut j = i + 1; j < n; j++) {
+    for (var j = i + 1; j < n; j++) {
       if (cap < weight_cap && cap + weights[j] <= weight_cap) {
         cap += weights[j];
         value += values[j];

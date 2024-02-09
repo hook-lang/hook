@@ -2,7 +2,7 @@
 // 99bottles.hk
 //
 
-mut n = 99;
+var n = 99;
 
 while (n > 1) {
   println(to_string(n) + " bottles of beer on the wall,");

@@ -15,7 +15,7 @@ let secret_number = to_int(1 + rand() * 99);
 loop {
   println("Please input your guess.");
 
-  mut guess = readln(stdin);
+  var guess = readln(stdin);
 
   guess = trim(guess);
 

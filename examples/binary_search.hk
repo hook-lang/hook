@@ -3,8 +3,8 @@
 //
 
 fn binary_search(arr, key) {
-  mut low = 0;
-  mut high = len(arr) - 1;
+  var low = 0;
+  var high = len(arr) - 1;
   while (low <= high) {
     let middle = to_int((low + high) / 2);
     let cmp = compare(key, arr[middle]);

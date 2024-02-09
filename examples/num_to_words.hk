@@ -11,7 +11,7 @@ let teen_places = ["tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "
 let tens_places = ["", "tenth", "twentieth", "thirtieth", "fortieth", "fifthieth", "sixthieth", "seventieth", "eightieth", "ninetieth"];
 
 fn num_to_array(num) {
-	mut arr = [];
+	var arr = [];
 	arr[] = to_int(num / 100000000 % 10);
 	arr[] = to_int(num / 10000000 % 10);
 	arr[] = to_int(num / 1000000 % 10);
@@ -35,7 +35,7 @@ fn has_trailing_zeros(arr) {
 
 fn num_to_words(num) {
 	let arr = num_to_array(num);
-	mut word = "";
+	var word = "";
 	if (num == 0)
 		word = "zero";
 	if (num >= 1 && num <= 9)
@@ -67,7 +67,7 @@ fn num_to_words(num) {
 
 fn num_to_place(num) {
 	let arr = num_to_array(num);
-	mut place = "";
+	var place = "";
 	if (num == 0)
 		place = "zeroth";
 	if (num >= 1 && num <= 9)

@@ -9,9 +9,9 @@ import { round } from math;
 srand(time());
 
 fn coin_flip(times) {
-  mut heads = 0;
-  mut tails = 0;
-  for (mut i = 0; i < times; i++) {
+  var heads = 0;
+  var tails = 0;
+  for (var i = 0; i < times; i++) {
     let n = round(rand() * 1);
     if (n == 0)
       heads++;

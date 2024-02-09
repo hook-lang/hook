@@ -5,8 +5,8 @@
 import { new_array } from arrays;
 
 fn sieve_of_eratosthenes(n) {
-  mut prime = new_array(n + 1);
-  mut i;
+  var prime = new_array(n + 1);
+  var i;
   i = 0;
   while (i < n + 1) {
     prime[] = true;
@@ -15,7 +15,7 @@ fn sieve_of_eratosthenes(n) {
   i = 2;
   while (i * i <= n) {
     if (prime[i]) {
-      mut j = i * 2;
+      var j = i * 2;
       while (j <= n) {
         prime[j] = false;
         j += i;

@@ -2,12 +2,12 @@
 // 100doors.hk
 //
 
-mut square = 1;
-mut increment = 3;
+var square = 1;
+var increment = 3;
 
 println("The open doors are: ");
 
-for (mut door = 1; door <= 100; door++)
+for (var door = 1; door <= 100; door++)
 {
   if (door != square)
     continue;

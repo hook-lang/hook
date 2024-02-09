@@ -84,8 +84,8 @@ typedef enum
 #define hk_decr_ref(o)       --(o)->refCount
 #define hk_is_unreachable(o) (!(o)->refCount)
 
-#define hk_value_incr_ref(v)  if (hk_is_object(v)) hk_incr_ref(hk_as_object(v))
-#define hk_value_decr_ref(v)  if (hk_is_object(v)) hk_decr_ref(hk_as_object(v))
+#define hk_value_incr_ref(v) if (hk_is_object(v)) hk_incr_ref(hk_as_object(v))
+#define hk_value_decr_ref(v) if (hk_is_object(v)) hk_decr_ref(hk_as_object(v))
 
 typedef struct
 {

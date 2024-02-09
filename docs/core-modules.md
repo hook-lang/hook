@@ -1957,7 +1957,7 @@ fn len(list: userdata) -> number;
 Example:
 
 ```rust
-mut list = lists.new_linked_list();
+var list = lists.new_linked_list();
 list = lists.push_back(list, 1);
 list = lists.push_back(list, 2);
 list = lists.push_back(list, 3);
@@ -1990,7 +1990,7 @@ fn push_front(list: userdata, value: any) -> userdata;
 Example:
 
 ```rust
-mut list = lists.new_linked_list();
+var list = lists.new_linked_list();
 list = lists.push_front(list, 1);
 list = lists.push_front(list, 2);
 println(lists.front(list)); // 2
@@ -2009,7 +2009,7 @@ fn push_back(list: userdata, value: any) -> userdata;
 Example:
 
 ```rust
-mut list = lists.new_linked_list();
+var list = lists.new_linked_list();
 list = lists.push_back(list, 1);
 list = lists.push_back(list, 2);
 println(lists.front(list)); // 1
@@ -2027,7 +2027,7 @@ fn pop_front(list: userdata) -> userdata;
 Example:
 
 ```rust
-mut list1 = lists.new_linked_list();
+var list1 = lists.new_linked_list();
 list1 = lists.push_back(list1, 1);
 list1 = lists.push_back(list1, 2);
 let list2 = lists.pop_front(list1);
@@ -2045,7 +2045,7 @@ fn pop_back(list: userdata) -> userdata;
 Example:
 
 ```rust
-mut list1 = lists.new_linked_list();
+var list1 = lists.new_linked_list();
 list1 = lists.push_back(list1, 1);
 list1 = lists.push_back(list1, 2);
 let list2 = lists.pop_back(list1);
@@ -2063,7 +2063,7 @@ fn front(list: userdata) -> any;
 Example:
 
 ```rust
-mut list = lists.new_linked_list();
+var list = lists.new_linked_list();
 list = lists.push_back(list, 1);
 list = lists.push_back(list, 2);
 println(lists.front(list)); // 1
@@ -2080,7 +2080,7 @@ fn back(list: userdata) -> any;
 Example:
 
 ```rust
-mut list = lists.new_linked_list();
+var list = lists.new_linked_list();
 list = lists.push_back(list, 1);
 list = lists.push_back(list, 2);
 println(lists.back(list)); // 2

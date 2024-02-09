@@ -4,9 +4,9 @@
 
 fn pi() {
   let n = 1000000;
-  mut d = 1;
-  mut sum = 0;
-  for (mut i = 0; i < n; i++) {
+  var d = 1;
+  var sum = 0;
+  for (var i = 0; i < n; i++) {
     if (i % 2 == 0)
       sum += 4 / d;
     else

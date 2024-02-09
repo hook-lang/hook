@@ -37,7 +37,7 @@ match (let { lvl, msg } = error("error message"); lvl) {
   _ => println("unknown log level");
 }
 
-mut result;
+var result;
 match (result = info("info message"); result.lvl) {
   "info" => println(result.msg);
   "warn" => println(result.msg);

@@ -23,7 +23,7 @@ if (let [ok, err] = bar(); err) {
   println(ok);
 }
 
-if (mut { ok, err } = baz(); err) {
+if (var { ok, err } = baz(); err) {
   println(err);
 } else {
   println(ok);

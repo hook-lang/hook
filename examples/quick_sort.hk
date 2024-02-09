@@ -2,14 +2,14 @@
 // quick_sort.hk
 //
 
-fn sort(mut arr) {
+fn sort(arr) {
   let n = len(arr);
   if (n <= 1)
     return arr;
   let pivot = arr[0];
-  mut left = []; 
-  mut right = [];
-  for (mut i = 1; i < n; i++) {
+  var left = []; 
+  var right = [];
+  for (var i = 1; i < n; i++) {
     if (arr[i] < pivot)
       left[] = arr[i];
     else

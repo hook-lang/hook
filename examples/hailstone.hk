@@ -2,8 +2,8 @@
 // hailstone.hk
 //
 
-fn hailstone(mut n) {
-  mut seq = [n];
+fn hailstone(n) {
+  var seq = [n];
   while (n != 1) {
     if (n % 2 == 0)
       n /= 2;

@@ -1,18 +1,18 @@
 
 let a = 1;
 let [b, c] = [2, 3];
-mut d;
-mut e = 4;
+var d;
+var e = 4;
 let [f, g] = ["foo", "bar"];
-mut [h] = ["baz"];
-mut [i, j] = ["qux", "quux"];
+var [h] = ["baz"];
+var [i, j] = ["qux", "quux"];
 
 let {k, l} = {k: "foo", l: "bar"};
-mut {m} = {m: "baz"};
-mut {n, o, p} = {n: "qux", p: "quux"};
+var {m} = {m: "baz"};
+var {n, o, p} = {n: "qux", p: "quux"};
 
 let [_, q, _] = [1, 2, 3];
-mut [r, _, s] = [4, 5, 6];
+var [r, _, s] = [4, 5, 6];
 
 println(a);
 println(b);

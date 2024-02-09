@@ -586,11 +586,6 @@ void scanner_next_token(Scanner *scan)
     scan->token.kind = TOKEN_KIND_MATCH_KW;
     return;
   }
-  if (match_keyword(scan, "mut"))
-  {
-    scan->token.kind = TOKEN_KIND_MUT_KW;
-    return;
-  }
   if (match_keyword(scan, "nil"))
   {
     scan->token.kind = TOKEN_KIND_NIL_KW;
@@ -611,6 +606,12 @@ void scanner_next_token(Scanner *scan)
     scan->token.kind = TOKEN_KIND_TRUE_KW;
     return;
   }
+  if (match_keyword(scan, "var"))
+  {
+    scan->token.kind = TOKEN_KIND_VAR_KW;
+    return;
+  }
+
   if (match_keyword(scan, "while!"))
   {
     scan->token.kind = TOKEN_KIND_WHILEBANG_KW;

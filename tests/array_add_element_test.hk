@@ -1,16 +1,16 @@
 
-mut arr1 = [];
+var arr1 = [];
 arr1[] = "foo";
 println(arr1);
 
-mut arr2 = [[]];
+var arr2 = [[]];
 arr2[0][] = "foo";
 println(arr2);
 
-mut arr3 = [[[]]];
+var arr3 = [[[]]];
 arr3[0][0][] = "foo";
 println(arr3);
 
-mut arr4 = [[1, 2, 3]];
+var arr4 = [[1, 2, 3]];
 arr4[0][] = 4;
 println(arr4);

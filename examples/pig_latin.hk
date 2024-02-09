@@ -7,11 +7,11 @@ import { lower } from strings;
 let vowels = ['a', 'e', 'i', 'o', 'u'];
 let num_vowels = len(vowels);
 
-fn pig_latin(mut word) {
+fn pig_latin(word) {
   word = lower(word);
   let first = word[0];
 
-  for (mut i = 0; i < num_vowels; i++) {
+  for (var i = 0; i < num_vowels; i++) {
     if (first != vowels[i])
       continue;
     return word + "way";

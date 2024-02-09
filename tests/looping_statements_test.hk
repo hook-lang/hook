@@ -1,5 +1,5 @@
 
-mut i;
+var i;
 
 i = 0;
 loop {

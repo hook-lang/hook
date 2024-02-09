@@ -23,13 +23,13 @@ if (let [ok, err] = bar(); err) {
   println(ok);
 }
 
-if (mut { ok, err } = baz(); err) {
+if (var { ok, err } = baz(); err) {
   println(err);
 } else {
   println(ok);
 }
 
-mut result;
+var result;
 if (result = baz(); result.err) {
   println(result.err);
 }

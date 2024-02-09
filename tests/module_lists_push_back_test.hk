@@ -1,6 +1,6 @@
 
 import lists;
-mut list = lists.new_linked_list();
+var list = lists.new_linked_list();
 list = lists.push_back(list, 1);
 list = lists.push_back(list, 2);
 println(lists.back(list));

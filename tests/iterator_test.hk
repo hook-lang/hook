@@ -1,6 +1,6 @@
 
-mut it1;
-mut it2;
+var it1;
+var it2;
 
 let range = 1 .. 3;
 it1 = iter(range);

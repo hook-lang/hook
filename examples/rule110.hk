@@ -3,8 +3,8 @@
 //
 
 let size = 100;
-mut prev = [];
-mut i;
+var prev = [];
+var i;
 
 i = 0;
 while (i < size - 1) {
@@ -43,15 +43,15 @@ fn calc(p, i) {
 
 i = 0;
 while (i < size) {
-  mut line = [false];
-  mut j;
+  var line = [false];
+  var j;
   j  = 1;
   while (j < size - 1) {
     line[] = calc(prev, j);
     j++;
   }
   line[] = false;
-  mut output = "";
+  var output = "";
   j = 0;
   while (j < size) {
     output += if (line[j]) "*" else " ";
