@@ -16,6 +16,7 @@ typedef struct
   bool optHelp;
   bool optVersion;
   bool optEval;
+  bool optAnalyze;
   bool optDump;
   bool optCompile;
   bool optRun;
@@ -58,6 +59,7 @@ static inline void parse_args(ParsedArgs *parsedArgs, int argc, const char **arg
   parsedArgs->optHelp = false;
   parsedArgs->optVersion = false;
   parsedArgs->optEval = false;
+  parsedArgs->optAnalyze = false;
   parsedArgs->optDump = false;
   parsedArgs->optCompile = false;
   parsedArgs->optRun = false;
@@ -98,6 +100,11 @@ static inline void parse_option(ParsedArgs *parsedArgs, const char *arg)
   if (option(arg, "-e") || option(arg, "--eval"))
   {
     parsedArgs->optEval = true;
+    return;
+  }
+  if (option(arg, "-a") || option(arg, "--analyze"))
+  {
+    parsedArgs->optAnalyze = true;
     return;
   }
   if (option(arg, "-d") || option(arg, "--dump"))
@@ -157,6 +164,7 @@ static inline void print_help(const char *cmd)
     "  -h, --help     prints this message\n"
     "  -v, --version  shows version information\n"
     "  -e, --eval     evaluates a string from the terminal\n"
+    "  -a, --analyze  analyzes source code\n"
     "  -d, --dump     shows the bytecode\n"
     "  -c, --compile  compiles source code\n"
     "  -r, --run      runs directly from bytecode\n"
@@ -269,7 +277,7 @@ int main(int argc, const char **argv)
       fatal_error("no input string");
     HkString *file = hk_string_from_chars(-1, "<terminal>");
     HkString *source = hk_string_from_chars(-1, input);
-    HkClosure *cl = hk_compile(file, source);
+    HkClosure *cl = hk_compile(file, source, HK_COMPILER_FLAG_NONE);
     return run_bytecode(cl, &parsedArgs);
   }
   if (parsedArgs.optRun)
@@ -286,7 +294,8 @@ int main(int argc, const char **argv)
   }
   HkString *file = hk_string_from_chars(-1, input ? input : "<stdin>");
   HkString *source = input ? load_source_from_file(input) : hk_string_from_stream(stdin, '\0');
-  HkClosure *cl = hk_compile(file, source);
+  int flags = parsedArgs.optAnalyze ? HK_COMPILER_FLAG_ANALYZE : HK_COMPILER_FLAG_NONE;
+  HkClosure *cl = hk_compile(file, source, flags);
   const char *output = parsedArgs.output;
   if (parsedArgs.optDump)
   {
@@ -303,6 +312,11 @@ int main(int argc, const char **argv)
   if (parsedArgs.optCompile)
   {
     save_bytecode_to_file(cl, output);
+    hk_closure_free(cl);
+    return EXIT_SUCCESS;
+  }
+  if (parsedArgs.optAnalyze)
+  {
     hk_closure_free(cl);
     return EXIT_SUCCESS;
   }

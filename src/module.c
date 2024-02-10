@@ -224,7 +224,7 @@ static inline void load_source_module(HkState *state, HkString *file, HkString *
   if (!source)
     hk_state_runtime_error(state, "cannot open module `%.*s`",
       name->length, name->chars);
-  HkClosure *cl = hk_compile(file, source);
+  HkClosure *cl = hk_compile(file, source, HK_COMPILER_FLAG_NONE);
   hk_state_push_closure(state, cl);
   hk_state_push_array(state, hk_array_new());
   hk_state_call(state, 1);

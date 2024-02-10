@@ -8,6 +8,9 @@
 
 #include "callable.h"
 
-HkClosure *hk_compile(HkString *file, HkString *source);
+#define HK_COMPILER_FLAG_NONE    0x00
+#define HK_COMPILER_FLAG_ANALYZE 0x01
+
+HkClosure *hk_compile(HkString *file, HkString *source, int flags);
 
 #endif // HK_COMPILER_H
