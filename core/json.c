@@ -34,6 +34,7 @@ static inline cJSON *value_to_json(HkValue val)
   case HK_TYPE_ITERATOR:
   case HK_TYPE_CALLABLE:
   case HK_TYPE_USERDATA:
+  case HK_TYPE_REFERENCE:
     json = cJSON_CreateNull();
     break;
   case HK_TYPE_ARRAY:

@@ -51,6 +51,7 @@ typedef struct
   int length;
   char *start;
   bool isMutable;
+  bool byRef;
 } Variable;
 
 typedef struct Loop

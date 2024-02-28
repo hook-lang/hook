@@ -46,6 +46,8 @@ static inline void do_fetch_field(HkState *state, HkString *name);
 static inline void do_set_field(HkState *state);
 static inline void do_put_field(HkState *state, HkString *name);
 static inline void do_inplace_put_field(HkState *state, HkString *name);
+static inline void do_element_ref(HkState *state);
+static inline void do_field_ref(HkState *state, HkString *name);
 static inline void do_current(HkState *state);
 static inline void do_next(HkState *state);
 static inline void do_equal(HkState *state);
@@ -814,6 +816,19 @@ static inline void do_inplace_put_field(HkState *state, HkString *name)
   --state->stackTop;
   hk_instance_release(inst);
   hk_value_decr_ref(val2);
+}
+
+static inline void do_element_ref(HkState *state)
+{
+  // TODO: Implement this function.
+  (void) state;
+}
+
+static inline void do_field_ref(HkState *state, HkString *name)
+{
+  // TODO: Implement this function.
+  (void) state;
+  (void) name;
 }
 
 static inline void do_current(HkState *state)
@@ -1588,6 +1603,47 @@ static inline void call_function(HkState *state, HkValue *locals, HkClosure *cl,
       if (!hk_state_is_ok(state))
         goto end;
       break;
+    case HK_OP_LOCAL_REF:
+      {
+        int index = read_byte(&pc);
+        HkValue *ref = &locals[index];
+        HkValue val = hk_reference_value(ref);
+        push(state, val);
+        if (!hk_state_is_ok(state))
+          goto end;
+      }
+      break;
+    case HK_OP_ELEMENT_REF:
+      do_element_ref(state);
+      if (!hk_state_is_ok(state))
+        goto end;
+      break;
+    case HK_OP_FIELD_REF:
+      do_field_ref(state, hk_as_string(consts[read_byte(&pc)]));
+      if (!hk_state_is_ok(state))
+        goto end;
+      break;
+    case HK_OP_GET_BY_REF:
+      {
+        int index = read_byte(&pc);
+        HkValue *ref = hk_as_reference(locals[index]);
+        HkValue val = *ref;
+        push(state, val);
+        if (!hk_state_is_ok(state))
+          goto end;
+        hk_value_incr_ref(val);
+      }
+      break;
+    case HK_OP_SET_BY_REF:
+      {
+        int index = read_byte(&pc);
+        HkValue *ref = hk_as_reference(locals[index]);
+        HkValue val = slots[state->stackTop];
+        --state->stackTop;
+        hk_value_release(*ref);
+        *ref = val;
+      }
+      break;
     case HK_OP_CURRENT:
       do_current(state);
       break;
@@ -1919,6 +1975,11 @@ void hk_state_check_argument_callable(HkState *state, HkValue *args, int index)
 void hk_state_check_argument_userdata(HkState *state, HkValue *args, int index)
 {
   hk_state_check_argument_type(state, args, index, HK_TYPE_USERDATA);
+}
+
+void hk_state_check_argument_reference(HkState *state, HkValue *args, int index)
+{
+  hk_state_check_argument_type(state, args, index, HK_TYPE_REFERENCE);
 }
 
 void hk_state_push(HkState *state, HkValue val)

@@ -153,6 +153,21 @@ void hk_dump(HkFunction *fn, FILE *stream)
     case HK_OP_INPLACE_PUT_FIELD:
       fprintf(stream, "InplacePutField       %5d\n", code[i++]);
       break;
+    case HK_OP_LOCAL_REF:
+      fprintf(stream, "LocalRef              %5d\n", code[i++]);
+      break;
+    case HK_OP_ELEMENT_REF:
+      fprintf(stream, "ElementRef\n");
+      break;
+    case HK_OP_FIELD_REF:
+      fprintf(stream, "FieldRef              %5d\n", code[i++]);
+      break;
+    case HK_OP_GET_BY_REF:
+      fprintf(stream, "GetByRef              %5d\n", code[i++]);
+      break;
+    case HK_OP_SET_BY_REF:
+      fprintf(stream, "SetByRef              %5d\n", code[i++]);
+      break;
     case HK_OP_CURRENT:
       fprintf(stream, "Current\n");
       break;

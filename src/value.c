@@ -21,6 +21,7 @@ void hk_value_free(HkValue val)
   case HK_TYPE_NIL:
   case HK_TYPE_BOOL:
   case HK_TYPE_NUMBER:
+  case HK_TYPE_REFERENCE:
     break;
   case HK_TYPE_STRING:
     hk_string_free(hk_as_string(val));
@@ -93,6 +94,9 @@ const char *hk_type_name(HkType type)
   case HK_TYPE_USERDATA:
     name = "userdata";
     break;
+  case HK_TYPE_REFERENCE:
+    name = "reference";
+    break;
   }
   return name;
 }
@@ -159,6 +163,9 @@ void hk_value_print(HkValue val, bool quoted)
     break;
   case HK_TYPE_USERDATA:
     printf("<userdata at %p>", val.as.pointer);
+    break;
+  case HK_TYPE_REFERENCE:
+    printf("<reference at %p>", val.as.pointer);
     break;
   }
 }

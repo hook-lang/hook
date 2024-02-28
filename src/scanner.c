@@ -571,6 +571,11 @@ void scanner_next_token(Scanner *scan)
     scan->token.kind = TOKEN_KIND_IN_KW;
     return;
   }
+  if (match_keyword(scan, "inout"))
+  {
+    scan->token.kind = TOKEN_KIND_INOUT_KW;
+    return;
+  }
   if (match_keyword(scan, "let"))
   {
     scan->token.kind = TOKEN_KIND_LET_KW;

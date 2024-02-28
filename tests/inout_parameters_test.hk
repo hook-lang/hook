@@ -1,0 +1,10 @@
+
+fn append(inout arr, elem) {
+  arr[] = elem;
+}
+
+var list = [1, 2];
+
+append(list, 3);
+
+println(list);

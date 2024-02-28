@@ -60,6 +60,7 @@ void hk_state_check_argument_instance(HkState *state, HkValue *args, int index);
 void hk_state_check_argument_iterator(HkState *state, HkValue *args, int index);
 void hk_state_check_argument_callable(HkState *state, HkValue *args, int index);
 void hk_state_check_argument_userdata(HkState *state, HkValue *args, int index);
+void hk_state_check_argument_reference(HkState *state, HkValue *args, int index);
 void hk_state_push(HkState *state, HkValue val);
 void hk_state_push_nil(HkState *state);
 void hk_state_push_bool(HkState *state, bool data);

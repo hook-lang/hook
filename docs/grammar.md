@@ -69,34 +69,39 @@ Keywords are reserved words that have a special meaning and cannot be used as na
       <td><code>continue</code></td>
       <td><code>del</code></td>
       <td><code>do</code></td>
+      <td><code>else</code></td>
     </tr>
     <tr>
-      <td><code>else</code></td>
       <td><code>false</code></td>
       <td><code>fn</code></td>
       <td><code>for</code></td>
       <td><code>foreach</code></td>
-    </tr>
-    <tr>
       <td><code>from</code></td>
       <td><code>if</code></td>
+    </tr>
+    <tr>
       <td><code>if!</code></td>
       <td><code>import</code></td>
       <td><code>in</code></td>
-    </tr>
-    <tr>
+      <td><code>inout</code></td>
       <td><code>let</code></td>
       <td><code>loop</code></td>
+    </tr>
+    <tr>
       <td><code>match</code></td>
       <td><code>nil</code></td>
       <td><code>return</code></td>
-    </tr>
-    <tr>
       <td><code>struct</code></td>
       <td><code>true</code></td>
       <td><code>var</code></td>
+    </tr>
+    <tr>
       <td><code>while</code></td>
       <td><code>while!</code></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
     </tr>
   </tbody>
 </table>
@@ -214,7 +219,9 @@ assign_call          ::= NAME subsc* assign_op expr
 
 struct_decl          ::= 'struct' NAME '{' ( string | NAME ( ',' string | NAME )* )? '}'
 
-fn_decl              ::= 'fn' NAME '(' ( NAME ( ',' NAME )* )? ')' ( '=>' expr ";" | block )
+fn_decl              ::= 'fn' NAME '(' params? ')' ( '=>' expr ";" | block )
+
+params               ::= ( 'inout'? NAME ( ',' 'inout'? NAME )* )
 
 del_stmt             ::= 'del' NAME subsc* '[' expr ']' ';'
 
@@ -268,7 +275,9 @@ add_expr             ::= mul_expr ( ( '+' | '-' ) mul_expr )*
 
 mul_expr             ::= unary_expr ( ( '*' | '/' | '~/' | '%' ) unary_expr )*
 
-unary_expr           ::= ( '-' | '!' | '~' ) unary_expr | primary_expr
+unary_expr           ::= ( '-' | '!' | '~' ) unary_expr | call_expr
+
+call_expr            ::= primary_expr ( subsc | call )*
 
 primary_expr         ::= literal
                        | array_constructor
@@ -285,10 +294,11 @@ literal              ::= 'nil' | 'false' | 'true' | number | string
 array_constructor    ::= '[' ( expr ( ',' expr )* )? ']'
 
 struct_constructor   ::= '{' ( string | NAME ':' expr ( ',' string | NAME ':' expr )* )? '}'
+                       | NAME '{' ( expr ( ',' expr )* )? '}'
 
 anonymous_struct     ::= 'struct' '{' ( string | NAME ( ',' string | NAME )* )? '}'
 
-anonymous_fn         ::= '|' ( NAME ( ',' NAME )* )? '|' ( '=>' expr | block )
+anonymous_fn         ::= '|' params? '|' ( '=>' expr | block )
                        | '||' ( '=>' expr | block )
 
 if_expr              ::= ( 'if' | 'if!' ) '(' expr ')' expr 'else' expr
@@ -296,7 +306,7 @@ if_expr              ::= ( 'if' | 'if!' ) '(' expr ')' expr 'else' expr
 match_expr           ::= 'match' '(' expr ')' '{' expr '=>' expr ( ',' expr '=>' expr )*
                          ',' '_' '=>' expr '}'
 
-subsc_call           ::= NAME ( subsc | call )* ( '{' ( expr ( ',' expr )* )? '}' )?
+subsc_call           ::= '&'? NAME ( subsc | call )*
 
 group_expr           ::= '(' expr ')'
 ```
