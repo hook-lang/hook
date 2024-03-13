@@ -1,0 +1,246 @@
+//
+// ecdsa.hk
+//
+
+import bigint;
+import crypto;
+import hashing;
+
+// Structs
+
+struct Point {
+  x, y
+}
+
+struct Curve {
+  keySize,
+  A, B, P, N, G
+}
+
+// Functions
+
+fn new_point(x, y) {
+  return Point {
+    bigint.from_string(x, 16),
+    bigint.from_string(y, 16)
+  };
+}
+
+fn new_point_at_infinity() {
+  return Point { nil, nil };
+}
+
+fn is_at_infinity(p) {
+  return p.x == nil && p.y == nil;
+}
+
+fn new_secp256k1_curve() {
+  let G = new_point(
+    "79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798",
+    "483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8"
+  );
+  return Curve {
+    32,
+    bigint.new(0),
+    bigint.new(7),
+    bigint.from_string(
+      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F",
+    16),
+    bigint.from_string(
+      "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141",
+    16),
+    G 
+  };
+}
+
+fn scalar_is_valid(c, scalar) {
+  return bigint.compare(scalar, 0) > 0 && bigint.compare(scalar, c.N) < 0;
+}
+
+fn random_scalar(c) {
+  let size = c.keySize;
+  var bytes = crypto.random_bytes(size);
+  var scalar = bigint.from_bytes(bytes);
+  while (!scalar_is_valid(c, scalar))
+  {
+    bytes = crypto.random_bytes(size);
+    scalar = bigint.from_bytes(bytes);
+  }
+  return scalar;
+}
+
+fn is_on_curve(c, p) {
+  // p.y ^ 2 mod c.P = p.x ^ 3 + c.A * p.x + c.B mod c.P
+  let t0 = bigint.mod(bigint.pow(p.y, 2), c.P);
+  let t1 = bigint.pow(p.x, 3);
+  let t2 = bigint.mul(c.A, p.x);
+  let t3 = bigint.add(t1, bigint.add(t2, c.B));
+  let t4 = bigint.mod(t3, c.P);
+  return bigint.compare(t0, t4) == 0;
+}
+
+fn compute_y(c, x) {
+  // y0 = sqrtm_prime(x ^ 3 + c.A * x + c.B, c.P)
+  // y1 = -y0 mod c.P
+  let t0 = bigint.pow(x, 3);
+  let t1 = bigint.mul(c.A, x);
+  let t2 = bigint.add(t0, bigint.add(t1, c.B));
+  let t3 = bigint.sqrtm_prime(t2, c.P);
+  let t4 = bigint.mod(bigint.neg(t3), c.P);
+  return [t3, t4];
+}
+
+fn add_points(c, p, q) {
+  if (is_at_infinity(p)) {
+    return q;
+  }
+  if (is_at_infinity(q)) {
+    return p;
+  }
+  // lambda = mod((q.y − p.y) * invertm(q.x − p.x, c.P), c.P)
+  var t0 = bigint.sub(q.y, p.y);
+  var t1 = bigint.sub(q.x, p.x);
+  let t2 = bigint.invertm(t1, c.P);
+  assert(t2, "invertm() failed");
+  let t3 = bigint.mul(t0, t2);
+  let lambda = bigint.mod(t3, c.P);
+  // x = mod(lambda ^ 2 − p.x − q.x, c.P)
+  t0 = bigint.sub(bigint.pow(lambda, 2), p.x);
+  let x = bigint.mod(bigint.sub(t0, q.x), c.P);
+  // y = mod(lambda * (p.x − x) − p.y, c.P)
+  t0 = bigint.sub(p.x, x);
+  t1 = bigint.mul(lambda, t0);
+  let y = bigint.mod(bigint.sub(t1, p.y), c.P);
+  return Point { x, y };
+}
+
+fn double_point(c, p) {
+  if (is_at_infinity(p) || bigint.compare(p.y, 0) == 0) {
+    return new_point_at_infinity();
+  }
+  // lambda = mod((3 * p.x ^ 2 + c.A) * invertm(2 * p.y, c.P), c.P)
+  var t0 = bigint.mul(bigint.pow(p.x, 2), 3);
+  var t1 = bigint.add(t0, c.A);
+  let t2 = bigint.mul(p.y, 2);
+  let t3 = bigint.invertm(t2, c.P);
+  assert(t3, "invertm() failed");
+  let lambda = bigint.mod(bigint.mul(t1, t3), c.P);
+  // x = mod(lambda ^ 2 − 2 * p.x, c.P)
+  t0 = bigint.pow(lambda, 2);
+  t1 = bigint.mul(p.x, 2);
+  let x = bigint.mod(bigint.sub(t0, t1), c.P);
+  // y = mod(lambda * (p.x − x) − p.y), c.P)
+  t0 = bigint.sub(p.x, x);
+  t1 = bigint.mul(lambda, t0);
+  let y = bigint.mod(bigint.sub(t1, p.y), c.P);
+  return Point { x, y };
+}
+
+fn multiply_point_by_scalar(c, p, scalar)
+{
+  var q = new_point_at_infinity();
+  let n = bigint.size(scalar, 2);
+  for (var i = n - 1; i >= 0; i--)
+  {
+    q = double_point(c, q);
+    if (bigint.testbit(scalar, i) == 1) {
+      q = add_points(c, q, p);
+    }
+  }
+  return q;
+}
+
+fn multiply_base_point_by_scalar(c, scalar) {
+  return multiply_point_by_scalar(c, c.G, scalar);
+}
+
+fn sign(c, digest, privKey) {
+  if (!scalar_is_valid(c, privKey)) {
+    return false;
+  }
+  loop {
+    let k = random_scalar(c);
+    let p = multiply_base_point_by_scalar(c, k);
+    // r = mod(p.x, c.N)
+    let r = bigint.mod(p.x, c.N);
+    if (bigint.compare(r, 0) == 0) {
+      continue;
+    }
+    // s = mod(invertm(k, c.N) * (digest + r * privKey), c.N)
+    let t0 = bigint.mul(r, privKey);
+    let t1 = bigint.add(digest, t0);
+    let t2 = bigint.invertm(k, c.N);
+    assert(t2, "invertm() failed");
+    let s = bigint.mod(bigint.mul(t2, t1), c.N);
+    if (bigint.compare(s, 0) == 0) {
+      continue;
+    }
+    return [r, s];
+  }
+}
+
+fn verify_signature(c, digest, pubKey, r, s) {
+  if (!scalar_is_valid(c, r) || !scalar_is_valid(c, s)) {
+    return false;
+  }
+  // w = invertm(s, c.N)
+  let w = bigint.invertm(s, c.N);
+  assert(w, "invertm() failed");
+  // u1 = mod(digest * w, c.N)
+  let u1 = bigint.mod(bigint.mul(digest, w), c.N);
+  // u2 = mod(r * w, c.N)
+  let u2 = bigint.mod(bigint.mul(r, w), c.N);
+  // p = u1 * G + u2 * pubKey
+  let p = add_points(c,
+    multiply_base_point_by_scalar(c, u1),
+    multiply_point_by_scalar(c, pubKey, u2)
+  );
+  if (is_at_infinity(p)) {
+    return false;
+  }
+  // v = mod(p.x, c.N)
+  let v = bigint.mod(p.x, c.N);
+  return bigint.compare(v, r) == 0;
+}
+
+// Main
+
+let c = new_secp256k1_curve();
+
+// Test compute_y() and is_on_curve()
+let p = new_point(
+  "D440BDBA94C11761FD4FC419B5BF3F111B8F193A5168ACD33AA5525DC50B2F18",
+  "7E38B3F29FDF12904486A0BCCE8F5018B7B96B60661DAB6DC2CF73E843BEF6CE"
+);
+let isOnCurve = is_on_curve(c, p);
+assert(isOnCurve, "Point must be on curve");
+let [ y0, y1 ] = compute_y(c, p.x);
+let y0IsY = bigint.compare(y0, p.y) == 0;
+let y1IsY = bigint.compare(y1, p.y) == 0;
+assert(y0IsY || y1IsY, "Point must have valid y coordinate");
+
+// Generate a random private key
+let privKey = random_scalar(c);
+println("Private key: " + bigint.to_string(privKey, 16));
+
+// Get the public key
+let pubKey = multiply_base_point_by_scalar(c, privKey);
+println("Public key:");
+println("  x: " + bigint.to_string(pubKey.x, 16));
+println("  y: " + bigint.to_string(pubKey.y, 16));
+
+// Hash the message
+let message = "Hello, world!";
+var digest = hashing.sha256(message);
+digest = bigint.from_bytes(digest);
+println("Digest: " + bigint.to_string(digest, 16));
+
+// Sign the digest
+let [ r, s ] = sign(c, digest, privKey);
+println("Signature:");
+println("  r: " + bigint.to_string(r, 16));
+println("  s: " + bigint.to_string(s, 16));
+
+// Verify the signature
+let isValid = verify_signature(c, digest, pubKey, r, s);
+assert(isValid, "Signature must be valid");

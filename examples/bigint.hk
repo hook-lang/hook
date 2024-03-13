@@ -4,9 +4,15 @@
 
 import bigint;
 
-let x = bigint.new("2222222222222222222222222222222222222222");
-let y = bigint.new("3333333333333333333333333333333333333333");
+let a = bigint.new("2222222222222222222222222222222222222222");
+let b = bigint.new(3);
+let c = bigint.from_string("f", 16);
+let d = bigint.new(7);
 
-let z = bigint.add(x, y);
+let x = bigint.add(a, b);
+let y = bigint.sub(x, c);
+let z = bigint.mod(y, d);
 
+println(bigint.to_string(x));
+println(bigint.to_string(y));
 println(bigint.to_string(z));
