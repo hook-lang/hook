@@ -645,7 +645,7 @@ static void assert_call(HkState *state, HkValue *args)
   state->flags |= HK_STATE_FLAG_NO_TRACE;
   state->status = HK_STATE_STATUS_ERROR;
   HkString *str = hk_as_string(args[2]);
-  fprintf(stderr, "assertion failed: %.*s\n", str->length, str->chars);
+  fprintf(stderr, "assert: %.*s\n", str->length, str->chars);
 }
 
 static void panic_call(HkState *state, HkValue *args)
