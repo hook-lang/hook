@@ -226,7 +226,9 @@ static inline void load_source_module(HkState *state, HkString *file, HkString *
       name->length, name->chars);
   HkClosure *cl = hk_compile(file, source, HK_COMPILER_FLAG_NONE);
   hk_state_push_closure(state, cl);
+  hk_return_if_not_ok(state);
   hk_state_push_array(state, hk_array_new());
+  hk_return_if_not_ok(state);
   hk_state_call(state, 1);
   if (!hk_state_is_ok(state))
     hk_state_runtime_error(state, "cannot load module `%.*s`",

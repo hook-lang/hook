@@ -1,0 +1,22 @@
+//
+// http_server.hk
+//
+
+import http;
+import json;
+
+let server = http.new_server();
+
+http.set_request_handler(server, |req, res| {
+  res.headers[] = "Content-Type: application/json";
+  res.body = json.encode({
+    success: true 
+  });
+  return res;
+});
+
+if (let err = http.listen(server, "0.0.0.0", 8080); err) {
+  panic(err);
+}
+
+http.close(server);

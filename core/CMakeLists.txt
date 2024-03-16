@@ -63,6 +63,11 @@ add_library(ini_mod SHARED
   ini.c
   deps/ini.c)
 
+add_library(http_mod SHARED
+  http.c
+  deps/picohttpparser.c
+  deps/socket.c)
+
 target_link_libraries(math_mod     ${STATIC_LIB_TARGET})
 target_link_libraries(os_mod       ${STATIC_LIB_TARGET})
 target_link_libraries(io_mod       ${STATIC_LIB_TARGET})
@@ -76,6 +81,7 @@ target_link_libraries(socket_mod   ${STATIC_LIB_TARGET})
 target_link_libraries(json_mod     ${STATIC_LIB_TARGET})
 target_link_libraries(lists_mod    ${STATIC_LIB_TARGET})
 target_link_libraries(ini_mod      ${STATIC_LIB_TARGET})
+target_link_libraries(http_mod     ${STATIC_LIB_TARGET})
 
 if(WIN32)
   target_link_libraries(socket_mod ws2_32)
@@ -94,3 +100,4 @@ set_target_properties(socket_mod   PROPERTIES PREFIX "")
 set_target_properties(json_mod     PROPERTIES PREFIX "")
 set_target_properties(lists_mod    PROPERTIES PREFIX "")
 set_target_properties(ini_mod      PROPERTIES PREFIX "")
+set_target_properties(http_mod     PROPERTIES PREFIX "")

@@ -234,7 +234,9 @@ static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsedArgs)
   HkState state;
   hk_state_init(&state, parsedArgs->stackSize);
   hk_state_push_closure(&state, cl);
+  hk_assert(hk_state_is_ok(&state), "unable to push closure");
   hk_state_push_array(&state, args_array(parsedArgs));
+  hk_assert(hk_state_is_ok(&state), "unable to push arguments");
   hk_state_call(&state, 1);
   int exitCode = EXIT_FAILURE;
   if (hk_state_is_ok(&state))

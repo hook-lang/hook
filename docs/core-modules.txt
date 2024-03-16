@@ -165,3 +165,34 @@ ini:
 
   load(filename: string) -> userdata
   get(config: userdata, section: string, key: string) -> string
+
+  module http;
+
+  // Types
+
+  struct Server;
+  struct Client;
+  struct Request;
+  struct Response;
+  type RequestHandler = fn (Request, Response) -> (Response?, Error?);
+
+  // Functions
+
+  // Create a new HTTP server
+  new_server() -> Server
+
+  // Create a new HTTP client
+  new_client() -> Client
+
+  // Close the HTTP server or client
+  close(socket: Server | Client) -> Error?
+
+  // Set the server's request handler
+  set_request_handler(server: Server, handler: RequestHandler)
+
+  // Listen for incoming connections
+  listen(server: Server, host: String, port: Integer) -> Error?
+
+  // Send an HTTP request
+  send_request(client: Client, method: Integer, path: String, headers: Array?,
+    body: String?) -> (Response?, Error?)

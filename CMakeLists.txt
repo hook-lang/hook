@@ -22,11 +22,11 @@ include_directories(include)
 link_directories(/usr/local/lib)
 
 if(MSVC)
-  add_compile_options(/W4)
+  add_compile_options(/W4 /WX)
 endif()
 
 if(NOT MSVC)
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -Werror)
   add_compile_options("$<$<CONFIG:Debug>:-fsanitize=address>")
   add_compile_options("$<$<CONFIG:Debug>:-fprofile-arcs>")
   add_compile_options("$<$<CONFIG:Debug>:-ftest-coverage>")

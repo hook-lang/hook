@@ -1,0 +1,17 @@
+//
+// http_client.hk
+//
+
+import http;
+
+let client = http.new_client();
+
+let [res, err] = http.send_request(client, http.METHOD_GET , "localhost:8080");
+
+if (res) {
+  println(res.body);
+} else {
+  panic(err);
+}
+
+http.close(client);

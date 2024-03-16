@@ -49,7 +49,7 @@ Below is a comprehensive list of all the modules available. Click on any module 
       <td><a href="#json">json</a></td>
       <td><a href="#lists">lists</a></td>
       <td><a href="#ini">ini</a></td>
-      <td></td>
+      <td><a href="#http">http</a></td>
     </tr>
   </tbody>
 </table>
@@ -2129,3 +2129,9 @@ Example:
 let config = ini.load("config.ini");
 println(ini.get(config, "section", "key")); // value
 ```
+
+### http
+
+The `http` module provides functions for working with HTTP.
+
+TODO: Add documentation for the `http` module.
