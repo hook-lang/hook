@@ -6,7 +6,7 @@
 #include <hook/userdata.h>
 #include <stdlib.h>
 
-void hk_userdata_init(HkUserdata *udata, void (*deinit)(struct hk_userdata *))
+void hk_userdata_init(HkUserdata *udata, void (*deinit)(HkUserdata *))
 {
   udata->refCount = 0;
   udata->deinit = deinit;
