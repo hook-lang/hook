@@ -9,9 +9,9 @@ Hook is a simple, cross-platform, dynamically typed scripting language that util
 
 > **Note**: Hook is currently in the early stages of development and should not be used in production environments at this time.
 
-## What does it look like
+## What does it look like?
 
-Hook features a modern syntax similar to C. For examples:
+Hook features a modern syntax similar to C.
 
 ```rust
 fn factorial(n) {
@@ -73,7 +73,14 @@ hook -e 'println("Hello, world!");'
 
 ## Documentation
 
-Unfortunately, as the language is undergoing constant updates and changes to its lexemes and syntax, documentation is not currently available. The `examples` folder may provide some guidance in the meantime.
+Unfortunately, as the language undergoes constant breaking changes, it's impractical to have complete documentation. However, we have some text files and examples that can help:
+
+* [docs/grammar.md](docs/grammar.md)
+* [docs/built-in.md](docs/built-in.md)
+* [docs/core-modules.md](docs/core-modules.md)
+* [examples](examples)
+
+Additionally, we have a cheatsheet that can be accessed at: [https://cheatsheets.zip/hook](https://cheatsheets.zip/hook)
 
 ## Play with Hook online
 
