@@ -17,8 +17,8 @@
 typedef struct
 {
   HK_OBJECT_HEADER
-  int capacity;
-  int length;
+  int     capacity;
+  int     length;
   HkValue *elements;
 } HkArray;
 

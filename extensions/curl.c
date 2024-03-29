@@ -9,10 +9,10 @@
 typedef struct
 {
   HK_USERDATA_HEADER
-  CURL *curl;
+  CURL     *curl;
   CURLcode res;
   HkString *url;
-  HkArray *headers;
+  HkArray  *headers;
 } CurlWrapper;
 
 static int initialized = 0;

@@ -45,34 +45,34 @@ typedef enum
 
 typedef struct
 {
-  bool isLocal;
-  int depth;
+  bool    isLocal;
+  int     depth;
   uint8_t index;
-  int length;
-  char *start;
-  bool isMutable;
+  int     length;
+  char    *start;
+  bool    isMutable;
 } Variable;
 
 typedef struct Loop
 {
   struct Loop *parent;
-  int scopeDepth;
-  uint16_t jump;
-  int numOffsets;
-  int offsets[MAX_BREAKS];
+  int         scopeDepth;
+  uint16_t    jump;
+  int         numOffsets;
+  int         offsets[MAX_BREAKS];
 } Loop;
 
-typedef struct compiler
+typedef struct Compiler
 {
-  struct compiler *parent;
-  int flags;
-  Scanner *scan;
-  int scopeDepth;
-  int numVariables;
-  uint8_t nextIndex;
-  Variable variables[MAX_VARIABLES];
-  Loop *loop;
-  HkFunction *fn;
+  struct Compiler *parent;
+  int             flags;
+  Scanner         *scan;
+  int             scopeDepth;
+  int             numVariables;
+  uint8_t         nextIndex;
+  Variable        variables[MAX_VARIABLES];
+  Loop            *loop;
+  HkFunction      *fn;
 } Compiler;
 
 static inline void syntax_error(HkString *fnName, const char *file, int line,

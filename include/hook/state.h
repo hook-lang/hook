@@ -35,12 +35,12 @@ typedef enum
   HK_STATE_STATUS_ERROR
 } HkSateStatus;
 
-typedef struct hk_state
+typedef struct HkState
 {
-  int stackEnd;
-  int stackTop;
-  HkValue *stackSlots;
-  int flags;
+  int          stackEnd;
+  int          stackTop;
+  HkValue      *stackSlots;
+  int          flags;
   HkSateStatus status;
 } HkState;
 
@@ -74,7 +74,8 @@ void hk_state_push_instance(HkState *state, HkInstance *inst);
 void hk_state_push_iterator(HkState *state, HkIterator *it);
 void hk_state_push_closure(HkState *state, HkClosure *cl);
 void hk_state_push_native(HkState *state, HkNative *native);
-void hk_state_push_new_native(HkState *state, const char *name, int arity, void (*call)(HkState *, HkValue *));
+void hk_state_push_new_native(HkState *state, const char *name, int arity,
+  HkCallFn call);
 void hk_state_push_userdata(HkState *state, HkUserdata *udata);
 void hk_state_array(HkState *state, int length);
 void hk_state_struct(HkState *state, int length);

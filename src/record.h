@@ -14,14 +14,14 @@
 typedef struct
 {
   HkString *key;
-  HkValue value;
+  HkValue  value;
 } RecordEntry;
 
 typedef struct
 {
-  int capacity;
-  int mask;
-  int length;
+  int         capacity;
+  int         mask;
+  int         length;
   RecordEntry *entries;
 } Record;
 

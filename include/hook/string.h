@@ -22,9 +22,9 @@
 typedef struct
 {
   HK_OBJECT_HEADER
-  int capacity;
-  int length;
-  char *chars;
+  int     capacity;
+  int     length;
+  char    *chars;
   int64_t hash;
 } HkString;
 

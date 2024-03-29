@@ -16,25 +16,25 @@
 typedef struct
 {
   HkString *name;
-  int index;
+  int      index;
 } HkField;
 
 typedef struct
 {
   HK_OBJECT_HEADER
-  int capacity;
-  int mask;
-  int length;
+  int      capacity;
+  int      mask;
+  int      length;
   HkString *name;
-  HkField *fields;
-  HkField **table;
+  HkField  *fields;
+  HkField  **table;
 } HkStruct;
 
 typedef struct
 {
   HK_OBJECT_HEADER
   HkStruct *ztruct;
-  HkValue values[1];
+  HkValue  values[1];
 } HkInstance;
 
 HkStruct *hk_struct_new(HkString *name);

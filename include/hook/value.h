@@ -89,13 +89,13 @@ typedef enum
 
 typedef struct
 {
-  HkType type;
-  int flags;
+  HkType   type;
+  int      flags;
   union
   {
-    bool boolean;
+    bool   boolean;
     double number;
-    void *pointer;
+    void   *pointer;
   } as;
 } HkValue;
 

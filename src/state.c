@@ -2015,7 +2015,8 @@ void hk_state_push_native(HkState *state, HkNative *native)
   hk_incr_ref(native);
 }
 
-void hk_state_push_new_native(HkState *state, const char *name, int arity, void (*call)(HkState *, HkValue *))
+void hk_state_push_new_native(HkState *state, const char *name, int arity,
+  HkCallFn call)
 {
   HkNative *native = hk_native_new(hk_string_from_chars(-1, name), arity, call);
   hk_state_push_native(state, native);

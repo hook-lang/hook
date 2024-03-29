@@ -12,7 +12,7 @@ typedef struct
 {
   HK_ITERATOR_HEADER
   HkArray *arr;
-  int current;
+  int     current;
 } ArrayIterator;
 
 static inline HkArray *array_allocate(int minCapacity);

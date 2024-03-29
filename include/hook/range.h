@@ -12,7 +12,7 @@
 typedef struct
 {
   HK_OBJECT_HEADER
-  int step;
+  int     step;
   int64_t start;
   int64_t end;
 } HkRange;

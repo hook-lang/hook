@@ -34,9 +34,9 @@
 typedef struct
 {
   HK_USERDATA_HEADER
-  int domain;
-  int type;
-  int protocol;
+  int    domain;
+  int    type;
+  int    protocol;
   Socket sock;
 } SocketUserdata;
 

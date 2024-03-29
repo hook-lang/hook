@@ -27,20 +27,20 @@ typedef enum
 typedef struct
 {
   TokenKind kind;
-  int line;
-  int col;
-  int length;
-  char *start;
+  int       line;
+  int       col;
+  int       length;
+  char      *start;
 } Token;
 
 typedef struct
 {
   HkString *file;
   HkString *source;
-  char *pos;
-  int line;
-  int col;
-  Token token;
+  char     *pos;
+  int      line;
+  int      col;
+  Token    token;
 } Scanner;
 
 void scanner_init(Scanner *scan, HkString *file, HkString *source);

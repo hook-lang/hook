@@ -10,13 +10,13 @@ typedef struct LinkedListNode
 {
   struct LinkedListNode *next;
   struct LinkedListNode *prev;
-  HkValue elem;
+  HkValue               elem;
 } LinkedListNode;
 
 typedef struct
 {
   HK_USERDATA_HEADER
-  int length;
+  int            length;
   LinkedListNode *head;
   LinkedListNode *tail;
 } LinkedList;

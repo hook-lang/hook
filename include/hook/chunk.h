@@ -43,12 +43,12 @@ typedef struct
 
 typedef struct
 {
-  int codeCapacity;
-  int codeLength;
+  int     codeCapacity;
+  int     codeLength;
   uint8_t *code;
-  int linesCapacity;
-  int linesLength;
-  HkLine *lines;
+  int     linesCapacity;
+  int     linesLength;
+  HkLine  *lines;
   HkArray *consts;
 } HkChunk;
 

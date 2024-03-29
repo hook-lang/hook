@@ -13,18 +13,18 @@
 typedef struct
 {
   const char *cmd;
-  bool optHelp;
-  bool optVersion;
-  bool optEval;
-  bool optAnalyze;
-  bool optDump;
-  bool optCompile;
-  bool optRun;
-  int stackSize; 
+  bool       optHelp;
+  bool       optVersion;
+  bool       optEval;
+  bool       optAnalyze;
+  bool       optDump;
+  bool       optCompile;
+  bool       optRun;
+  int        stackSize; 
   const char *input;
   const char *output;
   const char **args;
-  int numArgs;
+  int        numArgs;
 } ParsedArgs;
 
 static inline void fatal_error(const char *fmt, ...);
