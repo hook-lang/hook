@@ -165,3 +165,18 @@ ini:
 
   load(filename: string) -> userdata
   get(config: userdata, section: string, key: string) -> string
+
+selectors:
+
+  POLLIN: number
+  POLLOUT: number
+  POLLERR: number
+  POLLHUP: number
+  POLLNVAL: number
+  POLLPRI: number
+
+  new_poll_selector() -> userdata
+  register(selector: userdata, sock: userdata, events: number)
+  unregister(selector: userdata, sock: userdata)
+  modify(selector: userdata, sock: userdata, events: number)
+  poll(selector: userdata, timeout: number) -> array
