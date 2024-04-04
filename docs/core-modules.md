@@ -49,7 +49,7 @@ Below is a comprehensive list of all the modules available. Click on any module 
       <td><a href="#json">json</a></td>
       <td><a href="#lists">lists</a></td>
       <td><a href="#ini">ini</a></td>
-      <td></td>
+      <td><a href="#selectors">selectors</a></td>
     </tr>
   </tbody>
 </table>
@@ -362,6 +362,7 @@ The `os` module provides a variety of functions and constants that allow you to 
       <td><a href="#clock">clock</a></td>
       <td><a href="#time">time</a></td>
       <td><a href="#system">system</a></td>
+    </tr>
     <tr>
       <td><a href="#getenv">getenv</a></td>
       <td><a href="#getcwd">getcwd</a></td>
@@ -2128,4 +2129,165 @@ Example:
 ```rust
 let config = ini.load("config.ini");
 println(ini.get(config, "section", "key")); // value
+```
+
+### selectors
+
+The `selectors` module provides a wrapper around the `select`, `poll`, etc. system calls for monitoring multiple file descriptors, specially useful for network programming.
+
+<table>
+  <tbody>
+    <tr>
+      <td><a href="#pollin">POLLIN</a></td>
+      <td><a href="#pollout">POLLOUT</a></td>
+      <td><a href="#pollerr">POLLERR</a></td>
+    </tr>
+    <tr>
+      <td><a href="#pollhup">POLLHUP</a></td>
+      <td><a href="#pollnval">POLLNVAL</a></td>
+      <td><a href="#pollpri">POLLPRI</a></td>
+    </tr>
+    <tr>
+      <td><a href="#new_poll_selector">new_poll_selector</a></td>
+      <td><a href="#register">register</a></td>
+      <td><a href="#unregister">unregister</a></td>
+    </tr>
+    <tr>
+      <td><a href="#modify">modify</a></td>
+      <td><a href="#poll">poll</a></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
+
+#### POLLIN
+
+The `POLLIN` constant is used to specify that data is available for reading.
+
+```rust
+let POLLIN: number;
+```
+
+#### POLLOUT
+
+The `POLLOUT` constant is used to specify that data can be written without blocking.
+
+```rust
+let POLLOUT: number;
+```
+
+#### POLLERR
+
+The `POLLERR` constant is used to specify that an error has occurred.
+
+```rust
+let POLLERR: number;
+```
+
+#### POLLHUP
+
+The `POLLHUP` constant is used to specify that the connection has been closed.
+
+```rust
+let POLLHUP: number;
+```
+
+#### POLLNVAL
+
+The `POLLNVAL` constant is used to specify that the file descriptor is invalid.
+
+```rust
+let POLLNVAL: number;
+```
+
+#### POLLPRI
+
+The `POLLPRI` constant is used to specify that urgent data is available.
+
+```rust
+let POLLPRI: number;
+```
+
+#### new_poll_selector
+
+Creates a selector of type `poll`.
+
+```rust
+fn new_poll_selector() -> userdata;
+```
+
+Example:
+
+```rust
+let selector = selectors.new_poll_selector();
+```
+
+#### register
+
+Registers the given file descriptor with the given events.
+
+```rust
+fn register(selector: userdata, fd: number, events: number);
+```
+
+- `selector` is the selector to register the file descriptor with.
+- `fd` is the file descriptor to register.
+- `events` is the events to monitor. It can be a combination of `POLLIN`, `POLLOUT`, `POLLERR`, `POLLHUP`, `POLLNVAL`, and `POLLPRI`.
+
+Example:
+
+```rust
+let selector = selectors.new_poll_selector();
+selectors.register(selector, sock, selectors.POLLIN);
+```
+
+#### unregister
+
+Unregisters the given file descriptor.
+
+```rust
+fn unregister(selector: userdata, fd: number);
+```
+
+Example:
+
+```rust
+let selector = selectors.new_poll_selector();
+selectors.register(selector, sock, selectors.POLLIN);
+selectors.unregister(selector, sock);
+```
+
+#### modify
+
+Modifies the events to monitor for the given file descriptor.
+
+```rust
+fn modify(selector: userdata, fd: number, events: number);
+```
+
+Example:
+
+```rust
+let selector = selectors.new_poll_selector();
+selectors.register(selector, sock, selectors.POLLIN);
+selectors.modify(selector, sock, selectors.POLLOUT);
+```
+
+#### poll
+
+Waits for events on the registered file descriptors.
+
+```rust
+fn poll(selector: userdata, timeout: number) -> array;
+```
+
+- `selector` is the selector to wait for events on.
+- `timeout` is the maximum time to wait in milliseconds. If `timeout` is `0`, the function will return immediately. If `timeout` is `-1`, the function will block indefinitely.
+
+Example:
+
+```rust
+let selector = selectors.new_poll_selector();
+selectors.register(selector, sock, selectors.POLLIN);
+let events = selectors.poll(selector, 1000);
 ```
