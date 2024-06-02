@@ -136,11 +136,12 @@ static inline HkArray *split(HkString *str, HkString *sep)
   // TODO: Do not use strtok_r and do not copy the string
   HkString *_str = hk_string_copy(str);
   char *cur = _str->chars;
-  char *tk;
-  while ((tk = strtok_r(cur, sep->chars, &cur)))
+  char *tk = strtok_r(cur, sep->chars, &cur);
+  while (tk)
   {
     HkValue elem = hk_string_value(hk_string_from_chars(-1, tk));
     hk_array_inplace_add_element(arr, elem);
+    tk = strtok_r(cur, sep->chars, &cur);
   }
   hk_string_free(_str);
   return arr;
@@ -267,13 +268,13 @@ static void to_int_call(HkState *state, HkValue *args)
   HkValue val = args[1];
   if (hk_is_number(val))
   {
-    hk_state_push_number(state, (int64_t) hk_as_number(val));
+    hk_state_push_number(state, (double) ((int64_t) hk_as_number(val)));
     return;
   }
   double result;
   string_to_double(state, hk_as_string(val), &result);
   hk_return_if_not_ok(state);
-  hk_state_push_number(state, (int64_t) result);
+  hk_state_push_number(state, (double) ((int64_t) result));
 }
 
 static void to_number_call(HkState *state, HkValue *args)
@@ -405,7 +406,11 @@ static void bin_call(HkState *state, HkValue *args)
   char *chars = str->chars;
   for (int i = 0; i < length; ++i)
   {
+  #ifdef _WIN32
+    sscanf_s(chars, "%2hhx", (unsigned char *) &result->chars[i]);
+  #else
     sscanf(chars, "%2hhx", (unsigned char *) &result->chars[i]);
+  #endif
     chars += 2;
   }
   hk_state_push_string(state, result);
@@ -466,14 +471,14 @@ static void len_call(HkState *state, HkValue *args)
     HkRange *range = hk_as_range(val);
     if (range->start < range->end)
     {
-      int result = (int) range->end - range->start + 1;
-      hk_state_push_number(state, result);
+      int64_t result = range->end - range->start + 1;
+      hk_state_push_number(state, (double) result);
       return;
     }
     if (range->start > range->end)
     {
-      int result = (int) range->start - range->end + 1;
-      hk_state_push_number(state, result);
+      int64_t result = range->start - range->end + 1;
+      hk_state_push_number(state, (double) result);
       return;
     }
     hk_state_push_number(state, 1);

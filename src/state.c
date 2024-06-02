@@ -135,7 +135,7 @@ static inline void do_range(HkState *state)
     hk_state_runtime_error(state, "type error: range must be of type number");
     return;
   }
-  HkRange *range = hk_range_new(hk_as_number(val1), hk_as_number(val2));
+  HkRange *range = hk_range_new((int64_t) hk_as_number(val1), (int64_t) hk_as_number(val2));
   hk_incr_ref(range);
   slots[0] = hk_range_value(range);
   --state->stackTop;
@@ -441,7 +441,7 @@ static inline void slice_string(HkState *state, HkValue *slot, HkString *str, Hk
     hk_range_release(range);
     return;
   }
-  int length = end - start + 1;
+  int length = (int) (end - start + 1);
   result = hk_string_from_chars(length, &str->chars[start]);
 end:
   hk_incr_ref(result);
@@ -468,14 +468,14 @@ static inline void slice_array(HkState *state, HkValue *slot, HkArray *arr, HkRa
     hk_range_release(range);
     return;
   }
-  int length = end - start + 1;
+  int length = (int) (end - start + 1);
   result = hk_array_new_with_capacity(length);
   result->length = length;
-  for (int i = start, j = 0; i <= end ; ++i, ++j)
+  for (int64_t i = start, j = 0; i <= end ; ++i, ++j)
   {
-    HkValue elem = hk_array_get_element(arr, i);
+    HkValue elem = hk_array_get_element(arr, (int) i);
     hk_value_incr_ref(elem);
-    result->elements[j] = elem;
+    result->elements[(int) j] = elem;
   }
 end:
   hk_incr_ref(result);
@@ -649,7 +649,7 @@ static inline void do_inplace_put_element(HkState *state)
     hk_value_decr_ref(val3);
     return;
   }
-  HkArray *result = hk_array_set_element(arr, index, val3);
+  HkArray *result = hk_array_set_element(arr, (int) index, val3);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
   state->stackTop -= 2;
@@ -686,7 +686,7 @@ static inline void do_inplace_delete_element(HkState *state)
     --state->stackTop;
     return;
   }
-  HkArray *result = hk_array_delete_element(arr, index);
+  HkArray *result = hk_array_delete_element(arr, (int) index);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
   --state->stackTop;
@@ -932,7 +932,7 @@ static inline void do_bitwise_or(HkState *state)
       hk_type_name(val2.type));
     return;
   }
-  int64_t data = ((int64_t) hk_as_number(val1)) | ((int64_t) hk_as_number(val2));
+  double data = (double) (((int64_t) hk_as_number(val1)) | ((int64_t) hk_as_number(val2)));
   slots[0] = hk_number_value(data);
   --state->stackTop;
 }
@@ -948,7 +948,7 @@ static inline void do_bitwise_xor(HkState *state)
       hk_type_name(val2.type));
     return;
   }
-  int64_t data = ((int64_t) hk_as_number(val1)) ^ ((int64_t) hk_as_number(val2));
+  double data = (double) (((int64_t) hk_as_number(val1)) ^ ((int64_t) hk_as_number(val2)));
   slots[0] = hk_number_value(data);
   --state->stackTop;
 }
@@ -964,7 +964,7 @@ static inline void do_bitwise_and(HkState *state)
       hk_type_name(val2.type));
     return;
   }
-  int64_t data = ((int64_t) hk_as_number(val1)) & ((int64_t) hk_as_number(val2));
+  double data = (double) (((int64_t) hk_as_number(val1)) & ((int64_t) hk_as_number(val2)));
   slots[0] = hk_number_value(data);
   --state->stackTop;
 }
@@ -980,7 +980,7 @@ static inline void do_left_shift(HkState *state)
       hk_type_name(val2.type));
     return;
   }
-  int64_t data = ((int64_t) hk_as_number(val1)) << ((int64_t) hk_as_number(val2));
+  double data = (double) (((int64_t) hk_as_number(val1)) << ((int64_t) hk_as_number(val2)));
   slots[0] = hk_number_value(data);
   --state->stackTop;
 }
@@ -996,7 +996,7 @@ static inline void do_right_shift(HkState *state)
       hk_type_name(val2.type));
     return;
   }
-  int64_t data = ((int64_t) hk_as_number(val1)) >> ((int64_t) hk_as_number(val2));
+  double data = (double) (((int64_t) hk_as_number(val1)) >> ((int64_t) hk_as_number(val2)));
   slots[0] = hk_number_value(data);
   --state->stackTop;
 }
@@ -1260,7 +1260,7 @@ static inline void do_bitwise_not(HkState *state)
     hk_state_runtime_error(state, "type error: cannot apply `bitwise not` to %s", hk_type_name(val.type));
     return;
   }
-  int64_t data = ~((int64_t) hk_as_number(val));
+  double data = (double) (~((int64_t) hk_as_number(val)));
   slots[0] = hk_number_value(data);
 }
 
@@ -1857,8 +1857,10 @@ void hk_state_check_argument_types(HkState *state, HkValue *args, int index, int
   HkType valType = args[index].type;
   bool match = false;
   for (int i = 0; i < numTypes; ++i)
-    if ((match = (valType == types[i])))
-      break;
+  {
+    match = valType == types[i];
+    if (match) break;
+  }
   if (!match)
     type_error(state, index, numTypes, types, valType);
 }

@@ -57,9 +57,9 @@ static inline cJSON *value_to_json(HkValue val)
       for (int i = 0; i < ztruct->length; ++i)
       {
         HkField field = fields[i];
-        HkValue val = inst->values[i];
-        cJSON *json_val = value_to_json(val);
-        hk_assert(cJSON_AddItemToObject(json, field.name->chars, json_val), "Failed to add item to object.");
+        cJSON *json_val = value_to_json(inst->values[i]);
+        hk_assert(cJSON_AddItemToObject(json, field.name->chars, json_val),
+          "Failed to add item to object.");
       }
     }
     break;

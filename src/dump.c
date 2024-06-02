@@ -289,6 +289,6 @@ void hk_dump(HkFunction *fn, FILE *stream)
     }
   }
   fprintf(stream, "; %d instruction(s)\n\n", n);
-  for (int i = 0; i < fn->functionsLength; ++i)
-    hk_dump(fn->functions[i], stream);
+  for (int j = 0; j < fn->functionsLength; ++j)
+    hk_dump(fn->functions[j], stream);
 }

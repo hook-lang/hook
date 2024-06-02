@@ -267,7 +267,7 @@ static void bind_call(HkState *state, HkValue *args)
   }
   struct sockaddr_in sock_addr;
   memset(&sock_addr, 0, sizeof(sock_addr));
-  sock_addr.sin_family = udata->domain;
+  sock_addr.sin_family = (unsigned short) udata->domain;
   sock_addr.sin_port = htons((uint16_t) port);
   if (inet_pton(AF_INET, address, &sock_addr.sin_addr) < 1)
   {

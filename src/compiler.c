@@ -32,10 +32,9 @@ typedef enum
 
 #define consume(c, k) do \
   { \
-    Scanner *scan = (c)->scan; \
-    if (!match(scan, k)) \
+    if (!match((c)->scan, k)) \
       syntax_error_unexpected(c); \
-    scanner_next_token(scan); \
+    scanner_next_token((c)->scan); \
   } while(0)
 
 #define add_placeholder(c) do \
@@ -604,10 +603,10 @@ static void compile_import_statement(Compiler *comp)
       scanner_next_token(scan);
       if (!match(scan, TOKEN_KIND_NAME))
         syntax_error_unexpected(comp);
-      Token tk = scan->token;
+      tk = scan->token;
       scanner_next_token(scan);
       define_local(comp, &tk, false);
-      uint8_t index = add_string_constant(comp, &tk);
+      index = add_string_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
       hk_chunk_emit_byte(chunk, index);
       ++n;
@@ -697,11 +696,11 @@ static void compile_constant_declaration(Compiler *comp)
       scanner_next_token(scan);
       if (!match(scan, TOKEN_KIND_NAME))
         syntax_error_unexpected(comp);
-      Token tk = scan->token;
+      tk = scan->token;
       scanner_next_token(scan);
       // FIXME: This is a bug, we should not define the local here
       define_local(comp, &tk, false);
-      uint8_t index = add_string_constant(comp, &tk);
+      index = add_string_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
       hk_chunk_emit_byte(chunk, index);
       ++n;
@@ -790,11 +789,11 @@ static void compile_variable_declaration(Compiler *comp)
       scanner_next_token(scan);
       if (!match(scan, TOKEN_KIND_NAME))
         syntax_error_unexpected(comp);
-      Token tk = scan->token;
+      tk = scan->token;
       scanner_next_token(scan);
       // FIXME: This is a bug, we should not define the local here
       define_local(comp, &tk, true);
-      uint8_t index = add_string_constant(comp, &tk);
+      index = add_string_constant(comp, &tk);
       hk_chunk_emit_opcode(chunk, HK_OP_CONSTANT);
       hk_chunk_emit_byte(chunk, index);
       ++n;
@@ -1478,7 +1477,7 @@ static void compile_for_statement(Compiler *comp)
   }
   uint16_t jump1 = (uint16_t) chunk->codeLength;
   bool missing = match(scan, TOKEN_KIND_SEMICOLON);
-  int offset1;
+  int offset1 = 0;
   if (missing)
     scanner_next_token(scan);
   else
@@ -1509,7 +1508,10 @@ static void compile_for_statement(Compiler *comp)
   hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
   hk_chunk_emit_word(chunk, jump2);
   if (!missing)
+  {
+    hk_assert(offset1, "offset1 is zero");
     patch_jump(comp, offset1);
+  }
   end_loop(comp);
   pop_scope(comp);
 }
@@ -2254,7 +2256,7 @@ static Variable compile_variable(Compiler *comp, Token *tk, bool emit)
   return (Variable) {
     .isLocal = false,
     .depth = -1,
-    .index = index,
+    .index = (uint8_t) index,
     .length = tk->length,
     .start = tk->start,
     .isMutable = false

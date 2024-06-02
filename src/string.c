@@ -244,11 +244,12 @@ HkArray *hk_string_split(HkString *str, HkString *sep)
   // TODO: Do not use strtok_r and do not copy the string
   HkString *_str = hk_string_copy(str);
   char *cur = _str->chars;
-  char *tk;
-  while ((tk = strtok_r(cur, sep->chars, &cur)))
+  char *tk = strtok_r(cur, sep->chars, &cur);
+  while (tk)
   {
     HkValue elem = hk_string_value(hk_string_from_chars(-1, tk));
     hk_array_inplace_add_element(arr, elem);
+    tk = strtok_r(NULL, sep->chars, &cur);
   }
   hk_string_free(_str);
   return arr;

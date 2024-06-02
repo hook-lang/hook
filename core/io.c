@@ -8,6 +8,7 @@
 
 #ifdef _WIN32
   #include <windows.h>
+  #include <io.h>
 #endif
 
 #ifndef _WIN32
@@ -66,7 +67,12 @@ static void open_call(HkState *state, HkValue *args)
   hk_return_if_not_ok(state);
   HkString *filename = hk_as_string(args[1]);
   HkString *mode = hk_as_string(args[2]);
-  FILE *stream = fopen(filename->chars, mode->chars);
+  FILE *stream = NULL;
+#ifdef _WIN32
+  (void) fopen_s(&stream, filename->chars, mode->chars);
+#else
+  stream = fopen(filename->chars, mode->chars);
+#endif
   if (!stream)
   {
     hk_state_push_nil(state);
@@ -133,11 +139,13 @@ static void sync_call(HkState *state, HkValue *args)
   hk_state_check_argument_userdata(state, args, 1);
   hk_return_if_not_ok(state);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
-  int fd = fileno(stream);
   bool result;
 #ifdef _WIN32
-  result = FlushFileBuffers(fd);
+  int fd = _fileno(stream);
+  HANDLE handle = (HANDLE) _get_osfhandle(fd);
+  result = FlushFileBuffers(handle);
 #else
+  int fd = fileno(stream);
   result = !fsync(fd);
 #endif
   hk_state_push_bool(state, result);
@@ -169,7 +177,7 @@ static void seek_call(HkState *state, HkValue *args)
   hk_state_check_argument_int(state, args, 3);
   hk_return_if_not_ok(state);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
-  int64_t offset = (int64_t) hk_as_number(args[2]);
+  long offset = (long) hk_as_number(args[2]);
   int whence = (int) hk_as_number(args[3]);
   hk_state_push_number(state, fseek(stream, offset, whence));
 }
@@ -181,7 +189,7 @@ static void read_call(HkState *state, HkValue *args)
   hk_state_check_argument_int(state, args, 2);
   hk_return_if_not_ok(state);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
-  int64_t size = (int64_t) hk_as_number(args[2]);
+  int size = (int) hk_as_number(args[2]);
   HkString *str = hk_string_new_with_capacity(size);
   int length = (int) fread(str->chars, 1, size, stream);
   if (length < size && !feof(stream))
@@ -205,8 +213,8 @@ static void write_call(HkState *state, HkValue *args)
   hk_return_if_not_ok(state);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   HkString *str = hk_as_string(args[2]);
-  size_t size = str->length;
-  if (fwrite(str->chars, 1, size, stream) < size)
+  int size = str->length;
+  if ((int) fwrite(str->chars, 1, size, stream) < size)
   {
     hk_state_push_nil(state);
     return;
@@ -230,8 +238,9 @@ static void writeln_call(HkState *state, HkValue *args)
   hk_return_if_not_ok(state);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   HkString *str = hk_as_string(args[2]);
-  size_t size = str->length;
-  if (fwrite(str->chars, 1, size, stream) < size || fwrite("\n", 1, 1, stream) < 1)
+  int size = str->length;
+  if ((int) fwrite(str->chars, 1, size, stream) < size
+   || fwrite("\n", 1, 1, stream) < 1)
   {
     hk_state_push_nil(state);
     return;

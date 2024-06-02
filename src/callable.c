@@ -122,11 +122,10 @@ HkFunction *hk_function_deserialize(FILE *stream)
   HkFunction **functions = (HkFunction **) hk_allocate(sizeof(*functions) * fn->functionsCapacity);
   for (int i = 0; i < fn->functionsLength; ++i)
   {
-    HkFunction *fn = hk_function_deserialize(stream);
-    if (!fn)
-      return NULL;
-    hk_incr_ref(fn);
-    functions[i] = fn;
+    HkFunction *nestedFn = hk_function_deserialize(stream);
+    if (!nestedFn) return NULL;
+    hk_incr_ref(nestedFn);
+    functions[i] = nestedFn;
   }
   fn->functions = functions;
   if (fread(&fn->numNonlocals, sizeof(fn->numNonlocals), 1, stream) != 1)

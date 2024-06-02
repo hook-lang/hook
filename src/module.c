@@ -11,12 +11,13 @@
 #include "record.h"
 
 #ifdef _WIN32
-  #include <Windows.h>
   #include <io.h>
+  #include <Windows.h>
 #endif
 
 #ifndef _WIN32
   #include <dlfcn.h>
+  #include <limits.h>
   #include <unistd.h>
 #endif
 
@@ -55,18 +56,22 @@
 #endif
 
 #ifdef _WIN32
+  #define PATH_MAX MAX_PATH
+#endif
+
+#ifdef _WIN32
   typedef void (__stdcall *LoadModuleHandler)(HkState *);
 #else
   typedef void (*LoadModuleHandler)(HkState *);
 #endif
 
 static Record moduleCache;
-static HkString *path = NULL;
+static HkString *envPath = NULL;
 
-static inline const char *get_home_dir(void);
-static inline const char *get_default_home_dir(void);
-static inline HkString *get_path(void);
-static inline HkString *get_default_path(void);
+static inline void get_home_dir(char *path);
+static inline void get_default_home_dir(char *path);
+static inline HkString *get_env_path(void);
+static inline HkString *get_default_env_path(void);
 static inline HkString *path_match(HkString *path, HkString *name, HkString *currFile);
 static inline bool is_relative(char *filename);
 static inline HkString *get_module_file(HkString *relFile, HkString *currFile);
@@ -78,45 +83,48 @@ static inline HkString *load_source_from_file(const char *filename);
 static inline bool module_cache_get(HkString *name, HkValue *module);
 static inline void module_cache_put(HkString *name, HkValue module);
 
-static inline const char *get_home_dir(void)
+static inline void get_home_dir(char *path)
 {
   const char *dir = getenv(HOME_ENV_VAR);
   if (!dir)
-    dir = get_default_home_dir();
-  return dir;
+  {
+    get_default_home_dir(path);
+    return;
+  }
+  strncpy(path, dir, PATH_MAX);
+  path[PATH_MAX] = '\0';
 }
 
-static inline const char *get_default_home_dir(void)
+static inline void get_default_home_dir(char *path)
 {
-  const char *dir = "/opt/hook";
 #ifdef _WIN32
   const char *drive = getenv("SystemDrive");
   hk_assert(drive, "environment variable 'SystemDrive' not set");
-  char *path[MAX_PATH + 1];
-  snprintf(path, MAX_PATH, "%s\\hook", drive);
-  strncpy_s(path, MAX_PATH, drive, _TRUNCATE);
-  dir = (const char *) path;
+  snprintf(path, PATH_MAX + 1, "%s\\hook", drive);
+#else
+  strncpy(path, "/opt/hook", PATH_MAX);
+  path[PATH_MAX] = '\0';
 #endif
-  return dir;
 }
 
-static inline HkString *get_path(void)
+static inline HkString *get_env_path(void)
 {
-  if (!path)
+  if (!envPath)
   {
-    const char *_path = getenv(PATH_ENV_VAR);
-    path = _path ? hk_string_from_chars(-1, _path) : get_default_path();
+    const char *path = getenv(PATH_ENV_VAR);
+    envPath = path ? hk_string_from_chars(-1, path) : get_default_env_path();
   }
-  return path;
+  return envPath;
 }
 
-static inline HkString *get_default_path(void)
+static inline HkString *get_default_env_path(void)
 {
+  char homeDir[PATH_MAX + 1];
+  get_home_dir(homeDir);
   HkString *path = hk_string_new();
   hk_string_inplace_concat_chars(path, -1, WILDCARD);
   hk_string_inplace_concat_chars(path, -1, PATH_SEP);
-
-  hk_string_inplace_concat_chars(path, -1, get_home_dir());
+  hk_string_inplace_concat_chars(path, -1, homeDir);
   hk_string_inplace_concat_chars(path, -1, DIR_SEP);
   hk_string_inplace_concat_chars(path, -1, LIB_DIR);
   hk_string_inplace_concat_chars(path, -1, DIR_SEP);
@@ -124,11 +132,9 @@ static inline HkString *get_default_path(void)
   hk_string_inplace_concat_chars(path, -1, LIB_POSTFIX);
   hk_string_inplace_concat_chars(path, -1, LIB_EXT);
   hk_string_inplace_concat_chars(path, -1, PATH_SEP);
-
   hk_string_inplace_concat_chars(path, -1, WILDCARD);
   hk_string_inplace_concat_chars(path, -1, SRC_EXT);
   hk_string_inplace_concat_chars(path, -1, PATH_SEP);
-
   hk_string_inplace_concat_chars(path, -1, WILDCARD);
   hk_string_inplace_concat_chars(path, -1, DIR_SEP);
   hk_string_inplace_concat_chars(path, -1, SRC_MAIN);
@@ -193,7 +199,7 @@ static inline HkString *get_module_file(HkString *relFile, HkString *currFile)
 
 static inline void load_module(HkState *state, HkString *name, HkString *currFile)
 {
-  HkString *path = get_path();
+  HkString *path = get_env_path();
   HkString *file = path_match(path, name, currFile);
   if (!file)
   {
@@ -270,7 +276,12 @@ static inline void load_native_module(HkState *state, HkString *file, HkString *
 
 static inline HkString *load_source_from_file(const char *filename)
 {
-  FILE *stream = fopen(filename, "r");
+  FILE *stream = NULL;
+#ifdef _WIN32
+  (void) fopen_s(&stream, filename, "r");
+#else
+  stream = fopen(filename, "r");
+#endif
   if (!stream)
     return NULL;
   HkString *source = hk_string_from_stream(stream, '\0');
@@ -300,8 +311,8 @@ void module_cache_init(void)
 void module_cache_deinit(void)
 {
   record_deinit(&moduleCache);
-  if (path)
-    hk_string_free(path);
+  if (envPath)
+    hk_string_free(envPath);
 }
 
 void module_load(HkState *state, HkString *currFile)

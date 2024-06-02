@@ -108,7 +108,7 @@ static inline bool poll_selector_register(PollSelector *selector,
   if (selector->count == MAX_FDS) return false;
   PollFd fd = {
     .fd = (int) udata->sock,
-    .events = events,
+    .events = (short) events,
     .revents = 0
   };
   int index = selector->count;
@@ -149,7 +149,7 @@ static inline bool poll_selector_modify(PollSelector *selector,
     if (fd->fd == (int) udata->sock) break;
   }
   if (i == n) return false;
-  selector->fds[i].events = events;
+  selector->fds[i].events = (short) events;
   return true;
 }
 

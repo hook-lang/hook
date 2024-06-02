@@ -180,7 +180,12 @@ static inline void print_version(void)
 
 static inline FILE *open_file(const char *filename, const char *mode)
 {
-  FILE *stream = fopen(filename, mode);
+  FILE *stream = NULL;
+#ifdef _WIN32
+  (void) fopen_s(&stream, filename, mode);
+#else
+  stream = fopen(filename, mode);
+#endif
   if (!stream)
     fatal_error("unable to open file `%s`", filename);
   return stream;
