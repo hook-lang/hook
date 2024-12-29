@@ -2,14 +2,14 @@
 # CMakeLists.txt (Root)
 # ------------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.15)
 
 project(hook
   DESCRIPTION "The Hook Programming Language"
   VERSION 0.1.0
   LANGUAGES C)
 
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 11)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 set(BINARY_DIR ${CMAKE_BINARY_DIR}/../bin)

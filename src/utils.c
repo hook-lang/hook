@@ -4,13 +4,17 @@
 //
 
 #include <hook/utils.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
-#include <errno.h>
+#include <hook/memory.h>
 
 #ifdef _WIN32
   #include <windows.h>
+  #include <direct.h>
+#else
+  #include <sys/stat.h>
+  #include <limits.h>
 #endif
 
 #ifdef __linux__
@@ -23,7 +27,6 @@
 
 #ifdef _WIN32
   #define PATH_MAX MAX_PATH
-  #define mkdir _mkdir
 #endif
 
 static void make_directory(char *path);
@@ -37,7 +40,11 @@ static void make_directory(char *path)
     make_directory(path);
     *sep = '/';
   }
+#ifdef _WIN32
+  _mkdir(path);
+#else
   mkdir(path, 0777); 
+#endif
 }
 
 int hk_power_of_two_ceil(int n)
@@ -93,8 +100,18 @@ bool hk_double_from_chars(double *result, const char *chars, bool strict)
 void hk_copy_cstring(char *dest, const char *src, int max_len)
 {
 #ifdef _WIN32
-  strncpy_s(dest, max_len, src, _TRUNCATE);
+  strncpy_s(dest, max_len + 1, src, _TRUNCATE);
 #else
   strncpy(dest, src, max_len);
+  dest[max_len] = '\0';
 #endif
+}
+
+char *hk_duplicate_cstring(const char *str)
+{
+  int length = (int) strnlen(str, INT_MAX);
+  char *_str = (char *) hk_allocate(length + 1);
+  memcpy(_str, str, length);
+  _str[length] = '\0';
+  return _str;
 }

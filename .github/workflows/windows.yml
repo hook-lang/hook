@@ -1,0 +1,22 @@
+name: Build and test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  windows-build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Configure CMake and build
+      run: ${{ github.workspace }}/scripts/build.bat
+    - name: Running tests
+      run: |
+        ${{ github.workspace }}/scripts/test.bat
+      env:
+        HOOK_HOME: ${{ github.workspace }}
