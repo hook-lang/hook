@@ -1,5 +1,7 @@
 
-[![Build and test](https://github.com/hook-lang/hook/actions/workflows/build.yml/badge.svg)](https://github.com/hook-lang/hook/actions/workflows/build.yml)
+[![Ubuntu](https://github.com/hook-lang/hook/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/hook-lang/hook/actions/workflows/ubuntu.yml)
+[![macOS](https://github.com/hook-lang/hook/actions/workflows/macos.yml/badge.svg)](https://github.com/hook-lang/hook/actions/workflows/macos.yml)
+[![Windows](https://github.com/hook-lang/hook/actions/workflows/windows.yml/badge.svg)](https://github.com/hook-lang/hook/actions/workflows/windows.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/b58fa787c8cc480091a8e976164ee203)](https://app.codacy.com/gh/hook-lang/hook/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![codecov](https://codecov.io/gh/hook-lang/hook/graph/badge.svg?token=oRSpRBTqp8)](https://codecov.io/gh/hook-lang/hook)
 
