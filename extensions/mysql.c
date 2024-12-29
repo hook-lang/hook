@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // mysql.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "mysql.h"
@@ -23,14 +28,14 @@ static inline MySQLWrapper *mysql_wrapper_new(MYSQL *mysql);
 static inline MySQLResultWrapper *mysql_result_wrapper_new(MYSQL_RES *res);
 static void mysql_wrapper_deinit(HkUserdata *udata);
 static void mysql_result_wrapper_deinit(HkUserdata *udata);
-static void connect_call(HkState *state, HkValue *args);
-static void close_call(HkState *state, HkValue *args);
-static void ping_call(HkState *state, HkValue *args);
-static void error_call(HkState *state, HkValue *args);
-static void select_db_call(HkState *state, HkValue *args);
-static void query_call(HkState *state, HkValue *args);
-static void fetch_row_call(HkState *state, HkValue *args);
-static void affected_rows_call(HkState *state, HkValue *args);
+static void connect_call(HkVM *vm, HkValue *args);
+static void close_call(HkVM *vm, HkValue *args);
+static void ping_call(HkVM *vm, HkValue *args);
+static void error_call(HkVM *vm, HkValue *args);
+static void select_db_call(HkVM *vm, HkValue *args);
+static void query_call(HkVM *vm, HkValue *args);
+static void fetch_row_call(HkVM *vm, HkValue *args);
+static void affected_rows_call(HkVM *vm, HkValue *args);
 
 static inline MySQLWrapper *mysql_wrapper_new(MYSQL *mysql)
 {
@@ -65,21 +70,21 @@ static void mysql_result_wrapper_deinit(HkUserdata *udata)
   mysql_free_result(res);
 }
 
-static void connect_call(HkState *state, HkValue *args)
+static void connect_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_types(state, args, 1, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_types(state, args, 2, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_NUMBER });
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_types(state, args, 3, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_types(state, args, 4, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_types(state, args, 5, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_types(vm, args, 1, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_types(vm, args, 2, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_NUMBER });
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_types(vm, args, 3, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_types(vm, args, 4, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_types(vm, args, 5, 2, (HkType[]) { HK_TYPE_NIL, HK_TYPE_STRING });
+  hk_return_if_not_ok(vm);
   if (mysql_library_init(0, NULL, NULL))
   {
-    hk_state_runtime_error(state, "cannot initialize MySQL client library");
+    hk_vm_runtime_error(vm, "cannot initialize MySQL client library");
     return;
   }
   MYSQL *mysql = NULL;
@@ -99,20 +104,20 @@ static void connect_call(HkState *state, HkValue *args)
     hk_incr_ref(err);
     result->elements[0] = HK_NIL_VALUE;
     result->elements[1] = hk_string_value(err);
-    hk_state_push_array(state, result);
+    hk_vm_push_array(vm, result);
     return;
   }
   HkUserdata *udata = (HkUserdata *) mysql_wrapper_new(mysql);
   hk_incr_ref(udata);
   result->elements[0] = hk_userdata_value(udata);
   result->elements[1] = HK_NIL_VALUE;
-  hk_state_push_array(state, result);
+  hk_vm_push_array(vm, result);
 }
 
-static void close_call(HkState *state, HkValue *args)
+static void close_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   MySQLWrapper *wrapper = (MySQLWrapper *) hk_as_userdata(args[1]);
   bool result = false;
   if (wrapper->mysql)
@@ -122,42 +127,42 @@ static void close_call(HkState *state, HkValue *args)
     wrapper->mysql = NULL;
     result = true;
   }
-  hk_state_push_bool(state, result);
+  hk_vm_push_bool(vm, result);
 }
 
-static void ping_call(HkState *state, HkValue *args)
+static void ping_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   MYSQL *mysql = ((MySQLWrapper *) hk_as_userdata(args[1]))->mysql;
-  hk_state_push_bool(state, !mysql_ping(mysql));
+  hk_vm_push_bool(vm, !mysql_ping(mysql));
 }
 
-static void error_call(HkState *state, HkValue *args)
+static void error_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   MYSQL *mysql = ((MySQLWrapper *) hk_as_userdata(args[1]))->mysql;
-  hk_state_push_string_from_chars(state, -1, mysql_error(mysql));
+  hk_vm_push_string_from_chars(vm, -1, mysql_error(mysql));
 }
 
-static void select_db_call(HkState *state, HkValue *args)
+static void select_db_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_string(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_string(vm, args, 2);
+  hk_return_if_not_ok(vm);
   MYSQL *mysql = ((MySQLWrapper *) hk_as_userdata(args[1]))->mysql;
   const char *database = hk_as_string(args[2])->chars;
-  hk_state_push_bool(state, !mysql_select_db(mysql, database));
+  hk_vm_push_bool(vm, !mysql_select_db(mysql, database));
 }
 
-static void query_call(HkState *state, HkValue *args)
+static void query_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_string(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_string(vm, args, 2);
+  hk_return_if_not_ok(vm);
   MYSQL *mysql = ((MySQLWrapper *) hk_as_userdata(args[1]))->mysql;
   const char *query = hk_as_string(args[2])->chars;
   HkArray *result = hk_array_new_with_capacity(2);
@@ -168,7 +173,7 @@ static void query_call(HkState *state, HkValue *args)
     hk_incr_ref(err);
     result->elements[0] = HK_NIL_VALUE;
     result->elements[1] = hk_string_value(err);
-    hk_state_push_array(state, result);
+    hk_vm_push_array(vm, result);
     return;
   }
   MYSQL_RES *mysql_res = mysql_store_result(mysql);
@@ -176,26 +181,26 @@ static void query_call(HkState *state, HkValue *args)
   {
     result->elements[0] = HK_NIL_VALUE;
     result->elements[1] = HK_NIL_VALUE;
-    hk_state_push_array(state, result);
+    hk_vm_push_array(vm, result);
     return;
   }
   HkUserdata *udata = (HkUserdata *) mysql_result_wrapper_new(mysql_res);
   hk_incr_ref(udata);
   result->elements[0] = hk_userdata_value(udata);
   result->elements[1] = HK_NIL_VALUE;
-  hk_state_push_array(state, result);
+  hk_vm_push_array(vm, result);
 }
 
-static void fetch_row_call(HkState *state, HkValue *args)
+static void fetch_row_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   MYSQL_RES *res = ((MySQLResultWrapper *) hk_as_userdata(args[1]))->res;
   MYSQL_FIELD *fields = mysql_fetch_fields(res);
   MYSQL_ROW row = mysql_fetch_row(res);
   if (!row)
   {
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
   int numFields = mysql_num_fields(res);
@@ -249,52 +254,52 @@ static void fetch_row_call(HkState *state, HkValue *args)
     }
     hk_array_inplace_add_element(arr, elem);
   }
-  hk_state_push_array(state, arr);
+  hk_vm_push_array(vm, arr);
 }
 
-static void affected_rows_call(HkState *state, HkValue *args)
+static void affected_rows_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   MYSQL *mysql = ((MySQLWrapper *) hk_as_userdata(args[1]))->mysql;
-  hk_state_push_number(state, (double) mysql_affected_rows(mysql));
+  hk_vm_push_number(vm, (double) mysql_affected_rows(mysql));
 }
 
 HK_LOAD_MODULE_HANDLER(mysql)
 {
-  hk_state_push_string_from_chars(state, -1, "mysql");
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "connect");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "connect", 5, connect_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "close");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "close", 1, close_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "ping");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "ping", 1, ping_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "error");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "error", 1, error_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "select_db");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "select_db", 2, select_db_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "query");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "query", 2, query_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "fetch_row");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "fetch_row", 1, fetch_row_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "affected_rows");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "affected_rows", 1, affected_rows_call);
-  hk_return_if_not_ok(state);
-  hk_state_construct(state, 8);
+  hk_vm_push_string_from_chars(vm, -1, "mysql");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "connect");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "connect", 5, connect_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "close");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "close", 1, close_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "ping");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "ping", 1, ping_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "error");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "error", 1, error_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "select_db");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "select_db", 2, select_db_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "query");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "query", 2, query_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "fetch_row");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "fetch_row", 1, fetch_row_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "affected_rows");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "affected_rows", 1, affected_rows_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_construct(vm, 8);
 }

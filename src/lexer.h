@@ -1,10 +1,15 @@
 //
-// The Hook Programming Language
-// scanner.h
+// lexer.h
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
-#ifndef SCANNER_H
-#define SCANNER_H
+#ifndef LEXER_H
+#define LEXER_H
 
 #include <hook/string.h>
 
@@ -41,10 +46,10 @@ typedef struct
   int      line;
   int      col;
   Token    token;
-} Scanner;
+} Lexer;
 
-void scanner_init(Scanner *scan, HkString *file, HkString *source);
-void scanner_deinit(Scanner *scan);
-void scanner_next_token(Scanner *scan);
+void lexer_init(Lexer *lex, HkString *file, HkString *source);
+void lexer_deinit(Lexer *lex);
+void lexer_next_token(Lexer *lex);
 
-#endif // SCANNER_H
+#endif // LEXER_H

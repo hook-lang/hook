@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // utils.h
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #ifndef HK_UTILS_H
@@ -12,9 +17,9 @@
 #define HK_LOAD_MODULE_HANDLER_PREFIX "load_"
 
 #ifdef _WIN32
-  #define HK_LOAD_MODULE_HANDLER(n) void __declspec(dllexport) __stdcall load_##n(HkState *state)
+  #define HK_LOAD_MODULE_HANDLER(n) void __declspec(dllexport) __stdcall load_##n(HkVM *vm)
 #else
-  #define HK_LOAD_MODULE_HANDLER(n) void load_##n(HkState *state)
+  #define HK_LOAD_MODULE_HANDLER(n) void load_##n(HkVM *vm)
 #endif
 
 #define hk_assert(cond, msg) do \

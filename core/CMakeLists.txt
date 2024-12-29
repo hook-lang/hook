@@ -12,59 +12,73 @@ if(NOT MSVC)
 endif()
 
 add_library(math_mod SHARED
-  math.c)
+  "math.c"
+)
 
 add_library(os_mod SHARED
-  os.c)
+  "os.c"
+)
 
 add_library(io_mod SHARED
-  io.c)
+  "io.c"
+)
 
 add_library(numbers_mod SHARED
-  numbers.c)
+  "numbers.c"
+)
 
 add_library(strings_mod SHARED
-  strings.c)
+  "strings.c"
+)
 
 add_library(arrays_mod SHARED
-  arrays.c)
+  "arrays.c"
+)
 
 add_library(utf8_mod SHARED
-  utf8.c)
+  "utf8.c"
+)
 
 add_library(hashing_mod SHARED
-  hashing.c
-  deps/crc32.c
-  deps/crc64.c
-  deps/md5.c
-  deps/ripemd160.c
-  deps/sha1.c
-  deps/sha2.c
-  deps/sha3.c)
+  "hashing.c"
+  "deps/crc32.c"
+  "deps/crc64.c"
+  "deps/md5.c"
+  "deps/ripemd160.c"
+  "deps/sha1.c"
+  "deps/sha2.c"
+  "deps/sha3.c"
+)
 
 add_library(encoding_mod SHARED
-  encoding.c
-  deps/ascii85.c
-  deps/base32.c
-  deps/base58.c
-  deps/base64.c)
+  "encoding.c"
+  "deps/ascii85.c"
+  "deps/base32.c"
+  "deps/base58.c"
+  "deps/base64.c"
+)
 
 add_library(socket_mod SHARED
-  socket.c)
+  "socket.c"
+)
 
 add_library(json_mod SHARED
-  json.c
-  deps/cJSON.c)
+  "json.c"
+  "deps/cJSON.c"
+)
 
 add_library(lists_mod SHARED
-  lists.c)
+  "lists.c"
+)
 
 add_library(ini_mod SHARED
-  ini.c
-  deps/ini.c)
+  "ini.c"
+  "deps/ini.c"
+)
 
 add_library(selectors_mod SHARED
-  selectors.c)
+  "selectors.c"
+)
 
 target_link_libraries(math_mod      ${STATIC_LIB_TARGET})
 target_link_libraries(os_mod        ${STATIC_LIB_TARGET})

@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // curl.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "curl.h"
@@ -26,13 +31,13 @@ static inline void curl_wrapper_setopt_headers(CurlWrapper *wrapper, HkArray *he
 static inline struct curl_slist *array_to_slist(HkArray *arr);
 static void curl_wrapper_deinit(HkUserdata *udata);
 static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data);
-static void init_call(HkState *state, HkValue *args);
-static void setopt_call(HkState *state, HkValue *args);
-static void close_call(HkState *state, HkValue *args);
-static void exec_call(HkState *state, HkValue *args);
-static void errno_call(HkState *state, HkValue *args);
-static void error_call(HkState *state, HkValue *args);
-static void getinfo_call(HkState *state, HkValue *args);
+static void init_call(HkVM *vm, HkValue *args);
+static void setopt_call(HkVM *vm, HkValue *args);
+static void close_call(HkVM *vm, HkValue *args);
+static void exec_call(HkVM *vm, HkValue *args);
+static void errno_call(HkVM *vm, HkValue *args);
+static void error_call(HkVM *vm, HkValue *args);
+static void getinfo_call(HkVM *vm, HkValue *args);
 
 static inline void initialize(void)
 {
@@ -136,18 +141,18 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *data)
   return size;
 }
 
-static void init_call(HkState *state, HkValue *args)
+static void init_call(HkVM *vm, HkValue *args)
 {
   HkType types[] = { HK_TYPE_NIL, HK_TYPE_STRING };
-  hk_state_check_argument_types(state, args, 1, 2, types);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_types(vm, args, 1, 2, types);
+  hk_return_if_not_ok(vm);
   HkValue val = args[1];
   initialize();
   CURL *curl = curl_easy_init();
   if (!curl)
   {
     deinitialize();
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
   CURLcode res = CURLE_OK;
@@ -157,29 +162,29 @@ static void init_call(HkState *state, HkValue *args)
     if ((res = curl_easy_setopt(curl, CURLOPT_URL, str->chars)) == CURLE_OK)
       res = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   }
-  hk_state_push_userdata(state, (HkUserdata *) curl_wrapper_new(curl, res));
+  hk_vm_push_userdata(vm, (HkUserdata *) curl_wrapper_new(curl, res));
 }
 
-static void setopt_call(HkState *state, HkValue *args)
+static void setopt_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_int(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_int(vm, args, 2);
+  hk_return_if_not_ok(vm);
   HkType types[] = { HK_TYPE_STRING, HK_TYPE_ARRAY };
-  hk_state_check_argument_types(state, args, 3, 2, types);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_types(vm, args, 3, 2, types);
+  hk_return_if_not_ok(vm);
   CurlWrapper *wrapper = (CurlWrapper *) hk_as_userdata(args[1]);
   int opt = (int) hk_as_number(args[2]);
   HkValue val = args[3];
   wrapper->res = curl_wrapper_setopt(wrapper, opt, val);
-  hk_state_push_nil(state);
+  hk_vm_push_nil(vm);
 }
 
-static void close_call(HkState *state, HkValue *args)
+static void close_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   CurlWrapper *wrapper = (CurlWrapper *) hk_as_userdata(args[1]);
   bool result = false;
   if (wrapper->curl)
@@ -188,13 +193,13 @@ static void close_call(HkState *state, HkValue *args)
     wrapper->curl = NULL;
     result = true;
   }
-  hk_state_push_bool(state, result);
+  hk_vm_push_bool(vm, result);
 }
 
-static void exec_call(HkState *state, HkValue *args)
+static void exec_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   CurlWrapper *wrapper = (CurlWrapper *) hk_as_userdata(args[1]);
   CURL *curl = wrapper->curl;
   HkString *url = wrapper->url;
@@ -217,98 +222,98 @@ static void exec_call(HkState *state, HkValue *args)
   if (res != CURLE_OK)
   {
     hk_string_free(result);
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
-  hk_state_push_string(state, result);
+  hk_vm_push_string(vm, result);
 }
 
-static void errno_call(HkState *state, HkValue *args)
+static void errno_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   CurlWrapper *wrapper = (CurlWrapper *) hk_as_userdata(args[1]);
-  hk_state_push_number(state, (double) wrapper->res);
+  hk_vm_push_number(vm, (double) wrapper->res);
 }
 
-static void error_call(HkState *state, HkValue *args)
+static void error_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   CurlWrapper *wrapper = (CurlWrapper *) hk_as_userdata(args[1]);
   const char *chars = curl_easy_strerror(wrapper->res);
-  hk_state_push_string_from_chars(state, -1, chars);
+  hk_vm_push_string_from_chars(vm, -1, chars);
 }
 
-static void getinfo_call(HkState *state, HkValue *args)
+static void getinfo_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_int(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_int(vm, args, 2);
+  hk_return_if_not_ok(vm);
   CURL *curl = ((CurlWrapper *) hk_as_userdata(args[1]))->curl;
   int info = (int) hk_as_number(args[2]);
   // TODO: The type of value depends on info
   long value = 0;
   curl_easy_getinfo(curl, info, &value);
-  hk_state_push_number(state, (double) value);
+  hk_vm_push_number(vm, (double) value);
 }
 
 HK_LOAD_MODULE_HANDLER(curl)
 {
-  hk_state_push_string_from_chars(state, -1, "curl");
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "OPT_URL");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, CURLOPT_URL);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "OPT_FOLLOWLOCATION");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, CURLOPT_FOLLOWLOCATION);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "OPT_POST");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, CURLOPT_POST);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "OPT_POSTFIELDS");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, CURLOPT_POSTFIELDS);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "OPT_HTTPHEADER");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, CURLOPT_HTTPHEADER);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "INFO_RESPONSE_CODE");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, CURLINFO_RESPONSE_CODE);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "init");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "init", 1, init_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "setopt");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "setopt", 3, setopt_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "close");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "close", 1, close_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "exec");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "exec", 1, exec_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "errno");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "errno", 1, errno_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "error");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "error", 1, error_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "getinfo");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "getinfo", 2, getinfo_call);
-  hk_return_if_not_ok(state);
-  hk_state_construct(state, 13);
+  hk_vm_push_string_from_chars(vm, -1, "curl");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "OPT_URL");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, CURLOPT_URL);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "OPT_FOLLOWLOCATION");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, CURLOPT_FOLLOWLOCATION);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "OPT_POST");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, CURLOPT_POST);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "OPT_POSTFIELDS");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, CURLOPT_POSTFIELDS);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "OPT_HTTPHEADER");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, CURLOPT_HTTPHEADER);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "INFO_RESPONSE_CODE");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, CURLINFO_RESPONSE_CODE);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "init");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "init", 1, init_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "setopt");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "setopt", 3, setopt_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "close");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "close", 1, close_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "exec");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "exec", 1, exec_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "errno");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "errno", 1, errno_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "error");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "error", 1, error_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "getinfo");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "getinfo", 2, getinfo_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_construct(vm, 13);
 }

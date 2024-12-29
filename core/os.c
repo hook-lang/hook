@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // os.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "os.h"
@@ -16,42 +21,42 @@
   #include <limits.h>
 #endif
 
-static void clock_call(HkState *state, HkValue *args);
-static void time_call(HkState *state, HkValue *args);
-static void system_call(HkState *state, HkValue *args);
-static void getenv_call(HkState *state, HkValue *args);
-static void getcwd_call(HkState *state, HkValue *args);
-static void name_call(HkState *state, HkValue *args);
+static void clock_call(HkVM *vm, HkValue *args);
+static void time_call(HkVM *vm, HkValue *args);
+static void system_call(HkVM *vm, HkValue *args);
+static void getenv_call(HkVM *vm, HkValue *args);
+static void getcwd_call(HkVM *vm, HkValue *args);
+static void name_call(HkVM *vm, HkValue *args);
 
-static void clock_call(HkState *state, HkValue *args)
+static void clock_call(HkVM *vm, HkValue *args)
 {
   (void) args;
-  hk_state_push_number(state, (double) clock() / CLOCKS_PER_SEC);
+  hk_vm_push_number(vm, (double) clock() / CLOCKS_PER_SEC);
 }
 
-static void time_call(HkState *state, HkValue *args)
+static void time_call(HkVM *vm, HkValue *args)
 {
   (void) args;
-  hk_state_push_number(state, (double) time(NULL));
+  hk_vm_push_number(vm, (double) time(NULL));
 }
 
-static void system_call(HkState *state, HkValue *args)
+static void system_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_string(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, system(hk_as_string(args[1])->chars));
+  hk_vm_check_argument_string(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, system(hk_as_string(args[1])->chars));
 }
 
-static void getenv_call(HkState *state, HkValue *args)
+static void getenv_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_string(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_string(vm, args, 1);
+  hk_return_if_not_ok(vm);
   const char *chars = getenv(hk_as_string(args[1])->chars);
   chars = chars ? chars : "";
-  hk_state_push_string_from_chars(state, -1, chars);
+  hk_vm_push_string_from_chars(vm, -1, chars);
 }
 
-static void getcwd_call(HkState *state, HkValue *args)
+static void getcwd_call(HkVM *vm, HkValue *args)
 {
   (void) args;
   HkString *result = NULL;
@@ -70,15 +75,15 @@ static void getcwd_call(HkState *state, HkValue *args)
 end:
   if (!result)
   {
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
-  hk_state_push_string(state, result);
-  if (!hk_state_is_ok(state))
+  hk_vm_push_string(vm, result);
+  if (!hk_vm_is_ok(vm))
     hk_string_free(result);
 }
 
-static void name_call(HkState *state, HkValue *args)
+static void name_call(HkVM *vm, HkValue *args)
 {
   (void) args;
   char *result;
@@ -95,40 +100,40 @@ static void name_call(HkState *state, HkValue *args)
 #else
   result = "unknown";
 #endif
-  hk_state_push_string_from_chars(state, -1, result);
+  hk_vm_push_string_from_chars(vm, -1, result);
 }
 
 HK_LOAD_MODULE_HANDLER(os)
 {
-  hk_state_push_string_from_chars(state, -1, "os");
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "CLOCKS_PER_SEC");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, CLOCKS_PER_SEC);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "clock");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "clock", 0, clock_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "time");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "time", 0, time_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "system");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "system", 1, system_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "getenv");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "getenv", 1, getenv_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "getcwd");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "getcwd", 1, getcwd_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "name");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "name", 0, name_call);
-  hk_return_if_not_ok(state);
-  hk_state_construct(state, 7);
+  hk_vm_push_string_from_chars(vm, -1, "os");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "CLOCKS_PER_SEC");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, CLOCKS_PER_SEC);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "clock");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "clock", 0, clock_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "time");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "time", 0, time_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "system");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "system", 1, system_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "getenv");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "getenv", 1, getenv_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "getcwd");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "getcwd", 1, getcwd_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "name");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "name", 0, name_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_construct(vm, 7);
 }

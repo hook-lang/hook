@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // module.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "module.h"
@@ -60,9 +65,9 @@
 #endif
 
 #ifdef _WIN32
-  typedef void (__stdcall *LoadModuleHandler)(HkState *);
+  typedef void (__stdcall *LoadModuleHandler)(HkVM *);
 #else
-  typedef void (*LoadModuleHandler)(HkState *);
+  typedef void (*LoadModuleHandler)(HkVM *);
 #endif
 
 static Record moduleCache;
@@ -75,10 +80,10 @@ static inline HkString *get_default_env_path(void);
 static inline HkString *path_match(HkString *path, HkString *name, HkString *currFile);
 static inline bool is_relative(char *filename);
 static inline HkString *get_module_file(HkString *relFile, HkString *currFile);
-static inline void load_module(HkState *state, HkString *name, HkString *currFile);
+static inline void load_module(HkVM *vm, HkString *name, HkString *currFile);
 static inline bool is_source_module(char *filename);
-static inline void load_source_module(HkState *state, HkString *file, HkString *name);
-static inline void load_native_module(HkState *state, HkString *file, HkString *name);
+static inline void load_source_module(HkVM *vm, HkString *file, HkString *name);
+static inline void load_native_module(HkVM *vm, HkString *file, HkString *name);
 static inline HkString *load_source_from_file(const char *filename);
 static inline bool module_cache_get(HkString *name, HkValue *module);
 static inline void module_cache_put(HkString *name, HkValue module);
@@ -197,22 +202,22 @@ static inline HkString *get_module_file(HkString *relFile, HkString *currFile)
   return hk_string_copy(relFile);
 }
 
-static inline void load_module(HkState *state, HkString *name, HkString *currFile)
+static inline void load_module(HkVM *vm, HkString *name, HkString *currFile)
 {
   HkString *path = get_env_path();
   HkString *file = path_match(path, name, currFile);
   if (!file)
   {
-    hk_state_runtime_error(state, "cannot find module `%.*s`",
+    hk_vm_runtime_error(vm, "cannot find module `%.*s`",
       name->length, name->chars);
     return;
   }
   if (is_source_module(file->chars))
   {
-    load_source_module(state, file, name);
+    load_source_module(vm, file, name);
     return;
   }
-  load_native_module(state, file, name);
+  load_native_module(vm, file, name);
   hk_string_free(file);
 }
 
@@ -224,22 +229,22 @@ static inline bool is_source_module(char *filename)
   return !strcmp(ext, SRC_EXT);
 }
 
-static inline void load_source_module(HkState *state, HkString *file, HkString *name)
+static inline void load_source_module(HkVM *vm, HkString *file, HkString *name)
 {
   HkString *source = load_source_from_file(file->chars);
   if (!source)
-    hk_state_runtime_error(state, "cannot open module `%.*s`",
+    hk_vm_runtime_error(vm, "cannot open module `%.*s`",
       name->length, name->chars);
   HkClosure *cl = hk_compile(file, source, HK_COMPILER_FLAG_NONE);
-  hk_state_push_closure(state, cl);
-  hk_state_push_array(state, hk_array_new());
-  hk_state_call(state, 1);
-  if (!hk_state_is_ok(state))
-    hk_state_runtime_error(state, "cannot load module `%.*s`",
+  hk_vm_push_closure(vm, cl);
+  hk_vm_push_array(vm, hk_array_new());
+  hk_vm_call(vm, 1);
+  if (!hk_vm_is_ok(vm))
+    hk_vm_runtime_error(vm, "cannot load module `%.*s`",
       name->length, name->chars);
 }
 
-static inline void load_native_module(HkState *state, HkString *file, HkString *name)
+static inline void load_native_module(HkVM *vm, HkString *file, HkString *name)
 {
 #ifdef _WIN32
   HINSTANCE handle = LoadLibrary(file->chars);
@@ -248,7 +253,7 @@ static inline void load_native_module(HkState *state, HkString *file, HkString *
 #endif
   if (!handle)
   {
-    hk_state_runtime_error(state, "cannot open module `%.*s`",
+    hk_vm_runtime_error(vm, "cannot open module `%.*s`",
       name->length, name->chars);
     return;
   }
@@ -262,15 +267,15 @@ static inline void load_native_module(HkState *state, HkString *file, HkString *
 #endif
   if (!load)
   {
-    hk_state_runtime_error(state, "no such function %.*s()",
+    hk_vm_runtime_error(vm, "no such function %.*s()",
       funcName->length, funcName->chars);
     hk_string_free(funcName);
     return;
   }
   hk_string_free(funcName);
-  load(state);
-  if (!hk_state_is_ok(state))
-    hk_state_runtime_error(state, "cannot load module `%.*s`",
+  load(vm);
+  if (!hk_vm_is_ok(vm))
+    hk_vm_runtime_error(vm, "cannot load module `%.*s`",
       name->length, name->chars);
 }
 
@@ -315,9 +320,9 @@ void module_cache_deinit(void)
     hk_string_free(envPath);
 }
 
-void module_load(HkState *state, HkString *currFile)
+void module_load(HkVM *vm, HkString *currFile)
 {
-  HkValue *slots = &state->stackSlots[state->stackTop];
+  HkValue *slots = &vm->stackSlots[vm->stackTop];
   HkValue val = slots[0];
   hk_assert(hk_is_string(val), "module name must be a string");
   HkString *name = hk_as_string(val);
@@ -330,10 +335,10 @@ void module_load(HkState *state, HkString *currFile)
     hk_string_release(name);
     return;
   }
-  load_module(state, name, currFile);
-  hk_return_if_not_ok(state);
-  module_cache_put(name, state->stackSlots[state->stackTop]);
-  slots[0] = state->stackSlots[state->stackTop];
-  --state->stackTop;
+  load_module(vm, name, currFile);
+  hk_return_if_not_ok(vm);
+  module_cache_put(name, vm->stackSlots[vm->stackTop]);
+  slots[0] = vm->stackSlots[vm->stackTop];
+  --vm->stackTop;
   hk_string_release(name);
 }

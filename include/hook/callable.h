@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // callable.h
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #ifndef HK_CALLABLE_H
@@ -29,9 +34,9 @@ typedef struct
   HkValue    nonlocals[1];
 } HkClosure;
 
-struct HkState;
+struct HkVM;
 
-typedef void (*HkCallFn)(struct HkState *, HkValue *);
+typedef void (*HkCallFn)(struct HkVM *, HkValue *);
 
 typedef struct
 {

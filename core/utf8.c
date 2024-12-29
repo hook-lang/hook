@@ -1,13 +1,18 @@
 //
-// The Hook Programming Language
 // utf8.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "utf8.h"
 
 static inline int decode_char(unsigned char c);
-static void len_call(HkState *state, HkValue *args);
-static void sub_call(HkState *state, HkValue *args);
+static void len_call(HkVM *vm, HkValue *args);
+static void sub_call(HkVM *vm, HkValue *args);
 
 static inline int decode_char(unsigned char c)
 {
@@ -22,10 +27,10 @@ static inline int decode_char(unsigned char c)
   return 1;
 }
 
-static void len_call(HkState *state, HkValue *args)
+static void len_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_string(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_string(vm, args, 1);
+  hk_return_if_not_ok(vm);
   HkString *str = hk_as_string(args[1]);
   int result = 0;
   for (int i = 0; i < str->length;)
@@ -36,17 +41,17 @@ static void len_call(HkState *state, HkValue *args)
     i += length;
     ++result;
   }
-  hk_state_push_number(state, result);
+  hk_vm_push_number(vm, result);
 }
 
-static void sub_call(HkState *state, HkValue *args)
+static void sub_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_string(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_number(state, args, 2);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_number(state, args, 3);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_string(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_number(vm, args, 2);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_number(vm, args, 3);
+  hk_return_if_not_ok(vm);
   HkString *str = hk_as_string(args[1]);
   int start = (int) hk_as_number(args[2]);
   int end = (int) hk_as_number(args[3]);
@@ -72,20 +77,20 @@ static void sub_call(HkState *state, HkValue *args)
   end = i;
   length = end - start;
   char *chars = &str->chars[start];
-  hk_state_push_string_from_chars(state, length, chars);
+  hk_vm_push_string_from_chars(vm, length, chars);
 }
 
 HK_LOAD_MODULE_HANDLER(utf8)
 {
-  hk_state_push_string_from_chars(state, -1, "utf8");
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "len");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "len", 1, len_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "sub");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "sub", 3, sub_call);
-  hk_return_if_not_ok(state);
-  hk_state_construct(state, 2);
+  hk_vm_push_string_from_chars(vm, -1, "utf8");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "len");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "len", 1, len_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "sub");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "sub", 3, sub_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_construct(vm, 2);
 }

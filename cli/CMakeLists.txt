@@ -12,7 +12,8 @@ if(NOT MSVC)
 endif()
 
 add_executable(${PROJECT_NAME} 
-  main.c)
+  "main.c"
+)
 
 target_link_directories(${PROJECT_NAME} PRIVATE ${LIBRARY_DIR})
 

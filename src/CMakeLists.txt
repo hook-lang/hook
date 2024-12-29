@@ -15,25 +15,26 @@ if(NOT MSVC)
 endif()
 
 set(SOURCES
-  array.c
-  builtin.c
-  callable.c
-  chunk.c
-  utils.c
-  compiler.c
-  dump.c
-  iterable.c
-  iterator.c
-  memory.c
-  module.c
-  range.c
-  record.c
-  scanner.c
-  state.c
-  string.c
-  struct.c
-  userdata.c
-  value.c)
+  "array.c"
+  "builtin.c"
+  "callable.c"
+  "chunk.c"
+  "utils.c"
+  "compiler.c"
+  "dump.c"
+  "iterable.c"
+  "iterator.c"
+  "lexer.c"
+  "memory.c"
+  "module.c"
+  "range.c"
+  "record.c"
+  "string.c"
+  "struct.c"
+  "userdata.c"
+  "value.c"
+  "vm.c"
+)
 
 add_library(${STATIC_LIB_TARGET} STATIC ${SOURCES})
 add_library(${SHARED_LIB_TARGET} SHARED ${SOURCES})

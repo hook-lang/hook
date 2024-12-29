@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // json.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "json.h"
@@ -8,9 +13,9 @@
 #include "deps/cJSON.h"
 
 static inline cJSON *value_to_json(HkValue val);
-static inline HkValue json_to_value(HkState *state, cJSON *json);
-static void encode_call(HkState *state, HkValue *args);
-static void decode_call(HkState *state, HkValue *args);
+static inline HkValue json_to_value(HkVM *vm, cJSON *json);
+static void encode_call(HkVM *vm, HkValue *args);
+static void decode_call(HkVM *vm, HkValue *args);
 
 static inline cJSON *value_to_json(HkValue val)
 {
@@ -68,7 +73,7 @@ static inline cJSON *value_to_json(HkValue val)
   return json;
 }
 
-static inline HkValue json_to_value(HkState *state, cJSON *json)
+static inline HkValue json_to_value(HkVM *vm, cJSON *json)
 {
   HkValue val;
   switch (json->type)
@@ -95,7 +100,7 @@ static inline HkValue json_to_value(HkState *state, cJSON *json)
       cJSON *json_elem = json->child;
       while (json_elem)
       {
-        HkValue elem = json_to_value(state, json_elem);
+        HkValue elem = json_to_value(vm, json_elem);
         hk_array_inplace_add_element(arr, elem);
         json_elem = json_elem->next;
       }
@@ -104,22 +109,22 @@ static inline HkValue json_to_value(HkState *state, cJSON *json)
     break;
   case cJSON_Object:
     {
-      hk_state_push_nil(state);
+      hk_vm_push_nil(vm);
       cJSON *json_field = json->child;
       int length = 0;
       while (json_field)
       {
         HkString *field_name = hk_string_from_chars(-1, json_field->string);
-        HkValue value = json_to_value(state, json_field);
-        hk_state_push_string(state, field_name);
-        hk_state_push(state, value);
+        HkValue value = json_to_value(vm, json_field);
+        hk_vm_push_string(vm, field_name);
+        hk_vm_push(vm, value);
         ++length;
         json_field = json_field->next;
       }
-      hk_state_construct(state, length);
-      HkInstance *inst = hk_as_instance(state->stackSlots[state->stackTop]);
+      hk_vm_construct(vm, length);
+      HkInstance *inst = hk_as_instance(vm->stackSlots[vm->stackTop]);
       hk_incr_ref(inst);
-      hk_state_pop(state);
+      hk_vm_pop(vm);
       hk_decr_ref(inst);
       val = hk_instance_value(inst);
     }
@@ -131,7 +136,7 @@ static inline HkValue json_to_value(HkState *state, cJSON *json)
   return val;
 }
 
-static void encode_call(HkState *state, HkValue *args)
+static void encode_call(HkVM *vm, HkValue *args)
 {
   HkValue val = args[1];
   cJSON *json = value_to_json(val);
@@ -139,40 +144,40 @@ static void encode_call(HkState *state, HkValue *args)
   cJSON_Delete(json);
   HkString *str = hk_string_from_chars(-1, chars);
   free(chars);
-  hk_state_push_string(state, str);
-  if (!hk_state_is_ok(state))
+  hk_vm_push_string(vm, str);
+  if (!hk_vm_is_ok(vm))
     hk_string_free(str);
 }
 
-static void decode_call(HkState *state, HkValue *args)
+static void decode_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_string(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_string(vm, args, 1);
+  hk_return_if_not_ok(vm);
   HkString *str = hk_as_string(args[1]);
   cJSON *json = cJSON_ParseWithLength(str->chars, str->length);
   if (!json)
   {
-    hk_state_runtime_error(state, "cannot parse json");
+    hk_vm_runtime_error(vm, "cannot parse json");
     return;
   }
-  HkValue val = json_to_value(state, json);
+  HkValue val = json_to_value(vm, json);
   cJSON_Delete(json);
-  hk_state_push(state, val);
-  if (!hk_state_is_ok(state))
+  hk_vm_push(vm, val);
+  if (!hk_vm_is_ok(vm))
     hk_value_free(val);
 }
 
 HK_LOAD_MODULE_HANDLER(json)
 {
-  hk_state_push_string_from_chars(state, -1, "json");
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "encode");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "encode", 1, encode_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "decode");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "decode", 1, decode_call);
-  hk_return_if_not_ok(state);
-  hk_state_construct(state, 2);
+  hk_vm_push_string_from_chars(vm, -1, "json");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "encode");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "encode", 1, encode_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "decode");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "decode", 1, decode_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_construct(vm, 2);
 }

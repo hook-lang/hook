@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // main.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include <stdarg.h>
@@ -236,28 +241,28 @@ static inline void dump_bytecode_to_file(HkFunction *fn, const char *filename)
 
 static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsedArgs)
 {
-  HkState state;
-  hk_state_init(&state, parsedArgs->stackSize);
-  hk_state_push_closure(&state, cl);
-  hk_state_push_array(&state, args_array(parsedArgs));
-  hk_state_call(&state, 1);
+  HkVM vm;
+  hk_vm_init(&vm, parsedArgs->stackSize);
+  hk_vm_push_closure(&vm, cl);
+  hk_vm_push_array(&vm, args_array(parsedArgs));
+  hk_vm_call(&vm, 1);
   int exitCode = EXIT_FAILURE;
-  if (hk_state_is_ok(&state))
+  if (hk_vm_is_ok(&vm))
   {
-    HkValue result = state.stackSlots[state.stackTop];
+    HkValue result = vm.stackSlots[vm.stackTop];
     exitCode = hk_is_int(result) ? (int) hk_as_number(result) : EXIT_SUCCESS;
-    hk_state_pop(&state);
+    hk_vm_pop(&vm);
     goto end;
   }
-  if (hk_state_is_exit(&state))
+  if (hk_vm_is_exit(&vm))
   {
-    HkValue result = state.stackSlots[state.stackTop];
+    HkValue result = vm.stackSlots[vm.stackTop];
     hk_assert(hk_is_int(result), "exit code must be an integer");
     exitCode = (int) hk_as_number(result);
-    hk_state_pop(&state);
+    hk_vm_pop(&vm);
   }
 end:
-  hk_state_deinit(&state);
+  hk_vm_deinit(&vm);
   return exitCode;
 }
 

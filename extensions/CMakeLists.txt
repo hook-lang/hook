@@ -52,47 +52,60 @@ if(APPLE)
 endif()
 
 add_library(sqlite_mod SHARED
-  sqlite.c)
+  "sqlite.c"
+)
 
 add_library(curl_mod SHARED
-  curl.c)
+  "curl.c"
+)
 
 add_library(redis_mod SHARED
-  redis.c)
+  "redis.c"
+)
 
 add_library(secp256r1_mod SHARED
-  secp256r1.c
-  deps/ecc.c)
+  "secp256r1.c"
+  "deps/ecc.c"
+)
 
 add_library(fastcgi_mod SHARED
-  fastcgi.c)
+  "fastcgi.c"
+)
 
 add_library(mysql_mod SHARED
-  mysql.c)
+  "mysql.c"
+)
 
 add_library(bigint_mod SHARED
-  bigint.c)
+  "bigint.c"
+)
 
 add_library(zeromq_mod SHARED
-  zeromq.c)
+  "zeromq.c"
+)
 
 add_library(leveldb_mod SHARED
-  leveldb.c)
+  "leveldb.c"
+)
 
 add_library(crypto_mod SHARED
-  crypto.c
-  deps/rc4.c)
+  "crypto.c"
+  "deps/rc4.c"
+)
 
 add_library(regex_mod SHARED
-  regex.c)
+  "regex.c"
+)
 
 add_library(uuid_mod SHARED
-  uuid.c
-  deps/uuid4.c)
+  "uuid.c"
+  "deps/uuid4.c"
+)
 
 add_library(geohash_mod SHARED
-  geohash.c
-  deps/geohash.c)
+  "geohash.c"
+  "deps/geohash.c"
+)
 
 target_link_libraries(sqlite_mod    ${STATIC_LIB_TARGET})
 target_link_libraries(curl_mod      ${STATIC_LIB_TARGET})

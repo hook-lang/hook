@@ -1,39 +1,44 @@
 //
-// The Hook Programming Language
 // crypto.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "crypto.h"
 #include <openssl/rand.h>
 #include "deps/rc4.h"
 
-static void random_bytes_call(HkState *state, HkValue *args);
-static void rc4_encrypt_call(HkState *state, HkValue *args);
-static void rc4_decrypt_call(HkState *state, HkValue *args);
+static void random_bytes_call(HkVM *vm, HkValue *args);
+static void rc4_encrypt_call(HkVM *vm, HkValue *args);
+static void rc4_decrypt_call(HkVM *vm, HkValue *args);
 
-static void random_bytes_call(HkState *state, HkValue *args)
+static void random_bytes_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_int(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_int(vm, args, 1);
+  hk_return_if_not_ok(vm);
   int length = (int) (int) hk_as_number(args[1]);
   HkString *str = hk_string_new_with_capacity(length);
   if (!RAND_bytes((unsigned char *) str->chars, length))
   {
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
   str->length = length;
-  hk_state_push_string(state, str);
-  if (!hk_state_is_ok(state))
+  hk_vm_push_string(vm, str);
+  if (!hk_vm_is_ok(vm))
     hk_string_free(str);
 }
 
-static void rc4_encrypt_call(HkState *state, HkValue *args)
+static void rc4_encrypt_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_string(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_string(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_string(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_string(vm, args, 2);
+  hk_return_if_not_ok(vm);
   HkString *key = hk_as_string(args[1]);
   HkString *input = hk_as_string(args[2]);
   int key_length = key->length;
@@ -62,17 +67,17 @@ end:
   arr = hk_array_new_with_capacity(2);
   hk_array_inplace_add_element(arr, err ? HK_NIL_VALUE : hk_string_value(output));
   hk_array_inplace_add_element(arr, err ? hk_string_value(err) : HK_NIL_VALUE);
-  hk_state_push_array(state, arr);
-  if (!hk_state_is_ok(state))
+  hk_vm_push_array(vm, arr);
+  if (!hk_vm_is_ok(vm))
     hk_array_free(arr);
 }
 
-static void rc4_decrypt_call(HkState *state, HkValue *args)
+static void rc4_decrypt_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_string(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_string(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_string(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_string(vm, args, 2);
+  hk_return_if_not_ok(vm);
   HkString *key = hk_as_string(args[1]);
   HkString *input = hk_as_string(args[2]);
   int key_length = key->length;
@@ -101,26 +106,26 @@ end:
   arr = hk_array_new_with_capacity(2);
   hk_array_inplace_add_element(arr, err ? HK_NIL_VALUE : hk_string_value(output));
   hk_array_inplace_add_element(arr, err ? hk_string_value(err) : HK_NIL_VALUE);
-  hk_state_push_array(state, arr);
-  if (!hk_state_is_ok(state))
+  hk_vm_push_array(vm, arr);
+  if (!hk_vm_is_ok(vm))
     hk_array_free(arr);
 }
 
 HK_LOAD_MODULE_HANDLER(crypto)
 {
-  hk_state_push_string_from_chars(state, -1, "crypto");
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "random_bytes");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "random_bytes", 1, random_bytes_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "rc4_encrypt");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "rc4_encrypt", 2, rc4_encrypt_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "rc4_decrypt");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "rc4_decrypt", 2, rc4_decrypt_call);
-  hk_return_if_not_ok(state);
-  hk_state_construct(state, 3);
+  hk_vm_push_string_from_chars(vm, -1, "crypto");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "random_bytes");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "random_bytes", 1, random_bytes_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "rc4_encrypt");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "rc4_encrypt", 2, rc4_encrypt_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "rc4_decrypt");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "rc4_decrypt", 2, rc4_decrypt_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_construct(vm, 3);
 }

@@ -12,9 +12,9 @@ project(hook
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 
-set(BINARY_DIR ${CMAKE_BINARY_DIR}/../bin)
-set(LIBRARY_DIR ${CMAKE_BINARY_DIR}/../lib)
-set(PACKAGE_DIR ${CMAKE_BINARY_DIR}/../package)
+set(BINARY_DIR "${CMAKE_BINARY_DIR}/../bin")
+set(LIBRARY_DIR "${CMAKE_BINARY_DIR}/../lib")
+set(PACKAGE_DIR "${CMAKE_BINARY_DIR}/../package")
 
 include_directories(/usr/local/include)
 include_directories(include)

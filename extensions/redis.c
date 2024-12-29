@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // redis.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "redis.h"
@@ -16,8 +21,8 @@ typedef struct
 static inline RedisContextWrapper *redis_context_wrapper_new(redisContext *context);
 static void redis_context_wrapper_deinit(HkUserdata *udata);
 static HkValue redis_reply_to_value(redisReply *reply);
-static void connect_call(HkState *state, HkValue *args);
-static void command_call(HkState *state, HkValue *args);
+static void connect_call(HkVM *vm, HkValue *args);
+static void command_call(HkVM *vm, HkValue *args);
 
 static inline RedisContextWrapper *redis_context_wrapper_new(redisContext *context)
 {
@@ -89,49 +94,49 @@ static HkValue redis_reply_to_value(redisReply *reply)
   return result;
 }
 
-static void connect_call(HkState *state, HkValue *args)
+static void connect_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_int(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_int(vm, args, 2);
+  hk_return_if_not_ok(vm);
   HkString *hostname = hk_as_string(args[1]);
   int port = (int) hk_as_number(args[2]);
   redisContext *context = redisConnect(hostname->chars, port);
   if (!context || context->err)
   {
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
-  hk_state_push_userdata(state, (HkUserdata *) redis_context_wrapper_new(context));
+  hk_vm_push_userdata(vm, (HkUserdata *) redis_context_wrapper_new(context));
 }
 
-static void command_call(HkState *state, HkValue *args)
+static void command_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_string(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_string(vm, args, 2);
+  hk_return_if_not_ok(vm);
   redisContext *context = ((RedisContextWrapper *) hk_as_userdata(args[1]))->context;
   HkString *command = hk_as_string(args[2]);
   redisReply *reply = redisCommand(context, command->chars);
   hk_assert(reply, "redisCommand returned NULL");
   HkValue result = redis_reply_to_value(reply);
   freeReplyObject(reply);
-  hk_state_push(state, result);
+  hk_vm_push(vm, result);
 }
 
 HK_LOAD_MODULE_HANDLER(redis)
 {
-  hk_state_push_string_from_chars(state, -1, "redis");
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "connect");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "connect", 2, connect_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "command");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "command", 2, command_call);
-  hk_return_if_not_ok(state);
-  hk_state_construct(state, 2);
+  hk_vm_push_string_from_chars(vm, -1, "redis");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "connect");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "connect", 2, connect_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "command");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "command", 2, command_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_construct(vm, 2);
 }

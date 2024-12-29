@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // io.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "io.h"
@@ -28,20 +33,20 @@ typedef struct
 
 static inline File *file_new(FILE *stream);
 static void file_deinit(HkUserdata *udata);
-static void open_call(HkState *state, HkValue *args);
-static void close_call(HkState *state, HkValue *args);
-static void popen_call(HkState *state, HkValue *args);
-static void pclose_call(HkState *state, HkValue *args);
-static void eof_call(HkState *state, HkValue *args);
-static void flush_call(HkState *state, HkValue *args);
-static void sync_call(HkState *state, HkValue *args);
-static void tell_call(HkState *state, HkValue *args);
-static void rewind_call(HkState *state, HkValue *args);
-static void seek_call(HkState *state, HkValue *args);
-static void read_call(HkState *state, HkValue *args);
-static void write_call(HkState *state, HkValue *args);
-static void readln_call(HkState *state, HkValue *args);
-static void writeln_call(HkState *state, HkValue *args);
+static void open_call(HkVM *vm, HkValue *args);
+static void close_call(HkVM *vm, HkValue *args);
+static void popen_call(HkVM *vm, HkValue *args);
+static void pclose_call(HkVM *vm, HkValue *args);
+static void eof_call(HkVM *vm, HkValue *args);
+static void flush_call(HkVM *vm, HkValue *args);
+static void sync_call(HkVM *vm, HkValue *args);
+static void tell_call(HkVM *vm, HkValue *args);
+static void rewind_call(HkVM *vm, HkValue *args);
+static void seek_call(HkVM *vm, HkValue *args);
+static void read_call(HkVM *vm, HkValue *args);
+static void write_call(HkVM *vm, HkValue *args);
+static void readln_call(HkVM *vm, HkValue *args);
+static void writeln_call(HkVM *vm, HkValue *args);
 
 static inline File *file_new(FILE *stream)
 {
@@ -59,12 +64,12 @@ static void file_deinit(HkUserdata *udata)
   (void) fclose(stream);
 }
 
-static void open_call(HkState *state, HkValue *args)
+static void open_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_string(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_string(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_string(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_string(vm, args, 2);
+  hk_return_if_not_ok(vm);
   HkString *filename = hk_as_string(args[1]);
   HkString *mode = hk_as_string(args[2]);
   FILE *stream = NULL;
@@ -75,69 +80,69 @@ static void open_call(HkState *state, HkValue *args)
 #endif
   if (!stream)
   {
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
-  hk_state_push_userdata(state, (HkUserdata *) file_new(stream));
+  hk_vm_push_userdata(vm, (HkUserdata *) file_new(stream));
 }
 
-static void close_call(HkState *state, HkValue *args)
+static void close_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   HkValue val = args[1];
   FILE *stream = ((File *) hk_as_userdata(val))->stream;
   int status = fclose(stream);
-  hk_state_push_number(state, status);
+  hk_vm_push_number(vm, status);
 }
 
-static void popen_call(HkState *state, HkValue *args)
+static void popen_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_string(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_string(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_string(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_string(vm, args, 2);
+  hk_return_if_not_ok(vm);
   HkString *command = hk_as_string(args[1]);
   HkString *mode = hk_as_string(args[2]);
   FILE *stream;
   stream = popen(command->chars, mode->chars);
   if (!stream)
   {
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
-  hk_state_push_userdata(state, (HkUserdata *) file_new(stream));
+  hk_vm_push_userdata(vm, (HkUserdata *) file_new(stream));
 }
 
-static void pclose_call(HkState *state, HkValue *args)
+static void pclose_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   int status = pclose(stream);
-  hk_state_push_number(state, status);
+  hk_vm_push_number(vm, status);
 }
 
-static void eof_call(HkState *state, HkValue *args)
+static void eof_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
-  hk_state_push_bool(state, (bool) feof(stream));
+  hk_vm_push_bool(vm, (bool) feof(stream));
 }
 
-static void flush_call(HkState *state, HkValue *args)
+static void flush_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
-  hk_state_push_number(state, fflush(stream));
+  hk_vm_push_number(vm, fflush(stream));
 }
 
-static void sync_call(HkState *state, HkValue *args)
+static void sync_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   bool result;
 #ifdef _WIN32
@@ -148,46 +153,46 @@ static void sync_call(HkState *state, HkValue *args)
   int fd = fileno(stream);
   result = !fsync(fd);
 #endif
-  hk_state_push_bool(state, result);
+  hk_vm_push_bool(vm, result);
 }
 
-static void tell_call(HkState *state, HkValue *args)
+static void tell_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
-  hk_state_push_number(state, ftell(stream));
+  hk_vm_push_number(vm, ftell(stream));
 }
 
-static void rewind_call(HkState *state, HkValue *args)
+static void rewind_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   rewind(stream);
-  hk_state_push_nil(state);
+  hk_vm_push_nil(vm);
 }
 
-static void seek_call(HkState *state, HkValue *args)
+static void seek_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_int(state, args, 2);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_int(state, args, 3);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_int(vm, args, 2);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_int(vm, args, 3);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   long offset = (long) hk_as_number(args[2]);
   int whence = (int) hk_as_number(args[3]);
-  hk_state_push_number(state, fseek(stream, offset, whence));
+  hk_vm_push_number(vm, fseek(stream, offset, whence));
 }
 
-static void read_call(HkState *state, HkValue *args)
+static void read_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_int(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_int(vm, args, 2);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   int size = (int) hk_as_number(args[2]);
   HkString *str = hk_string_new_with_capacity(size);
@@ -195,142 +200,142 @@ static void read_call(HkState *state, HkValue *args)
   if (length < size && !feof(stream))
   {
     hk_string_free(str);
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
   str->length = length;
   str->chars[length] = '\0';
-  hk_state_push_string(state, str);
-  if (!hk_state_is_ok(state))
+  hk_vm_push_string(vm, str);
+  if (!hk_vm_is_ok(vm))
     hk_string_free(str);
 }
 
-static void write_call(HkState *state, HkValue *args)
+static void write_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_string(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_string(vm, args, 2);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   HkString *str = hk_as_string(args[2]);
   int size = str->length;
   if ((int) fwrite(str->chars, 1, size, stream) < size)
   {
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
-  hk_state_push_number(state, size);
+  hk_vm_push_number(vm, size);
 }
 
-static void readln_call(HkState *state, HkValue *args)
+static void readln_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
-  hk_state_push_string_from_stream(state, stream, '\n');
+  hk_vm_push_string_from_stream(vm, stream, '\n');
 }
 
-static void writeln_call(HkState *state, HkValue *args)
+static void writeln_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_string(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_string(vm, args, 2);
+  hk_return_if_not_ok(vm);
   FILE *stream = ((File *) hk_as_userdata(args[1]))->stream;
   HkString *str = hk_as_string(args[2]);
   int size = str->length;
   if ((int) fwrite(str->chars, 1, size, stream) < size
    || fwrite("\n", 1, 1, stream) < 1)
   {
-    hk_state_push_nil(state);
+    hk_vm_push_nil(vm);
     return;
   }
-  hk_state_push_number(state, size + 1);
+  hk_vm_push_number(vm, size + 1);
 }
 
 HK_LOAD_MODULE_HANDLER(io)
 {
-  hk_state_push_string_from_chars(state, -1, "io");
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "stdin");
-  hk_return_if_not_ok(state);
-  hk_state_push_userdata(state, (HkUserdata *) file_new(stdin));
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "stdout");
-  hk_return_if_not_ok(state);
-  hk_state_push_userdata(state, (HkUserdata *) file_new(stdout));
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "stderr");
-  hk_return_if_not_ok(state);
-  hk_state_push_userdata(state, (HkUserdata *) file_new(stderr));
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "SEEK_SET");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, SEEK_SET);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "SEEK_CUR");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, SEEK_CUR);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "SEEK_END");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, SEEK_END);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "open");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "open", 2, open_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "close");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "close", 1, close_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "popen");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "popen", 2, popen_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "pclose");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "pclose", 1, pclose_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "eof");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "eof", 1, eof_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "flush");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "flush", 1, flush_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "sync");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "sync", 1, sync_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "tell");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "tell", 1, tell_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "rewind");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "rewind", 1, rewind_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "seek");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "seek", 3, seek_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "read");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "read", 2, read_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "write");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "write", 2, write_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "readln");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "readln", 1, readln_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "writeln");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "writeln", 2, writeln_call);
-  hk_return_if_not_ok(state);
-  hk_state_construct(state, 20);
+  hk_vm_push_string_from_chars(vm, -1, "io");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "stdin");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_userdata(vm, (HkUserdata *) file_new(stdin));
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "stdout");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_userdata(vm, (HkUserdata *) file_new(stdout));
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "stderr");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_userdata(vm, (HkUserdata *) file_new(stderr));
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "SEEK_SET");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, SEEK_SET);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "SEEK_CUR");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, SEEK_CUR);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "SEEK_END");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, SEEK_END);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "open");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "open", 2, open_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "close");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "close", 1, close_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "popen");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "popen", 2, popen_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "pclose");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "pclose", 1, pclose_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "eof");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "eof", 1, eof_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "flush");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "flush", 1, flush_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "sync");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "sync", 1, sync_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "tell");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "tell", 1, tell_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "rewind");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "rewind", 1, rewind_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "seek");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "seek", 3, seek_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "read");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "read", 2, read_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "write");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "write", 2, write_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "readln");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "readln", 1, readln_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "writeln");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "writeln", 2, writeln_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_construct(vm, 20);
 }

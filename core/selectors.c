@@ -1,6 +1,11 @@
 //
-// The Hook Programming Language
 // selectors.c
+//
+// Copyright 2021 The Hook Programming Language Authors.
+//
+// This file is part of the Hook project.
+// For detailed license information, please refer to the LICENSE file
+// located in the root directory of this project.
 //
 
 #include "selectors.h"
@@ -57,11 +62,11 @@ static inline bool poll_selector_modify(PollSelector *selector,
   SocketUserdata *udata, int events);
 static inline HkArray *poll_selector_poll(PollSelector *selector, int timeout);
 static void poll_selector_deinit(HkUserdata *udata);
-static void new_poll_selector_call(HkState *state, HkValue *args);
-static void register_call(HkState *state, HkValue *args);
-static void unregister_call(HkState *state, HkValue *args);
-static void modify_call(HkState *state, HkValue *args);
-static void poll_call(HkState *state, HkValue *args);
+static void new_poll_selector_call(HkVM *vm, HkValue *args);
+static void register_call(HkVM *vm, HkValue *args);
+static void unregister_call(HkVM *vm, HkValue *args);
+static void modify_call(HkVM *vm, HkValue *args);
+static void poll_call(HkVM *vm, HkValue *args);
 
 #ifdef _WIN32
   static inline void startup(void)
@@ -189,127 +194,127 @@ static void poll_selector_deinit(HkUserdata *udata)
 #endif
 }
 
-static void new_poll_selector_call(HkState *state, HkValue *args)
+static void new_poll_selector_call(HkVM *vm, HkValue *args)
 {
   (void) args;
-  hk_state_push_userdata(state, (HkUserdata *) poll_selector_new());
+  hk_vm_push_userdata(vm, (HkUserdata *) poll_selector_new());
 }
 
-static void register_call(HkState *state, HkValue *args)
+static void register_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_userdata(state, args, 2);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_int(state, args, 3);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_userdata(vm, args, 2);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_int(vm, args, 3);
+  hk_return_if_not_ok(vm);
   PollSelector *selector = (PollSelector *) hk_as_userdata(args[1]);
   SocketUserdata *udata = (SocketUserdata *) hk_as_userdata(args[2]);
   int events = (int) hk_as_number(args[3]);
   if (!poll_selector_register(selector, udata, events))
   {
-    hk_state_runtime_error(state, "too many file descriptors");
+    hk_vm_runtime_error(vm, "too many file descriptors");
     return;
   }
-  hk_state_push_nil(state);
+  hk_vm_push_nil(vm);
 }
 
-static void unregister_call(HkState *state, HkValue *args)
+static void unregister_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_userdata(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_userdata(vm, args, 2);
+  hk_return_if_not_ok(vm);
   PollSelector *selector = (PollSelector *) hk_as_userdata(args[1]);
   SocketUserdata *udata = (SocketUserdata *) hk_as_userdata(args[2]);
   if (!poll_selector_unregister(selector, udata))
   {
-    hk_state_runtime_error(state, "file descriptor not found");
+    hk_vm_runtime_error(vm, "file descriptor not found");
     return;
   }
-  hk_state_push_nil(state);
+  hk_vm_push_nil(vm);
 }
 
-static void modify_call(HkState *state, HkValue *args)
+static void modify_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_userdata(state, args, 2);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_int(state, args, 3);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_userdata(vm, args, 2);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_int(vm, args, 3);
+  hk_return_if_not_ok(vm);
   PollSelector *selector = (PollSelector *) hk_as_userdata(args[1]);
   SocketUserdata *udata = (SocketUserdata *) hk_as_userdata(args[2]);
   int events = (int) hk_as_number(args[3]);
   if (!poll_selector_modify(selector, udata, events))
   {
-    hk_state_runtime_error(state, "file descriptor not found");
+    hk_vm_runtime_error(vm, "file descriptor not found");
     return;
   }
-  hk_state_push_nil(state);
+  hk_vm_push_nil(vm);
 }
 
-static void poll_call(HkState *state, HkValue *args)
+static void poll_call(HkVM *vm, HkValue *args)
 {
-  hk_state_check_argument_userdata(state, args, 1);
-  hk_return_if_not_ok(state);
-  hk_state_check_argument_number(state, args, 2);
-  hk_return_if_not_ok(state);
+  hk_vm_check_argument_userdata(vm, args, 1);
+  hk_return_if_not_ok(vm);
+  hk_vm_check_argument_number(vm, args, 2);
+  hk_return_if_not_ok(vm);
   PollSelector *selector = (PollSelector *) hk_as_userdata(args[1]);
   int timeout = (int) hk_as_number(args[2]);
   HkArray *arr = poll_selector_poll(selector, timeout);
-  hk_state_push_array(state, arr);
-  if (!hk_state_is_ok(state))
+  hk_vm_push_array(vm, arr);
+  if (!hk_vm_is_ok(vm))
     hk_array_free(arr);
 }
 
 HK_LOAD_MODULE_HANDLER(selectors)
 {
-  hk_state_push_string_from_chars(state, -1, "selectors");
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "POLLIN");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, POLLIN);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "POLLOUT");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, POLLOUT);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "POLLERR");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, POLLERR);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "POLLHUP");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, POLLHUP);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "POLLNVAL");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, POLLNVAL);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "POLLPRI");
-  hk_return_if_not_ok(state);
-  hk_state_push_number(state, POLLPRI);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "new_poll_selector");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "new_poll_selector", 0, new_poll_selector_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "register");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "register", 3, register_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "unregister");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "unregister", 2, unregister_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "modify");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "modify", 3, modify_call);
-  hk_return_if_not_ok(state);
-  hk_state_push_string_from_chars(state, -1, "poll");
-  hk_return_if_not_ok(state);
-  hk_state_push_new_native(state, "poll", 2, poll_call);
-  hk_return_if_not_ok(state);
-  hk_state_construct(state, 11);
+  hk_vm_push_string_from_chars(vm, -1, "selectors");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "POLLIN");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, POLLIN);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "POLLOUT");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, POLLOUT);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "POLLERR");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, POLLERR);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "POLLHUP");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, POLLHUP);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "POLLNVAL");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, POLLNVAL);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "POLLPRI");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_number(vm, POLLPRI);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "new_poll_selector");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "new_poll_selector", 0, new_poll_selector_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "register");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "register", 3, register_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "unregister");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "unregister", 2, unregister_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "modify");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "modify", 3, modify_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_push_string_from_chars(vm, -1, "poll");
+  hk_return_if_not_ok(vm);
+  hk_vm_push_new_native(vm, "poll", 2, poll_call);
+  hk_return_if_not_ok(vm);
+  hk_vm_construct(vm, 11);
 }
