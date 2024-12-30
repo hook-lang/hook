@@ -11,9 +11,10 @@
 #ifndef HK_MEMORY_H
 #define HK_MEMORY_H
 
-#include <stdint.h>
+#include <stddef.h>
 
-void *hk_allocate(int size);
-void *hk_reallocate(void *ptr, int size);
+void *hk_allocate(size_t size);
+void *hk_reallocate(void *ptr, size_t size);
+void hk_free(void *ptr);
 
 #endif // HK_MEMORY_H

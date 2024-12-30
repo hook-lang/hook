@@ -56,7 +56,7 @@ static inline LinkedListNode *LinkedListNode_new(HkValue elem)
 static inline void LinkedListNode_free(LinkedListNode *node)
 {
   hk_value_release(node->elem);
-  free(node);
+  hk_free(node);
 }
 
 static inline LinkedList *linked_list_new(void)

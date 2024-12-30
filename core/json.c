@@ -143,7 +143,7 @@ static void encode_call(HkVM *vm, HkValue *args)
   char *chars = cJSON_Print(json);
   cJSON_Delete(json);
   HkString *str = hk_string_from_chars(-1, chars);
-  free(chars);
+  hk_free(chars);
   hk_vm_push_string(vm, str);
   if (!hk_vm_is_ok(vm))
     hk_string_free(str);

@@ -9,12 +9,12 @@
 //
 
 #include <hook/vm.h>
+#include <math.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <math.h>
-#include <hook/struct.h>
 #include <hook/iterable.h>
 #include <hook/memory.h>
+#include <hook/struct.h>
 #include <hook/utils.h>
 #include "builtin.h"
 #include "module.h"
@@ -1835,7 +1835,7 @@ void hk_vm_deinit(HkVM *vm)
   hk_assert(vm->stackTop == num_globals() - 1, "stack must contain the globals");
   while (vm->stackTop > -1)
     hk_value_release(vm->stackSlots[vm->stackTop--]);
-  free(vm->stackSlots);
+  hk_free(vm->stackSlots);
 }
 
 void hk_vm_runtime_error(HkVM *vm, const char *fmt, ...)

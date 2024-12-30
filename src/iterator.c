@@ -9,7 +9,7 @@
 //
 
 #include <hook/iterator.h>
-#include <stdlib.h>
+#include <hook/memory.h>
 
 void hk_iterator_init(HkIterator *it, void (*deinit)(HkIterator *),
   bool (*isValid)(HkIterator *), HkValue (*getCurrent)(HkIterator *),
@@ -27,7 +27,7 @@ void hk_iterator_free(HkIterator *it)
 {
   if (it->deinit)
     it->deinit(it);
-  free(it);
+  hk_free(it);
 }
 
 void hk_iterator_release(HkIterator *it)

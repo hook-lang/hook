@@ -9,7 +9,6 @@
 //
 
 #include <hook/array.h>
-#include <stdlib.h>
 #include <hook/memory.h>
 #include <hook/utils.h>
 
@@ -108,8 +107,8 @@ void hk_array_free(HkArray *arr)
 {
   for (int i = 0; i < arr->length; ++i)
     hk_value_release(arr->elements[i]);
-  free(arr->elements);
-  free(arr);
+  hk_free(arr->elements);
+  hk_free(arr);
 }
 
 void hk_array_release(HkArray *arr)

@@ -11,12 +11,17 @@
 #include <hook/memory.h>
 #include <stdlib.h>
 
-void *hk_allocate(int size)
+void *hk_allocate(size_t size)
 {
   return malloc(size);
 }
 
-void *hk_reallocate(void *ptr, int size)
+void *hk_reallocate(void *ptr, size_t size)
 {
   return realloc(ptr, size);
+}
+
+void hk_free(void *ptr)
+{
+  free(ptr);
 }

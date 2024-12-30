@@ -9,7 +9,6 @@
 //
 
 #include <hook/range.h>
-#include <stdlib.h>
 #include <hook/memory.h>
 
 typedef struct
@@ -85,7 +84,7 @@ HkRange *hk_range_new(int64_t start, int64_t end)
 
 void hk_range_free(HkRange *range)
 {
-  free(range);
+  hk_free(range);
 }
 
 void hk_range_release(HkRange *range)

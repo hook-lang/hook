@@ -9,7 +9,6 @@
 //
 
 #include <hook/callable.h>
-#include <stdlib.h>
 #include <hook/memory.h>
 #include <hook/utils.h>
 
@@ -44,7 +43,7 @@ static inline void free_functions(HkFunction *fn)
 {
   for (int i = 0; i < fn->functionsLength; ++i)
     hk_function_release(fn->functions[i]);
-  free(fn->functions);
+  hk_free(fn->functions);
 }
 
 static inline void grow_functions(HkFunction *fn)
@@ -74,7 +73,7 @@ void hk_function_free(HkFunction *fn)
   hk_string_release(fn->file);
   hk_chunk_deinit(&fn->chunk);
   free_functions(fn);
-  free(fn);
+  hk_free(fn);
 }
 
 void hk_function_release(HkFunction *fn)
@@ -155,7 +154,7 @@ void hk_closure_free(HkClosure *cl)
   hk_function_release(fn);
   for (int i = 0; i < numNonlocals; ++i)
     hk_value_release(cl->nonlocals[i]);
-  free(cl);
+  hk_free(cl);
 }
 
 void hk_closure_release(HkClosure *cl)
@@ -179,7 +178,7 @@ HkNative *hk_native_new(HkString *name, int arity, HkCallFn call)
 void hk_native_free(HkNative *native)
 {
   hk_string_release(native->name);
-  free(native);
+  hk_free(native);
 }
 
 void hk_native_release(HkNative *native)

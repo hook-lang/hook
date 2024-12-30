@@ -9,7 +9,6 @@
 //
 
 #include <hook/chunk.h>
-#include <stdlib.h>
 #include <hook/memory.h>
 #include <hook/utils.h>
 
@@ -56,8 +55,8 @@ void hk_chunk_init(HkChunk *chunk)
 
 void hk_chunk_deinit(HkChunk *chunk)
 {
-  free(chunk->code);
-  free(chunk->lines);
+  hk_free(chunk->code);
+  hk_free(chunk->lines);
   hk_array_free(chunk->consts);
 }
 

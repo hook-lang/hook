@@ -9,7 +9,6 @@
 //
 
 #include <hook/struct.h>
-#include <stdlib.h>
 #include <string.h>
 #include <hook/memory.h>
 #include <hook/string.h>
@@ -48,7 +47,7 @@ static inline void grow(HkStruct *ztruct)
   ztruct->fields = (HkField *) hk_reallocate(ztruct->fields,
     sizeof(*ztruct->fields) * capacity);
   HkField **table = allocate_table(capacity);
-  free(ztruct->table);
+  hk_free(ztruct->table);
   ztruct->table = table;
   HkField *fields = ztruct->fields;
   for (int i = 0; i < length; i++)
@@ -85,9 +84,9 @@ void hk_struct_free(HkStruct *ztruct)
   HkField *fields = ztruct->fields;
   for (int i = 0; i < ztruct->length; ++i)
     hk_string_release(fields[i].name);
-  free(ztruct->fields);
-  free(ztruct->table);
-  free(ztruct);
+  hk_free(ztruct->fields);
+  hk_free(ztruct->table);
+  hk_free(ztruct);
 }
 
 void hk_struct_release(HkStruct *ztruct)
@@ -165,7 +164,7 @@ void hk_instance_free(HkInstance *inst)
   hk_struct_release(ztruct);
   for (int i = 0; i < length; ++i)
     hk_value_release(inst->values[i]);
-  free(inst);
+  hk_free(inst);
 }
 
 void hk_instance_release(HkInstance *inst)

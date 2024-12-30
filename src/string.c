@@ -9,7 +9,6 @@
 //
 
 #include <hook/string.h>
-#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <limits.h>
@@ -119,8 +118,8 @@ void hk_string_ensure_capacity(HkString *str, int minCapacity)
 
 void hk_string_free(HkString *str)
 {
-  free(str->chars);
-  free(str);
+  hk_free(str->chars);
+  hk_free(str);
 }
 
 void hk_string_release(HkString *str)

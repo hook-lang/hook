@@ -9,7 +9,6 @@
 //
 
 #include "record.h"
-#include <stdlib.h>
 #include <hook/memory.h>
 #include <hook/utils.h>
 
@@ -41,7 +40,7 @@ static inline void grow(Record *rec)
     entries[key->hash & mask] = rec->entries[i];
     ++j;
   }
-  free(rec->entries);
+  hk_free(rec->entries);
   rec->entries = entries;
   rec->capacity = capacity;
   rec->mask = mask;
@@ -70,7 +69,7 @@ void record_deinit(Record *rec)
     hk_value_release(entry->value);
     ++j;
   }
-  free(rec->entries);
+  hk_free(rec->entries);
 }
 
 RecordEntry *record_get_entry(Record *rec, HkString *key)

@@ -133,7 +133,7 @@ static void to_string_call(HkVM *vm, HkValue *args)
   }
   char *chars = mpz_get_str(NULL, base, bigint->num);
   HkString *str = hk_string_from_chars(-1, chars);
-  free(chars);
+  hk_free(chars);
   hk_vm_push_string(vm, str);
 }
 
@@ -155,7 +155,7 @@ static void to_bytes_call(HkVM *vm, HkValue *args)
   size_t length;
   char *chars = mpz_export(NULL, &length, 1, 1, 0, 0, bigint->num);
   HkString *str = hk_string_from_chars((int) length, chars);
-  free(chars);
+  hk_free(chars);
   hk_vm_push_string(vm, str);
 }
 

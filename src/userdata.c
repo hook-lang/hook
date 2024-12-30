@@ -9,7 +9,7 @@
 //
 
 #include <hook/userdata.h>
-#include <stdlib.h>
+#include <hook/memory.h>
 
 void hk_userdata_init(HkUserdata *udata, void (*deinit)(HkUserdata *))
 {
@@ -21,5 +21,5 @@ void hk_userdata_free(HkUserdata *udata)
 {
   if (udata->deinit)
     udata->deinit(udata);
-  free(udata);
+  hk_free(udata);
 }
