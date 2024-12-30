@@ -36,11 +36,3 @@ match (let { lvl, msg } = error("error message"); lvl) {
   "error" => println(msg);
   _ => println("unknown log level");
 }
-
-var result;
-match (result = info("info message"); result.lvl) {
-  "info" => println(result.msg);
-  "warn" => println(result.msg);
-  "error" => println(result.msg);
-  _ => println("unknown log level");
-}

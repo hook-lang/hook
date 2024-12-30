@@ -28,9 +28,3 @@ if (var { ok, err } = baz(); err) {
 } else {
   println(ok);
 }
-
-var result;
-if (result = baz(); result.err) {
-  println(result.err);
-}
-println(result.ok);

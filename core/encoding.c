@@ -15,7 +15,7 @@
 #include "deps/base58.h"
 
 #define BASE58_ENCODE_OUT_SIZE(n) ((n) * 138 / 100 + 1)
-#define BASE58_DECODE_OUT_SIZE(n) ((n) * 733 /1000 + 1)
+#define BASE58_DECODE_OUT_SIZE(n) ((n) * 733 / 1000 + 1)
 
 static void base32_encode_call(HkVM *vm, HkValue *args);
 static void base32_decode_call(HkVM *vm, HkValue *args);
@@ -62,7 +62,7 @@ static void base58_encode_call(HkVM *vm, HkValue *args)
   hk_return_if_not_ok(vm);
   HkString *str = hk_as_string(args[1]);
   HkString *result = hk_string_new_with_capacity(BASE58_ENCODE_OUT_SIZE(str->length));
-  size_t out_len;
+  size_t out_len = result->capacity;
   (void) base58_encode(str->chars, str->length, result->chars, &out_len);
   result->length = (int) out_len;
   result->chars[result->length] = '\0';
@@ -77,7 +77,7 @@ static void base58_decode_call(HkVM *vm, HkValue *args)
   hk_return_if_not_ok(vm);
   HkString *str = hk_as_string(args[1]);
   HkString *result = hk_string_new_with_capacity(BASE58_DECODE_OUT_SIZE(str->length));
-  size_t out_len;
+  size_t out_len = result->capacity;
   (void) base58_decode(str->chars, str->length, result->chars, &out_len);
   result->length = (int) out_len;
   result->chars[result->length] = '\0';
