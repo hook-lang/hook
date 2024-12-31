@@ -177,9 +177,9 @@ static inline HkArray *poll_selector_poll(PollSelector *selector, int timeout)
     if (!revents) continue;
     HkUserdata *udata = (HkUserdata *) selector->udatas[i];
     HkArray *event = hk_array_new_with_capacity(2);
-    hk_array_inplace_add_element(event, hk_userdata_value(udata));
-    hk_array_inplace_add_element(event, hk_number_value(revents));
-    hk_array_inplace_add_element(arr, hk_array_value(event));
+    hk_array_inplace_append_element(event, hk_userdata_value(udata));
+    hk_array_inplace_append_element(event, hk_number_value(revents));
+    hk_array_inplace_append_element(arr, hk_array_value(event));
     ++j;
   }
 end:

@@ -126,7 +126,7 @@ int hk_array_index_of(HkArray *arr, HkValue elem)
   return -1;
 }
 
-HkArray *hk_array_add_element(HkArray *arr, HkValue elem)
+HkArray *hk_array_append_element(HkArray *arr, HkValue elem)
 {
   int length = arr->length;
   HkArray *result = array_allocate(length + 1);
@@ -235,12 +235,12 @@ HkArray *hk_array_diff(HkArray *arr1, HkArray *arr2)
   {
     HkValue elem = arr1->elements[i];
     if (hk_array_index_of(arr2, elem) == -1)
-      hk_array_inplace_add_element(result, elem);
+      hk_array_inplace_append_element(result, elem);
   }
   return result;
 }
 
-void hk_array_inplace_add_element(HkArray *arr, HkValue elem)
+void hk_array_inplace_append_element(HkArray *arr, HkValue elem)
 {
   hk_array_ensure_capacity(arr, arr->length + 1);
   hk_value_incr_ref(elem);

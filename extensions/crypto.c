@@ -65,8 +65,8 @@ static void rc4_encrypt_call(HkVM *vm, HkValue *args)
 end:
   hk_assert(err || output, "err or output must be non-NULL");
   arr = hk_array_new_with_capacity(2);
-  hk_array_inplace_add_element(arr, err ? HK_NIL_VALUE : hk_string_value(output));
-  hk_array_inplace_add_element(arr, err ? hk_string_value(err) : HK_NIL_VALUE);
+  hk_array_inplace_append_element(arr, err ? hk_nil_value() : hk_string_value(output));
+  hk_array_inplace_append_element(arr, err ? hk_string_value(err) : hk_nil_value());
   hk_vm_push_array(vm, arr);
   if (!hk_vm_is_ok(vm))
     hk_array_free(arr);
@@ -104,8 +104,8 @@ static void rc4_decrypt_call(HkVM *vm, HkValue *args)
 end:
   hk_assert(err || output, "err or output must be non-NULL");
   arr = hk_array_new_with_capacity(2);
-  hk_array_inplace_add_element(arr, err ? HK_NIL_VALUE : hk_string_value(output));
-  hk_array_inplace_add_element(arr, err ? hk_string_value(err) : HK_NIL_VALUE);
+  hk_array_inplace_append_element(arr, err ? hk_nil_value() : hk_string_value(output));
+  hk_array_inplace_append_element(arr, err ? hk_string_value(err) : hk_nil_value());
   hk_vm_push_array(vm, arr);
   if (!hk_vm_is_ok(vm))
     hk_array_free(arr);

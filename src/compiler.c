@@ -120,6 +120,7 @@ static void compile_assign_statement(Compiler *comp, Token *tk);
 static int compile_assign(Compiler *comp, Production prod, bool inplace);
 static void compile_struct_declaration(Compiler *comp, bool isAnonymous);
 static void compile_function_declaration(Compiler *comp);
+static void compile_params(Compiler *comp);
 static void compile_anonymous_function(Compiler *comp);
 static void compile_anonymous_function_without_params(Compiler *comp);
 static void compile_del_statement(Compiler *comp);
@@ -267,7 +268,7 @@ static inline uint8_t add_constant(Compiler *comp, HkValue val)
     compilation_error(fn->name, lex->file->chars, tk->line, tk->col,
       "a function may only contain %d unique constants", MAX_CONSTANTS);
   uint8_t index = (uint8_t) consts->length;
-  hk_array_inplace_add_element(consts, val);
+  hk_array_inplace_append_element(consts, val);
   return index;
 }
 
@@ -440,7 +441,7 @@ static inline void compiler_init(Compiler *comp, Compiler *parent, int flags,
 static void compile_statement(Compiler *comp)
 {
   Lexer *lex = comp->lex;
-  hk_chunk_add_line(&comp->fn->chunk, lex->token.line);
+  hk_chunk_append_line(&comp->fn->chunk, lex->token.line);
   if (match(lex, TOKEN_KIND_IMPORT_KW))
   {
     compile_import_statement(comp);
@@ -945,7 +946,8 @@ static int compile_assign(Compiler *comp, Production prod, bool inplace)
       lexer_next_token(lex);
       consume(comp, TOKEN_KIND_EQ);
       compile_expression(comp);
-      hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_ADD_ELEMENT : HK_OP_ADD_ELEMENT);
+      hk_chunk_emit_opcode(chunk, inplace ? HK_OP_INPLACE_APPEND_ELEMENT
+        : HK_OP_APPEND_ELEMENT);
       return PRODUCTION_ASSIGN;
     }
     compile_expression(comp);
@@ -1109,21 +1111,7 @@ static void compile_function_declaration(Compiler *comp)
     hk_chunk_emit_opcode(childChunk, HK_OP_RETURN_NIL);
     goto end;
   }
-  if (!match(lex, TOKEN_KIND_NAME))
-    syntax_error_unexpected(comp);
-  define_local(&childComp, &lex->token, true);
-  lexer_next_token(lex);
-  int arity = 1;
-  while (match(lex, TOKEN_KIND_COMMA))
-  {
-    lexer_next_token(lex);
-    if (!match(lex, TOKEN_KIND_NAME))
-      syntax_error_unexpected(comp);
-    define_local(&childComp, &lex->token, true);
-    lexer_next_token(lex);
-    ++arity;
-  }
-  childComp.fn->arity = arity;
+  compile_params(&childComp);
   consume(comp, TOKEN_KIND_RPAREN);
   if (match(lex, TOKEN_KIND_ARROW))
   {
@@ -1140,9 +1128,29 @@ static void compile_function_declaration(Compiler *comp)
   uint8_t index;
 end:
   index = fn->functionsLength;
-  hk_function_add_child(fn, childComp.fn);
+  hk_function_append_child(fn, childComp.fn);
   hk_chunk_emit_opcode(chunk, HK_OP_CLOSURE);
   hk_chunk_emit_byte(chunk, index);
+}
+
+static void compile_params(Compiler *comp)
+{
+  Lexer *lex = comp->lex;
+  if (!match(lex, TOKEN_KIND_NAME))
+    syntax_error_unexpected(comp);
+  define_local(comp, &lex->token, true);
+  lexer_next_token(lex);
+  int arity = 1;
+  while (match(lex, TOKEN_KIND_COMMA))
+  {
+    lexer_next_token(lex);
+    if (!match(lex, TOKEN_KIND_NAME))
+      syntax_error_unexpected(comp);
+    define_local(comp, &lex->token, true);
+    lexer_next_token(lex);
+    ++arity;
+  }
+  comp->fn->arity = arity;
 }
 
 static void compile_anonymous_function(Compiler *comp)
@@ -1170,21 +1178,7 @@ static void compile_anonymous_function(Compiler *comp)
     hk_chunk_emit_opcode(childChunk, HK_OP_RETURN_NIL);
     goto end;
   }
-  if (!match(lex, TOKEN_KIND_NAME))
-    syntax_error_unexpected(comp);
-  define_local(&childComp, &lex->token, true);
-  lexer_next_token(lex);
-  int arity = 1;
-  while (match(lex, TOKEN_KIND_COMMA))
-  {
-    lexer_next_token(lex);
-    if (!match(lex, TOKEN_KIND_NAME))
-      syntax_error_unexpected(comp);
-    define_local(&childComp, &lex->token, true);
-    lexer_next_token(lex);
-    ++arity;
-  }
-  childComp.fn->arity = arity;
+  compile_params(&childComp);
   consume(comp, TOKEN_KIND_PIPE);
   if (match(lex, TOKEN_KIND_ARROW))
   {
@@ -1200,7 +1194,7 @@ static void compile_anonymous_function(Compiler *comp)
   uint8_t index;
 end:
   index = fn->functionsLength;
-  hk_function_add_child(fn, childComp.fn);
+  hk_function_append_child(fn, childComp.fn);
   hk_chunk_emit_opcode(chunk, HK_OP_CLOSURE);
   hk_chunk_emit_byte(chunk, index);
 }
@@ -1228,7 +1222,7 @@ static void compile_anonymous_function_without_params(Compiler *comp)
   uint8_t index;
 end:
   index = fn->functionsLength;
-  hk_function_add_child(fn, childComp.fn);
+  hk_function_append_child(fn, childComp.fn);
   hk_chunk_emit_opcode(chunk, HK_OP_CLOSURE);
   hk_chunk_emit_byte(chunk, index);
 }
@@ -2280,6 +2274,7 @@ static Variable *compile_nonlocal(Compiler *comp, Token *tk)
     HkOpCode op = HK_OP_NONLOCAL;
     if (var->isLocal)
     {
+      // TODO: Make possible to capture mutable variables by value.
       if (var->isMutable)
       {
         print_semantic_error(fn->name, comp->lex->file->chars, tk->line, tk->col,

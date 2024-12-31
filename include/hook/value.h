@@ -37,9 +37,8 @@ typedef enum
 #define HK_FLAG_ITERABLE   0x08
 #define HK_FLAG_NATIVE     0x10
 
-#define HK_NIL_VALUE         ((HkValue) { .type = HK_TYPE_NIL, .flags = HK_FLAG_FALSEY | HK_FLAG_COMPARABLE })
-#define HK_FALSE_VALUE       ((HkValue) { .type = HK_TYPE_BOOL, .flags = HK_FLAG_FALSEY | HK_FLAG_COMPARABLE, .as.boolean = false })
-#define HK_TRUE_VALUE        ((HkValue) { .type = HK_TYPE_BOOL, .flags = HK_FLAG_COMPARABLE, .as.boolean = true })
+#define hk_nil_value()       ((HkValue) { .type = HK_TYPE_NIL, .flags = HK_FLAG_FALSEY | HK_FLAG_COMPARABLE })
+#define hk_bool_value(b)     ((HkValue) { .type = HK_TYPE_BOOL, .flags = HK_FLAG_COMPARABLE |((b) ? HK_FLAG_NONE : HK_FLAG_FALSEY), .as.boolean = (b) })
 #define hk_number_value(n)   ((HkValue) { .type = HK_TYPE_NUMBER, .flags = HK_FLAG_COMPARABLE, .as.number = (n) })
 #define hk_string_value(s)   ((HkValue) { .type = HK_TYPE_STRING, .flags = HK_FLAG_OBJECT | HK_FLAG_COMPARABLE, .as.pointer = (s) })
 #define hk_range_value(r)    ((HkValue) { .type = HK_TYPE_RANGE, .flags = HK_FLAG_OBJECT | HK_FLAG_COMPARABLE | HK_FLAG_ITERABLE, .as.pointer = (r) })

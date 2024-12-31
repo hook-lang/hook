@@ -102,7 +102,7 @@ static void connect_call(HkVM *vm, HkValue *args)
     mysql_close(mysql);
     mysql_library_end();
     hk_incr_ref(err);
-    result->elements[0] = HK_NIL_VALUE;
+    result->elements[0] = hk_nil_value();
     result->elements[1] = hk_string_value(err);
     hk_vm_push_array(vm, result);
     return;
@@ -110,7 +110,7 @@ static void connect_call(HkVM *vm, HkValue *args)
   HkUserdata *udata = (HkUserdata *) mysql_wrapper_new(mysql);
   hk_incr_ref(udata);
   result->elements[0] = hk_userdata_value(udata);
-  result->elements[1] = HK_NIL_VALUE;
+  result->elements[1] = hk_nil_value();
   hk_vm_push_array(vm, result);
 }
 
@@ -171,7 +171,7 @@ static void query_call(HkVM *vm, HkValue *args)
   {
     HkString *err = hk_string_from_chars(-1, mysql_error(mysql));
     hk_incr_ref(err);
-    result->elements[0] = HK_NIL_VALUE;
+    result->elements[0] = hk_nil_value();
     result->elements[1] = hk_string_value(err);
     hk_vm_push_array(vm, result);
     return;
@@ -179,15 +179,15 @@ static void query_call(HkVM *vm, HkValue *args)
   MYSQL_RES *mysql_res = mysql_store_result(mysql);
   if (!mysql_res)
   {
-    result->elements[0] = HK_NIL_VALUE;
-    result->elements[1] = HK_NIL_VALUE;
+    result->elements[0] = hk_nil_value();
+    result->elements[1] = hk_nil_value();
     hk_vm_push_array(vm, result);
     return;
   }
   HkUserdata *udata = (HkUserdata *) mysql_result_wrapper_new(mysql_res);
   hk_incr_ref(udata);
   result->elements[0] = hk_userdata_value(udata);
-  result->elements[1] = HK_NIL_VALUE;
+  result->elements[1] = hk_nil_value();
   hk_vm_push_array(vm, result);
 }
 
@@ -210,10 +210,10 @@ static void fetch_row_call(HkVM *vm, HkValue *args)
     char *chars = row[i];
     if (!chars)
     {
-      hk_array_inplace_add_element(arr, HK_NIL_VALUE);
+      hk_array_inplace_append_element(arr, hk_nil_value());
       break;
     }
-    HkValue elem = HK_NIL_VALUE;
+    HkValue elem = hk_nil_value();
     switch (fields[i].type)
     {
     case MYSQL_TYPE_NULL:
@@ -252,7 +252,7 @@ static void fetch_row_call(HkVM *vm, HkValue *args)
     default:
       break;
     }
-    hk_array_inplace_add_element(arr, elem);
+    hk_array_inplace_append_element(arr, elem);
   }
   hk_vm_push_array(vm, arr);
 }

@@ -252,7 +252,7 @@ HkArray *hk_string_split(HkString *str, HkString *sep)
   while (tk)
   {
     HkValue elem = hk_string_value(hk_string_from_chars(-1, tk));
-    hk_array_inplace_add_element(arr, elem);
+    hk_array_inplace_append_element(arr, elem);
     tk = strtok_r(NULL, sep->chars, &cur);
   }
   hk_string_free(_str);

@@ -48,14 +48,14 @@ static void new_call(HkVM *vm, HkValue *args)
   {
     char message[128];
     snprintf(message, sizeof(message), "compilation failed at offset %d: %s", offset, error);
-    hk_array_inplace_add_element(arr, HK_NIL_VALUE);
-    hk_array_inplace_add_element(arr, hk_string_value(hk_string_from_chars(-1, message)));
+    hk_array_inplace_append_element(arr, hk_nil_value());
+    hk_array_inplace_append_element(arr, hk_string_value(hk_string_from_chars(-1, message)));
     hk_vm_push_array(vm, arr);
     return;
   }
   HkUserdata *udata = (HkUserdata *) regex_new(pcre);
-  hk_array_inplace_add_element(arr, hk_userdata_value(udata));
-  hk_array_inplace_add_element(arr, HK_NIL_VALUE);
+  hk_array_inplace_append_element(arr, hk_userdata_value(udata));
+  hk_array_inplace_append_element(arr, hk_nil_value());
   hk_vm_push_array(vm, arr);
   if (!hk_vm_is_ok(vm))
     regex_deinit(udata);

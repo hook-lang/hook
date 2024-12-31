@@ -116,8 +116,8 @@ void hk_dump(HkFunction *fn, FILE *stream)
     case HK_OP_SET_LOCAL:
       fprintf(stream, "SetLocal              %5d\n", code[i++]);
       break;
-    case HK_OP_ADD_ELEMENT:
-      fprintf(stream, "AddElement\n");
+    case HK_OP_APPEND_ELEMENT:
+      fprintf(stream, "AppendElement\n");
       break;
     case HK_OP_GET_ELEMENT:
       fprintf(stream, "GetElement\n");
@@ -134,8 +134,8 @@ void hk_dump(HkFunction *fn, FILE *stream)
     case HK_OP_DELETE_ELEMENT:
       fprintf(stream, "DeleteElement\n");
       break;
-    case HK_OP_INPLACE_ADD_ELEMENT:
-      fprintf(stream, "InplaceAddElement\n");
+    case HK_OP_INPLACE_APPEND_ELEMENT:
+      fprintf(stream, "InplaceAppendElement\n");
       break;
     case HK_OP_INPLACE_PUT_ELEMENT:
       fprintf(stream, "InplacePutElement\n");

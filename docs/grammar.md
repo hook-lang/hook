@@ -198,8 +198,8 @@ stmt                 ::= import_stmt
                        | block
 
 import_stmt          ::= 'import' NAME ( 'as' NAME )? ';'
-                       | 'import' STRING 'as' NAME ';'
-                       | 'import' '{' NAME ( ',' NAME )* '}' 'from' ( NAME | STRING ) ';'
+                       | 'import' string 'as' NAME ';'
+                       | 'import' '{' NAME ( ',' NAME )* '}' 'from' ( NAME | string ) ';'
 
 var_decl             ::= 'let' NAME '=' expr
                        | 'var' NAME ( '=' expr )?
@@ -214,7 +214,9 @@ assign_call          ::= NAME subsc* assign_op expr
 
 struct_decl          ::= 'struct' NAME '{' ( string | NAME ( ',' string | NAME )* )? '}'
 
-fn_decl              ::= 'fn' NAME '(' ( NAME ( ',' NAME )* )? ')' ( '=>' expr ";" | block )
+fn_decl              ::= 'fn' NAME '(' params? ')' ( '=>' expr ";" | block )
+
+params               ::= NAME ( ',' NAME )*
 
 del_stmt             ::= 'del' NAME subsc* '[' expr ']' ';'
 
@@ -288,7 +290,7 @@ struct_constructor   ::= '{' ( string | NAME ':' expr ( ',' string | NAME ':' ex
 
 anonymous_struct     ::= 'struct' '{' ( string | NAME ( ',' string | NAME )* )? '}'
 
-anonymous_fn         ::= '|' ( NAME ( ',' NAME )* )? '|' ( '=>' expr | block )
+anonymous_fn         ::= '|' params? '|' ( '=>' expr | block )
                        | '||' ( '=>' expr | block )
 
 if_expr              ::= ( 'if' | 'if!' ) '(' expr ')' expr 'else' expr

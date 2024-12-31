@@ -35,7 +35,7 @@ static inline void do_iterator(HkVM *vm);
 static inline void do_closure(HkVM *vm, HkFunction *fn);
 static inline void do_unpack_array(HkVM *vm, int n);
 static inline void do_unpack_struct(HkVM *vm, int n);
-static inline void do_add_element(HkVM *vm);
+static inline void do_append_element(HkVM *vm);
 static inline void do_get_element(HkVM *vm);
 static inline void slice_string(HkVM *vm, HkValue *slot, HkString *str, HkRange *range);
 static inline void slice_array(HkVM *vm, HkValue *slot, HkArray *arr, HkRange *range);
@@ -43,7 +43,7 @@ static inline void do_fetch_element(HkVM *vm);
 static inline void do_set_element(HkVM *vm);
 static inline void do_put_element(HkVM *vm);
 static inline void do_delete_element(HkVM *vm);
-static inline void do_inplace_add_element(HkVM *vm);
+static inline void do_inplace_append_element(HkVM *vm);
 static inline void do_inplace_put_element(HkVM *vm);
 static inline void do_inplace_delete_element(HkVM *vm);
 static inline void do_get_field(HkVM *vm, HkString *name);
@@ -224,7 +224,7 @@ static inline void adjust_instance_args(HkVM *vm, int length, int numArgs)
   }
   while (numArgs < length)
   {
-    push(vm, HK_NIL_VALUE);
+    push(vm, hk_nil_value());
     hk_return_if_not_ok(vm);
     ++numArgs;
   }
@@ -314,7 +314,7 @@ static inline void do_unpack_array(HkVM *vm, int n)
   }
   for (int i = arr->length; i < n; ++i)
   {
-    push(vm, HK_NIL_VALUE);
+    push(vm, hk_nil_value());
     if (!hk_vm_is_ok(vm))
       break;
   }
@@ -338,7 +338,7 @@ static inline void do_unpack_struct(HkVM *vm, int n)
   {
     HkString *name = hk_as_string(slots[i]);
     int index = hk_struct_index_of(ztruct, name);
-    HkValue value = index == -1 ? HK_NIL_VALUE :
+    HkValue value = index == -1 ? hk_nil_value() :
       hk_instance_get_field(inst, index);
     hk_value_incr_ref(value);
     hk_decr_ref(name);
@@ -348,7 +348,7 @@ static inline void do_unpack_struct(HkVM *vm, int n)
   hk_instance_release(inst);
 }
 
-static inline void do_add_element(HkVM *vm)
+static inline void do_append_element(HkVM *vm)
 {
   HkValue *slots = &vm->stackSlots[vm->stackTop - 1];
   HkValue val1 = slots[0];
@@ -359,7 +359,7 @@ static inline void do_add_element(HkVM *vm)
     return;
   }
   HkArray *arr = hk_as_array(val1);
-  HkArray *result = hk_array_add_element(arr, val2);
+  HkArray *result = hk_array_append_element(arr, val2);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
   --vm->stackTop;
@@ -597,7 +597,7 @@ static inline void do_delete_element(HkVM *vm)
   hk_array_release(arr);
 }
 
-static inline void do_inplace_add_element(HkVM *vm)
+static inline void do_inplace_append_element(HkVM *vm)
 {
   HkValue *slots = &vm->stackSlots[vm->stackTop - 1];
   HkValue val1 = slots[0];
@@ -610,12 +610,12 @@ static inline void do_inplace_add_element(HkVM *vm)
   HkArray *arr = hk_as_array(val1);
   if (arr->refCount == 2)
   {
-    hk_array_inplace_add_element(arr, val2);
+    hk_array_inplace_append_element(arr, val2);
     --vm->stackTop;
     hk_value_decr_ref(val2);
     return;
   }
-  HkArray *result = hk_array_add_element(arr, val2);
+  HkArray *result = hk_array_append_element(arr, val2);
   hk_incr_ref(result);
   slots[0] = hk_array_value(result);
   --vm->stackTop;
@@ -853,7 +853,7 @@ static inline void do_equal(HkVM *vm)
   HkValue *slots = &vm->stackSlots[vm->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
-  slots[0] = hk_value_equal(val1, val2) ? HK_TRUE_VALUE : HK_FALSE_VALUE;
+  slots[0] = hk_value_equal(val1, val2) ? hk_bool_value(true) : hk_bool_value(false);
   --vm->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
@@ -867,7 +867,7 @@ static inline void do_greater(HkVM *vm)
   int result;
   hk_vm_compare(vm, val1, val2, &result);
   hk_return_if_not_ok(vm);
-  slots[0] = result > 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
+  slots[0] = result > 0 ? hk_bool_value(true) : hk_bool_value(false);
   --vm->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
@@ -881,7 +881,7 @@ static inline void do_less(HkVM *vm)
   int result;
   hk_vm_compare(vm, val1, val2, &result);
   hk_return_if_not_ok(vm);
-  slots[0] = result < 0 ? HK_TRUE_VALUE : HK_FALSE_VALUE;
+  slots[0] = result < 0 ? hk_bool_value(true) : hk_bool_value(false);
   --vm->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
@@ -892,7 +892,7 @@ static inline void do_not_equal(HkVM *vm)
   HkValue *slots = &vm->stackSlots[vm->stackTop - 1];
   HkValue val1 = slots[0];
   HkValue val2 = slots[1];
-  slots[0] = hk_value_equal(val1, val2) ? HK_FALSE_VALUE : HK_TRUE_VALUE;
+  slots[0] = hk_value_equal(val1, val2) ? hk_bool_value(false) : hk_bool_value(true);
   --vm->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
@@ -906,7 +906,7 @@ static inline void do_not_greater(HkVM *vm)
   int result;
   hk_vm_compare(vm, val1, val2, &result);
   hk_return_if_not_ok(vm);
-  slots[0] = result > 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
+  slots[0] = result > 0 ? hk_bool_value(false) : hk_bool_value(true);
   --vm->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
@@ -920,7 +920,7 @@ static inline void do_not_less(HkVM *vm)
   int result;
   hk_vm_compare(vm, val1, val2, &result);
   hk_return_if_not_ok(vm);
-  slots[0] = result < 0 ? HK_FALSE_VALUE : HK_TRUE_VALUE;
+  slots[0] = result < 0 ? hk_bool_value(false) : hk_bool_value(true);
   --vm->stackTop;
   hk_value_release(val1);
   hk_value_release(val2);
@@ -1252,7 +1252,7 @@ static inline void do_not(HkVM *vm)
 {
   HkValue *slots = &vm->stackSlots[vm->stackTop];
   HkValue val = slots[0];
-  slots[0] = hk_is_falsey(val) ? HK_TRUE_VALUE : HK_FALSE_VALUE;
+  slots[0] = hk_is_falsey(val) ? hk_bool_value(true) : hk_bool_value(false);
   hk_value_release(val);
 }
 
@@ -1382,7 +1382,7 @@ static inline void adjust_call_args(HkVM *vm, int arity, int numArgs)
   }
   while (numArgs < arity)
   {
-    push(vm, HK_NIL_VALUE);
+    push(vm, hk_nil_value());
     hk_return_if_not_ok(vm);
     ++numArgs;
   }
@@ -1415,17 +1415,17 @@ static inline void call_function(HkVM *vm, HkValue *locals, HkClosure *cl, int *
     switch (op)
     {
     case HK_OP_NIL:
-      push(vm, HK_NIL_VALUE);
+      push(vm, hk_nil_value());
       if (!hk_vm_is_ok(vm))
         goto end;
       break;
     case HK_OP_FALSE:
-      push(vm, HK_FALSE_VALUE);
+      push(vm, hk_bool_value(false));
       if (!hk_vm_is_ok(vm))
         goto end;
       break;
     case HK_OP_TRUE:
-      push(vm, HK_TRUE_VALUE);
+      push(vm, hk_bool_value(true));
       if (!hk_vm_is_ok(vm))
         goto end;
       break;
@@ -1527,8 +1527,8 @@ static inline void call_function(HkVM *vm, HkValue *locals, HkClosure *cl, int *
         locals[index] = val;
       }
       break;
-    case HK_OP_ADD_ELEMENT:
-      do_add_element(vm);
+    case HK_OP_APPEND_ELEMENT:
+      do_append_element(vm);
       if (!hk_vm_is_ok(vm))
         goto end;
       break;
@@ -1555,8 +1555,8 @@ static inline void call_function(HkVM *vm, HkValue *locals, HkClosure *cl, int *
       if (!hk_vm_is_ok(vm))
         goto end;
       break;
-    case HK_OP_INPLACE_ADD_ELEMENT:
-      do_inplace_add_element(vm);
+    case HK_OP_INPLACE_APPEND_ELEMENT:
+      do_inplace_append_element(vm);
       if (!hk_vm_is_ok(vm))
         goto end;
       break;
@@ -1791,7 +1791,7 @@ static inline void call_function(HkVM *vm, HkValue *locals, HkClosure *cl, int *
     case HK_OP_RETURN:
       return;
     case HK_OP_RETURN_NIL:
-      push(vm, HK_NIL_VALUE);
+      push(vm, hk_nil_value());
       if (!hk_vm_is_ok(vm))
         goto end;
       return;
@@ -1937,12 +1937,12 @@ void hk_vm_push(HkVM *vm, HkValue val)
 
 void hk_vm_push_nil(HkVM *vm)
 {
-  push(vm, HK_NIL_VALUE);
+  push(vm, hk_nil_value());
 }
 
 void hk_vm_push_bool(HkVM *vm, bool data)
 {
-  push(vm, data ? HK_TRUE_VALUE : HK_FALSE_VALUE);
+  push(vm, hk_bool_value(data));
 }
 
 void hk_vm_push_number(HkVM *vm, double data)

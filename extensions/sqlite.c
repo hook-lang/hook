@@ -177,7 +177,7 @@ static void fetch_row_call(HkVM *vm, HkValue *args)
     for (int i = 0; i < num_columns; ++i)
     {
       int type = sqlite3_column_type(stmt, i);
-      HkValue elem = HK_NIL_VALUE;
+      HkValue elem = hk_nil_value();
       switch (type)
       {
       case SQLITE_NULL:
@@ -203,7 +203,7 @@ static void fetch_row_call(HkVM *vm, HkValue *args)
         }
         break;
       }
-      hk_array_inplace_add_element(row, elem);
+      hk_array_inplace_append_element(row, elem);
     }
   }
   if (row)

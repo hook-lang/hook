@@ -210,7 +210,7 @@ static void front_call(HkVM *vm, HkValue *args)
   hk_vm_check_argument_userdata(vm, args, 1);
   hk_return_if_not_ok(vm);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
-  HkValue elem = list->head ? list->head->elem : HK_NIL_VALUE;
+  HkValue elem = list->head ? list->head->elem : hk_nil_value();
   hk_vm_push(vm, elem);
 }
 
@@ -219,7 +219,7 @@ static void back_call(HkVM *vm, HkValue *args)
   hk_vm_check_argument_userdata(vm, args, 1);
   hk_return_if_not_ok(vm);
   LinkedList *list = (LinkedList *) hk_as_userdata(args[1]);
-  HkValue elem = list->tail ? list->tail->elem : HK_NIL_VALUE;
+  HkValue elem = list->tail ? list->tail->elem : hk_nil_value();
   hk_vm_push(vm, elem);
 }
 

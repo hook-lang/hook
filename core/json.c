@@ -79,13 +79,13 @@ static inline HkValue json_to_value(HkVM *vm, cJSON *json)
   switch (json->type)
   {
   case cJSON_False:    
-    val = HK_FALSE_VALUE;
+    val = hk_bool_value(false);
     break;
   case cJSON_True:
-    val = HK_TRUE_VALUE;
+    val = hk_bool_value(true);
     break;
   case cJSON_NULL:
-    val = HK_NIL_VALUE;
+    val = hk_nil_value();
     break;
   case cJSON_Number:
     val = hk_number_value(json->valuedouble);
@@ -101,7 +101,7 @@ static inline HkValue json_to_value(HkVM *vm, cJSON *json)
       while (json_elem)
       {
         HkValue elem = json_to_value(vm, json_elem);
-        hk_array_inplace_add_element(arr, elem);
+        hk_array_inplace_append_element(arr, elem);
         json_elem = json_elem->next;
       }
       val = hk_array_value(arr);
@@ -130,7 +130,7 @@ static inline HkValue json_to_value(HkVM *vm, cJSON *json)
     }
     break;
   default:
-    val = HK_NIL_VALUE;
+    val = hk_nil_value();
     break;
   }
   return val;

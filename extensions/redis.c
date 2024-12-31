@@ -39,7 +39,7 @@ static void redis_context_wrapper_deinit(HkUserdata *udata)
 
 static HkValue redis_reply_to_value(redisReply *reply)
 {
-  HkValue result = HK_NIL_VALUE;
+  HkValue result = hk_nil_value();
   switch (reply->type)
   {
     case REDIS_REPLY_STRING:
@@ -68,7 +68,7 @@ static HkValue redis_reply_to_value(redisReply *reply)
       result = hk_number_value((double) reply->integer);
       break;
     case REDIS_REPLY_NIL:
-      result = HK_NIL_VALUE;
+      result = hk_nil_value();
       break;
     case REDIS_REPLY_DOUBLE:
       {
@@ -78,7 +78,7 @@ static HkValue redis_reply_to_value(redisReply *reply)
       }
       break;
     case REDIS_REPLY_BOOL:
-      result = reply->integer ? HK_TRUE_VALUE : HK_FALSE_VALUE;
+      result = reply->integer ? hk_bool_value(true) : hk_bool_value(false);
       break;
     case REDIS_REPLY_MAP:
     case REDIS_REPLY_ATTR:

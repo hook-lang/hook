@@ -31,9 +31,11 @@ assign_call          ::= NAME subsc* assign_op expr
                        | NAME subsc* subsc '=' expr
                        | NAME ( subsc | call )* call
 
-struct_decl          ::= 'struct' NAME '{' ( string | NAME ( ',' string | NAME )* )? '}'
+struct_decl          ::= 'struct' NAME '{' ( STRING | NAME ( ',' STRING | NAME )* )? '}'
 
-fn_decl              ::= 'fn' NAME '(' ( NAME ( ',' NAME )* )? ')' ( '=>' expr ";" | block )
+fn_decl              ::= 'fn' NAME '(' params? ')' ( '=>' expr ";" | block )
+
+params               ::= NAME ( ',' NAME )*
 
 del_stmt             ::= 'del' NAME subsc* '[' expr ']' ';'
 
@@ -99,15 +101,15 @@ primary_expr         ::= literal
                        | subsc_call
                        | group_expr
 
-literal              ::= 'nil' | 'false' | 'true' | number | string
+literal              ::= 'nil' | 'false' | 'true' | NUMBER | STRING
 
 array_constructor    ::= '[' ( expr ( ',' expr )* )? ']'
 
-struct_constructor   ::= '{' ( string | NAME ':' expr ( ',' string | NAME ':' expr )* )? '}'
+struct_constructor   ::= '{' ( STRING | NAME ':' expr ( ',' STRING | NAME ':' expr )* )? '}'
 
-anonymous_struct     ::= 'struct' '{' ( string | NAME ( ',' string | NAME )* )? '}'
+anonymous_struct     ::= 'struct' '{' ( STRING | NAME ( ',' STRING | NAME )* )? '}'
 
-anonymous_fn         ::= '|' ( NAME ( ',' NAME )* )? '|' ( '=>' expr | block )
+anonymous_fn         ::= '|' params? '|' ( '=>' expr | block )
                        | '||' ( '=>' expr | block )
 
 if_expr              ::= ( 'if' | 'if!' ) '(' expr ')' expr 'else' expr

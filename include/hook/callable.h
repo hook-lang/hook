@@ -49,7 +49,7 @@ typedef struct
 HkFunction *hk_function_new(int arity, HkString *name, HkString *file);
 void hk_function_free(HkFunction *fn);
 void hk_function_release(HkFunction *fn);
-void hk_function_add_child(HkFunction *fn, HkFunction *child);
+void hk_function_append_child(HkFunction *fn, HkFunction *child);
 void hk_function_serialize(HkFunction *fn, FILE *stream);
 HkFunction *hk_function_deserialize(FILE *stream);
 HkClosure *hk_closure_new(HkFunction *fn);

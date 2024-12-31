@@ -83,7 +83,7 @@ void hk_function_release(HkFunction *fn)
     hk_function_free(fn);
 }
 
-void hk_function_add_child(HkFunction *fn, HkFunction *child)
+void hk_function_append_child(HkFunction *fn, HkFunction *child)
 {
   grow_functions(fn);
   hk_incr_ref(child);

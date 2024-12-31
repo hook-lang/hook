@@ -160,15 +160,15 @@ static void open_call(HkVM *vm, HkValue *args)
   HkArray *arr = hk_array_new_with_capacity(2);
   if (err)
   {
-    hk_array_inplace_add_element(arr, HK_NIL_VALUE);
-    hk_array_inplace_add_element(arr, hk_string_value(hk_string_from_chars(-1, err)));
+    hk_array_inplace_append_element(arr, hk_nil_value());
+    hk_array_inplace_append_element(arr, hk_string_value(hk_string_from_chars(-1, err)));
     hk_free(err);
     hk_vm_push_array(vm, arr);
     return;
   }
   LeveldbWrapper *wrapper = leveldb_wrapper_new(db);
-  hk_array_inplace_add_element(arr, hk_userdata_value((HkUserdata *) wrapper));
-  hk_array_inplace_add_element(arr, HK_NIL_VALUE);
+  hk_array_inplace_append_element(arr, hk_userdata_value((HkUserdata *) wrapper));
+  hk_array_inplace_append_element(arr, hk_nil_value());
   hk_vm_push_array(vm, arr);
 }
 
@@ -208,14 +208,14 @@ static void put_call(HkVM *vm, HkValue *args)
   HkArray *arr = hk_array_new_with_capacity(2);
   if (err)
   {
-    hk_array_inplace_add_element(arr, HK_FALSE_VALUE);
-    hk_array_inplace_add_element(arr, hk_string_value(hk_string_from_chars(-1, err)));
+    hk_array_inplace_append_element(arr, hk_bool_value(false));
+    hk_array_inplace_append_element(arr, hk_string_value(hk_string_from_chars(-1, err)));
     hk_free(err);
     hk_vm_push_array(vm, arr);
     return;
   }
-  hk_array_inplace_add_element(arr, HK_TRUE_VALUE);
-  hk_array_inplace_add_element(arr, HK_NIL_VALUE);
+  hk_array_inplace_append_element(arr, hk_bool_value(true));
+  hk_array_inplace_append_element(arr, hk_nil_value());
   hk_vm_push_array(vm, arr);
 }
 
@@ -239,14 +239,14 @@ static void get_call(HkVM *vm, HkValue *args)
   HkArray *arr = hk_array_new_with_capacity(2);
   if (err)
   {
-    hk_array_inplace_add_element(arr, HK_NIL_VALUE);
-    hk_array_inplace_add_element(arr, hk_string_value(hk_string_from_chars(-1, err)));
+    hk_array_inplace_append_element(arr, hk_nil_value());
+    hk_array_inplace_append_element(arr, hk_string_value(hk_string_from_chars(-1, err)));
     hk_free(err);
     hk_vm_push_array(vm, arr);
     return;
   }
-  hk_array_inplace_add_element(arr, hk_string_value(hk_string_from_chars(value_length, value)));
-  hk_array_inplace_add_element(arr, HK_NIL_VALUE);
+  hk_array_inplace_append_element(arr, hk_string_value(hk_string_from_chars(value_length, value)));
+  hk_array_inplace_append_element(arr, hk_nil_value());
   hk_free(value);
   hk_vm_push_array(vm, arr);
 }
@@ -270,14 +270,14 @@ static void delete_call(HkVM *vm, HkValue *args)
   HkArray *arr = hk_array_new_with_capacity(2);
   if (err)
   {
-    hk_array_inplace_add_element(arr, HK_FALSE_VALUE);
-    hk_array_inplace_add_element(arr, hk_string_value(hk_string_from_chars(-1, err)));
+    hk_array_inplace_append_element(arr, hk_bool_value(false));
+    hk_array_inplace_append_element(arr, hk_string_value(hk_string_from_chars(-1, err)));
     hk_free(err);
     hk_vm_push_array(vm, arr);
     return;
   }
-  hk_array_inplace_add_element(arr, HK_TRUE_VALUE);
-  hk_array_inplace_add_element(arr, HK_NIL_VALUE);
+  hk_array_inplace_append_element(arr, hk_bool_value(true));
+  hk_array_inplace_append_element(arr, hk_nil_value());
   hk_vm_push_array(vm, arr);
 }
 

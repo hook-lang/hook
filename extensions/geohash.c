@@ -47,8 +47,8 @@ static void decode_call(HkVM *vm, HkValue *args)
     return;
   }
   HkArray *arr = hk_array_new_with_capacity(2);
-  hk_array_inplace_add_element(arr, hk_number_value(lat));
-  hk_array_inplace_add_element(arr, hk_number_value(lon));
+  hk_array_inplace_append_element(arr, hk_number_value(lat));
+  hk_array_inplace_append_element(arr, hk_number_value(lon));
   hk_vm_push_array(vm, arr);
   if (!hk_vm_is_ok(vm))
     hk_array_free(arr);

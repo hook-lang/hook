@@ -79,7 +79,7 @@ void hk_chunk_emit_opcode(HkChunk *chunk, HkOpCode op)
   hk_chunk_emit_byte(chunk, (uint8_t) op);
 }
 
-void hk_chunk_add_line(HkChunk *chunk, int no)
+void hk_chunk_append_line(HkChunk *chunk, int no)
 {
   grow_lines(chunk);
   HkLine *line = &chunk->lines[chunk->linesLength];
