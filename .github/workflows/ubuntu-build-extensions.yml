@@ -1,0 +1,52 @@
+name: Ubuntu build with extensions
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ubuntu-build-extensions:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies (APT packages)
+      run: |
+        sudo apt-get update -y
+        sudo apt-get install -y libsqlite3-dev
+        sudo apt-get install -y libcurl4-openssl-dev
+        sudo apt-get install -y libmysqlclient-dev
+        sudo apt-get install -y libgmp3-dev
+        sudo apt-get install -y libzmq3-dev
+        sudo apt-get install -y libleveldb-dev
+        sudo apt-get install -y libpcre3-dev
+    - name: Installing dependency hiredis
+      run: |
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
+    - name: Installing dependency fcgi2
+      run: |
+        git clone https://github.com/FastCGI-Archives/fcgi2.git
+        cd fcgi2
+        libtoolize && aclocal && automake --add-missing && autoconf
+        ./autogen.sh
+        ./configure
+        make
+        sudo make install
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXTENSIONS=1
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build
+    - name: Running tests
+      run: |
+        ${{ github.workspace }}/scripts/test.sh
+      env:
+        HOOK_HOME: ${{ github.workspace }}

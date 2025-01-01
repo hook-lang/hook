@@ -1,0 +1,43 @@
+name: macOS build with extensions
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  macos-build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Installing dependencies (Homebrew packages)
+      run: |
+        brew install sqlite
+        brew install openssl
+        brew install fcgi
+        brew install mysql-client
+        brew install gmp
+        brew install zmq
+        brew install leveldb
+        brew install pcre
+    - name: Installing dependency hiredis
+      run: |
+        git clone https://github.com/redis/hiredis.git
+        cd hiredis
+        git fetch --all --tags
+        git checkout tags/v1.0.2
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+        cmake --build build
+        sudo cmake --install build
+    - name: Configure CMake
+      run: |
+        cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=Debug -DBUILD_EXTENSIONS=1
+    - name: Build
+      run: |
+        cmake --build ${{ github.workspace }}/build
+    - name: Running tests
+      run: |
+        ${{ github.workspace }}/scripts/test.sh
+      env:
+        HOOK_HOME: ${{ github.workspace }}

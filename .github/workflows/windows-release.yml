@@ -1,0 +1,22 @@
+name: Windows release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  windows-release:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
+    - name: Configure CMake and build for release
+      run: ${{ github.workspace }}/scripts/pack.bat
+    - name: Upload asset
+      uses: shogo82148/actions-upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ${{ github.workspace }}/package/*.tar.gz
+        overwrite: true

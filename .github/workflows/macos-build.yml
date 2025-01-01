@@ -1,4 +1,4 @@
-name: Ubuntu
+name: macOS build
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  ubuntu-build:
-    runs-on: ubuntu-latest
+  macos-build:
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
     - name: Configure CMake and build
@@ -18,9 +18,3 @@ jobs:
         ${{ github.workspace }}/scripts/test.sh
       env:
         HOOK_HOME: ${{ github.workspace }}
-    - name: Code coverage
-      run: |
-        gcov src/*.c
-        bash <(curl -s https://codecov.io/bash)
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
