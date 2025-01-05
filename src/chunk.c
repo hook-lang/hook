@@ -74,7 +74,7 @@ void hk_chunk_emit_word(HkChunk *chunk, uint16_t word)
   chunk->codeLength += 2;
 }
 
-void hk_chunk_emit_opcode(HkChunk *chunk, HkOpCode op)
+void hk_chunk_emit_opcode(HkChunk *chunk, HkOpcode op)
 {
   hk_chunk_emit_byte(chunk, (uint8_t) op);
 }

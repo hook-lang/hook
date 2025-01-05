@@ -238,6 +238,7 @@ static inline void load_source_module(HkVM *vm, HkString *file, HkString *name)
   HkClosure *cl = hk_compile(file, source, HK_COMPILER_FLAG_NONE);
   hk_vm_push_closure(vm, cl);
   hk_vm_push_array(vm, hk_array_new());
+  // TODO
   hk_vm_call(vm, 1);
   if (!hk_vm_is_ok(vm))
     hk_vm_runtime_error(vm, "cannot load module `%.*s`",

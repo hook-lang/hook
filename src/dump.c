@@ -42,7 +42,7 @@ void hk_dump(HkFunction *fn, FILE *stream)
   int last_line = -1;
   while (i < chunk->codeLength)
   {
-    HkOpCode op = (HkOpCode) code[i];
+    HkOpcode op = (HkOpcode) code[i];
     int j = i++;
     ++n;
     int line = get_line(chunk, j);

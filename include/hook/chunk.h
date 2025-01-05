@@ -38,7 +38,7 @@ typedef enum
   HK_OP_NOT,                    HK_OP_BITWISE_NOT,            HK_OP_INCREMENT,
   HK_OP_DECREMENT,              HK_OP_CALL,                   HK_OP_LOAD_MODULE,
   HK_OP_RETURN,                 HK_OP_RETURN_NIL
-} HkOpCode;
+} HkOpcode;
 
 typedef struct
 {
@@ -61,7 +61,7 @@ void hk_chunk_init(HkChunk *chunk);
 void hk_chunk_deinit(HkChunk *chunk);
 void hk_chunk_emit_byte(HkChunk *chunk, uint8_t byte);
 void hk_chunk_emit_word(HkChunk *chunk, uint16_t word);
-void hk_chunk_emit_opcode(HkChunk *chunk, HkOpCode op);
+void hk_chunk_emit_opcode(HkChunk *chunk, HkOpcode op);
 void hk_chunk_append_line(HkChunk *chunk, int no);
 int hk_chunk_get_line(HkChunk *chunk, int offset);
 void hk_chunk_serialize(HkChunk *chunk, FILE *stream);

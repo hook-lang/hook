@@ -21,15 +21,15 @@
 
 #define HK_STACK_MIN_CAPACITY (1 << 8)
 
-#define hk_vm_is_no_trace(s) ((s)->flags & HK_VM_FLAG_NO_TRACE)
+#define hk_vm_is_no_trace(vm) ((vm)->flags & HK_VM_FLAG_NO_TRACE)
 
-#define hk_vm_is_ok(s)    ((s)->status == HK_VM_STATUS_OK)
-#define hk_vm_is_exit(s)  ((s)->status == HK_VM_STATUS_EXIT)
-#define hk_vm_is_error(s) ((s)->status == HK_VM_STATUS_ERROR)
+#define hk_vm_is_ok(vm)    ((vm)->status == HK_VM_STATUS_OK)
+#define hk_vm_is_exit(vm)  ((vm)->status == HK_VM_STATUS_EXIT)
+#define hk_vm_is_error(vm) ((vm)->status == HK_VM_STATUS_ERROR)
 
-#define hk_return_if_not_ok(s) do \
+#define hk_return_if_not_ok(vm) do \
   { \
-    if (!hk_vm_is_ok(s)) \
+    if (!hk_vm_is_ok(vm)) \
       return; \
   } while (0)
 
@@ -47,6 +47,7 @@ typedef struct HkVM
   HkValue      *stackSlots;
   int          flags;
   HkSateStatus status;
+  int          line;
 } HkVM;
 
 void hk_vm_init(HkVM *vm, int minCapacity);

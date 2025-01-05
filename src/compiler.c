@@ -105,9 +105,9 @@ static inline void define_local(Compiler *comp, Token *tk, bool isMutable);
 static inline Variable resolve_variable(Compiler *comp, Token *tk);
 static inline Variable *lookup_variable(Compiler *comp, Token *tk);
 static inline bool nonlocal_exists(Compiler *comp, Token *tk);
-static inline int emit_jump(HkChunk *chunk, HkOpCode op);
+static inline int emit_jump(HkChunk *chunk, HkOpcode op);
 static inline void patch_jump(Compiler *comp, int offset);
-static inline void patch_opcode(HkChunk *chunk, int offset, HkOpCode op);
+static inline void patch_opcode(HkChunk *chunk, int offset, HkOpcode op);
 static inline void start_loop(Compiler *comp, Loop *loop);
 static inline void end_loop(Compiler *comp);
 static inline void compiler_init(Compiler *comp, Compiler *parent, int flags,
@@ -383,7 +383,7 @@ static inline bool nonlocal_exists(Compiler *comp, Token *tk)
   return lookup_variable(comp, tk) || nonlocal_exists(comp->parent, tk);
 }
 
-static inline int emit_jump(HkChunk *chunk, HkOpCode op)
+static inline int emit_jump(HkChunk *chunk, HkOpcode op)
 {
   hk_chunk_emit_opcode(chunk, op);
   int offset = chunk->codeLength;
@@ -403,7 +403,7 @@ static inline void patch_jump(Compiler *comp, int offset)
   *((uint16_t *) &chunk->code[offset]) = (uint16_t) jump;
 }
 
-static inline void patch_opcode(HkChunk *chunk, int offset, HkOpCode op)
+static inline void patch_opcode(HkChunk *chunk, int offset, HkOpcode op)
 {
   chunk->code[offset] = (uint8_t) op;
 }
@@ -1308,7 +1308,7 @@ static void compile_if_statement(Compiler *comp, bool not)
   }
   compile_expression(comp);
   consume(comp, TOKEN_KIND_RPAREN);
-  HkOpCode op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
+  HkOpcode op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
   int offset1 = emit_jump(chunk, op);
   compile_statement(comp);
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
@@ -1407,7 +1407,7 @@ static void compile_while_statement(Compiler *comp, bool not)
   start_loop(comp, &loop);
   compile_expression(comp);
   consume(comp, TOKEN_KIND_RPAREN);
-  HkOpCode op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
+  HkOpcode op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
   int offset = emit_jump(chunk, op);
   compile_statement(comp);
   hk_chunk_emit_opcode(chunk, HK_OP_JUMP);
@@ -1424,7 +1424,7 @@ static void compile_do_statement(Compiler *comp)
   Loop loop;
   start_loop(comp, &loop);
   compile_statement(comp);  
-  HkOpCode op = HK_OP_JUMP_IF_FALSE;
+  HkOpcode op = HK_OP_JUMP_IF_FALSE;
   if (match(lex, TOKEN_KIND_WHILEBANG_KW))
   {
     lexer_next_token(lex);
@@ -2069,7 +2069,7 @@ static void compile_if_expression(Compiler *comp, bool not)
   consume(comp, TOKEN_KIND_LPAREN);
   compile_expression(comp);
   consume(comp, TOKEN_KIND_RPAREN);
-  HkOpCode op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
+  HkOpcode op = not ? HK_OP_JUMP_IF_TRUE : HK_OP_JUMP_IF_FALSE;
   int offset1 = emit_jump(chunk, op);
   compile_expression(comp);
   int offset2 = emit_jump(chunk, HK_OP_JUMP);
@@ -2271,7 +2271,7 @@ static Variable *compile_nonlocal(Compiler *comp, Token *tk)
   Variable *var = lookup_variable(comp, tk);
   if (var)
   {
-    HkOpCode op = HK_OP_NONLOCAL;
+    HkOpcode op = HK_OP_NONLOCAL;
     if (var->isLocal)
     {
       // TODO: Make possible to capture mutable variables by value.

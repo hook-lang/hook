@@ -245,6 +245,7 @@ static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsedArgs)
   hk_vm_init(&vm, parsedArgs->stackSize);
   hk_vm_push_closure(&vm, cl);
   hk_vm_push_array(&vm, args_array(parsedArgs));
+  // TODO
   hk_vm_call(&vm, 1);
   int exitCode = EXIT_FAILURE;
   if (hk_vm_is_ok(&vm))
