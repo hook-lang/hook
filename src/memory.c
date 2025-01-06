@@ -8,7 +8,7 @@
 // located in the root directory of this project.
 //
 
-#include <hook/memory.h>
+#include "hook/memory.h"
 #include <stdlib.h>
 
 void *hk_allocate(size_t size)

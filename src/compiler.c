@@ -8,14 +8,14 @@
 // located in the root directory of this project.
 //
 
-#include <hook/compiler.h>
+#include "hook/compiler.h"
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <hook/struct.h>
-#include <hook/utils.h>
+#include "hook/struct.h"
+#include "hook/utils.h"
 #include "builtin.h"
 #include "lexer.h"
 

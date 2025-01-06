@@ -8,8 +8,8 @@
 // located in the root directory of this project.
 //
 
-#include <hook/iterator.h>
-#include <hook/memory.h>
+#include "hook/iterator.h"
+#include "hook/memory.h"
 
 void hk_iterator_init(HkIterator *it, void (*deinit)(HkIterator *),
   bool (*isValid)(HkIterator *), HkValue (*getCurrent)(HkIterator *),

@@ -8,7 +8,7 @@
 // located in the root directory of this project.
 //
 
-#include <hook/dump.h>
+#include "hook/dump.h"
 
 static inline int get_line(HkChunk *chunk, int offset);
 

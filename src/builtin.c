@@ -14,9 +14,9 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
-#include <hook/iterable.h>
-#include <hook/struct.h>
-#include <hook/utils.h>
+#include "hook/iterable.h"
+#include "hook/struct.h"
+#include "hook/utils.h"
 
 #ifdef _WIN32
   #include <Windows.h>

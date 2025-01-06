@@ -122,7 +122,7 @@ static inline HkValue json_to_value(HkVM *vm, cJSON *json)
         json_field = json_field->next;
       }
       hk_vm_construct(vm, length);
-      HkInstance *inst = hk_as_instance(vm->stackSlots[vm->stackTop]);
+      HkInstance *inst = hk_as_instance(hk_stack_get(&vm->vstk, 0));
       hk_incr_ref(inst);
       hk_vm_pop(vm);
       hk_decr_ref(inst);

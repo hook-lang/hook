@@ -249,14 +249,14 @@ static inline int run_bytecode(HkClosure *cl, ParsedArgs *parsedArgs)
   int exitCode = EXIT_FAILURE;
   if (hk_vm_is_ok(&vm))
   {
-    HkValue result = vm.stackSlots[vm.stackTop];
+    HkValue result = hk_stack_get(&vm.vstk, 0);
     exitCode = hk_is_int(result) ? (int) hk_as_number(result) : EXIT_SUCCESS;
     hk_vm_pop(&vm);
     goto end;
   }
   if (hk_vm_is_exit(&vm))
   {
-    HkValue result = vm.stackSlots[vm.stackTop];
+    HkValue result = hk_stack_get(&vm.vstk, 0);
     hk_assert(hk_is_int(result), "exit code must be an integer");
     exitCode = (int) hk_as_number(result);
     hk_vm_pop(&vm);

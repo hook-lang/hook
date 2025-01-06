@@ -11,7 +11,7 @@
 #ifndef BUILTIN_H
 #define BUILTIN_H
 
-#include <hook/vm.h>
+#include "hook/vm.h"
 
 void load_globals(HkVM *vm);
 int num_globals(void);

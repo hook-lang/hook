@@ -8,8 +8,8 @@
 // located in the root directory of this project.
 //
 
-#include <hook/range.h>
-#include <hook/memory.h>
+#include "hook/range.h"
+#include "hook/memory.h"
 
 typedef struct
 {

@@ -11,7 +11,7 @@
 #ifndef LEXER_H
 #define LEXER_H
 
-#include <hook/string.h>
+#include "hook/string.h"
 
 typedef enum
 {

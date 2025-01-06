@@ -13,13 +13,14 @@
 
 #include "callable.h"
 #include "range.h"
+#include "stack.h"
 #include "struct.h"
 #include "userdata.h"
 
 #define HK_VM_FLAG_NONE     0x00
 #define HK_VM_FLAG_NO_TRACE 0x01
 
-#define HK_STACK_MIN_CAPACITY (1 << 8)
+#define HK_VM_STACK_DEFAULT_SIZE (1 << 10)
 
 #define hk_vm_is_no_trace(s) ((s)->flags & HK_VM_FLAG_NO_TRACE)
 
@@ -42,14 +43,12 @@ typedef enum
 
 typedef struct HkVM
 {
-  int          stackEnd;
-  int          stackTop;
-  HkValue      *stackSlots;
-  int          flags;
-  HkSateStatus status;
+  HkStack(HkValue) vstk;
+  int              flags;
+  HkSateStatus     status;
 } HkVM;
 
-void hk_vm_init(HkVM *vm, int minCapacity);
+void hk_vm_init(HkVM *vm, int size);
 void hk_vm_deinit(HkVM *vm);
 void hk_vm_runtime_error(HkVM *vm, const char *fmt, ...);
 void hk_vm_check_argument_type(HkVM *vm, HkValue *args, int index, HkType type);

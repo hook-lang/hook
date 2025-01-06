@@ -8,14 +8,14 @@
 // located in the root directory of this project.
 //
 
-#include <hook/value.h>
+#include "hook/value.h"
 #include <math.h>
 #include <stdlib.h>
-#include <hook/callable.h>
-#include <hook/range.h>
-#include <hook/struct.h>
-#include <hook/userdata.h>
-#include <hook/utils.h>
+#include "hook/callable.h"
+#include "hook/range.h"
+#include "hook/struct.h"
+#include "hook/userdata.h"
+#include "hook/utils.h"
 
 #define EPSILON 1e-9
 

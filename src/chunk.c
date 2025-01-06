@@ -8,9 +8,9 @@
 // located in the root directory of this project.
 //
 
-#include <hook/chunk.h>
-#include <hook/memory.h>
-#include <hook/utils.h>
+#include "hook/chunk.h"
+#include "hook/memory.h"
+#include "hook/utils.h"
 
 #define MIN_CAPACITY (1 << 3)
 

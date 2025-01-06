@@ -9,8 +9,8 @@
 //
 
 #include "record.h"
-#include <hook/memory.h>
-#include <hook/utils.h>
+#include "hook/memory.h"
+#include "hook/utils.h"
 
 static inline RecordEntry *allocate_entries(int capacity);
 static inline void grow(Record *rec);

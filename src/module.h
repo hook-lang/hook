@@ -11,7 +11,7 @@
 #ifndef MODULE_H
 #define MODULE_H
 
-#include <hook/vm.h>
+#include "hook/vm.h"
 
 void module_cache_init(void);
 void module_cache_deinit(void);

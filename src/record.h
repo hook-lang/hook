@@ -11,7 +11,7 @@
 #ifndef RECORD_H
 #define RECORD_H
 
-#include <hook/string.h>
+#include "hook/string.h"
 
 #define RECORD_MIN_CAPACITY    (1 << 3)
 #define RECORD_MAX_LOAD_FACTOR 0.75

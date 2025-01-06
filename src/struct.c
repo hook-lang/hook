@@ -8,10 +8,10 @@
 // located in the root directory of this project.
 //
 
-#include <hook/struct.h>
+#include "hook/struct.h"
 #include <string.h>
-#include <hook/memory.h>
-#include <hook/string.h>
+#include "hook/memory.h"
+#include "hook/string.h"
 
 static inline HkField **allocate_table(int capacity);
 static inline HkField *add_field(HkStruct *ztruct, HkString *name);

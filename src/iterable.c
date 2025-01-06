@@ -8,9 +8,9 @@
 // located in the root directory of this project.
 //
 
-#include <hook/iterable.h>
-#include <hook/array.h>
-#include <hook/range.h>
+#include "hook/iterable.h"
+#include "hook/array.h"
+#include "hook/range.h"
 
 HkIterator *hk_new_iterator(HkValue val)
 {

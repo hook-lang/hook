@@ -8,9 +8,9 @@
 // located in the root directory of this project.
 //
 
-#include <hook/array.h>
-#include <hook/memory.h>
-#include <hook/utils.h>
+#include "hook/array.h"
+#include "hook/memory.h"
+#include "hook/utils.h"
 
 typedef struct
 {

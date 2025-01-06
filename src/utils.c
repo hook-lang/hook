@@ -8,11 +8,11 @@
 // located in the root directory of this project.
 //
 
-#include <hook/utils.h>
+#include "hook/utils.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#include <hook/memory.h>
+#include "hook/memory.h"
 
 #ifdef _WIN32
   #include <windows.h>

@@ -8,8 +8,8 @@
 // located in the root directory of this project.
 //
 
-#include <hook/userdata.h>
-#include <hook/memory.h>
+#include "hook/userdata.h"
+#include "hook/memory.h"
 
 void hk_userdata_init(HkUserdata *udata, void (*deinit)(HkUserdata *))
 {

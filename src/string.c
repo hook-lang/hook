@@ -8,12 +8,12 @@
 // located in the root directory of this project.
 //
 
-#include <hook/string.h>
-#include <string.h>
+#include "hook/string.h"
 #include <ctype.h>
 #include <limits.h>
-#include <hook/memory.h>
-#include <hook/utils.h>
+#include <string.h>
+#include "hook/memory.h"
+#include "hook/utils.h"
 
 #ifdef _WIN32
   #define strtok_r strtok_s

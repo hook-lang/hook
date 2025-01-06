@@ -20,6 +20,7 @@
 #include "hook/iterator.h"
 #include "hook/memory.h"
 #include "hook/range.h"
+#include "hook/stack.h"
 #include "hook/string.h"
 #include "hook/struct.h"
 #include "hook/userdata.h"

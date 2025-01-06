@@ -11,8 +11,8 @@
 #include "module.h"
 #include <stdlib.h>
 #include <string.h>
-#include <hook/compiler.h>
-#include <hook/utils.h>
+#include "hook/compiler.h"
+#include "hook/utils.h"
 #include "record.h"
 
 #ifdef _WIN32
@@ -322,7 +322,7 @@ void module_cache_deinit(void)
 
 void module_load(HkVM *vm, HkString *currFile)
 {
-  HkValue *slots = &vm->stackSlots[vm->stackTop];
+  HkValue *slots = &hk_stack_get(&vm->vstk, 0);
   HkValue val = slots[0];
   hk_assert(hk_is_string(val), "module name must be a string");
   HkString *name = hk_as_string(val);
@@ -337,8 +337,9 @@ void module_load(HkVM *vm, HkString *currFile)
   }
   load_module(vm, name, currFile);
   hk_return_if_not_ok(vm);
-  module_cache_put(name, vm->stackSlots[vm->stackTop]);
-  slots[0] = vm->stackSlots[vm->stackTop];
-  --vm->stackTop;
+  val = hk_stack_get(&vm->vstk, 0);
+  module_cache_put(name, val);
+  slots[0] = val;
+  hk_stack_pop(&vm->vstk);
   hk_string_release(name);
 }
