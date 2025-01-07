@@ -21,6 +21,7 @@ jobs:
         brew install zmq
         brew install leveldb
         brew install pcre
+        brew install raylib
     - name: Installing dependency hiredis
       run: |
         git clone https://github.com/redis/hiredis.git

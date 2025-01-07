@@ -164,15 +164,15 @@ static inline void do_struct(HkVM *vm, int length)
 {
   HkValue *slots = &hk_stack_get(&vm->vstk, length);
   HkValue val = slots[0];
-  HkString *struct_name = hk_is_nil(val) ? NULL : hk_as_string(val);
-  HkStruct *ztruct = hk_struct_new(struct_name);
+  HkString *structName = hk_is_nil(val) ? NULL : hk_as_string(val);
+  HkStruct *ztruct = hk_struct_new(structName);
   for (int i = 1; i <= length; ++i)
   {
-    HkString *field_name = hk_as_string(slots[i]);
-    if (!hk_struct_define_field(ztruct, field_name))
+    HkString *fieldName = hk_as_string(slots[i]);
+    if (!hk_struct_define_field(ztruct, fieldName))
     {
-      hk_vm_runtime_error(vm, "field %.*s is already defined", field_name->length,
-        field_name->chars);
+      hk_vm_runtime_error(vm, "field %.*s is already defined", fieldName->length,
+        fieldName->chars);
       hk_struct_free(ztruct);
       return;
     }
@@ -182,8 +182,8 @@ static inline void do_struct(HkVM *vm, int length)
   vm->vstk.top -= length;
   hk_incr_ref(ztruct);
   slots[0] = hk_struct_value(ztruct);
-  if (struct_name)
-    hk_decr_ref(struct_name);
+  if (structName)
+    hk_decr_ref(structName);
 }
 
 static inline void do_instance(HkVM *vm, int numArgs)
@@ -232,15 +232,15 @@ static inline void do_construct(HkVM *vm, int length)
   int n = length << 1;
   HkValue *slots = &hk_stack_get(&vm->vstk, n);
   HkValue val = slots[0];
-  HkString *struct_name = hk_is_nil(val) ? NULL : hk_as_string(val);
-  HkStruct *ztruct = hk_struct_new(struct_name);
+  HkString *structName = hk_is_nil(val) ? NULL : hk_as_string(val);
+  HkStruct *ztruct = hk_struct_new(structName);
   for (int i = 1; i <= n; i += 2)
   {
-    HkString *field_name = hk_as_string(slots[i]);
-    if (hk_struct_define_field(ztruct, field_name))
+    HkString *fieldName = hk_as_string(slots[i]);
+    if (hk_struct_define_field(ztruct, fieldName))
       continue;
-    hk_vm_runtime_error(vm, "field %.*s is already defined", field_name->length,
-      field_name->chars);
+    hk_vm_runtime_error(vm, "field %.*s is already defined", fieldName->length,
+      fieldName->chars);
     hk_struct_free(ztruct);
     return;
   }
@@ -252,8 +252,8 @@ static inline void do_construct(HkVM *vm, int length)
   vm->vstk.top -= n;
   hk_incr_ref(inst);
   slots[0] = hk_instance_value(inst);
-  if (struct_name)
-    hk_decr_ref(struct_name);
+  if (structName)
+    hk_decr_ref(structName);
 }
 
 static inline void do_iterator(HkVM *vm)
