@@ -138,7 +138,7 @@ static inline void string_to_double(HkVM *vm, HkString *str, double *result)
 static inline HkArray *split(HkString *str, HkString *sep)
 {
   HkArray *arr = hk_array_new();
-  // TODO: Do not use strtok_r and do not copy the string
+  // TODO: Do not use strtok_r and do not copy the string.
   HkString *_str = hk_string_copy(str);
   char *cur = _str->chars;
   char *tk = strtok_r(cur, sep->chars, &cur);

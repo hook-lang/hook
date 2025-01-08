@@ -245,7 +245,7 @@ HkString *hk_string_slice(HkString *str, int start, int stop)
 HkArray *hk_string_split(HkString *str, HkString *sep)
 {
   HkArray *arr = hk_array_new();
-  // TODO: Do not use strtok_r and do not copy the string
+  // TODO: Do not use strtok_r and do not copy the string.
   HkString *_str = hk_string_copy(str);
   char *cur = _str->chars;
   char *tk = strtok_r(cur, sep->chars, &cur);

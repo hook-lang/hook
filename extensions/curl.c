@@ -73,13 +73,13 @@ static inline CURLcode curl_wrapper_setopt(CurlWrapper *wrapper, int opt, HkValu
 {
   if (opt == CURLOPT_URL)
   {
-    // TODO: Check if val is an array
+    // TODO: Check if val is an array.
     curl_wrapper_setopt_url(wrapper, hk_as_string(val));
     return CURLE_OK;
   }
   if (opt == CURLOPT_HTTPHEADER)
   {
-    // TODO: Check if val is an array
+    // TODO: Check if val is an array.
     curl_wrapper_setopt_headers(wrapper, hk_as_array(val));
     return CURLE_OK;
   }
@@ -253,7 +253,7 @@ static void getinfo_call(HkVM *vm, HkValue *args)
   hk_return_if_not_ok(vm);
   CURL *curl = ((CurlWrapper *) hk_as_userdata(args[1]))->curl;
   int info = (int) hk_as_number(args[2]);
-  // TODO: The type of value depends on info
+  // TODO: The type of value depends on info.
   long value = 0;
   curl_easy_getinfo(curl, info, &value);
   hk_vm_push_number(vm, (double) value);
